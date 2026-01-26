@@ -1,0 +1,633 @@
+fragment PageParts on Page {
+  __typename
+  title
+  description
+  socialImage
+  blocks {
+    __typename
+    ... on PageBlocksHero {
+      variant
+      theme
+      headline
+      subheadline
+      image
+      videoUrl
+      backgroundImage
+      primaryButtonText
+      primaryButtonLink
+      secondaryButtonText
+      secondaryButtonLink
+      badge
+      gradientFrom
+      gradientTo
+    }
+    ... on PageBlocksFeatures {
+      variant
+      theme
+      headline
+      subheadline
+      columns
+      items {
+        __typename
+        title
+        description
+        icon
+        image
+        link
+      }
+    }
+    ... on PageBlocksTestimonials {
+      variant
+      theme
+      headline
+      subheadline
+      useReferences
+      testimonialRefs {
+        __typename
+        testimonial {
+          ... on Testimonial {
+            __typename
+            quote
+            author {
+              ... on Author {
+                __typename
+                name
+                role
+                avatar
+                bio
+                email
+                social {
+                  __typename
+                  twitter
+                  linkedin
+                  github
+                  website
+                }
+              }
+              ... on Document {
+                _sys {
+                  filename
+                  basename
+                  hasReferences
+                  breadcrumbs
+                  path
+                  relativePath
+                  extension
+                }
+                id
+              }
+            }
+            authorName
+            authorRole
+            authorAvatar
+            company
+            companyLogo
+            rating
+            featured
+          }
+          ... on Document {
+            _sys {
+              filename
+              basename
+              hasReferences
+              breadcrumbs
+              path
+              relativePath
+              extension
+            }
+            id
+          }
+        }
+      }
+      items {
+        __typename
+        quote
+        authorName
+        authorRole
+        company
+        avatar
+        rating
+      }
+    }
+    ... on PageBlocksCta {
+      variant
+      theme
+      globalCtaRef {
+        ... on GlobalCta {
+          __typename
+          name
+          headline
+          description
+          primaryButton {
+            __typename
+            text
+            link
+            style
+          }
+          secondaryButton {
+            __typename
+            text
+            link
+            style
+          }
+          theme
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+      headline
+      description
+      image
+      primaryButtonText
+      primaryButtonLink
+      secondaryButtonText
+      secondaryButtonLink
+      emailPlaceholder
+      submitButtonText
+    }
+    ... on PageBlocksContent {
+      variant
+      theme
+      headline
+      body
+      sidebarContent
+      leftColumn
+      rightColumn
+    }
+    ... on PageBlocksGallery {
+      variant
+      theme
+      headline
+      subheadline
+      columns
+      gap
+      items {
+        __typename
+        image
+        alt
+        caption
+        video
+        aspectRatio
+      }
+    }
+    ... on PageBlocksPricing {
+      variant
+      theme
+      headline
+      subheadline
+      showToggle
+      annualDiscount
+      tiers {
+        __typename
+        name
+        price
+        period
+        description
+        features
+        buttonText
+        buttonLink
+        highlighted
+        badge
+      }
+    }
+    ... on PageBlocksFaq {
+      variant
+      theme
+      headline
+      subheadline
+      items {
+        __typename
+        question
+        answer
+        category
+      }
+      showCategories
+      ctaText
+      ctaLink
+    }
+    ... on PageBlocksTeam {
+      variant
+      theme
+      headline
+      subheadline
+      columns
+      useReferences
+      authorRefs {
+        __typename
+        author {
+          ... on Author {
+            __typename
+            name
+            role
+            avatar
+            bio
+            email
+            social {
+              __typename
+              twitter
+              linkedin
+              github
+              website
+            }
+          }
+          ... on Document {
+            _sys {
+              filename
+              basename
+              hasReferences
+              breadcrumbs
+              path
+              relativePath
+              extension
+            }
+            id
+          }
+        }
+      }
+      members {
+        __typename
+        name
+        role
+        avatar
+        bio
+        social {
+          __typename
+          twitter
+          linkedin
+          github
+        }
+      }
+    }
+    ... on PageBlocksStats {
+      variant
+      theme
+      headline
+      subheadline
+      animate
+      items {
+        __typename
+        value
+        label
+        icon
+        description
+        progress
+      }
+    }
+    ... on PageBlocksLogoCloud {
+      variant
+      theme
+      headline
+      subheadline
+      grayscale
+      size
+      logos {
+        __typename
+        image
+        name
+        url
+      }
+    }
+  }
+}
+
+fragment PostParts on Post {
+  __typename
+  title
+  excerpt
+  author {
+    ... on Author {
+      __typename
+      name
+      role
+      avatar
+      bio
+      email
+      social {
+        __typename
+        twitter
+        linkedin
+        github
+        website
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
+  date
+  featuredImage
+  category
+  tags
+  featured
+  body
+  relatedPosts {
+    __typename
+    post {
+      ... on Post {
+        __typename
+        title
+        excerpt
+        author {
+          ... on Author {
+            __typename
+            name
+            role
+            avatar
+            bio
+            email
+            social {
+              __typename
+              twitter
+              linkedin
+              github
+              website
+            }
+          }
+          ... on Document {
+            _sys {
+              filename
+              basename
+              hasReferences
+              breadcrumbs
+              path
+              relativePath
+              extension
+            }
+            id
+          }
+        }
+        date
+        featuredImage
+        category
+        tags
+        featured
+        body
+        relatedPosts {
+          __typename
+          post {
+            ... on Post {
+              __typename
+              title
+              excerpt
+              date
+              featuredImage
+              category
+              tags
+              featured
+              body
+              relatedPosts {
+                __typename
+              }
+            }
+            ... on Document {
+              _sys {
+                filename
+                basename
+                hasReferences
+                breadcrumbs
+                path
+                relativePath
+                extension
+              }
+              id
+            }
+          }
+        }
+      }
+      ... on Document {
+        _sys {
+          filename
+          basename
+          hasReferences
+          breadcrumbs
+          path
+          relativePath
+          extension
+        }
+        id
+      }
+    }
+  }
+}
+
+fragment ProjectParts on Project {
+  __typename
+  title
+  description
+  client
+  date
+  featuredImage
+  gallery {
+    __typename
+    image
+    alt
+    caption
+  }
+  category
+  techStack
+  liveUrl
+  githubUrl
+  featured
+  testimonial {
+    ... on Testimonial {
+      __typename
+      quote
+      author {
+        ... on Author {
+          __typename
+          name
+          role
+          avatar
+          bio
+          email
+          social {
+            __typename
+            twitter
+            linkedin
+            github
+            website
+          }
+        }
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+      }
+      authorName
+      authorRole
+      authorAvatar
+      company
+      companyLogo
+      rating
+      featured
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
+  body
+}
+
+fragment AuthorParts on Author {
+  __typename
+  name
+  role
+  avatar
+  bio
+  email
+  social {
+    __typename
+    twitter
+    linkedin
+    github
+    website
+  }
+}
+
+fragment TestimonialParts on Testimonial {
+  __typename
+  quote
+  author {
+    ... on Author {
+      __typename
+      name
+      role
+      avatar
+      bio
+      email
+      social {
+        __typename
+        twitter
+        linkedin
+        github
+        website
+      }
+    }
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+  }
+  authorName
+  authorRole
+  authorAvatar
+  company
+  companyLogo
+  rating
+  featured
+}
+
+fragment GlobalCtaParts on GlobalCta {
+  __typename
+  name
+  headline
+  description
+  primaryButton {
+    __typename
+    text
+    link
+    style
+  }
+  secondaryButton {
+    __typename
+    text
+    link
+    style
+  }
+  theme
+}
+
+fragment SettingsParts on Settings {
+  __typename
+  siteName
+  siteDescription
+  logo
+  logoDark
+  favicon
+  socialImage
+  header {
+    __typename
+    navigation {
+      __typename
+      label
+      link
+      children {
+        __typename
+        label
+        link
+        description
+      }
+    }
+    ctaButton {
+      __typename
+      text
+      link
+    }
+  }
+  footer {
+    __typename
+    copyright
+    columns {
+      __typename
+      title
+      links {
+        __typename
+        label
+        link
+      }
+    }
+    social {
+      __typename
+      twitter
+      facebook
+      instagram
+      linkedin
+      github
+      youtube
+    }
+  }
+}

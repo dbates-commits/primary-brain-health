@@ -1,0 +1,12 @@
+{
+  "title": "See It In Action",
+  "description": "Schedule a live demo to see how our block-based CMS can transform your content workflow.",
+  "primaryButton": {
+    "text": "Book a Demo",
+    "link": "/contact?type=demo"
+  },
+  "secondaryButton": {
+    "text": "View Case Studies",
+    "link": "/projects"
+  }
+}

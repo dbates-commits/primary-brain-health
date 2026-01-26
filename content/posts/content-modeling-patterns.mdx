@@ -1,0 +1,27 @@
+---
+title: Advanced Content Modeling Patterns
+excerpt: Explore sophisticated content modeling techniques including references, nested objects, and reusable content blocks.
+author: content/authors/sarah-johnson.mdx
+date: 2024-01-25T00:00:00.000Z
+featuredImage: ''
+category: technology
+tags:
+  - Content Modeling
+  - Architecture
+  - Best Practices
+featured: false
+---
+
+Good content modeling is the foundation of a maintainable CMS implementation. Let's explore patterns that scale with your content needs.
+
+## Referenced Content
+
+Instead of duplicating author information across posts, we reference a single Author document. Update once, reflect everywhere. This is essential for testimonials, team members, and any reusable content.
+
+## Global Content Blocks
+
+Some content appears across multiple pages - CTAs, promotional banners, announcement bars. Create these as global blocks that can be referenced anywhere, ensuring consistency and easy updates.
+
+## Nested Objects vs Collections
+
+Know when to use nested objects (FAQ items within a page) versus separate collections (blog posts). Nested works for page-specific content; collections work for content that lives independently or gets referenced.
