@@ -1,56 +1,224 @@
 ---
-title: Home
+title: Primary Brain Health
 description: >-
-  A sophisticated showcase of advanced content modeling patterns with Tina CMS
-  and Next.js
+  Primary Brain Health is a virtual-first clinic dedicated to dementia
+  prevention and cognitive optimization. Book your initial consultation today.
 socialImage: ''
 blocks:
-  - variant: gradient
-    theme: dark
-    headline: Build Content-Driven Websites That Scale!!!
+  - variant: split
+    theme: light
+    headline: Take Control of Your Brain Health.
     subheadline: >-
-      Discover the power of block-based editing, variant systems, and
-      sophisticated content modeling with Tina CMS and Next.js - This is some
-      more text.
-    primaryButtonText: Explore Features
-    primaryButtonLink: /services
-    secondaryButtonText: View Projects
-    secondaryButtonLink: /projects
-    badge: Next.js + Tina CMS
-    gradientFrom: '#6366f1'
-    gradientTo: '#8b5cf6'
+      Primary Brain Health is a virtual-first clinic dedicated to dementia
+      prevention and cognitive optimization. Book your initial consultation
+      today.
+    primaryButtonText: Book a Consultation
+    primaryButtonLink: '#intake'
+    badge: Evidence-Based Care
     _template: hero
   - variant: grid
     theme: light
-    headline: Why Choose This Architecture?
-    subheadline: >-
-      Modern content management that empowers editors while maintaining
-      developer control
+    headline: What We Do
     columns: '3'
     items:
-      - title: Foobar
-        description: This is a descritipon
-        icon: zap
-        image: /uploads/Senior woman and daughter in kitchen with laptop (2) 1.jpg
-      - title: Hey Phil & Heidi
-        description: This is some description text here!!!
-        icon: clock
-        link: 'https://grounded.world'
-      - title: Over here
-        description: Another description
-        icon: users
+      - title: Comprehensive Brain Health Assessment
+        description: >-
+          In-depth cognitive testing, medical history review, and risk factor
+          analysis to establish your brain health baseline.
+        icon: clipboard
+      - title: Personalized Prevention Plans
+        description: >-
+          Evidence-based strategies tailored to your unique risk profile,
+          covering lifestyle, nutrition, exercise, sleep, and cognitive
+          engagement.
+        icon: heart
+      - title: Ongoing Virtual Care
+        description: >-
+          Regular virtual check-ins with your clinical team to track progress,
+          adjust your plan, and ensure you stay on course.
+        icon: video
     _template: features
-  - variant: counters
-    theme: dark
-    headline: Built for Performance
-    _template: stats
+  - variant: twoColumn
+    theme: light
+    headline: Who Is This For?
+    leftColumn:
+      type: root
+      children:
+        - type: p
+          children:
+            - type: text
+              text: >-
+                Primary Brain Health serves anyone who wants to take a proactive
+                approach to their cognitive future. Our patients typically fall
+                into three groups:
+        - type: p
+          children:
+            - type: text
+              text: ''
+              bold: true
+            - type: text
+              text: 'People with a family history of dementia'
+              bold: true
+            - type: text
+              text: ' — If Alzheimer''s or another form of dementia runs in your family, early intervention can significantly reduce your risk.'
+        - type: p
+          children:
+            - type: text
+              text: 'Those noticing early cognitive changes'
+              bold: true
+            - type: text
+              text: ' — Subtle changes in memory, focus, or word-finding can be early signals. We help you understand what''s normal and what deserves attention.'
+        - type: p
+          children:
+            - type: text
+              text: 'High-performers optimizing brain function'
+              bold: true
+            - type: text
+              text: ' — Executives, professionals, and lifelong learners who want to protect and enhance their cognitive performance for the long term.'
+    rightColumn:
+      type: root
+      children:
+        - type: p
+          children:
+            - type: text
+              text: >-
+                No matter which group you identify with, our approach is the
+                same: thorough assessment, personalized planning, and continuous
+                support — all from the comfort of your home through our virtual
+                platform.
+        - type: p
+          children:
+            - type: text
+              text: >-
+                You don't need a diagnosis or a referral. If brain health
+                matters to you, we're here to help.
+    _template: content
+  - variant: grid
+    theme: light
+    headline: How It Works
+    columns: '4'
+    items:
+      - title: Book Your Consultation
+        description: >-
+          Schedule a convenient virtual appointment with our brain health team
+          to discuss your goals and concerns.
+        icon: calendar
+      - title: Complete Your Brain Health Assessment
+        description: >-
+          Undergo comprehensive cognitive testing and risk evaluation from the
+          comfort of your home.
+        icon: clipboard
+      - title: Receive Your Personalized Plan
+        description: >-
+          Get a detailed, evidence-based prevention and optimization plan
+          tailored to your unique profile.
+        icon: file
+      - title: Begin Your Brain Health Journey
+        description: >-
+          Start implementing your plan with ongoing virtual support, progress
+          tracking, and regular check-ins.
+        icon: rocket
+    _template: features
+  - variant: grid
+    theme: light
+    headline: Our Clinical Team
+    columns: '2'
+    members:
+      - name: Dr. Sarah Chen
+        role: Medical Director, Brain Health
+        bio: >-
+          Board-certified neurologist with over 15 years of experience in
+          dementia prevention and cognitive health. Dr. Chen leads our clinical
+          team with a focus on evidence-based, patient-centered care.
+        avatar: /uploads/placeholder-avatar-1.jpg
+        social:
+          linkedin: '#'
+      - name: Dr. James Mitchell
+        role: Clinical Neuropsychologist
+        bio: >-
+          Specializing in cognitive assessment and rehabilitation, Dr. Mitchell
+          brings a decade of experience in brain health evaluation and
+          personalized intervention planning.
+        avatar: /uploads/placeholder-avatar-2.jpg
+        social:
+          linkedin: '#'
+    _template: team
+  - variant: grid
+    theme: light
+    headline: What Our Patients Say
+    testimonials:
+      - quote: >-
+          After losing my mother to Alzheimer's, I was terrified of the same
+          fate. Primary Brain Health gave me a concrete plan and peace of mind.
+          For the first time, I feel like I'm in control of my brain health.
+        authorName: Margaret R.
+        authorRole: Patient
+        rating: 5
+      - quote: >-
+          The comprehensive assessment was eye-opening. I learned about risk
+          factors I never knew I had, and now I have a clear roadmap for
+          prevention. The virtual format makes it easy to fit into my busy
+          schedule.
+        authorName: David K.
+        authorRole: Patient
+        rating: 5
+      - quote: >-
+          As a CEO, cognitive performance is everything. The team at Primary
+          Brain Health helped me optimize my sleep, exercise, and nutrition for
+          peak mental performance. I've never felt sharper.
+        authorName: Lisa T.
+        authorRole: Patient
+        rating: 5
+    _template: testimonials
+  - variant: accordion
+    theme: light
+    headline: Frequently Asked Questions
+    items:
+      - question: What is a brain health consultation?
+        answer: >-
+          A brain health consultation is a comprehensive virtual visit with our
+          clinical team where we review your medical history, family history,
+          lifestyle factors, and cognitive concerns. We use this information to
+          create a personalized risk profile and develop an evidence-based plan
+          for dementia prevention and cognitive optimization.
+      - question: Who qualifies for brain health services?
+        answer: >-
+          Anyone interested in proactive brain health care qualifies. You do not
+          need a referral or an existing diagnosis. Our services are especially
+          valuable for individuals with a family history of dementia, those
+          noticing subtle cognitive changes, and high-performers who want to
+          maintain peak cognitive function.
+      - question: How do virtual visits work?
+        answer: >-
+          All appointments take place via secure video conferencing. You'll meet
+          with your clinician from the comfort of your home. Cognitive
+          assessments are conducted using validated digital tools, and your
+          personalized plan is delivered and reviewed during follow-up virtual
+          sessions.
+      - question: Does insurance cover brain health services?
+        answer: >-
+          Coverage varies by insurance plan. We recommend contacting your
+          insurance provider to verify coverage for preventive neurology and
+          neuropsychological assessments. We also offer self-pay options and can
+          provide documentation for out-of-network reimbursement.
+      - question: What should I expect during my first visit?
+        answer: >-
+          Your first visit typically lasts 60 minutes. We'll discuss your health
+          history, cognitive concerns, lifestyle habits, and goals. You'll
+          receive an overview of the assessment process and next steps. Many
+          patients find the initial consultation both informative and reassuring.
+    _template: faq
+  - headline: Ready to Take the First Step?
+    subheadline: >-
+      Book your initial brain health consultation. We'll reach out within 24
+      hours.
+    buttonText: Book a Consultation
+    _template: intakeForm
   - variant: simple
     theme: primary
-    headline: Ready to Build Something Amazing?
-    primaryButtonText: Get Started
-    primaryButtonLink: /contact
-    secondaryButtonText: View Documentation
-    secondaryButtonLink: /blog
+    headline: Questions? We're Here.
+    primaryButtonText: Contact Us
+    primaryButtonLink: 'mailto:hello@primarybrainhealth.com'
     _template: cta
 ---
 

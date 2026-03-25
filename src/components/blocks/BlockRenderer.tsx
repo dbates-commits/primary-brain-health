@@ -12,6 +12,7 @@ import { Gallery } from "@/components/blocks/Gallery";
 import { ContentSection } from "@/components/blocks/ContentSection";
 import { Testimonials } from "@/components/blocks/Testimonials";
 import { LogoCloud } from "@/components/blocks/LogoCloud";
+import { IntakeForm } from "@/components/blocks/IntakeForm";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Block = any;
@@ -189,6 +190,20 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 headline={block.headline}
                 grayscale={block.grayscale}
                 logos={block.logos || []}
+              />
+            );
+
+          case "PageBlocksIntakeForm":
+            return (
+              <IntakeForm
+                key={index}
+                headline={block.headline}
+                subheadline={block.subheadline}
+                buttonText={block.buttonText}
+                tinaFields={{
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
+                }}
               />
             );
 

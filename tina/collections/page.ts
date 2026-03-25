@@ -10,6 +10,7 @@ import { faqBlock } from "../blocks/faq";
 import { teamBlock } from "../blocks/team";
 import { statsBlock } from "../blocks/stats";
 import { logoCloudBlock } from "../blocks/logoCloud";
+import { intakeFormBlock } from "../blocks/intakeForm";
 
 export const pageCollection: Collection = {
   name: "page",
@@ -66,6 +67,7 @@ export const pageCollection: Collection = {
         teamBlock,
         statsBlock,
         logoCloudBlock,
+        intakeFormBlock,
       ],
     },
   ],
