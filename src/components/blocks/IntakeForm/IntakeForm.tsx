@@ -37,6 +37,7 @@ export function IntakeForm({
       sex: (form.elements.namedItem("sex") as HTMLSelectElement).value,
       yearsOfEducation: (form.elements.namedItem("yearsOfEducation") as HTMLInputElement).value,
       contactFor: (form.elements.namedItem("contactFor") as HTMLSelectElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
     };
 
     try {
@@ -203,6 +204,19 @@ export function IntakeForm({
                 <option value="self">Myself</option>
                 <option value="someone-else">Someone else</option>
               </select>
+            </div>
+
+            <div>
+              <label htmlFor="message" className={labelClasses}>
+                Message (optional)
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={4}
+                placeholder="Tell us a bit about what brings you here..."
+                className={inputClasses}
+              />
             </div>
 
             <div className="pt-4">
