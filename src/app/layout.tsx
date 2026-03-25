@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TinaShowcase - Next.js + Tina CMS Demo",
+  title: "Primary Brain Health",
   description:
     "A sophisticated Next.js + Tina CMS demo showcasing advanced content modeling patterns including drag-and-drop blocks, variants, and more.",
 };

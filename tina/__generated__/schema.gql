@@ -312,7 +312,13 @@ type PageBlocksLogoCloud {
   logos: [PageBlocksLogoCloudLogos]
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud
+type PageBlocksIntakeForm {
+  headline: String
+  subheadline: String
+  buttonText: String
+}
+
+union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm
 
 type Page implements Node & Document {
   title: String!
@@ -594,6 +600,12 @@ input PageBlocksLogoCloudFilter {
   logos: PageBlocksLogoCloudLogosFilter
 }
 
+input PageBlocksIntakeFormFilter {
+  headline: StringFilter
+  subheadline: StringFilter
+  buttonText: StringFilter
+}
+
 input PageBlocksFilter {
   hero: PageBlocksHeroFilter
   features: PageBlocksFeaturesFilter
@@ -606,6 +618,7 @@ input PageBlocksFilter {
   team: PageBlocksTeamFilter
   stats: PageBlocksStatsFilter
   logoCloud: PageBlocksLogoCloudFilter
+  intakeForm: PageBlocksIntakeFormFilter
 }
 
 input PageFilter {
@@ -1331,6 +1344,12 @@ input PageBlocksLogoCloudMutation {
   logos: [PageBlocksLogoCloudLogosMutation]
 }
 
+input PageBlocksIntakeFormMutation {
+  headline: String
+  subheadline: String
+  buttonText: String
+}
+
 input PageBlocksMutation {
   hero: PageBlocksHeroMutation
   features: PageBlocksFeaturesMutation
@@ -1343,6 +1362,7 @@ input PageBlocksMutation {
   team: PageBlocksTeamMutation
   stats: PageBlocksStatsMutation
   logoCloud: PageBlocksLogoCloudMutation
+  intakeForm: PageBlocksIntakeFormMutation
 }
 
 input PageMutation {

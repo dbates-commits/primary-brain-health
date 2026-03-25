@@ -105,9 +105,9 @@ export function Footer({ copyright, columns, social }: FooterProps) {
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">T</span>
+                  <span className="text-white font-bold text-lg">P</span>
                 </div>
-                <span className="font-bold text-xl">TinaShowcase</span>
+                <span className="font-bold text-xl">Primary Brain Health</span>
               </Link>
               <p className="text-gray-400 text-sm mb-4">
                 A sophisticated Next.js + Tina CMS demo showcasing advanced content modeling patterns.
@@ -148,7 +148,7 @@ export function Footer({ copyright, columns, social }: FooterProps) {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-sm">
-            {copyright || `© ${new Date().getFullYear()} TinaShowcase. All rights reserved.`}
+            {copyright || `© ${new Date().getFullYear()} Primary Brain Health. All rights reserved.`}
           </p>
           <div className="flex gap-6 text-sm">
             <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">

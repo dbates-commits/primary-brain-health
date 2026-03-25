@@ -297,6 +297,11 @@ fragment PageParts on Page {
         url
       }
     }
+    ... on PageBlocksIntakeForm {
+      headline
+      subheadline
+      buttonText
+    }
   }
 }
 

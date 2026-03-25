@@ -42,9 +42,9 @@ export function Header({ navigation = [], ctaButton }: HeaderProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">T</span>
+              <span className="text-white font-bold text-lg">P</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">TinaShowcase</span>
+            <span className="font-bold text-xl text-gray-900">Primary Brain Health</span>
           </Link>
 
           {/* Desktop Navigation */}
