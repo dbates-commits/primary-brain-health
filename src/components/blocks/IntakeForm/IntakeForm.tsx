@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export interface IntakeFormProps {
@@ -19,8 +20,8 @@ export function IntakeForm({
   buttonText = "Book a Consultation",
   tinaFields,
 }: IntakeFormProps) {
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,40 +53,11 @@ export function IntakeForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      setSubmitted(true);
+      router.push("/thank-you");
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <section id="intake" className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg
-              className="w-8 h-8 text-on-secondary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h3 className="text-3xl font-bold font-headline mb-4">Thank You!</h3>
-          <p className="text-on-primary-container text-lg">
-            We&apos;ve received your information and will reach out within 24
-            hours to schedule your consultation.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   const inputClasses =
     "w-full bg-surface-container-low border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
