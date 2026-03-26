@@ -71,15 +71,15 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/terms"
                   className="text-primary/60 hover:text-secondary transition-colors text-sm"
                 >
-                  Legal
+                  Terms &amp; Conditions
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/privacy"
                   className="text-primary/60 hover:text-secondary transition-colors text-sm"
                 >
                   Privacy Policy
