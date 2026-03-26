@@ -7,39 +7,39 @@ import Image from "next/image";
 const posts = [
   {
     slug: "getting-started-with-tina",
-    title: "Getting Started with Tina CMS",
-    excerpt: "Learn how to set up Tina CMS with Next.js and create your first editable content.",
-    author: "Sarah Chen",
+    title: "Why Early Brain Health Screening Matters",
+    excerpt: "Research shows that early intervention is one of the most powerful tools for reducing dementia risk. Here's what you should know.",
+    author: "Dr. David Bates",
     date: "2024-01-15",
-    category: "Tutorial",
-    featuredImage: "https://placehold.co/800x400/6366f1/ffffff?text=Getting+Started",
+    category: "Prevention",
+    featuredImage: "https://placehold.co/800x400/6366f1/ffffff?text=Brain+Health",
   },
   {
     slug: "block-based-editing",
-    title: "Building Block-Based Pages",
-    excerpt: "Discover how to create flexible, reusable blocks that content editors will love.",
-    author: "Mike Johnson",
+    title: "5 Lifestyle Changes That Protect Your Brain",
+    excerpt: "Evidence-based lifestyle modifications that can reduce your risk of cognitive decline and support long-term brain health.",
+    author: "Dr. Sarah Mitchell",
     date: "2024-01-10",
-    category: "Tutorial",
-    featuredImage: "https://placehold.co/800x400/8b5cf6/ffffff?text=Block+Editing",
+    category: "Lifestyle",
+    featuredImage: "https://placehold.co/800x400/8b5cf6/ffffff?text=Lifestyle",
   },
   {
     slug: "visual-editing-tips",
-    title: "Tips for Better Visual Editing",
-    excerpt: "Make the most of Tina's visual editing capabilities with these pro tips.",
-    author: "Lisa Park",
+    title: "Understanding Cognitive Risk Factors",
+    excerpt: "From genetics to cardiovascular health, learn which factors influence your brain health and what you can do about them.",
+    author: "Dr. David Bates",
     date: "2024-01-05",
-    category: "Tips",
-    featuredImage: "https://placehold.co/800x400/6366f1/ffffff?text=Visual+Editing",
+    category: "Education",
+    featuredImage: "https://placehold.co/800x400/6366f1/ffffff?text=Risk+Factors",
   },
   {
     slug: "content-modeling-best-practices",
-    title: "Content Modeling Best Practices",
-    excerpt: "Learn how to structure your content for maximum flexibility and reusability.",
-    author: "Alex Thompson",
+    title: "Understanding Your Cognitive Assessment Results",
+    excerpt: "A guide to interpreting your brain health assessment and what the results mean for your personalized prevention plan.",
+    author: "Dr. Sarah Mitchell",
     date: "2024-01-01",
-    category: "Best Practices",
-    featuredImage: "https://placehold.co/800x400/8b5cf6/ffffff?text=Content+Modeling",
+    category: "Assessment",
+    featuredImage: "https://placehold.co/800x400/8b5cf6/ffffff?text=Assessment",
   },
 ];
 
@@ -49,9 +49,9 @@ export default function BlogPage() {
       <section className="bg-gradient-to-r from-indigo-600 to-purple-600 py-20">
         <Container>
           <div className="text-center text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Resources</h1>
             <p className="text-xl text-indigo-100 max-w-2xl mx-auto">
-              Insights, tutorials, and best practices for building with Tina CMS
+              Research-backed insights, prevention strategies, and brain health education
             </p>
           </div>
         </Container>

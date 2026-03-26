@@ -69,27 +69,25 @@ function SocialIcon({ platform, url }: { platform: string; url: string }) {
 export function Footer({ copyright, columns, social }: FooterProps) {
   const defaultColumns: FooterColumn[] = [
     {
-      title: "Product",
+      title: "Services",
       links: [
-        { label: "Features", link: "/services" },
-        { label: "Pricing", link: "/services#pricing" },
-        { label: "Testimonials", link: "/#testimonials" },
+        { label: "What We Do", link: "/#about-what-we-do" },
+        { label: "Who It's For", link: "/#who-is-this-for" },
+        { label: "How It Works", link: "/#how-it-works" },
       ],
     },
     {
-      title: "Company",
+      title: "About",
       links: [
-        { label: "About", link: "/about" },
-        { label: "Blog", link: "/blog" },
-        { label: "Careers", link: "/careers" },
+        { label: "Credibility & Trust", link: "/#credibility-trust" },
+        { label: "Book a Consultation", link: "/#intake" },
       ],
     },
     {
-      title: "Resources",
+      title: "Contact",
       links: [
-        { label: "Documentation", link: "/docs" },
-        { label: "Help Center", link: "/help" },
-        { label: "Contact", link: "/contact" },
+        { label: "Book a Consultation", link: "/#intake" },
+        { label: "Email Us", link: "mailto:info@primarybrainhealth.com" },
       ],
     },
   ];
@@ -110,7 +108,7 @@ export function Footer({ copyright, columns, social }: FooterProps) {
                 <span className="font-bold text-xl">Primary Brain Health</span>
               </Link>
               <p className="text-gray-400 text-sm mb-4">
-                A sophisticated Next.js + Tina CMS demo showcasing advanced content modeling patterns.
+                A virtual-first clinic dedicated to dementia prevention and cognitive optimization. Take control of your brain health today.
               </p>
               {social && (
                 <div className="flex gap-4">

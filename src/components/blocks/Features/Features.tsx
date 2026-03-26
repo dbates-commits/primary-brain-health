@@ -34,12 +34,12 @@ export interface FeaturesProps {
 
 const themeStyles = {
   light: {
-    bg: "bg-white",
+    bg: "",
     headline: "text-gray-900",
     subheadline: "text-gray-600",
     itemTitle: "text-gray-900",
     itemDesc: "text-gray-600",
-    cardBg: "bg-gray-50",
+    cardBg: "bg-white/70",
     iconBg: "bg-indigo-100",
     iconColor: "text-indigo-600",
   },

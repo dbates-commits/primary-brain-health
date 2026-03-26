@@ -1,6 +1,6 @@
 {
-  "title": "Newsletter Signup",
-  "description": "Get the latest tips on content management, design patterns, and development best practices delivered to your inbox.",
+  "title": "Stay Informed",
+  "description": "Get the latest brain health research, prevention tips, and clinic updates delivered to your inbox.",
   "primaryButton": {
     "text": "Subscribe",
     "link": "#newsletter"

@@ -185,7 +185,7 @@ type PageBlocksContent {
   variant: String
   theme: String
   headline: String
-  body: JSON
+  bodyText: String
   sidebarContent: JSON
   leftColumn: JSON
   rightColumn: JSON
@@ -439,28 +439,6 @@ input PageBlocksCtaFilter {
   submitButtonText: StringFilter
 }
 
-input PageBlocksContentBodyCalloutFilter {
-  type: StringFilter
-  title: StringFilter
-  text: StringFilter
-}
-
-input PageBlocksContentBodyCodeBlockFilter {
-  language: StringFilter
-  code: StringFilter
-}
-
-input PageBlocksContentBodyVideoEmbedFilter {
-  url: StringFilter
-  caption: StringFilter
-}
-
-input PageBlocksContentBodyFilter {
-  callout: PageBlocksContentBodyCalloutFilter
-  codeBlock: PageBlocksContentBodyCodeBlockFilter
-  videoEmbed: PageBlocksContentBodyVideoEmbedFilter
-}
-
 input RichTextFilter {
   startsWith: String
   eq: String
@@ -471,7 +449,7 @@ input PageBlocksContentFilter {
   variant: StringFilter
   theme: StringFilter
   headline: StringFilter
-  body: PageBlocksContentBodyFilter
+  bodyText: StringFilter
   sidebarContent: RichTextFilter
   leftColumn: RichTextFilter
   rightColumn: RichTextFilter
@@ -1219,7 +1197,7 @@ input PageBlocksContentMutation {
   variant: String
   theme: String
   headline: String
-  body: JSON
+  bodyText: String
   sidebarContent: JSON
   leftColumn: JSON
   rightColumn: JSON

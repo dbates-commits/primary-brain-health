@@ -514,79 +514,12 @@ var contentBlock = {
       type: "string"
     },
     {
-      name: "body",
+      name: "bodyText",
       label: "Body Content",
-      type: "rich-text",
-      isBody: true,
-      templates: [
-        {
-          name: "callout",
-          label: "Callout Box",
-          fields: [
-            {
-              name: "type",
-              label: "Type",
-              type: "string",
-              options: [
-                { value: "info", label: "Info" },
-                { value: "warning", label: "Warning" },
-                { value: "success", label: "Success" },
-                { value: "error", label: "Error" }
-              ]
-            },
-            {
-              name: "title",
-              label: "Title",
-              type: "string"
-            },
-            {
-              name: "text",
-              label: "Text",
-              type: "string",
-              ui: {
-                component: "textarea"
-              }
-            }
-          ]
-        },
-        {
-          name: "codeBlock",
-          label: "Code Block",
-          fields: [
-            {
-              name: "language",
-              label: "Language",
-              type: "string",
-              options: ["javascript", "typescript", "python", "bash", "json", "html", "css"]
-            },
-            {
-              name: "code",
-              label: "Code",
-              type: "string",
-              ui: {
-                component: "textarea"
-              }
-            }
-          ]
-        },
-        {
-          name: "videoEmbed",
-          label: "Video Embed",
-          fields: [
-            {
-              name: "url",
-              label: "Video URL",
-              type: "string",
-              description: "YouTube or Vimeo URL"
-            },
-            {
-              name: "caption",
-              label: "Caption",
-              type: "string"
-            }
-          ]
-        }
-      ]
+      type: "string",
+      ui: {
+        component: "textarea"
+      }
     },
     {
       name: "sidebarContent",

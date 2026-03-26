@@ -1,12 +1,12 @@
 {
-  "title": "See It In Action",
-  "description": "Schedule a live demo to see how our block-based CMS can transform your content workflow.",
+  "title": "Ready to Get Started?",
+  "description": "Book your initial brain health consultation and take the first step toward a proactive prevention plan.",
   "primaryButton": {
-    "text": "Book a Demo",
-    "link": "/contact?type=demo"
+    "text": "Book a Consultation",
+    "link": "/#intake"
   },
   "secondaryButton": {
-    "text": "View Case Studies",
-    "link": "/projects"
+    "text": "Learn More",
+    "link": "/services"
   }
 }

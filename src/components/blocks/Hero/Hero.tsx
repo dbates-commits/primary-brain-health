@@ -33,7 +33,7 @@ export interface HeroProps {
 
 const themeStyles = {
   light: {
-    bg: "bg-white",
+    bg: "",
     headline: "text-gray-900",
     subheadline: "text-gray-600",
     badge: "bg-indigo-100 text-indigo-700",

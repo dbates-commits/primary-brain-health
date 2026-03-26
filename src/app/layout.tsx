@@ -12,7 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Primary Brain Health",
   description:
-    "A sophisticated Next.js + Tina CMS demo showcasing advanced content modeling patterns including drag-and-drop blocks, variants, and more.",
+    "Primary Brain Health is a virtual-first clinic dedicated to dementia prevention and cognitive optimization. Book your initial brain health consultation today.",
 };
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} font-sans antialiased`}>
         <Header />
         <main className="min-h-screen">{children}</main>

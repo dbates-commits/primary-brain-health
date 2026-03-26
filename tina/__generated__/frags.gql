@@ -159,7 +159,7 @@ fragment PageParts on Page {
       variant
       theme
       headline
-      body
+      bodyText
       sidebarContent
       leftColumn
       rightColumn

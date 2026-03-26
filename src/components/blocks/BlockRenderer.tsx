@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { tinaField } from "tinacms/dist/react";
 import { Hero } from "@/components/blocks/Hero";
 import { Features } from "@/components/blocks/Features";
@@ -19,6 +20,14 @@ type Block = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PageData = any;
 
+function slugify(text?: string): string | undefined {
+  if (!text) return undefined;
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undefined; data?: PageData }) {
   if (!blocks) return null;
 
@@ -29,11 +38,14 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
   return (
     <>
       {blocks.map((block: Block, index: number) => {
+        const sectionId = slugify(block.headline);
+
+        let content: React.ReactNode = null;
+
         switch (block.__typename) {
           case "PageBlocksHero":
-            return (
+            content = (
               <Hero
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -57,11 +69,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 }}
               />
             );
+            break;
 
           case "PageBlocksFeatures":
-            return (
+            content = (
               <Features
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -75,11 +87,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 blockData={data?.blocks?.[index]}
               />
             );
+            break;
 
           case "PageBlocksTeam":
-            return (
+            content = (
               <Team
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -88,11 +100,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 members={block.members || []}
               />
             );
+            break;
 
           case "PageBlocksStats":
-            return (
+            content = (
               <Stats
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -100,11 +112,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 items={block.stats || []}
               />
             );
+            break;
 
           case "PageBlocksFaq":
-            return (
+            content = (
               <FAQ
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -112,11 +124,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 items={block.items || []}
               />
             );
+            break;
 
           case "PageBlocksCta":
-            return (
+            content = (
               <CallToAction
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -128,11 +140,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 image={block.image}
               />
             );
+            break;
 
           case "PageBlocksPricingTable":
-            return (
+            content = (
               <PricingTable
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -140,11 +152,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 tiers={block.tiers || []}
               />
             );
+            break;
 
           case "PageBlocksGallery":
-            return (
+            content = (
               <Gallery
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -154,25 +166,25 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 items={block.items || []}
               />
             );
+            break;
 
           case "PageBlocksContent":
-            return (
+            content = (
               <ContentSection
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
-                body={block.body}
+                bodyText={block.bodyText}
                 sidebarContent={block.sidebarContent}
                 leftColumn={block.leftColumn}
                 rightColumn={block.rightColumn}
               />
             );
+            break;
 
           case "PageBlocksTestimonials":
-            return (
+            content = (
               <Testimonials
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -180,11 +192,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 items={block.testimonials || []}
               />
             );
+            break;
 
           case "PageBlocksLogoCloud":
-            return (
+            content = (
               <LogoCloud
-                key={index}
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
@@ -192,11 +204,11 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 logos={block.logos || []}
               />
             );
+            break;
 
           case "PageBlocksIntakeForm":
-            return (
+            content = (
               <IntakeForm
-                key={index}
                 headline={block.headline}
                 subheadline={block.subheadline}
                 buttonText={block.buttonText}
@@ -206,10 +218,18 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                 }}
               />
             );
+            break;
 
           default:
             return null;
         }
+
+        const bg = index % 2 === 0 ? "bg-white" : "bg-gray-50";
+
+        if (sectionId) {
+          return <div key={index} id={sectionId} className={`scroll-mt-20 ${bg}`}>{content}</div>;
+        }
+        return <div key={index} className={bg}>{content}</div>;
       })}
     </>
   );

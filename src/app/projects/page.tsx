@@ -7,39 +7,39 @@ import Image from "next/image";
 const projects = [
   {
     slug: "ecommerce-platform",
-    title: "E-Commerce Platform",
-    description: "A modern e-commerce solution built with Next.js and Tina CMS for managing products and content.",
-    client: "ShopMax Inc",
-    category: "E-commerce",
-    featuredImage: "https://placehold.co/800x600/6366f1/ffffff?text=E-Commerce",
-    techStack: ["Next.js", "Tina CMS", "Stripe", "Tailwind"],
+    title: "Cognitive Health Research Platform",
+    description: "A digital cognitive screening platform used across multiple clinical trial sites, supporting remote and in-clinic assessment modes.",
+    client: "National Cognitive Health Institute",
+    category: "Research",
+    featuredImage: "https://placehold.co/800x600/6366f1/ffffff?text=Research",
+    techStack: ["Next.js", "TypeScript", "Tailwind", "Vercel"],
   },
   {
     slug: "saas-marketing-site",
-    title: "SaaS Marketing Site",
-    description: "High-converting marketing website with dynamic landing pages and A/B testing capabilities.",
-    client: "CloudTech Solutions",
-    category: "Web Development",
-    featuredImage: "https://placehold.co/800x600/8b5cf6/ffffff?text=SaaS+Site",
-    techStack: ["Next.js", "Tina CMS", "Vercel", "Analytics"],
+    title: "Telehealth Platform for Neurology",
+    description: "A virtual care platform enabling a neurology practice to deliver remote consultations and cognitive assessments to patients across multiple states.",
+    client: "NeuroWell Clinic",
+    category: "Telehealth",
+    featuredImage: "https://placehold.co/800x600/8b5cf6/ffffff?text=Telehealth",
+    techStack: ["Next.js", "TypeScript", "Tailwind", "Vercel"],
   },
   {
     slug: "blog-platform",
-    title: "Multi-Author Blog Platform",
-    description: "Content platform supporting multiple authors, categories, and rich media content.",
-    client: "MediaHub",
-    category: "Content Platform",
-    featuredImage: "https://placehold.co/800x600/6366f1/ffffff?text=Blog+Platform",
-    techStack: ["Next.js", "Tina CMS", "MDX", "Search"],
+    title: "Brain Health Awareness Campaign",
+    description: "A public-facing educational website for a brain health nonprofit that drove a 3x increase in community screening sign-ups.",
+    client: "BrainStrong Foundation",
+    category: "Nonprofit",
+    featuredImage: "https://placehold.co/800x600/6366f1/ffffff?text=Awareness",
+    techStack: ["Next.js", "TypeScript", "Node.js", "AWS"],
   },
   {
     slug: "portfolio-showcase",
-    title: "Creative Portfolio",
-    description: "Stunning portfolio website with visual editing and gallery management.",
-    client: "Design Studio",
-    category: "Portfolio",
-    featuredImage: "https://placehold.co/800x600/8b5cf6/ffffff?text=Portfolio",
-    techStack: ["Next.js", "Tina CMS", "Framer Motion"],
+    title: "Patient Education Portal",
+    description: "An accessible, content-managed portal providing patients and caregivers with evidence-based resources on cognitive health and dementia prevention.",
+    client: "CogCare Health",
+    category: "Patient Education",
+    featuredImage: "https://placehold.co/800x600/8b5cf6/ffffff?text=Education",
+    techStack: ["Next.js", "Tina CMS", "Tailwind"],
   },
 ];
 
@@ -49,9 +49,9 @@ export default function ProjectsPage() {
       <section className="bg-gray-900 py-20">
         <Container>
           <div className="text-center text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Projects</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Work</h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Explore our portfolio of projects built with Tina CMS
+              Projects we've built in the brain health and digital healthcare space
             </p>
           </div>
         </Container>

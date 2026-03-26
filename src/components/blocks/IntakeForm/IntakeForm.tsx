@@ -54,7 +54,7 @@ export function IntakeForm({
 
   if (submitted) {
     return (
-      <section id="intake" className="py-20 bg-gray-50">
+      <section id="intake" className="py-20">
         <Container size="narrow">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-12 text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -64,7 +64,7 @@ export function IntakeForm({
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h3>
             <p className="text-gray-600">
-              We&apos;ve received your information and will reach out within 24 hours to schedule your consultation.
+              We've received your information and will reach out within 24 hours to schedule your consultation.
             </p>
           </div>
         </Container>
@@ -77,7 +77,7 @@ export function IntakeForm({
   const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
-    <section id="intake" className="py-20 bg-gray-50">
+    <section id="intake" className="py-20">
       <Container size="narrow">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-12">
           {headline && (

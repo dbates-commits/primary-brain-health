@@ -8,6 +8,7 @@ export interface ContentSectionProps {
   variant?: "default" | "twoColumn" | "withSidebar";
   theme?: "light" | "dark";
   headline?: string;
+  bodyText?: string;
   body?: TinaMarkdownContent;
   sidebarContent?: TinaMarkdownContent;
   leftColumn?: TinaMarkdownContent;
@@ -16,14 +17,16 @@ export interface ContentSectionProps {
 
 const themeStyles = {
   light: {
-    bg: "bg-white",
+    bg: "",
     headline: "text-gray-900",
     prose: "prose prose-gray",
+    text: "text-gray-600",
   },
   dark: {
     bg: "bg-gray-900",
     headline: "text-white",
     prose: "prose prose-invert",
+    text: "text-gray-300",
   },
 };
 
@@ -31,6 +34,7 @@ export function ContentSection({
   variant = "default",
   theme = "light",
   headline,
+  bodyText,
   body,
   sidebarContent,
   leftColumn,
@@ -47,7 +51,16 @@ export function ContentSection({
               {headline}
             </h2>
           )}
-          {body && (
+          {bodyText && (
+            <div className={cn("max-w-none space-y-4", styles.text)}>
+              {bodyText.split("\n\n").map((paragraph, i) => (
+                <p key={i} className="text-lg leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          )}
+          {!bodyText && body && (
             <div className={cn("max-w-none", styles.prose)}>
               <TinaMarkdown content={body} />
             </div>
