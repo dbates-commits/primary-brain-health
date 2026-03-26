@@ -25,7 +25,7 @@ export function ContentSection({
 }: ContentSectionProps) {
   if (variant === "default") {
     return (
-      <section className="bg-surface-container-lowest py-24 md:py-32 px-8 md:px-16">
+      <section id="about" className="bg-surface-container-lowest py-24 md:py-32 px-8 md:px-16 scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <span className="font-headline font-bold text-secondary tracking-widest uppercase text-sm mb-4 block">
             Our Philosophy
