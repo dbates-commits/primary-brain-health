@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Container } from "@/components/shared/Container";
 import { cn } from "@/lib/utils";
 
 export interface IntakeFormProps {
@@ -29,15 +28,22 @@ export function IntakeForm({
 
     const form = e.currentTarget;
     const data = {
-      firstName: (form.elements.namedItem("firstName") as HTMLInputElement).value,
-      lastName: (form.elements.namedItem("lastName") as HTMLInputElement).value,
+      fullName: (form.elements.namedItem("fullName") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
-      birthYear: (form.elements.namedItem("birthYear") as HTMLInputElement).value,
+      birthYear: (form.elements.namedItem("birthYear") as HTMLInputElement)
+        .value,
       sex: (form.elements.namedItem("sex") as HTMLSelectElement).value,
-      yearsOfEducation: (form.elements.namedItem("yearsOfEducation") as HTMLInputElement).value,
-      contactFor: (form.elements.namedItem("contactFor") as HTMLSelectElement).value,
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+      yearsOfEducation: (
+        form.elements.namedItem("yearsOfEducation") as HTMLInputElement
+      ).value,
+      contactFor: (
+        form.querySelector(
+          'input[name="contactFor"]:checked'
+        ) as HTMLInputElement
+      )?.value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement)
+        .value,
     };
 
     try {
@@ -54,35 +60,47 @@ export function IntakeForm({
 
   if (submitted) {
     return (
-      <section id="intake" className="py-20">
-        <Container size="narrow">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-12 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h3>
-            <p className="text-gray-600">
-              We've received your information and will reach out within 24 hours to schedule your consultation.
-            </p>
+      <section id="intake" className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg
+              className="w-8 h-8 text-on-secondary"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
           </div>
-        </Container>
+          <h3 className="text-3xl font-bold font-headline mb-4">Thank You!</h3>
+          <p className="text-on-primary-container text-lg">
+            We&apos;ve received your information and will reach out within 24
+            hours to schedule your consultation.
+          </p>
+        </div>
       </section>
     );
   }
 
   const inputClasses =
-    "w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent";
-  const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
+    "w-full bg-surface-container-low border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
 
   return (
-    <section id="intake" className="py-20">
-      <Container size="narrow">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-12">
+    <section
+      id="intake"
+      className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary"
+    >
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
+        {/* Left: Copy */}
+        <div>
           {headline && (
             <h2
-              className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-3"
+              className="text-4xl md:text-6xl font-extrabold font-headline mb-8 leading-tight"
               data-tina-field={tinaFields?.headline}
             >
               {headline}
@@ -90,71 +108,142 @@ export function IntakeForm({
           )}
           {subheadline && (
             <p
-              className="text-lg text-gray-600 text-center mb-10 max-w-xl mx-auto"
+              className="text-on-primary-container text-xl leading-relaxed mb-8"
               data-tina-field={tinaFields?.subheadline}
             >
               {subheadline}
             </p>
           )}
+          <div className="p-8 bg-primary-container rounded-xl">
+            <h4 className="font-headline font-bold text-lg mb-4 flex items-center gap-2">
+              <svg
+                className="w-5 h-5 text-secondary-fixed"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              What to expect:
+            </h4>
+            <ul className="space-y-4 text-on-primary-container">
+              <li className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                20-minute introductory clinical discussion
+              </li>
+              <li className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Review of your medical family history
+              </li>
+              <li className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Overview of virtual testing procedures
+              </li>
+            </ul>
+          </div>
+        </div>
 
+        {/* Right: Form */}
+        <div className="bg-surface-container-lowest p-8 md:p-12 rounded-[2rem] text-on-surface shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="firstName" className={labelClasses}>
-                  First Name
+                <label
+                  htmlFor="fullName"
+                  className="block text-sm font-semibold mb-2"
+                >
+                  Full Name
                 </label>
                 <input
-                  id="firstName"
-                  name="firstName"
+                  id="fullName"
+                  name="fullName"
                   type="text"
                   required
+                  placeholder="Jane Doe"
                   className={inputClasses}
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className={labelClasses}>
-                  Last Name
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  required
-                  className={inputClasses}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="email" className={labelClasses}>
-                  Email
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold mb-2"
+                >
+                  Email Address
                 </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
                   required
+                  placeholder="jane@example.com"
                   className={inputClasses}
                 />
               </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="phone" className={labelClasses}>
-                  Phone
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-semibold mb-2"
+                >
+                  Phone Number
                 </label>
                 <input
                   id="phone"
                   name="phone"
                   type="tel"
                   required
+                  placeholder="(555) 000-0000"
                   className={inputClasses}
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
-                <label htmlFor="birthYear" className={labelClasses}>
+                <label
+                  htmlFor="birthYear"
+                  className="block text-sm font-semibold mb-2"
+                >
                   Birth Year
                 </label>
                 <input
@@ -163,24 +252,38 @@ export function IntakeForm({
                   type="number"
                   min="1920"
                   max="2010"
-                  placeholder="e.g. 1975"
                   required
+                  placeholder="1970"
                   className={inputClasses}
                 />
               </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="sex" className={labelClasses}>
+                <label
+                  htmlFor="sex"
+                  className="block text-sm font-semibold mb-2"
+                >
                   Sex
                 </label>
-                <select id="sex" name="sex" required className={cn(inputClasses, "appearance-none")}>
-                  <option value="">Select...</option>
+                <select
+                  id="sex"
+                  name="sex"
+                  required
+                  className={cn(inputClasses, "appearance-none")}
+                >
+                  <option value="">Select</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
               <div>
-                <label htmlFor="yearsOfEducation" className={labelClasses}>
+                <label
+                  htmlFor="yearsOfEducation"
+                  className="block text-sm font-semibold mb-2"
+                >
                   Years of Education
                 </label>
                 <input
@@ -190,47 +293,64 @@ export function IntakeForm({
                   min="0"
                   max="30"
                   required
+                  placeholder="16"
                   className={inputClasses}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="contactFor" className={labelClasses}>
-                Are you contacting on behalf of yourself or someone else?
+              <label className="block text-sm font-semibold mb-2">
+                Who is this consultation for?
               </label>
-              <select id="contactFor" name="contactFor" required className={cn(inputClasses, "appearance-none")}>
-                <option value="">Select...</option>
-                <option value="self">Myself</option>
-                <option value="someone-else">Someone else</option>
-              </select>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="contactFor"
+                    value="self"
+                    className="text-primary focus:ring-primary"
+                  />
+                  <span>Myself</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="contactFor"
+                    value="someone-else"
+                    className="text-primary focus:ring-primary"
+                  />
+                  <span>Someone Else</span>
+                </label>
+              </div>
             </div>
 
             <div>
-              <label htmlFor="message" className={labelClasses}>
-                Message (optional)
+              <label
+                htmlFor="message"
+                className="block text-sm font-semibold mb-2"
+              >
+                Message (Optional)
               </label>
               <textarea
                 id="message"
                 name="message"
                 rows={4}
-                placeholder="Tell us a bit about what brings you here..."
+                placeholder="Tell us more about your concerns..."
                 className={inputClasses}
               />
             </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full px-8 py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? "Submitting..." : buttonText}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-secondary text-on-secondary py-5 rounded-xl font-headline font-bold text-lg hover:brightness-110 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Submitting..." : buttonText}
+            </button>
           </form>
         </div>
-      </Container>
+      </div>
     </section>
   );
 }

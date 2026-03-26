@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -9,8 +9,13 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Primary Brain Health",
+  title: "Primary Brain Health | Expert Cognitive Longevity Care",
   description:
     "Primary Brain Health is a virtual-first clinic dedicated to dementia prevention and cognitive optimization. Book your initial brain health consultation today.",
 };
@@ -22,16 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${manrope.variable} font-body antialiased bg-surface text-on-surface`}
+      >
         <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer
-          social={{
-            twitter: "https://twitter.com/tinacms",
-            github: "https://github.com/tinacms/tinacms",
-            linkedin: "https://linkedin.com/company/tinacms",
-          }}
-        />
+        <main className="pt-20">{children}</main>
+        <Footer />
       </body>
     </html>
   );

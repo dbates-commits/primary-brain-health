@@ -28,11 +28,19 @@ function slugify(text?: string): string | undefined {
     .replace(/(^-|-$)/g, "");
 }
 
-export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undefined; data?: PageData }) {
+export function BlockRenderer({
+  blocks,
+  data,
+}: {
+  blocks: Block[] | null | undefined;
+  data?: PageData;
+}) {
   if (!blocks) return null;
 
   const getFieldPath = (index: number, field: string) => {
-    return data?.blocks?.[index] ? tinaField(data.blocks[index], field) : undefined;
+    return data?.blocks?.[index]
+      ? tinaField(data.blocks[index], field)
+      : undefined;
   };
 
   return (
@@ -65,7 +73,10 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
                   subheadline: getFieldPath(index, "subheadline"),
                   badge: getFieldPath(index, "badge"),
                   primaryButtonText: getFieldPath(index, "primaryButtonText"),
-                  secondaryButtonText: getFieldPath(index, "secondaryButtonText"),
+                  secondaryButtonText: getFieldPath(
+                    index,
+                    "secondaryButtonText"
+                  ),
                 }}
               />
             );
@@ -224,12 +235,14 @@ export function BlockRenderer({ blocks, data }: { blocks: Block[] | null | undef
             return null;
         }
 
-        const bg = index % 2 === 0 ? "bg-white" : "bg-gray-50";
-
         if (sectionId) {
-          return <div key={index} id={sectionId} className={`scroll-mt-20 ${bg}`}>{content}</div>;
+          return (
+            <div key={index} id={sectionId} className="scroll-mt-20">
+              {content}
+            </div>
+          );
         }
-        return <div key={index} className={bg}>{content}</div>;
+        return <div key={index}>{content}</div>;
       })}
     </>
   );

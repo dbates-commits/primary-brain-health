@@ -1,6 +1,5 @@
 "use client";
 
-import { Container } from "@/components/shared/Container";
 import { cn } from "@/lib/utils";
 import { TinaMarkdown, TinaMarkdownContent } from "tinacms/dist/rich-text";
 
@@ -15,24 +14,8 @@ export interface ContentSectionProps {
   rightColumn?: TinaMarkdownContent;
 }
 
-const themeStyles = {
-  light: {
-    bg: "",
-    headline: "text-gray-900",
-    prose: "prose prose-gray",
-    text: "text-gray-600",
-  },
-  dark: {
-    bg: "bg-gray-900",
-    headline: "text-white",
-    prose: "prose prose-invert",
-    text: "text-gray-300",
-  },
-};
-
 export function ContentSection({
   variant = "default",
-  theme = "light",
   headline,
   bodyText,
   body,
@@ -40,76 +23,80 @@ export function ContentSection({
   leftColumn,
   rightColumn,
 }: ContentSectionProps) {
-  const styles = themeStyles[theme];
-
   if (variant === "default") {
     return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container size="narrow">
+      <section className="bg-surface-container-lowest py-24 md:py-32 px-8 md:px-16">
+        <div className="max-w-4xl mx-auto">
+          <span className="font-headline font-bold text-secondary tracking-widest uppercase text-sm mb-4 block">
+            Our Philosophy
+          </span>
           {headline && (
-            <h2 className={cn("text-3xl md:text-4xl font-bold mb-8", styles.headline)}>
+            <h2 className="text-4xl md:text-5xl font-bold font-headline text-primary mb-12">
               {headline}
             </h2>
           )}
           {bodyText && (
-            <div className={cn("max-w-none space-y-4", styles.text)}>
+            <div className="grid md:grid-cols-2 gap-12">
               {bodyText.split("\n\n").map((paragraph, i) => (
-                <p key={i} className="text-lg leading-relaxed">
+                <p
+                  key={i}
+                  className="text-lg md:text-xl text-on-surface-variant leading-relaxed"
+                >
                   {paragraph}
                 </p>
               ))}
             </div>
           )}
           {!bodyText && body && (
-            <div className={cn("max-w-none", styles.prose)}>
+            <div className="prose prose-lg max-w-none text-on-surface-variant">
               <TinaMarkdown content={body} />
             </div>
           )}
-        </Container>
+        </div>
       </section>
     );
   }
 
   if (variant === "twoColumn") {
     return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container>
+      <section className="bg-surface-container-lowest py-24 md:py-32 px-8 md:px-16">
+        <div className="max-w-7xl mx-auto">
           {headline && (
-            <h2 className={cn("text-3xl md:text-4xl font-bold mb-12 text-center", styles.headline)}>
+            <h2 className="text-4xl md:text-5xl font-bold font-headline text-primary mb-12 text-center">
               {headline}
             </h2>
           )}
           <div className="grid md:grid-cols-2 gap-12">
-            <div className={cn("max-w-none", styles.prose)}>
+            <div className="prose prose-lg max-w-none text-on-surface-variant">
               {leftColumn && <TinaMarkdown content={leftColumn} />}
             </div>
-            <div className={cn("max-w-none", styles.prose)}>
+            <div className="prose prose-lg max-w-none text-on-surface-variant">
               {rightColumn && <TinaMarkdown content={rightColumn} />}
             </div>
           </div>
-        </Container>
+        </div>
       </section>
     );
   }
 
   if (variant === "withSidebar") {
     return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container>
+      <section className={cn("py-24 md:py-32 px-8 md:px-16")}>
+        <div className="max-w-7xl mx-auto">
           {headline && (
-            <h2 className={cn("text-3xl md:text-4xl font-bold mb-12", styles.headline)}>
+            <h2 className="text-4xl md:text-5xl font-bold font-headline text-primary mb-12">
               {headline}
             </h2>
           )}
           <div className="grid md:grid-cols-3 gap-12">
-            <div className={cn("md:col-span-2 max-w-none", styles.prose)}>
+            <div className="md:col-span-2 prose prose-lg max-w-none text-on-surface-variant">
               {body && <TinaMarkdown content={body} />}
             </div>
-            <aside className={cn("max-w-none", styles.prose)}>
+            <aside className="prose prose-lg max-w-none text-on-surface-variant">
               {sidebarContent && <TinaMarkdown content={sidebarContent} />}
             </aside>
           </div>
-        </Container>
+        </div>
       </section>
     );
   }

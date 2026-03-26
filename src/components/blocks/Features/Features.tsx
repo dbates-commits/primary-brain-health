@@ -1,11 +1,6 @@
 "use client";
 
 import { tinaField } from "tinacms/dist/react";
-import { Container } from "@/components/shared/Container";
-import { Card } from "@/components/shared/Card";
-import { Icon } from "@/components/shared/Icon";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 interface FeatureItem {
   title: string;
@@ -32,48 +27,66 @@ export interface FeaturesProps {
   blockData?: any;
 }
 
-const themeStyles = {
-  light: {
-    bg: "",
-    headline: "text-gray-900",
-    subheadline: "text-gray-600",
-    itemTitle: "text-gray-900",
-    itemDesc: "text-gray-600",
-    cardBg: "bg-white/70",
-    iconBg: "bg-indigo-100",
-    iconColor: "text-indigo-600",
-  },
-  dark: {
-    bg: "bg-gray-900",
-    headline: "text-white",
-    subheadline: "text-gray-400",
-    itemTitle: "text-white",
-    itemDesc: "text-gray-400",
-    cardBg: "bg-gray-800",
-    iconBg: "bg-indigo-900",
-    iconColor: "text-indigo-400",
-  },
-  primary: {
-    bg: "bg-indigo-600",
-    headline: "text-white",
-    subheadline: "text-indigo-200",
-    itemTitle: "text-white",
-    itemDesc: "text-indigo-200",
-    cardBg: "bg-indigo-500",
-    iconBg: "bg-white/20",
-    iconColor: "text-white",
-  },
-};
+// Map CMS icon names to Material-style SVG icons
+function FeatureIcon({ name, className }: { name: string; className?: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    users: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      </svg>
+    ),
+    zap: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+      </svg>
+    ),
+    star: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+      </svg>
+    ),
+    calendar: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+    ),
+    clipboard: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+      </svg>
+    ),
+    file: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      </svg>
+    ),
+    rocket: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+      </svg>
+    ),
+    shield: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+      </svg>
+    ),
+    check: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    lock: (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+      </svg>
+    ),
+  };
 
-const columnClasses = {
-  "2": "md:grid-cols-2",
-  "3": "md:grid-cols-2 lg:grid-cols-3",
-  "4": "md:grid-cols-2 lg:grid-cols-4",
-};
+  return <>{icons[name] || icons["star"]}</>;
+}
 
 export function Features({
   variant = "grid",
-  theme = "light",
   headline,
   subheadline,
   columns = "3",
@@ -81,21 +94,22 @@ export function Features({
   tinaFields,
   blockData,
 }: FeaturesProps) {
-  const styles = themeStyles[theme];
-
   const getItemField = (index: number, field: string) => {
-    return blockData?.items?.[index] ? tinaField(blockData.items[index], field) : undefined;
+    return blockData?.items?.[index]
+      ? tinaField(blockData.items[index], field)
+      : undefined;
   };
 
-  if (variant === "grid") {
+  // "How It Works" - 4-column timeline layout
+  if (columns === "4" && variant === "grid") {
     return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container>
-          {(headline || subheadline) && (
-            <div className="text-center max-w-3xl mx-auto mb-16">
+      <section className="bg-surface-container-low py-24 md:py-32 px-8 md:px-16" id="how-it-works">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div className="max-w-2xl">
               {headline && (
                 <h2
-                  className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}
+                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6"
                   data-tina-field={tinaFields?.headline}
                 >
                   {headline}
@@ -103,130 +117,92 @@ export function Features({
               )}
               {subheadline && (
                 <p
-                  className={cn("text-lg", styles.subheadline)}
+                  className="text-on-surface-variant text-lg"
                   data-tina-field={tinaFields?.subheadline}
                 >
                   {subheadline}
                 </p>
               )}
             </div>
-          )}
-          <div className={cn("grid gap-8", columnClasses[columns])}>
+          </div>
+          <div className="grid md:grid-cols-4 gap-4 relative">
+            {/* Timeline line */}
+            <div className="hidden md:block absolute top-10 left-0 w-full h-px bg-outline-variant/30 z-0" />
             {items.map((item, index) => (
-              <Card key={index} variant="bordered" className={styles.cardBg} hover>
-                {item.icon && (
-                  <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-4", styles.iconBg)}>
-                    <Icon name={item.icon} className={styles.iconColor} size="md" />
-                  </div>
-                )}
-                <h3
-                  className={cn("text-xl font-semibold mb-2", styles.itemTitle)}
+              <div key={index} className="relative z-10">
+                <div className="w-20 h-20 bg-surface-container-lowest rounded-full flex items-center justify-center mb-8 border-4 border-surface-container-low shadow-sm">
+                  {item.icon && (
+                    <FeatureIcon
+                      name={item.icon}
+                      className="w-8 h-8 text-secondary"
+                    />
+                  )}
+                </div>
+                <div className="text-secondary font-bold font-headline mb-2">
+                  Step {index + 1}
+                </div>
+                <h4
+                  className="text-xl font-bold text-primary mb-3"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
-                </h3>
+                </h4>
                 {item.description && (
                   <p
-                    className={cn("text-base", styles.itemDesc)}
+                    className="text-on-surface-variant"
                     data-tina-field={getItemField(index, "description")}
                   >
                     {item.description}
                   </p>
                 )}
-              </Card>
-            ))}
-          </div>
-        </Container>
-      </section>
-    );
-  }
-
-  if (variant === "alternating") {
-    return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container>
-          {(headline || subheadline) && (
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              {headline && (
-                <h2
-                  className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}
-                  data-tina-field={tinaFields?.headline}
-                >
-                  {headline}
-                </h2>
-              )}
-              {subheadline && (
-                <p
-                  className={cn("text-lg", styles.subheadline)}
-                  data-tina-field={tinaFields?.subheadline}
-                >
-                  {subheadline}
-                </p>
-              )}
-            </div>
-          )}
-          <div className="space-y-24">
-            {items.map((item, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "grid md:grid-cols-2 gap-12 items-center",
-                  index % 2 === 1 && "md:flex-row-reverse"
-                )}
-              >
-                <div className={index % 2 === 1 ? "md:order-2" : ""}>
-                  {item.icon && (
-                    <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-4", styles.iconBg)}>
-                      <Icon name={item.icon} className={styles.iconColor} size="md" />
-                    </div>
-                  )}
-                  <h3
-                    className={cn("text-2xl font-bold mb-4", styles.itemTitle)}
-                    data-tina-field={getItemField(index, "title")}
-                  >
-                    {item.title}
-                  </h3>
-                  {item.description && (
-                    <p
-                      className={cn("text-lg", styles.itemDesc)}
-                      data-tina-field={getItemField(index, "description")}
-                    >
-                      {item.description}
-                    </p>
-                  )}
-                </div>
-                <div className={index % 2 === 1 ? "md:order-1" : ""}>
-                  {item.image && (
-                    <div
-                      className="relative aspect-[4/3] rounded-2xl overflow-hidden"
-                      data-tina-field={getItemField(index, "image")}
-                    >
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
               </div>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
     );
   }
 
-  if (variant === "iconCards") {
+  // "Credibility & Trust" - inline badge row
+  if (
+    headline?.toLowerCase().includes("credibility") ||
+    headline?.toLowerCase().includes("trust") ||
+    headline?.toLowerCase().includes("why us")
+  ) {
     return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container>
+      <section className="py-24 px-8 md:px-16" id="why-us">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-12 md:gap-24 opacity-80">
+          {items.map((item, index) => (
+            <div key={index} className="flex items-center gap-4">
+              {item.icon && (
+                <FeatureIcon
+                  name={item.icon}
+                  className="w-8 h-8 text-primary"
+                />
+              )}
+              <span
+                className="text-primary font-headline font-bold text-lg tracking-tight"
+                data-tina-field={getItemField(index, "title")}
+              >
+                {item.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // "Who It's For" - card grid (default grid variant)
+  if (variant === "grid") {
+    return (
+      <section className="py-24 md:py-32 px-8 md:px-16 neural-texture" id="who-it-is-for">
+        <div className="max-w-7xl mx-auto">
           {(headline || subheadline) && (
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center mb-16">
               {headline && (
                 <h2
-                  className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}
+                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6"
                   data-tina-field={tinaFields?.headline}
                 >
                   {headline}
@@ -234,7 +210,7 @@ export function Features({
               )}
               {subheadline && (
                 <p
-                  className={cn("text-lg", styles.subheadline)}
+                  className="text-on-surface-variant text-lg max-w-2xl mx-auto"
                   data-tina-field={tinaFields?.subheadline}
                 >
                   {subheadline}
@@ -242,90 +218,38 @@ export function Features({
               )}
             </div>
           )}
-          <div className={cn("grid gap-6", columnClasses[columns])}>
+          <div className={`grid gap-8 ${columns === "2" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
             {items.map((item, index) => (
-              <Card key={index} variant="elevated" className="text-center" hover>
+              <div
+                key={index}
+                className="bg-surface-container-low p-10 rounded-xl transition-all hover:-translate-y-2 group"
+              >
                 {item.icon && (
-                  <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4", styles.iconBg)}>
-                    <Icon name={item.icon} className={styles.iconColor} size="lg" />
+                  <div className="w-14 h-14 bg-secondary-container flex items-center justify-center rounded-lg mb-8 group-hover:bg-secondary transition-colors">
+                    <FeatureIcon
+                      name={item.icon}
+                      className="w-6 h-6 text-on-secondary-container group-hover:text-on-secondary"
+                    />
                   </div>
                 )}
                 <h3
-                  className={cn("text-xl font-semibold mb-2", styles.itemTitle)}
+                  className="text-2xl font-bold font-headline text-primary mb-4"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
                 </h3>
                 {item.description && (
                   <p
-                    className={cn("text-sm", styles.itemDesc)}
+                    className="text-on-surface-variant leading-relaxed"
                     data-tina-field={getItemField(index, "description")}
                   >
                     {item.description}
                   </p>
                 )}
-              </Card>
+              </div>
             ))}
           </div>
-        </Container>
-      </section>
-    );
-  }
-
-  if (variant === "comparison") {
-    return (
-      <section className={cn("py-20", styles.bg)}>
-        <Container>
-          {(headline || subheadline) && (
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              {headline && (
-                <h2
-                  className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}
-                  data-tina-field={tinaFields?.headline}
-                >
-                  {headline}
-                </h2>
-              )}
-              {subheadline && (
-                <p
-                  className={cn("text-lg", styles.subheadline)}
-                  data-tina-field={tinaFields?.subheadline}
-                >
-                  {subheadline}
-                </p>
-              )}
-            </div>
-          )}
-          <div className="grid md:grid-cols-2 gap-8">
-            {items.map((item, index) => (
-              <Card key={index} variant="bordered" className={cn(styles.cardBg, "relative")} hover>
-                <div className="flex items-start gap-4">
-                  {item.icon && (
-                    <div className={cn("w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center", styles.iconBg)}>
-                      <Icon name={item.icon} className={styles.iconColor} size="md" />
-                    </div>
-                  )}
-                  <div>
-                    <h3
-                      className={cn("text-xl font-semibold mb-2", styles.itemTitle)}
-                      data-tina-field={getItemField(index, "title")}
-                    >
-                      {item.title}
-                    </h3>
-                    {item.description && (
-                      <p
-                        className={cn("text-base", styles.itemDesc)}
-                        data-tina-field={getItemField(index, "description")}
-                      >
-                        {item.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Container>
+        </div>
       </section>
     );
   }

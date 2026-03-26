@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Design System: "The Cognitive Sanctuary" */
+  /* Primary palette */
+  --color-primary: #041632;
+  --color-primary-container: #1b2b48;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #8393b5;
+  --color-primary-fixed: #d7e2ff;
+  --color-primary-fixed-dim: #b7c7eb;
+
+  /* Secondary palette */
+  --color-secondary: #446558;
+  --color-secondary-container: #c6ebda;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #4a6b5e;
+  --color-secondary-fixed: #c6ebda;
+  --color-secondary-fixed-dim: #aacebe;
+
+  /* Surface hierarchy */
+  --color-surface: #fbf9f4;
+  --color-surface-container: #f0eee9;
+  --color-surface-container-low: #f5f3ee;
+  --color-surface-container-high: #eae8e3;
+  --color-surface-container-highest: #e4e2dd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-dim: #dbdad5;
+  --color-surface-variant: #e4e2dd;
+
+  /* On-surface */
+  --color-on-surface: #1b1c19;
+  --color-on-surface-variant: #44474d;
+
+  /* Outline */
+  --color-outline: #75777e;
+  --color-outline-variant: #c5c6ce;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+
+  /* Inverse */
+  --color-inverse-surface: #30312e;
+  --color-inverse-on-surface: #f2f1ec;
+  --color-inverse-primary: #b7c7eb;
+
+  /* Surface tint */
+  --color-surface-tint: #4f5e7e;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-primary: var(--color-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary: var(--color-on-primary);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-secondary-fixed: var(--color-secondary-fixed);
+  --color-surface: var(--color-surface);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+  --color-inverse-surface: var(--color-inverse-surface);
+  --color-inverse-on-surface: var(--color-inverse-on-surface);
+  --color-inverse-primary: var(--color-inverse-primary);
+  --color-surface-tint: var(--color-surface-tint);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Neural texture pattern */
+.neural-texture {
+  background-image: radial-gradient(
+    circle at 2px 2px,
+    rgba(68, 101, 88, 0.05) 1px,
+    transparent 0
+  );
+  background-size: 40px 40px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: "Inter", sans-serif;
+}
+
+::selection {
+  background: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
 }

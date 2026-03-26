@@ -1,7 +1,5 @@
 "use client";
 
-import { Container } from "@/components/shared/Container";
-import { Button } from "@/components/shared/Button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -31,321 +29,127 @@ export interface HeroProps {
   tinaFields?: TinaFieldsMap;
 }
 
-const themeStyles = {
-  light: {
-    bg: "",
-    headline: "text-gray-900",
-    subheadline: "text-gray-600",
-    badge: "bg-indigo-100 text-indigo-700",
-  },
-  dark: {
-    bg: "bg-gray-900",
-    headline: "text-white",
-    subheadline: "text-gray-300",
-    badge: "bg-indigo-900 text-indigo-300",
-  },
-  primary: {
-    bg: "bg-indigo-600",
-    headline: "text-white",
-    subheadline: "text-indigo-100",
-    badge: "bg-white/20 text-white",
-  },
-  secondary: {
-    bg: "bg-gray-800",
-    headline: "text-white",
-    subheadline: "text-gray-300",
-    badge: "bg-indigo-500 text-white",
-  },
-};
-
 export function Hero({
   variant = "centered",
-  theme = "light",
   headline,
   subheadline,
   image,
-  videoUrl,
-  backgroundImage,
   primaryButtonText,
   primaryButtonLink,
-  secondaryButtonText,
-  secondaryButtonLink,
   badge,
-  gradientFrom = "#6366f1",
-  gradientTo = "#8b5cf6",
   tinaFields,
 }: HeroProps) {
-  const styles = themeStyles[theme];
-  const isDark = theme === "dark" || theme === "primary" || theme === "secondary";
-
-  if (variant === "centered") {
-    return (
-      <section className={cn("relative py-20 lg:py-32", styles.bg)}>
-        {backgroundImage && (
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={backgroundImage}
-              alt=""
-              fill
-              className="object-cover opacity-20"
-            />
-          </div>
-        )}
-        <Container className="relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            {badge && (
-              <span
-                className={cn("inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6", styles.badge)}
-                data-tina-field={tinaFields?.badge}
-              >
-                {badge}
-              </span>
-            )}
-            <h1
-              className={cn("text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6", styles.headline)}
-              data-tina-field={tinaFields?.headline}
-            >
-              {headline}
-            </h1>
-            {subheadline && (
-              <p
-                className={cn("text-lg md:text-xl mb-8", styles.subheadline)}
-                data-tina-field={tinaFields?.subheadline}
-              >
-                {subheadline}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {primaryButtonText && (
-                <Button
-                  href={primaryButtonLink}
-                  variant="solid"
-                  color={isDark ? "white" : "primary"}
-                  size="lg"
-                  data-tina-field={tinaFields?.primaryButtonText}
-                >
-                  {primaryButtonText}
-                </Button>
-              )}
-              {secondaryButtonText && (
-                <Button
-                  href={secondaryButtonLink}
-                  variant="outline"
-                  color={isDark ? "white" : "primary"}
-                  size="lg"
-                  data-tina-field={tinaFields?.secondaryButtonText}
-                >
-                  {secondaryButtonText}
-                </Button>
-              )}
-            </div>
-          </div>
-        </Container>
-      </section>
-    );
-  }
-
   if (variant === "split" || variant === "splitReverse") {
     const isReverse = variant === "splitReverse";
     return (
-      <section className={cn("py-20 lg:py-32", styles.bg)}>
-        <Container>
-          <div className={cn("grid lg:grid-cols-2 gap-12 lg:gap-16 items-center", isReverse && "lg:flex-row-reverse")}>
-            <div className={cn(isReverse && "lg:order-2")}>
-              {badge && (
-                <span
-                  className={cn("inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6", styles.badge)}
-                  data-tina-field={tinaFields?.badge}
-                >
-                  {badge}
-                </span>
-              )}
-              <h1
-                className={cn("text-4xl md:text-5xl font-bold tracking-tight mb-6", styles.headline)}
-                data-tina-field={tinaFields?.headline}
+      <section className="relative min-h-[870px] flex items-center overflow-hidden px-8 md:px-16 py-12">
+        <div className="max-w-7xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center">
+          {/* Text */}
+          <div className={cn("z-10", isReverse ? "order-1 md:order-2" : "order-2 md:order-1")}>
+            {badge && (
+              <span
+                className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-secondary-container text-on-secondary-container font-headline"
+                data-tina-field={tinaFields?.badge}
               >
-                {headline}
-              </h1>
-              {subheadline && (
-                <p
-                  className={cn("text-lg md:text-xl mb-8", styles.subheadline)}
-                  data-tina-field={tinaFields?.subheadline}
+                {badge}
+              </span>
+            )}
+            <h1
+              className="text-5xl md:text-7xl font-extrabold font-headline text-primary leading-[1.1] mb-6 tracking-tight"
+              data-tina-field={tinaFields?.headline}
+            >
+              {headline}
+            </h1>
+            {subheadline && (
+              <p
+                className="text-xl md:text-2xl text-on-surface-variant leading-relaxed mb-10 max-w-xl"
+                data-tina-field={tinaFields?.subheadline}
+              >
+                {subheadline}
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row gap-4">
+              {primaryButtonText && (
+                <a
+                  href={primaryButtonLink || "#"}
+                  className="bg-secondary text-on-secondary px-10 py-5 rounded-xl font-headline text-lg font-bold shadow-lg hover:shadow-xl transition-all inline-flex items-center justify-center gap-2"
+                  data-tina-field={tinaFields?.primaryButtonText}
                 >
-                  {subheadline}
-                </p>
+                  {primaryButtonText}
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
               )}
-              <div className="flex flex-col sm:flex-row gap-4">
-                {primaryButtonText && (
-                  <Button
-                    href={primaryButtonLink}
-                    variant="solid"
-                    color={isDark ? "white" : "primary"}
-                    size="lg"
-                    data-tina-field={tinaFields?.primaryButtonText}
-                  >
-                    {primaryButtonText}
-                  </Button>
-                )}
-                {secondaryButtonText && (
-                  <Button
-                    href={secondaryButtonLink}
-                    variant="outline"
-                    color={isDark ? "white" : "primary"}
-                    size="lg"
-                    data-tina-field={tinaFields?.secondaryButtonText}
-                  >
-                    {secondaryButtonText}
-                  </Button>
-                )}
+            </div>
+          </div>
+
+          {/* Image */}
+          <div className={cn("relative", isReverse ? "order-2 md:order-1" : "order-1 md:order-2")}>
+            {image ? (
+              <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl">
+                <Image
+                  src={image}
+                  alt={headline || ""}
+                  fill
+                  className="object-cover"
+                />
               </div>
-            </div>
-            <div className={cn("relative", isReverse && "lg:order-1")}>
-              {image && (
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                  <Image
-                    src={image}
-                    alt={headline || ""}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl bg-surface-container-high">
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNxnMqkM7wh-NeTbmWT0l2NlKUmJrrTidcZnWEXxvnju2Jei6aDT63L4nXAt4hLnKpR4AMo0x0Bbid-t81ttvL3rMd_PITyqJLpFd3_eyjDKgKi_lBlIPPg8xKtKCFciAth4zPjMVEhM5dmUvoN7EWuV42RwaKVZGe3K80g-xQAURoDSV8EXI2JAHYyllON3lyJiu1xdFKgu1m53AQ2Xw-cdOvkEx1ZMgIlfBd3DIt03CqdxUNKudZTJL2iPRbSShdEMxFqbcz2WQ"
+                  alt="Couple enjoying cognitive wellness"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            {/* Neural motif overlay */}
+            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-secondary-container/30 rounded-full blur-3xl" />
           </div>
-        </Container>
+        </div>
       </section>
     );
   }
 
-  if (variant === "video") {
-    return (
-      <section className="relative py-20 lg:py-32 bg-gray-900 overflow-hidden">
-        {videoUrl && (
-          <div className="absolute inset-0 z-0">
-            <iframe
-              src={`${videoUrl}?autoplay=1&mute=1&loop=1&controls=0&playlist=${videoUrl.split("/").pop()}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              allow="autoplay; fullscreen"
-              style={{ pointerEvents: "none" }}
-            />
-            <div className="absolute inset-0 bg-black/60" />
-          </div>
+  // Centered variant
+  return (
+    <section className="relative py-24 md:py-32 px-8 md:px-16">
+      <div className="max-w-3xl mx-auto text-center">
+        {badge && (
+          <span
+            className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-secondary-container text-on-secondary-container font-headline"
+            data-tina-field={tinaFields?.badge}
+          >
+            {badge}
+          </span>
         )}
-        <Container className="relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            {badge && (
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-white/20 text-white"
-                data-tina-field={tinaFields?.badge}
-              >
-                {badge}
-              </span>
-            )}
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-white"
-              data-tina-field={tinaFields?.headline}
+        <h1
+          className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-headline text-primary tracking-tight mb-6"
+          data-tina-field={tinaFields?.headline}
+        >
+          {headline}
+        </h1>
+        {subheadline && (
+          <p
+            className="text-lg md:text-xl text-on-surface-variant mb-8"
+            data-tina-field={tinaFields?.subheadline}
+          >
+            {subheadline}
+          </p>
+        )}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {primaryButtonText && (
+            <a
+              href={primaryButtonLink || "#"}
+              className="bg-secondary text-on-secondary px-10 py-5 rounded-xl font-headline text-lg font-bold shadow-lg hover:shadow-xl transition-all inline-flex items-center justify-center gap-2"
+              data-tina-field={tinaFields?.primaryButtonText}
             >
-              {headline}
-            </h1>
-            {subheadline && (
-              <p
-                className="text-lg md:text-xl mb-8 text-gray-200"
-                data-tina-field={tinaFields?.subheadline}
-              >
-                {subheadline}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {primaryButtonText && (
-                <Button
-                  href={primaryButtonLink}
-                  variant="solid"
-                  color="white"
-                  size="lg"
-                  data-tina-field={tinaFields?.primaryButtonText}
-                >
-                  {primaryButtonText}
-                </Button>
-              )}
-              {secondaryButtonText && (
-                <Button
-                  href={secondaryButtonLink}
-                  variant="outline"
-                  color="white"
-                  size="lg"
-                  data-tina-field={tinaFields?.secondaryButtonText}
-                >
-                  {secondaryButtonText}
-                </Button>
-              )}
-            </div>
-          </div>
-        </Container>
-      </section>
-    );
-  }
-
-  if (variant === "gradient") {
-    return (
-      <section
-        className="py-20 lg:py-32"
-        style={{
-          background: `linear-gradient(135deg, ${gradientFrom} 0%, ${gradientTo} 100%)`,
-        }}
-      >
-        <Container>
-          <div className="max-w-3xl mx-auto text-center">
-            {badge && (
-              <span
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-white/20 text-white"
-                data-tina-field={tinaFields?.badge}
-              >
-                {badge}
-              </span>
-            )}
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-white"
-              data-tina-field={tinaFields?.headline}
-            >
-              {headline}
-            </h1>
-            {subheadline && (
-              <p
-                className="text-lg md:text-xl mb-8 text-white/80"
-                data-tina-field={tinaFields?.subheadline}
-              >
-                {subheadline}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {primaryButtonText && (
-                <Button
-                  href={primaryButtonLink}
-                  variant="solid"
-                  color="white"
-                  size="lg"
-                  data-tina-field={tinaFields?.primaryButtonText}
-                >
-                  {primaryButtonText}
-                </Button>
-              )}
-              {secondaryButtonText && (
-                <Button
-                  href={secondaryButtonLink}
-                  variant="outline"
-                  color="white"
-                  size="lg"
-                  data-tina-field={tinaFields?.secondaryButtonText}
-                >
-                  {secondaryButtonText}
-                </Button>
-              )}
-            </div>
-          </div>
-        </Container>
-      </section>
-    );
-  }
-
-  return null;
+              {primaryButtonText}
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 }

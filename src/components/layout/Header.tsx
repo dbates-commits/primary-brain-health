@@ -1,45 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Container } from "@/components/shared/Container";
-import { Button } from "@/components/shared/Button";
-import { Icon } from "@/components/shared/Icon";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
   link: string;
-  children?: { label: string; link: string; description?: string }[];
 }
 
-interface HeaderProps {
-  navigation?: NavItem[];
-  ctaButton?: {
-    text: string;
-    link: string;
-  };
-}
-
-export function Header({ navigation = [], ctaButton }: HeaderProps) {
+export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
 
-  const defaultNavigation: NavItem[] = [
-    { label: "About", link: "#about-what-we-do" },
-    { label: "Who It's For", link: "#who-is-this-for" },
+  const nav: NavItem[] = [
+    { label: "About", link: "#about" },
+    { label: "Who It's For", link: "#who-it-is-for" },
     { label: "How It Works", link: "#how-it-works" },
-    { label: "Why Us", link: "#credibility-trust" },
+    { label: "Why Us", link: "#why-us" },
   ];
 
-  const nav = navigation.length > 0 ? navigation : defaultNavigation;
-
   useEffect(() => {
-    const navIds = nav
-      .filter((item) => item.link.startsWith("#"))
-      .map((item) => item.link.slice(1));
-
-    const allIds = [...navIds, "intake", "ready-to-take-the-first-step", "take-control-of-your-brain-health"];
+    const navIds = nav.map((item) => item.link.slice(1));
+    const allIds = [...navIds, "intake"];
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -63,115 +45,109 @@ export function Header({ navigation = [], ctaButton }: HeaderProps) {
     });
 
     return () => observer.disconnect();
-  }, [nav]);
-
-  const linkClass = (href: string) =>
-    cn(
-      "text-[14px] font-semibold transition-colors",
-      activeHash === href
-        ? "text-indigo-600"
-        : "text-gray-600 hover:text-gray-900"
-    );
-
-  const mobileLinkClass = (href: string) =>
-    cn(
-      "text-[16px] font-semibold",
-      activeHash === href
-        ? "text-indigo-600"
-        : "text-gray-600 hover:text-gray-900"
-    );
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-      <Container>
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center gap-2 cursor-pointer">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">P</span>
-            </div>
-            <span className="font-bold text-xl text-gray-900">Primary Brain Health</span>
-          </a>
+    <nav className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]">
+      <div className="flex justify-between items-center h-20 px-8 md:px-16 max-w-[1400px] mx-auto">
+        {/* Logo */}
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className="text-xl font-bold text-primary tracking-tight font-headline"
+        >
+          Primary Brain Health
+        </a>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {nav.map((item, index) =>
-              item.link.startsWith("#") ? (
-                <a
-                  key={index}
-                  href={item.link}
-                  className={linkClass(item.link)}
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={index}
-                  href={item.link}
-                  className={linkClass(item.link)}
-                >
-                  {item.label}
-                </Link>
-              )
-            )}
-          </nav>
-
-          {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-4">
-            {ctaButton ? (
-              <Button href={ctaButton.link} variant="solid" color="primary" size="sm">
-                {ctaButton.text}
-              </Button>
-            ) : (
-              <Button href="#intake" variant="solid" color="primary" size="sm">
-                Book a Consultation
-              </Button>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Icon name={mobileMenuOpen ? "close" : "menu"} size="md" className="text-gray-600" />
-          </button>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-2">
+          {nav.map((item) => (
+            <a
+              key={item.link}
+              href={item.link}
+              className={cn(
+                "font-headline text-sm font-semibold tracking-tight px-4 py-2 rounded-full transition-all",
+                activeHash === item.link
+                  ? "text-secondary font-bold border-b-2 border-secondary pb-1 rounded-none"
+                  : "text-primary/70 hover:text-primary hover:bg-surface-container-low"
+              )}
+            >
+              {item.label}
+            </a>
+          ))}
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100">
-            <nav className="flex flex-col gap-4">
-              {nav.map((item, index) =>
-                item.link.startsWith("#") ? (
-                  <a
-                    key={index}
-                    href={item.link}
-                    className={mobileLinkClass(item.link)}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.label}
-                  </a>
-                ) : (
-                  <Link
-                    key={index}
-                    href={item.link}
-                    className={mobileLinkClass(item.link)}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                )
-              )}
-              <div className="pt-4 border-t border-gray-100">
-                <Button href="#intake" variant="solid" color="primary" className="w-full">
-                  Book a Consultation
-                </Button>
-              </div>
-            </nav>
+        {/* CTA Button */}
+        <a
+          href="#intake"
+          className="hidden md:inline-flex bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold active:scale-90 transition-transform duration-200"
+        >
+          Book a Consultation
+        </a>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden p-2 text-primary"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            {mobileMenuOpen ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-surface/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
+          <div className="flex flex-col gap-4">
+            {nav.map((item) => (
+              <a
+                key={item.link}
+                href={item.link}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "font-headline text-base font-semibold py-2",
+                  activeHash === item.link
+                    ? "text-secondary"
+                    : "text-primary/70"
+                )}
+              >
+                {item.label}
+              </a>
+            ))}
+            <a
+              href="#intake"
+              onClick={() => setMobileMenuOpen(false)}
+              className="bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold text-center mt-2"
+            >
+              Book a Consultation
+            </a>
           </div>
-        )}
-      </Container>
-    </header>
+        </div>
+      )}
+    </nav>
   );
 }
