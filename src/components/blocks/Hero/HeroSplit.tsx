@@ -37,11 +37,7 @@ export function HeroSplit({
               data-tina-field={tinaFields?.headline}
             >
               {headline
-                ? highlightBrainHealth(
-                    headline,
-                    "text-secondary animate-brain-health-glow",
-                    { animationDelay: "800ms" }
-                  )
+                ? highlightBrainHealth(headline, "text-secondary animate-brain-health-glow")
                 : null}
             </h1>
             {subheadline && (
