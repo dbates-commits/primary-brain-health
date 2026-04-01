@@ -107,22 +107,25 @@ export function HeroBrainMask({
         <div className="order-1 lg:order-2 shrink-0 w-[280px] md:w-[400px] lg:w-[500px] xl:w-[560px]">
           <div className="relative w-full" style={{ paddingBottom: "100%" }}>
             <div className="absolute inset-0 flex items-center justify-center gap-[10px]">
-              {BRAIN_COLUMNS.map((col, i) => (
+              {BRAIN_COLUMNS.map((col, i) => {
+                // Each strip has a different height, but the video must span the
+                // full container height in every strip so all strips show the same
+                // frame (just clipped by their pill shape — no funhouse distortion).
+                // Strip is centered vertically: top offset = (1 - h) / 2 of container.
+                // In strip-relative %: videoHeight = 1/h * 100%, videoTop = -(1-h)/(2h) * 100%
+                const h = parseFloat(col.height) / 100;
+                const videoHeight = `${(1 / h) * 100}%`;
+                const videoTop = `${-((1 - h) / (2 * h)) * 100}%`;
+
+                return (
                   <div
                     key={i}
                     className="relative overflow-hidden rounded-full flex-shrink-0"
                     style={{
-                      // Exact strip width: container minus 5 gaps divided by 6
                       width: "calc((100% - 50px) / 6)",
                       height: col.height,
                     }}
                   >
-                    {/*
-                     * True die-cut: video spans the full container width.
-                     * In strip-relative units: 6 strips + 5×10px gaps = calc(600% + 50px).
-                     * Each strip offsets left by its index × (one strip-width + 10px gap).
-                     * key={videoIndex} remounts the video on each cycle → autoPlay + animation replay.
-                     */}
                     <video
                       key={videoIndex}
                       autoPlay
@@ -134,9 +137,9 @@ export function HeroBrainMask({
                       className="absolute max-w-none"
                       style={{
                         width: "calc(600% + 50px)",
-                        height: "100%",
+                        height: videoHeight,
                         left: `calc(${-i * 100}% - ${i * 10}px)`,
-                        top: 0,
+                        top: videoTop,
                         objectFit: "cover",
                         objectPosition: "center center",
                         animation: `strip-video-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${STRIP_DELAYS_MS[i]}ms both`,
@@ -145,7 +148,8 @@ export function HeroBrainMask({
                       <source src={VIDEOS[videoIndex]} type="video/mp4" />
                     </video>
                   </div>
-                ))}
+                );
+              })}
             </div>
           </div>
         </div>
