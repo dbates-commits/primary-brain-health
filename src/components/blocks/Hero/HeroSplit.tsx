@@ -32,14 +32,22 @@ export function HeroSplit({
         >
           <div className="flex flex-col gap-6">
             <h1
-              className="text-4xl md:text-5xl lg:text-[56px] font-bold font-headline text-on-surface leading-[1.1] tracking-tight"
+              className="animate-fade-up text-4xl md:text-5xl lg:text-[56px] font-bold font-headline text-on-surface leading-[1.1] tracking-tight"
+              style={{ animationDelay: "0ms" }}
               data-tina-field={tinaFields?.headline}
             >
-              {headline ? highlightBrainHealth(headline) : null}
+              {headline
+                ? highlightBrainHealth(
+                    headline,
+                    "text-secondary animate-brain-health-glow",
+                    { animationDelay: "800ms" }
+                  )
+                : null}
             </h1>
             {subheadline && (
               <p
-                className="text-lg md:text-2xl text-on-surface leading-relaxed max-w-xl"
+                className="animate-fade-up text-lg md:text-2xl text-on-surface leading-relaxed max-w-xl"
+                style={{ animationDelay: "180ms" }}
                 data-tina-field={tinaFields?.subheadline}
               >
                 {subheadline}
@@ -50,7 +58,8 @@ export function HeroSplit({
           {primaryButtonText && (
             <a
               href={primaryButtonLink || "#"}
-              className="bg-secondary text-on-secondary px-6 py-4 rounded-xl font-headline text-lg md:text-2xl font-semibold shadow-lg hover:shadow-xl hover:brightness-110 transition-all inline-flex items-center justify-center w-fit"
+              className="animate-fade-up bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold active:scale-90 transition-transform duration-200 inline-flex items-center justify-center w-fit"
+              style={{ animationDelay: "320ms" }}
               data-tina-field={tinaFields?.primaryButtonText}
             >
               {primaryButtonText}
@@ -58,21 +67,23 @@ export function HeroSplit({
           )}
 
           {/* Trust bar */}
-          <div className="border-l-4 border-outline-variant pl-6 flex flex-col gap-2">
+          <div
+            className="animate-fade-up border-l-4 border-outline-variant pl-6 flex flex-col gap-2"
+            style={{ animationDelay: "460ms" }}
+          >
             <TrustAvatars />
-            <p className="text-2xl font-medium text-on-surface">
-              3,200+ Patients
-            </p>
-            <p className="text-xl text-outline">Trust Us</p>
+            <p className="text-sm font-semibold text-on-surface">3,200+ Patients</p>
+            <p className="text-xs text-outline">Trust Us</p>
           </div>
         </div>
 
         {/* Image */}
         <div
           className={cn(
-            "relative w-full lg:w-[500px] xl:w-[600px] shrink-0",
+            "animate-fade-up relative w-full lg:w-[400px] xl:w-[460px] shrink-0",
             isReverse ? "order-1 lg:order-1" : "order-1 lg:order-2"
           )}
+          style={{ animationDelay: "80ms" }}
         >
           {image ? (
             <div className="aspect-square lg:aspect-[3/4] rounded-[2rem] overflow-hidden">
