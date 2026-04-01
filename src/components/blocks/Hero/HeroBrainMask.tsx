@@ -81,30 +81,39 @@ export function HeroBrainMask({
         {/* Brain-shaped image mask */}
         <div className="order-1 lg:order-2 shrink-0 w-[280px] md:w-[400px] lg:w-[500px] xl:w-[560px]">
           <div className="relative w-full" style={{ paddingBottom: "100%" }}>
-            <div className="absolute inset-0 flex items-end justify-center gap-[10px] lg:gap-[10px]">
-              {BRAIN_COLUMNS.map((col, i) => (
-                <div
-                  key={i}
-                  className="relative overflow-hidden rounded-full"
-                  style={{
-                    width: `${100 / 6 - 2}%`,
-                    height: col.height,
-                    alignSelf: "flex-end",
-                    marginTop: col.top,
-                  }}
-                >
-                  <img
-                    src={imgSrc}
-                    alt=""
-                    className="absolute w-[600%] max-w-none h-auto min-h-full object-cover"
+            <div className="absolute inset-0 flex items-center justify-center gap-[10px]">
+              {BRAIN_COLUMNS.map((col, i) => {
+                // Each column needs to show the correct horizontal slice of the full image.
+                // The image should span the full container width, positioned so each
+                // pill reveals the matching portion.
+                const colCount = BRAIN_COLUMNS.length;
+                const colWidthPct = 100 / colCount - 2; // ~14.67%
+                // Position of this column's left edge as % of container
+                const colLeftPct = i * (100 / colCount);
+
+                return (
+                  <div
+                    key={i}
+                    className="relative overflow-hidden rounded-full"
                     style={{
-                      left: `${-i * 100}%`,
-                      top: "50%",
-                      transform: "translateY(-50%)",
+                      width: `${colWidthPct}%`,
+                      height: col.height,
                     }}
-                  />
-                </div>
-              ))}
+                  >
+                    <img
+                      src={imgSrc}
+                      alt=""
+                      className="absolute max-w-none object-cover"
+                      style={{
+                        width: `${(100 / colWidthPct) * 100}%`,
+                        height: "100%",
+                        left: `${-(colLeftPct / colWidthPct) * 100}%`,
+                        top: 0,
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
