@@ -25,6 +25,8 @@ export const heroBlock: Template = {
         { value: "centered", label: "Centered" },
         { value: "split", label: "Split (Image Right)" },
         { value: "splitReverse", label: "Split (Image Left)" },
+        { value: "fullImage", label: "Full Image Overlay" },
+        { value: "brainMask", label: "Brain Shape Mask" },
         { value: "video", label: "Video Background" },
         { value: "gradient", label: "Gradient Background" },
       ],

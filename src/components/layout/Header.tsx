@@ -36,15 +36,21 @@ export function Header() {
           }
         });
       },
-      { rootMargin: "-50% 0px -50% 0px" }
+      { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
     );
 
-    allIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+    // Delay to ensure sections are in the DOM
+    const timer = setTimeout(() => {
+      allIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
+    }, 100);
 
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, []);
 
   return (
@@ -69,10 +75,10 @@ export function Header() {
               key={item.link}
               href={item.link}
               className={cn(
-                "font-headline text-sm font-semibold tracking-tight px-4 py-2 rounded-full transition-all",
+                "font-headline text-sm font-semibold tracking-tight px-4 py-2 transition-all",
                 activeHash === item.link
-                  ? "text-secondary font-bold border-b-2 border-secondary pb-1 rounded-none"
-                  : "text-primary/70 hover:text-primary hover:bg-surface-container-low"
+                  ? "text-secondary"
+                  : "text-primary/70 hover:text-primary"
               )}
             >
               {item.label}

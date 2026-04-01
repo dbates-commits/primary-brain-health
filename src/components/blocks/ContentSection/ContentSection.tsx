@@ -25,19 +25,27 @@ export function ContentSection({
 }: ContentSectionProps) {
   if (variant === "default") {
     return (
-      <section id="about" className="bg-surface-container-lowest py-24 md:py-32 px-8 md:px-16 scroll-mt-20">
-        <div className="max-w-4xl mx-auto">
-          <span className="font-headline font-bold text-secondary tracking-widest uppercase text-sm mb-4 block">
-            Our Philosophy
-          </span>
-          {headline && (
-            <h2 className="text-4xl md:text-5xl font-bold font-headline text-primary mb-12">
-              {headline}
-            </h2>
-          )}
-          {bodyText && (
-            <div className="grid md:grid-cols-2 gap-12">
-              {bodyText.split("\n\n").map((paragraph, i) => (
+      <section id="about" className="bg-surface-container-lowest py-16 lg:py-20 px-6 md:px-12 lg:px-20 scroll-mt-20">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
+          {/* Left: subtitle + heading */}
+          <div className="flex-1 flex flex-col gap-6">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-error" />
+              <span className="font-body font-medium text-error tracking-wide uppercase text-lg md:text-2xl">
+                Our Philosophy
+              </span>
+            </div>
+            {headline && (
+              <h2 className="text-4xl md:text-5xl lg:text-[56px] font-semibold font-headline text-on-surface leading-[1.1]">
+                {headline}
+              </h2>
+            )}
+          </div>
+
+          {/* Right: body paragraphs */}
+          <div className="flex flex-col gap-10 lg:w-[600px] shrink-0">
+            {bodyText &&
+              bodyText.split("\n\n").map((paragraph, i) => (
                 <p
                   key={i}
                   className="text-lg md:text-xl text-on-surface-variant leading-relaxed"
@@ -45,13 +53,12 @@ export function ContentSection({
                   {paragraph}
                 </p>
               ))}
-            </div>
-          )}
-          {!bodyText && body && (
-            <div className="prose prose-lg max-w-none text-on-surface-variant">
-              <TinaMarkdown content={body} />
-            </div>
-          )}
+            {!bodyText && body && (
+              <div className="prose prose-lg max-w-none text-on-surface-variant">
+                <TinaMarkdown content={body} />
+              </div>
+            )}
+          </div>
         </div>
       </section>
     );
