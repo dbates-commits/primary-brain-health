@@ -15,6 +15,7 @@ export function HeroFullImage({
 }: HeroProps) {
   return (
     <section className="bg-surface px-5 lg:px-10 pt-5 lg:pt-10">
+      <div className="max-w-7xl mx-auto">
       <div className="relative rounded-3xl overflow-hidden min-h-[700px] lg:min-h-[900px]">
         {/* Background image */}
         <img
@@ -75,6 +76,7 @@ export function HeroFullImage({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
