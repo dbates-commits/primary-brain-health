@@ -26,13 +26,13 @@ export function HeroSplit({
         {/* Text */}
         <div
           className={cn(
-            "z-10 flex flex-col gap-10 lg:gap-16 flex-1",
+            "z-10 flex flex-col gap-8 lg:gap-10 flex-1",
             isReverse ? "order-2 lg:order-2" : "order-2 lg:order-1"
           )}
         >
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             <h1
-              className="animate-fade-up text-4xl md:text-5xl lg:text-[56px] font-bold font-headline text-on-surface leading-[1.1] tracking-tight"
+              className="animate-fade-up text-4xl md:text-5xl lg:text-[56px] font-bold font-headline text-on-surface leading-[1.1] tracking-tight text-pretty"
               style={{ animationDelay: "0ms" }}
               data-tina-field={tinaFields?.headline}
             >
@@ -42,7 +42,7 @@ export function HeroSplit({
             </h1>
             {subheadline && (
               <p
-                className="animate-fade-up text-lg md:text-2xl text-on-surface leading-relaxed max-w-xl"
+                className="animate-fade-up text-lg text-on-surface leading-relaxed max-w-xl text-pretty"
                 style={{ animationDelay: "180ms" }}
                 data-tina-field={tinaFields?.subheadline}
               >
@@ -64,12 +64,11 @@ export function HeroSplit({
 
           {/* Trust bar */}
           <div
-            className="animate-fade-up border-l-4 border-outline-variant pl-6 flex flex-col gap-2"
+            className="animate-fade-up border-l-4 border-outline-variant pl-5 flex flex-col gap-1.5"
             style={{ animationDelay: "460ms" }}
           >
             <TrustAvatars />
-            <p className="text-sm font-semibold text-on-surface">3,200+ Patients</p>
-            <p className="text-xs text-outline">Trust Us</p>
+            <p className="text-sm text-on-surface">Trusted by <span className="font-semibold">3,200+</span> patients and families</p>
           </div>
         </div>
 
@@ -95,7 +94,7 @@ export function HeroSplit({
               <img
                 src={DEFAULT_HERO_IMAGE}
                 alt="Couple enjoying cognitive wellness"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-[65%_center]"
               />
             </div>
           )}

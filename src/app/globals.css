@@ -85,6 +85,81 @@
   --color-surface-tint: var(--color-surface-tint);
 }
 
+/* ---- Animation keyframes ---- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* "Brain Health" — one-time soft green glow that plays after text appears */
+@keyframes brain-health-glow {
+  0%   { text-shadow: none; }
+  35%  { text-shadow: 0 0 22px rgba(68, 101, 88, 0.5), 0 0 40px rgba(68, 101, 88, 0.18); }
+  100% { text-shadow: none; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-brain-health-glow {
+  animation: brain-health-glow 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* "Brain Health" — no glow, color fades in after headline appears */
+@keyframes brain-health-in {
+  from { color: var(--color-on-surface); }
+  to   { color: var(--color-secondary); }
+}
+
+.animate-brain-health-in {
+  animation: brain-health-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 600ms both;
+}
+
+/* Brain pattern color blob — pulse in/out on a long cycle */
+@keyframes pattern-pulse {
+  0%, 100% { opacity: 0; }
+  35%, 65% { opacity: 1; }
+}
+
+/* Neural background node pulse */
+@keyframes node-pulse {
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.55; }
+}
+
+/* Brain-mask strip: video slides up into static pill on enter */
+@keyframes strip-video-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scroll-reveal — added by JS after mount (progressive enhancement) */
+.scroll-hidden {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-hidden.scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Neural texture pattern */
 .neural-texture {
   background-image: radial-gradient(

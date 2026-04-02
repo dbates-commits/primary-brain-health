@@ -3,6 +3,7 @@ import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ScrollRevealInit } from "@/components/ScrollRevealInit";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${manrope.variable} font-body antialiased bg-surface text-on-surface`}
       >
+        <ScrollRevealInit />
         <Header />
         <main className="pt-20">{children}</main>
         <Footer />

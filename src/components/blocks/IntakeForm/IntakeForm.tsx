@@ -65,6 +65,7 @@ export function IntakeForm({
   return (
     <section
       id="intake"
+      data-scroll-reveal
       className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary"
     >
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
@@ -72,7 +73,8 @@ export function IntakeForm({
         <div>
           {headline && (
             <h2
-              className="text-4xl md:text-6xl font-extrabold font-headline mb-8 leading-tight"
+              data-scroll-item
+              className="text-4xl md:text-6xl font-extrabold font-headline mb-8 leading-tight text-balance"
               data-tina-field={tinaFields?.headline}
             >
               {headline}
@@ -80,13 +82,14 @@ export function IntakeForm({
           )}
           {subheadline && (
             <p
-              className="text-on-primary-container text-xl leading-relaxed mb-8"
+              data-scroll-item
+              className="text-on-primary-container text-xl leading-relaxed mb-8 text-pretty"
               data-tina-field={tinaFields?.subheadline}
             >
               {subheadline}
             </p>
           )}
-          <div className="p-8 bg-primary-container rounded-xl">
+          <div data-scroll-item className="p-8 bg-primary-container rounded-xl">
             <h4 className="font-headline font-bold text-lg mb-4 flex items-center gap-2">
               <svg
                 className="w-5 h-5 text-secondary-fixed"
@@ -157,7 +160,7 @@ export function IntakeForm({
         </div>
 
         {/* Right: Form */}
-        <div className="bg-surface-container-lowest p-8 md:p-12 rounded-[2rem] text-on-surface shadow-2xl">
+        <div data-scroll-item className="bg-surface-container-lowest p-8 md:p-12 rounded-[2rem] text-on-surface shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>

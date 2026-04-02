@@ -63,10 +63,10 @@ export function HeroBrainMask({
 
       <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
         {/* Text */}
-        <div className="flex flex-col gap-10 lg:gap-16 flex-1 order-2 lg:order-1">
-          <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8 lg:gap-10 flex-1 order-2 lg:order-1">
+          <div className="flex flex-col gap-4">
             <h1
-              className="text-4xl md:text-5xl lg:text-[56px] font-bold font-headline text-on-surface leading-[1.1] tracking-tight"
+              className="text-4xl md:text-5xl lg:text-[56px] font-bold font-headline text-on-surface leading-[1.1] tracking-tight text-pretty"
               data-tina-field={tinaFields?.headline}
             >
               {headline
@@ -75,7 +75,7 @@ export function HeroBrainMask({
             </h1>
             {subheadline && (
               <p
-                className="text-lg md:text-2xl text-on-surface leading-relaxed max-w-xl"
+                className="text-lg text-on-surface leading-relaxed max-w-xl text-pretty"
                 data-tina-field={tinaFields?.subheadline}
               >
                 {subheadline}
@@ -94,12 +94,9 @@ export function HeroBrainMask({
           )}
 
           {/* Trust bar */}
-          <div className="border-l-4 border-outline-variant pl-6 flex flex-col gap-2">
+          <div className="border-l-4 border-outline-variant pl-5 flex flex-col gap-1.5">
             <TrustAvatars />
-            <p className="text-2xl font-medium text-on-surface">
-              3,200+ Patients
-            </p>
-            <p className="text-xl text-outline">Trust Us</p>
+            <p className="text-sm text-on-surface">Trusted by <span className="font-semibold">3,200+</span> patients and families</p>
           </div>
         </div>
 

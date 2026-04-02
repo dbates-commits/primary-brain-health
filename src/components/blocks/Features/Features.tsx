@@ -103,13 +103,14 @@ export function Features({
   // "How It Works" - 4-column timeline layout
   if (columns === "4" && variant === "grid") {
     return (
-      <section className="bg-surface-container-low py-24 md:py-32 px-8 md:px-16" id="how-it-works">
+      <section className="bg-surface-container-low py-24 md:py-32 px-8 md:px-16" id="how-it-works" data-scroll-reveal data-scroll-stagger="110">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-2xl">
               {headline && (
                 <h2
-                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6"
+                  data-scroll-item
+                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6 text-balance"
                   data-tina-field={tinaFields?.headline}
                 >
                   {headline}
@@ -117,7 +118,8 @@ export function Features({
               )}
               {subheadline && (
                 <p
-                  className="text-on-surface-variant text-lg"
+                  data-scroll-item
+                  className="text-on-surface-variant text-lg text-pretty"
                   data-tina-field={tinaFields?.subheadline}
                 >
                   {subheadline}
@@ -129,7 +131,7 @@ export function Features({
             {/* Timeline line */}
             <div className="hidden md:block absolute top-10 left-0 w-full h-px bg-outline-variant/30 z-0" />
             {items.map((item, index) => (
-              <div key={index} className="relative z-10">
+              <div key={index} data-scroll-item className="relative z-10">
                 <div className="w-20 h-20 bg-surface-container-lowest rounded-full flex items-center justify-center mb-8 border-4 border-surface-container-low shadow-sm">
                   {item.icon && (
                     <FeatureIcon
@@ -142,14 +144,14 @@ export function Features({
                   Step {index + 1}
                 </div>
                 <h4
-                  className="text-xl font-bold text-primary mb-3"
+                  className="text-xl font-bold text-primary mb-3 text-balance"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
                 </h4>
                 {item.description && (
                   <p
-                    className="text-on-surface-variant"
+                    className="text-on-surface-variant text-pretty"
                     data-tina-field={getItemField(index, "description")}
                   >
                     {item.description}
@@ -170,10 +172,10 @@ export function Features({
     headline?.toLowerCase().includes("why us")
   ) {
     return (
-      <section className="py-24 px-8 md:px-16" id="why-us">
+      <section className="py-24 px-8 md:px-16" id="why-us" data-scroll-reveal>
         <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-12 md:gap-24 opacity-80">
           {items.map((item, index) => (
-            <div key={index} className="flex items-center gap-4">
+            <div key={index} data-scroll-item className="flex items-center gap-4">
               {item.icon && (
                 <FeatureIcon
                   name={item.icon}
@@ -196,13 +198,14 @@ export function Features({
   // "Who It's For" - card grid (default grid variant)
   if (variant === "grid") {
     return (
-      <section className="py-24 md:py-32 px-8 md:px-16 neural-texture" id="who-it-is-for">
+      <section className="py-24 md:py-32 px-8 md:px-16 neural-texture" id="who-it-is-for" data-scroll-reveal>
         <div className="max-w-7xl mx-auto">
           {(headline || subheadline) && (
             <div className="text-center mb-16">
               {headline && (
                 <h2
-                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6"
+                  data-scroll-item
+                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6 text-balance"
                   data-tina-field={tinaFields?.headline}
                 >
                   {headline}
@@ -210,7 +213,8 @@ export function Features({
               )}
               {subheadline && (
                 <p
-                  className="text-on-surface-variant text-lg max-w-2xl mx-auto"
+                  data-scroll-item
+                  className="text-on-surface-variant text-lg max-w-2xl mx-auto text-pretty"
                   data-tina-field={tinaFields?.subheadline}
                 >
                   {subheadline}
@@ -222,6 +226,7 @@ export function Features({
             {items.map((item, index) => (
               <div
                 key={index}
+                data-scroll-item
                 className="bg-surface-container-low p-10 rounded-xl transition-all hover:-translate-y-2 group"
               >
                 {item.icon && (
@@ -233,14 +238,14 @@ export function Features({
                   </div>
                 )}
                 <h3
-                  className="text-2xl font-bold font-headline text-primary mb-4"
+                  className="text-2xl font-bold font-headline text-primary mb-4 text-balance"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
                 </h3>
                 {item.description && (
                   <p
-                    className="text-on-surface-variant leading-relaxed"
+                    className="text-on-surface-variant leading-relaxed text-pretty"
                     data-tina-field={getItemField(index, "description")}
                   >
                     {item.description}
