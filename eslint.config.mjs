@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Tina CMS generated/config files
+    "tina/__generated__/**",
+    "tina/config.ts",
   ]),
 ]);
 
