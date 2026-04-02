@@ -127,9 +127,9 @@ export function Features({
               )}
             </div>
           </div>
-          <div className="grid md:grid-cols-4 gap-4 relative">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 relative">
             {/* Timeline line */}
-            <div className="hidden md:block absolute top-10 left-0 w-full h-px bg-outline-variant/30 z-0" />
+            <div className="hidden lg:block absolute top-10 left-0 w-full h-px bg-outline-variant/30 z-0" />
             {items.map((item, index) => (
               <div key={index} data-scroll-item className="relative z-10">
                 <div className="w-20 h-20 bg-surface-container-lowest rounded-full flex items-center justify-center mb-8 border-4 border-surface-container-low shadow-sm">

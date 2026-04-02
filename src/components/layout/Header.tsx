@@ -55,7 +55,7 @@ export function Header() {
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]">
-      <div className="flex justify-between items-center h-20 px-8 md:px-16 max-w-[1400px] mx-auto">
+      <div className="flex justify-between items-center h-20 px-8 lg:px-16 max-w-[1400px] mx-auto">
         {/* Logo */}
         <a
           href="#"
@@ -69,7 +69,7 @@ export function Header() {
         </a>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2">
           {nav.map((item) => (
             <a
               key={item.link}
@@ -89,14 +89,14 @@ export function Header() {
         {/* CTA Button */}
         <a
           href="#intake"
-          className="hidden md:inline-flex bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold active:scale-90 transition-transform duration-200"
+          className="hidden lg:inline-flex bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold active:scale-90 transition-transform duration-200"
         >
           Book a Consultation
         </a>
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2 text-primary"
+          className="lg:hidden p-2 text-primary"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -126,34 +126,41 @@ export function Header() {
       </div>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-surface/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
-          <div className="flex flex-col gap-4">
-            {nav.map((item) => (
+      <div
+        className={cn(
+          "lg:hidden grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
+          mobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="bg-surface/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
+            <div className="flex flex-col gap-4">
+              {nav.map((item) => (
+                <a
+                  key={item.link}
+                  href={item.link}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "font-headline text-base font-semibold py-2",
+                    activeHash === item.link
+                      ? "text-secondary"
+                      : "text-primary/70"
+                  )}
+                >
+                  {item.label}
+                </a>
+              ))}
               <a
-                key={item.link}
-                href={item.link}
+                href="#intake"
                 onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "font-headline text-base font-semibold py-2",
-                  activeHash === item.link
-                    ? "text-secondary"
-                    : "text-primary/70"
-                )}
+                className="bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold text-center mt-2"
               >
-                {item.label}
+                Book a Consultation
               </a>
-            ))}
-            <a
-              href="#intake"
-              onClick={() => setMobileMenuOpen(false)}
-              className="bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold text-center mt-2"
-            >
-              Book a Consultation
-            </a>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }
