@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="bg-surface-container-low w-full rounded-t-[2.5rem]">
@@ -70,20 +72,20 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a
+                <Link
                   href="/terms"
                   className="text-primary/60 hover:text-secondary transition-colors text-sm"
                 >
                   Terms &amp; Conditions
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/privacy"
                   className="text-primary/60 hover:text-secondary transition-colors text-sm"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

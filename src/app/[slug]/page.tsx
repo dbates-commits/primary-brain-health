@@ -35,30 +35,31 @@ export default async function DynamicPage({ params }: PageProps) {
   const resolvedParams = await params;
   const relativePath = `${resolvedParams.slug}.mdx`;
 
+  let result: Awaited<ReturnType<typeof client.queries.page>>;
   try {
-    const result = await client.queries.page({ relativePath });
-
-    if (resolvedParams.slug === "home-2") {
-      return (
-        <div className={`${notoSerif.variable} [&_h1]:font-[family-name:var(--font-noto-serif)] [&_h2]:font-[family-name:var(--font-noto-serif)] [&_h3]:font-[family-name:var(--font-noto-serif)] [&_p]:font-[family-name:var(--font-noto-serif)] [&_h1]:font-light [&_h2]:font-light [&_h3]:font-light`}>
-          <PageClient
-            data={result.data}
-            query={result.query}
-            variables={result.variables}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <PageClient
-        data={result.data}
-        query={result.query}
-        variables={result.variables}
-      />
-    );
+    result = await client.queries.page({ relativePath });
   } catch (error) {
     console.error("Error fetching page:", error);
     notFound();
   }
+
+  if (resolvedParams.slug === "home-2") {
+    return (
+      <div className={`${notoSerif.variable} [&_h1]:font-[family-name:var(--font-noto-serif)] [&_h2]:font-[family-name:var(--font-noto-serif)] [&_h3]:font-[family-name:var(--font-noto-serif)] [&_p]:font-[family-name:var(--font-noto-serif)] [&_h1]:font-light [&_h2]:font-light [&_h3]:font-light`}>
+        <PageClient
+          data={result.data}
+          query={result.query}
+          variables={result.variables}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <PageClient
+      data={result.data}
+      query={result.query}
+      variables={result.variables}
+    />
+  );
 }

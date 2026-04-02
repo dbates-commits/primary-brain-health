@@ -51,7 +51,7 @@ export default function ProjectsPage() {
           <div className="text-center text-white">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Work</h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Projects we've built in the brain health and digital healthcare space
+              Projects we&apos;ve built in the brain health and digital healthcare space
             </p>
           </div>
         </Container>

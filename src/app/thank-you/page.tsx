@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Request Received | Primary Brain Health",
@@ -135,18 +136,18 @@ export default function ThankYouPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-4 relative z-10">
-                <a
+                <Link
                   href="/#about"
                   className="bg-secondary text-on-secondary px-8 py-4 rounded-xl font-headline font-bold text-center transition-all hover:brightness-110 shadow-lg"
                 >
                   Learn More
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/"
                   className="text-on-primary-container border border-on-primary-container/30 px-8 py-4 rounded-xl font-headline font-bold text-center hover:bg-white/5 transition-colors"
                 >
                   Return to Home
-                </a>
+                </Link>
               </div>
               {/* Decorative element */}
               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />

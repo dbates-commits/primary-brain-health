@@ -106,7 +106,7 @@ export function Testimonials({
             {items.map((item, index) => (
               <Card key={index} variant="elevated" className={styles.cardBg}>
                 <Icon name="quote" size="lg" className={cn("mb-4", styles.quoteIcon)} />
-                <p className={cn("text-lg mb-6", styles.quote)}>"{item.quote}"</p>
+                <p className={cn("text-lg mb-6", styles.quote)}>&ldquo;{item.quote}&rdquo;</p>
                 {item.rating && (
                   <div className="mb-4">
                     <StarRating
@@ -147,7 +147,7 @@ export function Testimonials({
           <div className="text-center">
             <Icon name="quote" size="xl" className={cn("mx-auto mb-6", styles.quoteIcon)} />
             <blockquote className={cn("text-2xl md:text-3xl font-medium mb-8", styles.quote)}>
-              "{item.quote}"
+              &ldquo;{item.quote}&rdquo;
             </blockquote>
             {item.rating && (
               <div className="flex justify-center mb-6">
@@ -198,7 +198,7 @@ export function Testimonials({
           <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
             {items.map((item, index) => (
               <Card key={index} variant="bordered" className={cn(styles.cardBg, "break-inside-avoid")}>
-                <p className={cn("text-base mb-4", styles.quote)}>"{item.quote}"</p>
+                <p className={cn("text-base mb-4", styles.quote)}>&ldquo;{item.quote}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   {item.avatar && (
                     <div className="relative w-10 h-10 rounded-full overflow-hidden">
@@ -241,7 +241,7 @@ export function Testimonials({
             {items.map((item, index) => (
               <Card key={index} variant="elevated" className={cn(styles.cardBg, "w-[380px] flex-shrink-0")}>
                 <Icon name="quote" size="lg" className={cn("mb-4", styles.quoteIcon)} />
-                <p className={cn("text-lg mb-6", styles.quote)}>"{item.quote}"</p>
+                <p className={cn("text-lg mb-6", styles.quote)}>&ldquo;{item.quote}&rdquo;</p>
                 {item.rating && (
                   <div className="mb-4">
                     <StarRating
