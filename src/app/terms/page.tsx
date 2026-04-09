@@ -15,7 +15,7 @@ export default function TermsPage() {
           <span className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4 block font-headline">
             Legal Documentation
           </span>
-          <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-primary tracking-tight mb-6">
+          <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-on-surface tracking-tight mb-6">
             Terms &amp; Conditions
           </h1>
           <div className="flex items-center gap-2 text-on-surface-variant text-sm">
@@ -38,7 +38,7 @@ export default function TermsPage() {
 
         {/* Content */}
         <section>
-          <h2 className="font-headline text-3xl font-bold text-primary">
+          <h2 className="font-headline text-3xl font-bold text-on-surface">
             1. Acceptance of Terms
           </h2>
           <p>
@@ -56,7 +56,7 @@ export default function TermsPage() {
             evolving protocols.
           </p>
 
-          <h2 className="font-headline text-3xl font-bold text-primary">
+          <h2 className="font-headline text-3xl font-bold text-on-surface">
             2. Use of Service
           </h2>
           <p>
@@ -80,7 +80,7 @@ export default function TermsPage() {
             </li>
           </ul>
 
-          <h2 className="font-headline text-3xl font-bold text-primary">
+          <h2 className="font-headline text-3xl font-bold text-on-surface">
             3. User Responsibilities
           </h2>
           <p>
@@ -97,7 +97,7 @@ export default function TermsPage() {
             of the Cognitive Sanctuary interface is strictly prohibited.
           </p>
 
-          <h2 className="font-headline text-3xl font-bold text-primary">
+          <h2 className="font-headline text-3xl font-bold text-on-surface">
             4. Limitation of Liability
           </h2>
           <p>
@@ -112,7 +112,7 @@ export default function TermsPage() {
             for the specific consultation or service cycle in question.
           </p>
 
-          <h2 className="font-headline text-3xl font-bold text-primary">
+          <h2 className="font-headline text-3xl font-bold text-on-surface">
             5. Governing Law
           </h2>
           <p>

@@ -3,6 +3,7 @@
 import { Container } from "@/components/shared/Container";
 import { Card } from "@/components/shared/Card";
 import { Icon } from "@/components/shared/Icon";
+import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -93,9 +94,9 @@ export function Testimonials({
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
               {headline && (
-                <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+                <Heading size="md" className={cn("mb-4", styles.headline)}>
                   {headline}
-                </h2>
+                </Heading>
               )}
               {subheadline && (
                 <p className={cn("text-lg", styles.subheadline)}>{subheadline}</p>
@@ -186,9 +187,9 @@ export function Testimonials({
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
               {headline && (
-                <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+                <Heading size="md" className={cn("mb-4", styles.headline)}>
                   {headline}
-                </h2>
+                </Heading>
               )}
               {subheadline && (
                 <p className={cn("text-lg", styles.subheadline)}>{subheadline}</p>
@@ -227,9 +228,9 @@ export function Testimonials({
         {(headline || subheadline) && (
           <div className="text-center max-w-3xl mx-auto mb-16">
             {headline && (
-              <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+              <Heading size="md" className={cn("mb-4", styles.headline)}>
                 {headline}
-              </h2>
+              </Heading>
             )}
             {subheadline && (
               <p className={cn("text-lg", styles.subheadline)}>{subheadline}</p>

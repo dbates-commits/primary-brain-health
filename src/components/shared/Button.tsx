@@ -26,7 +26,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center font-headline font-bold rounded-full transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const sizeStyles = {
     sm: "px-4 py-2 text-sm",
@@ -37,26 +37,26 @@ export function Button({
   const variantColorStyles = {
     solid: {
       primary:
-        "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500",
+        "bg-primary text-on-primary hover:brightness-110 focus:ring-primary",
       secondary:
-        "bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-500",
-      white: "bg-white text-gray-900 hover:bg-gray-100 focus:ring-gray-300",
-      dark: "bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-700",
+        "bg-secondary text-on-secondary hover:brightness-110 focus:ring-secondary",
+      white: "bg-white text-on-surface hover:bg-surface-container-low focus:ring-outline",
+      dark: "bg-on-surface text-surface hover:brightness-125 focus:ring-on-surface",
     },
     outline: {
       primary:
-        "border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 focus:ring-indigo-500",
+        "border-2 border-primary text-primary hover:bg-primary/5 focus:ring-primary",
       secondary:
-        "border-2 border-gray-800 text-gray-800 hover:bg-gray-50 focus:ring-gray-500",
+        "border-2 border-secondary text-secondary hover:bg-secondary/5 focus:ring-secondary",
       white:
         "border-2 border-white text-white hover:bg-white/10 focus:ring-white",
-      dark: "border-2 border-gray-900 text-gray-900 hover:bg-gray-100 focus:ring-gray-700",
+      dark: "border-2 border-on-surface text-on-surface hover:bg-on-surface/5 focus:ring-on-surface",
     },
     ghost: {
-      primary: "text-indigo-600 hover:bg-indigo-50 focus:ring-indigo-500",
-      secondary: "text-gray-800 hover:bg-gray-50 focus:ring-gray-500",
+      primary: "text-primary hover:bg-primary/5 focus:ring-primary",
+      secondary: "text-secondary hover:bg-secondary/5 focus:ring-secondary",
       white: "text-white hover:bg-white/10 focus:ring-white",
-      dark: "text-gray-900 hover:bg-gray-100 focus:ring-gray-700",
+      dark: "text-on-surface hover:bg-on-surface/5 focus:ring-on-surface",
     },
   };
 

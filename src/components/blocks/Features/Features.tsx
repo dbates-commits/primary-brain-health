@@ -1,6 +1,7 @@
 "use client";
 
 import { tinaField } from "tinacms/dist/react";
+import { Heading } from "@/components/shared/Heading";
 
 interface FeatureItem {
   title: string;
@@ -108,13 +109,14 @@ export function Features({
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-2xl">
               {headline && (
-                <h2
+                <Heading
+                  size="lg"
                   data-scroll-item
-                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6 text-balance"
+                  className="mb-6 text-balance"
                   data-tina-field={tinaFields?.headline}
                 >
                   {headline}
-                </h2>
+                </Heading>
               )}
               {subheadline && (
                 <p
@@ -144,7 +146,7 @@ export function Features({
                   Step {index + 1}
                 </div>
                 <h4
-                  className="text-xl font-bold text-primary mb-3 text-balance"
+                  className="text-xl font-bold text-on-surface mb-3 text-balance"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
@@ -179,11 +181,11 @@ export function Features({
               {item.icon && (
                 <FeatureIcon
                   name={item.icon}
-                  className="w-8 h-8 text-primary"
+                  className="w-8 h-8 text-on-surface"
                 />
               )}
               <span
-                className="text-primary font-headline font-bold text-lg tracking-tight"
+                className="text-on-surface font-headline font-bold text-lg tracking-tight"
                 data-tina-field={getItemField(index, "title")}
               >
                 {item.title}
@@ -203,13 +205,14 @@ export function Features({
           {(headline || subheadline) && (
             <div className="text-center mb-16">
               {headline && (
-                <h2
+                <Heading
+                  size="lg"
                   data-scroll-item
-                  className="text-4xl md:text-5xl font-bold font-headline text-primary mb-6 text-balance"
+                  className="mb-6 text-balance"
                   data-tina-field={tinaFields?.headline}
                 >
                   {headline}
-                </h2>
+                </Heading>
               )}
               {subheadline && (
                 <p
@@ -237,12 +240,14 @@ export function Features({
                     />
                   </div>
                 )}
-                <h3
-                  className="text-2xl font-bold font-headline text-primary mb-4 text-balance"
+                <Heading
+                  as="h3"
+                  size="sm"
+                  className="mb-4 text-balance"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
-                </h3>
+                </Heading>
                 {item.description && (
                   <p
                     className="text-on-surface-variant leading-relaxed text-pretty"

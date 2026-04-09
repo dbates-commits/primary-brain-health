@@ -22,7 +22,7 @@ export default function ThankYouPage() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-primary tracking-tight mb-6 leading-[1.1] font-headline">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-on-surface tracking-tight mb-6 leading-[1.1] font-headline">
             Thank You for Reaching Out
           </h1>
           <p className="text-xl md:text-2xl text-on-surface-variant leading-relaxed max-w-2xl mx-auto">
@@ -47,7 +47,7 @@ export default function ThankYouPage() {
                 <p className="text-secondary font-bold text-sm uppercase tracking-[0.2em] mb-3 font-headline">
                   Restorative Care
                 </p>
-                <h3 className="text-3xl font-bold text-primary mb-3 font-headline leading-tight">
+                <h3 className="text-3xl font-bold text-on-surface mb-3 font-headline leading-tight">
                   A focused approach to your vitality.
                 </h3>
                 <p className="text-on-surface-variant text-lg leading-relaxed">
@@ -62,7 +62,7 @@ export default function ThankYouPage() {
           <div className="lg:col-span-5 flex flex-col gap-8">
             {/* Next Steps Card */}
             <div className="bg-surface-container-low p-10 rounded-[2rem] flex-grow shadow-sm border border-outline-variant/10">
-              <h2 className="text-3xl font-bold text-primary mb-8 flex items-center gap-3 font-headline">
+              <h2 className="text-3xl font-bold text-on-surface mb-8 flex items-center gap-3 font-headline">
                 <svg
                   className="w-8 h-8 text-secondary"
                   fill="none"
@@ -84,7 +84,7 @@ export default function ThankYouPage() {
                     1
                   </div>
                   <div>
-                    <p className="font-bold text-primary text-lg mb-1 font-headline">
+                    <p className="font-bold text-on-surface text-lg mb-1 font-headline">
                       Initial Review
                     </p>
                     <p className="text-on-surface-variant text-base leading-relaxed">
@@ -98,7 +98,7 @@ export default function ThankYouPage() {
                     2
                   </div>
                   <div>
-                    <p className="font-bold text-primary text-lg mb-1 font-headline">
+                    <p className="font-bold text-on-surface text-lg mb-1 font-headline">
                       Personal Outreach
                     </p>
                     <p className="text-on-surface-variant text-base leading-relaxed">
@@ -112,7 +112,7 @@ export default function ThankYouPage() {
                     3
                   </div>
                   <div>
-                    <p className="font-bold text-primary text-lg mb-1 font-headline">
+                    <p className="font-bold text-on-surface text-lg mb-1 font-headline">
                       Scheduling
                     </p>
                     <p className="text-on-surface-variant text-base leading-relaxed">

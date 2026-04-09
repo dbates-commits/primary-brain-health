@@ -5,7 +5,6 @@ export const heroBlock: Template = {
   label: "Hero Section",
   ui: {
     defaultItem: {
-      variant: "centered",
       theme: "light",
       headline: "Build Something Amazing",
       subheadline: "A powerful platform to bring your ideas to life",
@@ -13,24 +12,10 @@ export const heroBlock: Template = {
       primaryButtonLink: "#",
     },
     itemProps: (item) => ({
-      label: `Hero - ${item?.variant || "centered"}`,
+      label: `Hero - ${item?.headline || "Untitled"}`,
     }),
   },
   fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "centered", label: "Centered" },
-        { value: "split", label: "Split (Image Right)" },
-        { value: "splitReverse", label: "Split (Image Left)" },
-        { value: "fullImage", label: "Full Image Overlay" },
-        { value: "brainMask", label: "Brain Shape Mask" },
-        { value: "video", label: "Video Background" },
-        { value: "gradient", label: "Gradient Background" },
-      ],
-    },
     {
       name: "theme",
       label: "Color Theme",
@@ -59,19 +44,7 @@ export const heroBlock: Template = {
       name: "image",
       label: "Image",
       type: "image",
-      description: "Used for split layouts",
-    },
-    {
-      name: "videoUrl",
-      label: "Video URL",
-      type: "string",
-      description: "YouTube or Vimeo URL for video background",
-    },
-    {
-      name: "backgroundImage",
-      label: "Background Image",
-      type: "image",
-      description: "Optional background image",
+      description: "Poster/fallback image for the hero video",
     },
     {
       name: "primaryButtonText",
@@ -82,34 +55,6 @@ export const heroBlock: Template = {
       name: "primaryButtonLink",
       label: "Primary Button Link",
       type: "string",
-    },
-    {
-      name: "secondaryButtonText",
-      label: "Secondary Button Text",
-      type: "string",
-    },
-    {
-      name: "secondaryButtonLink",
-      label: "Secondary Button Link",
-      type: "string",
-    },
-    {
-      name: "badge",
-      label: "Badge Text",
-      type: "string",
-      description: "Optional badge above headline",
-    },
-    {
-      name: "gradientFrom",
-      label: "Gradient From Color",
-      type: "string",
-      description: "CSS color for gradient start (e.g., #6366f1)",
-    },
-    {
-      name: "gradientTo",
-      label: "Gradient To Color",
-      type: "string",
-      description: "CSS color for gradient end (e.g., #8b5cf6)",
     },
   ],
 };

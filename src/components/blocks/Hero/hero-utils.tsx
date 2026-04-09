@@ -3,26 +3,16 @@ import type { CSSProperties } from "react";
 export interface TinaFieldsMap {
   headline?: string;
   subheadline?: string;
-  badge?: string;
   primaryButtonText?: string;
-  secondaryButtonText?: string;
 }
 
 export interface HeroProps {
-  variant?: "centered" | "split" | "splitReverse" | "fullImage" | "brainMask" | "neuralSplit" | "video" | "gradient";
   theme?: "light" | "dark" | "primary" | "secondary";
   headline?: string;
   subheadline?: string;
   image?: string;
-  videoUrl?: string;
-  backgroundImage?: string;
   primaryButtonText?: string;
   primaryButtonLink?: string;
-  secondaryButtonText?: string;
-  secondaryButtonLink?: string;
-  badge?: string;
-  gradientFrom?: string;
-  gradientTo?: string;
   tinaFields?: TinaFieldsMap;
 }
 

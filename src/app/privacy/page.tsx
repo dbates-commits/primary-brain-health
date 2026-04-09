@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
         <span className="text-on-surface-variant text-sm tracking-widest uppercase mb-4 block">
           Legal Documentation
         </span>
-        <h1 className="text-4xl md:text-5xl font-headline font-extrabold text-primary tracking-tight mb-6">
+        <h1 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface tracking-tight mb-6">
           Privacy Policy
         </h1>
         <div className="flex items-center gap-2 text-on-surface-variant font-medium">
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
       <div className="space-y-12 [&_p]:text-lg [&_p]:leading-[2] [&_p]:text-primary/85 [&_li]:text-lg [&_li]:leading-[1.8] [&_li]:text-primary/85">
         {/* Introduction */}
         <section>
-          <h2 className="text-2xl font-headline font-bold text-primary mb-6">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-6">
             Introduction
           </h2>
           <p>
@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
 
         {/* Information Collection */}
         <section>
-          <h2 className="text-2xl font-headline font-bold text-primary mb-6">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-6">
             Information Collection
           </h2>
           <p className="mb-6">
@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage() {
 
         {/* Data Usage */}
         <section>
-          <h2 className="text-2xl font-headline font-bold text-primary mb-6">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-6">
             Data Usage
           </h2>
           <p className="mb-6">
@@ -105,7 +105,7 @@ export default function PrivacyPolicyPage() {
 
         {/* Privacy Rights */}
         <section>
-          <h2 className="text-2xl font-headline font-bold text-primary mb-6">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-6">
             Your Privacy Rights
           </h2>
           <p className="mb-6">
@@ -122,7 +122,7 @@ export default function PrivacyPolicyPage() {
 
         {/* Cookies */}
         <section>
-          <h2 className="text-2xl font-headline font-bold text-primary mb-6">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-6">
             Cookies and Technical Tracking
           </h2>
           <p>
@@ -136,7 +136,7 @@ export default function PrivacyPolicyPage() {
 
         {/* Third-Party */}
         <section>
-          <h2 className="text-2xl font-headline font-bold text-primary mb-6">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-6">
             Third-Party Disclosure
           </h2>
           <p>
@@ -151,7 +151,7 @@ export default function PrivacyPolicyPage() {
         <section className="pt-12 border-t border-outline-variant/30">
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h3 className="text-xl font-headline font-bold text-primary mb-4">
+              <h3 className="text-xl font-headline font-bold text-on-surface mb-4">
                 Legal Contact
               </h3>
               <div className="space-y-1 text-on-surface-variant">
@@ -163,7 +163,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-headline font-bold text-primary mb-4">
+              <h3 className="text-xl font-headline font-bold text-on-surface mb-4">
                 Electronic Inquiry
               </h3>
               <p className="!text-base text-on-surface-variant mb-2">

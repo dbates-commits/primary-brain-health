@@ -38,17 +38,12 @@ Pages are composed of blocks defined in `tina/blocks/`. Each block has a Tina sc
 
 Block components receive a `variant` prop for layout variations and `tinaFields` for visual editing integration via `data-tina-field`.
 
-### Hero Components
+### Hero Component
 
-Heroes are split into separate files under `src/components/blocks/Hero/`:
-- `Hero.tsx` — thin router that picks component by variant
-- `HeroSplit.tsx` — side-by-side layout (image + text)
-- `HeroFullImage.tsx` — full-bleed image with overlay text
-- `HeroBrainMask.tsx` — brain-shaped pill column image mask
-- `HeroCentered.tsx` — centered text layout
+The hero lives under `src/components/blocks/Hero/`:
+- `Hero.tsx` — entry point, renders `HeroFullImage`
+- `HeroFullImage.tsx` — full-bleed video hero with overlay text
 - `hero-utils.tsx` — shared types (`HeroProps`), constants (`TRUST_AVATARS`), and helpers (`highlightBrainHealth`)
-
-Three comparison pages exist: `/home-1` (split), `/home-2` (fullImage), `/home-3` (brainMask).
 
 ### Design System
 

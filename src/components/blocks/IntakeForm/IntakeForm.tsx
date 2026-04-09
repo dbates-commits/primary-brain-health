@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/shared/Button";
+import { Heading } from "@/components/shared/Heading";
 
 export interface IntakeFormProps {
   headline?: string;
@@ -22,6 +24,18 @@ export function IntakeForm({
 }: IntakeFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+
+  const currentYear = new Date().getFullYear();
+  const birthYears = Array.from({ length: currentYear - 1919 }, (_, i) => currentYear - i);
+
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+    let formatted = "";
+    if (digits.length > 0) formatted = `(${digits.slice(0, 3)}`;
+    if (digits.length >= 4) formatted += `) ${digits.slice(3, 6)}`;
+    if (digits.length >= 7) formatted += `-${digits.slice(6)}`;
+    e.target.value = formatted;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,7 +104,7 @@ export function IntakeForm({
             </p>
           )}
           <div data-scroll-item className="p-8 bg-primary-container rounded-xl">
-            <h4 className="font-headline font-bold text-lg mb-4 flex items-center gap-2">
+            <Heading as="h4" size="sm" className="mb-4 flex items-center gap-2">
               <svg
                 className="w-5 h-5 text-secondary-fixed"
                 fill="none"
@@ -105,7 +119,7 @@ export function IntakeForm({
                 />
               </svg>
               What to expect:
-            </h4>
+            </Heading>
             <ul className="space-y-4 text-on-primary-container">
               <li className="flex items-start gap-3">
                 <svg
@@ -211,6 +225,7 @@ export function IntakeForm({
                   type="tel"
                   required
                   placeholder="(555) 000-0000"
+                  onChange={handlePhoneInput}
                   className={inputClasses}
                 />
               </div>
@@ -221,16 +236,19 @@ export function IntakeForm({
                 >
                   Birth Year
                 </label>
-                <input
+                <select
                   id="birthYear"
                   name="birthYear"
-                  type="number"
-                  min="1920"
-                  max="2010"
                   required
-                  placeholder="1970"
-                  className={inputClasses}
-                />
+                  className={cn(inputClasses, "appearance-none")}
+                >
+                  <option value="">Select year</option>
+                  {birthYears.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -316,13 +334,15 @@ export function IntakeForm({
               />
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={submitting}
-              className="w-full bg-secondary text-on-secondary py-5 rounded-xl font-headline font-bold text-lg hover:brightness-110 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="solid"
+              color="secondary"
+              size="lg"
+              className="w-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Submitting..." : buttonText}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

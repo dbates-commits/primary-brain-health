@@ -2,6 +2,7 @@
 
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/shared/Button";
+import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -76,9 +77,9 @@ export function CallToAction({
         <Container size="narrow">
           <div className="text-center">
             {headline && (
-              <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+              <Heading size="md" className={cn("mb-4", styles.headline)}>
                 {headline}
-              </h2>
+              </Heading>
             )}
             {description && (
               <p className={cn("text-lg mb-8 max-w-2xl mx-auto", styles.description)}>
@@ -120,9 +121,9 @@ export function CallToAction({
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               {headline && (
-                <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+                <Heading size="md" className={cn("mb-4", styles.headline)}>
                   {headline}
-                </h2>
+                </Heading>
               )}
               {description && (
                 <p className={cn("text-lg mb-8", styles.description)}>{description}</p>
@@ -167,9 +168,9 @@ export function CallToAction({
         <Container size="narrow">
           <div className="text-center">
             {headline && (
-              <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+              <Heading size="md" className={cn("mb-4", styles.headline)}>
                 {headline}
-              </h2>
+              </Heading>
             )}
             {description && (
               <p className={cn("text-lg mb-8", styles.description)}>{description}</p>
@@ -201,9 +202,9 @@ export function CallToAction({
       <Container size="narrow">
         <div className="text-center">
           {headline && (
-            <h2 className={cn("text-3xl md:text-4xl font-bold mb-4", styles.headline)}>
+            <Heading size="md" className={cn("mb-4", styles.headline)}>
               {headline}
-            </h2>
+            </Heading>
           )}
           {description && (
             <p className={cn("text-lg mb-8 max-w-2xl mx-auto", styles.description)}>

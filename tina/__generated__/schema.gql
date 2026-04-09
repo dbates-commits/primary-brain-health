@@ -106,20 +106,12 @@ type Collection {
 union DocumentNode = Page | Post | Project | Author | Testimonial | GlobalCta | Settings | Folder
 
 type PageBlocksHero {
-  variant: String
   theme: String
   headline: String
   subheadline: String
   image: String
-  videoUrl: String
-  backgroundImage: String
   primaryButtonText: String
   primaryButtonLink: String
-  secondaryButtonText: String
-  secondaryButtonLink: String
-  badge: String
-  gradientFrom: String
-  gradientTo: String
 }
 
 type PageBlocksFeaturesItems {
@@ -345,20 +337,12 @@ input ImageFilter {
 }
 
 input PageBlocksHeroFilter {
-  variant: StringFilter
   theme: StringFilter
   headline: StringFilter
   subheadline: StringFilter
   image: ImageFilter
-  videoUrl: StringFilter
-  backgroundImage: ImageFilter
   primaryButtonText: StringFilter
   primaryButtonLink: StringFilter
-  secondaryButtonText: StringFilter
-  secondaryButtonLink: StringFilter
-  badge: StringFilter
-  gradientFrom: StringFilter
-  gradientTo: StringFilter
 }
 
 input PageBlocksFeaturesItemsFilter {
@@ -1122,20 +1106,12 @@ input DocumentMutation {
 }
 
 input PageBlocksHeroMutation {
-  variant: String
   theme: String
   headline: String
   subheadline: String
   image: String
-  videoUrl: String
-  backgroundImage: String
   primaryButtonText: String
   primaryButtonLink: String
-  secondaryButtonText: String
-  secondaryButtonLink: String
-  badge: String
-  gradientFrom: String
-  gradientTo: String
 }
 
 input PageBlocksFeaturesItemsMutation {

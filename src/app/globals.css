@@ -1,22 +1,55 @@
 @import "tailwindcss";
 
+/* Interstate — self-hosted headline font */
+@font-face {
+  font-family: "Interstate";
+  src: url("/fonts/Interstate-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Interstate";
+  src: url("/fonts/Interstate-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Interstate";
+  src: url("/fonts/Interstate-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Interstate";
+  src: url("/fonts/Interstate-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Design System: "The Cognitive Sanctuary" */
-  /* Primary palette */
-  --color-primary: #041632;
-  --color-primary-container: #1b2b48;
+  /* Primary palette — Dark Teal per identity guide */
+  --color-primary: #006e8a;
+  --color-primary-container: #004d61;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #8393b5;
-  --color-primary-fixed: #d7e2ff;
-  --color-primary-fixed-dim: #b7c7eb;
+  --color-on-primary-container: #a3d4e4;
+  --color-primary-fixed: #d1eaf2;
+  --color-primary-fixed-dim: #8ec7da;
 
-  /* Secondary palette */
-  --color-secondary: #446558;
-  --color-secondary-container: #c6ebda;
+  /* Secondary palette — Aqua accent per identity guide */
+  --color-secondary: #009ea1;
+  --color-secondary-container: #b3e8e9;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #4a6b5e;
-  --color-secondary-fixed: #c6ebda;
-  --color-secondary-fixed-dim: #aacebe;
+  --color-on-secondary-container: #007577;
+  --color-secondary-fixed: #b3e8e9;
+  --color-secondary-fixed-dim: #80d6d8;
 
   /* Surface hierarchy */
   --color-surface: #fbf9f4;
@@ -44,14 +77,14 @@
   /* Inverse */
   --color-inverse-surface: #30312e;
   --color-inverse-on-surface: #f2f1ec;
-  --color-inverse-primary: #b7c7eb;
+  --color-inverse-primary: #8ec7da;
 
   /* Surface tint */
-  --color-surface-tint: #4f5e7e;
+  --color-surface-tint: #006e8a;
 }
 
 @theme inline {
-  --font-headline: "Manrope", sans-serif;
+  --font-headline: "Interstate", "Manrope", sans-serif;
   --font-body: "Inter", sans-serif;
 
   --color-primary: var(--color-primary);

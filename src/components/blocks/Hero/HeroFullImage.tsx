@@ -14,7 +14,7 @@ export function HeroFullImage({
   tinaFields,
 }: HeroProps) {
   return (
-    <section className="relative overflow-hidden min-h-[520px] lg:min-h-[640px] mx-4 lg:mx-6 rounded-3xl">
+    <section className="relative overflow-hidden min-h-[520px] lg:min-h-[640px] mx-4 lg:mx-6 mt-8 mb-8 max-w-[1800px] 2xl:mx-auto rounded-3xl">
 
       {/* Background video — fills edge to edge, up behind the header */}
       <video
@@ -37,13 +37,12 @@ export function HeroFullImage({
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       {/* Content — pt-20 clears the fixed header */}
-      <div className="relative z-10 flex flex-col justify-end h-full min-h-[520px] lg:min-h-[640px] p-5 lg:p-12 pt-20 lg:pt-24 pb-10 lg:pb-14">
+      <div className="relative z-10 flex flex-col justify-end h-full min-h-[520px] lg:min-h-[640px] px-0 pt-20 lg:pt-24 pb-10 lg:pb-14 max-w-7xl mx-auto w-full">
 
         {/* Mobile headline */}
         <div className="lg:hidden mb-auto animate-fade-up" style={{ animationDelay: "150ms" }}>
           <h1
-            className="text-3xl font-light text-white leading-[1.15] text-pretty"
-            style={{ fontFamily: "var(--font-noto-serif, 'Georgia', serif)", fontWeight: 300 }}
+            className="text-3xl font-bold text-white leading-[1.15] text-pretty font-headline"
             data-tina-field={tinaFields?.headline}
           >
             {headline ? highlightBrainHealth(headline, "text-secondary-container") : null}
@@ -58,8 +57,7 @@ export function HeroFullImage({
             style={{ animationDelay: "150ms" }}
           >
             <h1
-              className="text-5xl xl:text-6xl font-light text-white leading-[1.1] text-pretty"
-              style={{ fontFamily: "var(--font-noto-serif, 'Georgia', serif)", fontWeight: 300 }}
+              className="text-5xl xl:text-6xl font-bold text-white leading-[1.1] text-pretty font-headline"
               data-tina-field={tinaFields?.headline}
             >
               {headline ? highlightBrainHealth(headline, "text-secondary-container") : null}

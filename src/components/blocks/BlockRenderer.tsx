@@ -54,29 +54,16 @@ export function BlockRenderer({
           case "PageBlocksHero":
             content = (
               <Hero
-                variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
                 subheadline={block.subheadline}
                 image={block.image}
-                videoUrl={block.videoUrl}
-                backgroundImage={block.backgroundImage}
                 primaryButtonText={block.primaryButtonText}
                 primaryButtonLink={block.primaryButtonLink}
-                secondaryButtonText={block.secondaryButtonText}
-                secondaryButtonLink={block.secondaryButtonLink}
-                badge={block.badge}
-                gradientFrom={block.gradientFrom}
-                gradientTo={block.gradientTo}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),
                   subheadline: getFieldPath(index, "subheadline"),
-                  badge: getFieldPath(index, "badge"),
                   primaryButtonText: getFieldPath(index, "primaryButtonText"),
-                  secondaryButtonText: getFieldPath(
-                    index,
-                    "secondaryButtonText"
-                  ),
                 }}
               />
             );

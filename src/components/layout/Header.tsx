@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/shared/Button";
 
 interface NavItem {
   label: string;
@@ -11,6 +13,14 @@ interface NavItem {
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
+  const pathname = usePathname();
+
+  function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
 
   const nav: NavItem[] = [
     { label: "About", link: "#about" },
@@ -58,14 +68,18 @@ export function Header() {
       <div className="flex justify-between items-center h-20 px-8 lg:px-16 max-w-[1400px] mx-auto">
         {/* Logo */}
         <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          className="text-xl font-bold text-primary tracking-tight font-headline"
+          href="/"
+          onClick={handleLogoClick}
+          className="flex items-center gap-2"
         >
-          Primary Brain Health
+          <img
+            src="/images/pbh-logomark.svg"
+            alt="Primary Brain Health"
+            className="h-10 w-auto"
+          />
+          <span className="text-lg font-bold tracking-[0.12em] uppercase font-headline text-primary hidden sm:inline">
+            Primary Brain Health
+          </span>
         </a>
 
         {/* Desktop Navigation */}
@@ -75,10 +89,10 @@ export function Header() {
               key={item.link}
               href={item.link}
               className={cn(
-                "font-headline text-sm font-semibold tracking-tight px-4 py-2 transition-all",
+                "font-body text-base font-semibold tracking-tight px-4 py-2 transition-all",
                 activeHash === item.link
                   ? "text-secondary"
-                  : "text-primary/70 hover:text-primary"
+                  : "text-on-surface/70 hover:text-on-surface"
               )}
             >
               {item.label}
@@ -87,12 +101,9 @@ export function Header() {
         </div>
 
         {/* CTA Button */}
-        <a
-          href="#intake"
-          className="hidden lg:inline-flex bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold active:scale-90 transition-transform duration-200"
-        >
+        <Button href="#intake" variant="solid" color="primary" size="md" className="hidden lg:inline-flex">
           Book a Consultation
-        </a>
+        </Button>
 
         {/* Mobile Menu Button */}
         <button
@@ -141,22 +152,25 @@ export function Header() {
                   href={item.link}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "font-headline text-base font-semibold py-2",
+                    "font-body text-base font-semibold py-2",
                     activeHash === item.link
                       ? "text-secondary"
-                      : "text-primary/70"
+                      : "text-on-surface/70"
                   )}
                 >
                   {item.label}
                 </a>
               ))}
-              <a
+              <Button
                 href="#intake"
                 onClick={() => setMobileMenuOpen(false)}
-                className="bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold text-center mt-2"
+                variant="solid"
+                color="primary"
+                size="md"
+                className="text-center mt-2"
               >
                 Book a Consultation
-              </a>
+              </Button>
             </div>
           </div>
         </div>

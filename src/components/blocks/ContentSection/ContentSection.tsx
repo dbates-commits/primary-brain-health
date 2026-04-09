@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { TinaMarkdown, TinaMarkdownContent } from "tinacms/dist/rich-text";
+import { Heading } from "@/components/shared/Heading";
 
 export interface ContentSectionProps {
   variant?: "default" | "twoColumn" | "withSidebar";
@@ -31,19 +32,19 @@ export function ContentSection({
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
           {/* Left: subtitle + heading */}
           <div className="flex-1 flex flex-col gap-6">
-            <div data-scroll-item className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-error" />
-              <span className="font-body font-medium text-error tracking-wide uppercase text-lg md:text-2xl">
+            <div data-scroll-item>
+              <span className="font-body font-medium text-secondary tracking-wide uppercase text-lg md:text-2xl">
                 Our Philosophy
               </span>
             </div>
             {headline && (
-              <h2
+              <Heading
+                size="lg"
                 data-scroll-item
-                className="text-4xl md:text-5xl lg:text-[56px] font-semibold font-headline text-on-surface leading-[1.1] text-balance"
+                className="lg:text-[56px] leading-[1.1] text-balance"
               >
                 {headline}
-              </h2>
+              </Heading>
             )}
           </div>
 
@@ -74,9 +75,9 @@ export function ContentSection({
       <section className="bg-surface-container-lowest py-24 md:py-32 px-8 md:px-16">
         <div className="max-w-7xl mx-auto">
           {headline && (
-            <h2 className="text-4xl md:text-5xl font-bold font-headline text-primary mb-12 text-center text-balance">
+            <Heading size="lg" className="mb-12 text-center text-balance">
               {headline}
-            </h2>
+            </Heading>
           )}
           <div className="grid md:grid-cols-2 gap-12">
             <div className="prose prose-lg max-w-none text-on-surface-variant">
@@ -96,9 +97,9 @@ export function ContentSection({
       <section className={cn("py-24 md:py-32 px-8 md:px-16")}>
         <div className="max-w-7xl mx-auto">
           {headline && (
-            <h2 className="text-4xl md:text-5xl font-bold font-headline text-primary mb-12 text-balance">
+            <Heading size="lg" className="mb-12 text-balance">
               {headline}
-            </h2>
+            </Heading>
           )}
           <div className="grid md:grid-cols-3 gap-12">
             <div className="md:col-span-2 prose prose-lg max-w-none text-on-surface-variant">

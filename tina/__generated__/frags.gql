@@ -6,20 +6,12 @@ fragment PageParts on Page {
   blocks {
     __typename
     ... on PageBlocksHero {
-      variant
       theme
       headline
       subheadline
       image
-      videoUrl
-      backgroundImage
       primaryButtonText
       primaryButtonLink
-      secondaryButtonText
-      secondaryButtonLink
-      badge
-      gradientFrom
-      gradientTo
     }
     ... on PageBlocksFeatures {
       variant
