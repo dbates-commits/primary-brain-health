@@ -1,6 +1,7 @@
 "use client";
 
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Icon } from "@/components/shared/Icon";
 import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
@@ -84,7 +85,7 @@ export function Stats({
 
   if (variant === "counters") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -111,13 +112,13 @@ export function Stats({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "progress") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container size="narrow">
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -148,13 +149,13 @@ export function Stats({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "icons") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -184,13 +185,13 @@ export function Stats({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "cards") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -221,7 +222,7 @@ export function Stats({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 

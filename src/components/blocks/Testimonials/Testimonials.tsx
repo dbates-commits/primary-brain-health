@@ -1,6 +1,7 @@
 "use client";
 
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Card } from "@/components/shared/Card";
 import { Icon } from "@/components/shared/Icon";
 import { Heading } from "@/components/shared/Heading";
@@ -89,7 +90,7 @@ export function Testimonials({
 
   if (variant === "grid") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -136,14 +137,14 @@ export function Testimonials({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "single" && items.length > 0) {
     const item = items[0];
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container size="narrow">
           <div className="text-center">
             <Icon name="quote" size="xl" className={cn("mx-auto mb-6", styles.quoteIcon)} />
@@ -176,13 +177,13 @@ export function Testimonials({
             </div>
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "quotes") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -217,13 +218,13 @@ export function Testimonials({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   // Default: carousel
   return (
-    <section className={cn("py-20", styles.bg)}>
+    <Section className={cn("py-20", styles.bg)}>
       <Container>
         {(headline || subheadline) && (
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -272,6 +273,6 @@ export function Testimonials({
           </div>
         </div>
       </Container>
-    </section>
+    </Section>
   );
 }

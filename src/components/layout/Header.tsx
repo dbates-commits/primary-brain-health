@@ -24,9 +24,9 @@ export function Header() {
 
   const nav: NavItem[] = [
     { label: "About", link: "#about" },
-    { label: "Who It's For", link: "#who-it-is-for" },
+    { label: "What You Gain", link: "#what-you-gain" },
     { label: "How It Works", link: "#how-it-works" },
-    { label: "Why Us", link: "#why-us" },
+    { label: "Trust", link: "#credibility-trust" },
   ];
 
   useEffect(() => {

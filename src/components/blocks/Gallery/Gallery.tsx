@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Icon } from "@/components/shared/Icon";
 import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
@@ -77,7 +78,7 @@ export function Gallery({
 
   if (variant === "grid") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-12">
@@ -111,13 +112,13 @@ export function Gallery({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "masonry") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-12">
@@ -150,13 +151,13 @@ export function Gallery({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "carousel") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-12">
@@ -190,13 +191,13 @@ export function Gallery({
             </div>
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   // Lightbox variant
   return (
-    <section className={cn("py-20", styles.bg)}>
+    <Section className={cn("py-20", styles.bg)}>
       <Container>
         {(headline || subheadline) && (
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -282,6 +283,6 @@ export function Gallery({
           </div>
         )}
       </Container>
-    </section>
+    </Section>
   );
 }

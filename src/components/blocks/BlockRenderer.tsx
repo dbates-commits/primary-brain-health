@@ -57,12 +57,15 @@ export function BlockRenderer({
                 theme={block.theme}
                 headline={block.headline}
                 subheadline={block.subheadline}
+                subheadlineRich={block.subheadlineRich}
+                trustText={block.trustText}
                 image={block.image}
                 primaryButtonText={block.primaryButtonText}
                 primaryButtonLink={block.primaryButtonLink}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),
-                  subheadline: getFieldPath(index, "subheadline"),
+                  subheadline: getFieldPath(index, "subheadlineRich"),
+                  trustText: getFieldPath(index, "trustText"),
                   primaryButtonText: getFieldPath(index, "primaryButtonText"),
                 }}
               />
@@ -171,11 +174,17 @@ export function BlockRenderer({
               <ContentSection
                 variant={block.variant}
                 theme={block.theme}
+                label={block.label}
                 headline={block.headline}
                 bodyText={block.bodyText}
                 sidebarContent={block.sidebarContent}
                 leftColumn={block.leftColumn}
                 rightColumn={block.rightColumn}
+                tinaFields={{
+                  label: getFieldPath(index, "label"),
+                  headline: getFieldPath(index, "headline"),
+                  bodyText: getFieldPath(index, "bodyText"),
+                }}
               />
             );
             break;

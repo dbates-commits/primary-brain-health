@@ -33,6 +33,12 @@ export const contentBlock: Template = {
       ],
     },
     {
+      name: "label",
+      label: "Section Label",
+      type: "string",
+      description: "Small uppercase text above the headline (e.g. 'Our Approach')",
+    },
+    {
       name: "headline",
       label: "Headline",
       type: "string",

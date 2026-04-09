@@ -108,8 +108,9 @@ union DocumentNode = Page | Post | Project | Author | Testimonial | GlobalCta | 
 type PageBlocksHero {
   theme: String
   headline: String
-  subheadline: String
+  subheadlineRich: JSON
   image: String
+  trustText: String
   primaryButtonText: String
   primaryButtonLink: String
 }
@@ -176,6 +177,7 @@ type PageBlocksCta {
 type PageBlocksContent {
   variant: String
   theme: String
+  label: String
   headline: String
   bodyText: String
   sidebarContent: JSON
@@ -336,11 +338,18 @@ input ImageFilter {
   in: [String]
 }
 
+input RichTextFilter {
+  startsWith: String
+  eq: String
+  exists: Boolean
+}
+
 input PageBlocksHeroFilter {
   theme: StringFilter
   headline: StringFilter
-  subheadline: StringFilter
+  subheadlineRich: RichTextFilter
   image: ImageFilter
+  trustText: StringFilter
   primaryButtonText: StringFilter
   primaryButtonLink: StringFilter
 }
@@ -423,15 +432,10 @@ input PageBlocksCtaFilter {
   submitButtonText: StringFilter
 }
 
-input RichTextFilter {
-  startsWith: String
-  eq: String
-  exists: Boolean
-}
-
 input PageBlocksContentFilter {
   variant: StringFilter
   theme: StringFilter
+  label: StringFilter
   headline: StringFilter
   bodyText: StringFilter
   sidebarContent: RichTextFilter
@@ -1108,8 +1112,9 @@ input DocumentMutation {
 input PageBlocksHeroMutation {
   theme: String
   headline: String
-  subheadline: String
+  subheadlineRich: JSON
   image: String
+  trustText: String
   primaryButtonText: String
   primaryButtonLink: String
 }
@@ -1172,6 +1177,7 @@ input PageBlocksCtaMutation {
 input PageBlocksContentMutation {
   variant: String
   theme: String
+  label: String
   headline: String
   bodyText: String
   sidebarContent: JSON

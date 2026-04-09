@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Icon } from "@/components/shared/Icon";
 import { Button } from "@/components/shared/Button";
 import { Heading } from "@/components/shared/Heading";
@@ -76,7 +77,7 @@ export function FAQ({
 
   if (variant === "accordion") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container size="narrow">
           {(headline || subheadline) && (
             <div className="text-center mb-12">
@@ -128,7 +129,7 @@ export function FAQ({
             </div>
           )}
         </Container>
-      </section>
+      </Section>
     );
   }
 
@@ -138,7 +139,7 @@ export function FAQ({
     const rightItems = items.slice(midpoint);
 
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-12">
@@ -179,13 +180,13 @@ export function FAQ({
             </div>
           )}
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "cards") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-12">
@@ -216,7 +217,7 @@ export function FAQ({
             </div>
           )}
         </Container>
-      </section>
+      </Section>
     );
   }
 

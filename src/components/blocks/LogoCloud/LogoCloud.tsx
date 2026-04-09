@@ -1,6 +1,7 @@
 "use client";
 
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -85,7 +86,7 @@ export function LogoCloud({
 
   if (variant === "simple") {
     return (
-      <section className={cn("py-16", styles.bg)}>
+      <Section className={cn("py-16", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center mb-10">
@@ -105,13 +106,13 @@ export function LogoCloud({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "marquee") {
     return (
-      <section className={cn("py-16 overflow-hidden", styles.bg)}>
+      <Section className={cn("py-16 overflow-hidden", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center mb-10">
@@ -148,13 +149,13 @@ export function LogoCloud({
             animation: marquee 30s linear infinite;
           }
         `}</style>
-      </section>
+      </Section>
     );
   }
 
   // Grid variant
   return (
-    <section className={cn("py-16", styles.bg)}>
+    <Section className={cn("py-16", styles.bg)}>
       <Container>
         {(headline || subheadline) && (
           <div className="text-center mb-10">
@@ -174,6 +175,6 @@ export function LogoCloud({
           ))}
         </div>
       </Container>
-    </section>
+    </Section>
   );
 }

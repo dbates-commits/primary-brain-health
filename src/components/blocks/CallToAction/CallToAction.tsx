@@ -1,6 +1,7 @@
 "use client";
 
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Button } from "@/components/shared/Button";
 import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
@@ -73,7 +74,7 @@ export function CallToAction({
 
   if (variant === "simple") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container size="narrow">
           <div className="text-center">
             {headline && (
@@ -110,13 +111,13 @@ export function CallToAction({
             </div>
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "withImage") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -158,13 +159,13 @@ export function CallToAction({
             )}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "newsletter") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container size="narrow">
           <div className="text-center">
             {headline && (
@@ -192,13 +193,13 @@ export function CallToAction({
             </form>
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   // Reference variant - same as simple but designed to pull from global CTAs
   return (
-    <section className={cn("py-20", styles.bg)}>
+    <Section className={cn("py-20", styles.bg)}>
       <Container size="narrow">
         <div className="text-center">
           {headline && (
@@ -235,6 +236,6 @@ export function CallToAction({
           </div>
         </div>
       </Container>
-    </section>
+    </Section>
   );
 }

@@ -8,8 +8,9 @@ fragment PageParts on Page {
     ... on PageBlocksHero {
       theme
       headline
-      subheadline
+      subheadlineRich
       image
+      trustText
       primaryButtonText
       primaryButtonLink
     }
@@ -150,6 +151,7 @@ fragment PageParts on Page {
     ... on PageBlocksContent {
       variant
       theme
+      label
       headline
       bodyText
       sidebarContent

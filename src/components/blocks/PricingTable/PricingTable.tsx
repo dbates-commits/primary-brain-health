@@ -1,6 +1,7 @@
 "use client";
 
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Button } from "@/components/shared/Button";
 import { Icon } from "@/components/shared/Icon";
 import { Heading } from "@/components/shared/Heading";
@@ -78,7 +79,7 @@ export function PricingTable({
 
   if (variant === "cards") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -184,7 +185,7 @@ export function PricingTable({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
@@ -193,7 +194,7 @@ export function PricingTable({
     tiers.forEach((tier) => tier.features?.forEach((f) => allFeatures.add(f)));
 
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -287,13 +288,13 @@ export function PricingTable({
             </table>
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   // Table variant
   return (
-    <section className={cn("py-20", styles.bg)}>
+    <Section className={cn("py-20", styles.bg)}>
       <Container>
         {(headline || subheadline) && (
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -351,6 +352,6 @@ export function PricingTable({
           </table>
         </div>
       </Container>
-    </section>
+    </Section>
   );
 }

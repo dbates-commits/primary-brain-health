@@ -1,5 +1,6 @@
 "use client";
 
+import { TinaMarkdown } from "tinacms/dist/rich-text";
 import {
   HeroProps,
   highlightBrainHealth,
@@ -9,7 +10,8 @@ import {
 
 export function HeroFullImage({
   headline,
-  subheadline,
+  subheadlineRich,
+  trustText,
   image,
   tinaFields,
 }: HeroProps) {
@@ -37,12 +39,12 @@ export function HeroFullImage({
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       {/* Content — pt-20 clears the fixed header */}
-      <div className="relative z-10 flex flex-col justify-end h-full min-h-[520px] lg:min-h-[640px] px-0 pt-20 lg:pt-24 pb-10 lg:pb-14 max-w-7xl mx-auto w-full">
+      <div className="relative z-10 flex flex-col justify-end h-full min-h-[520px] lg:min-h-[640px] px-6 md:px-10 xl:px-0 pt-20 lg:pt-24 pb-10 lg:pb-14 max-w-7xl mx-auto w-full">
 
         {/* Mobile headline */}
         <div className="lg:hidden mb-auto animate-fade-up" style={{ animationDelay: "150ms" }}>
           <h1
-            className="text-3xl font-bold text-white leading-[1.15] text-pretty font-headline"
+            className="text-3xl md:text-5xl font-bold text-white leading-[1.15] text-pretty font-headline"
             data-tina-field={tinaFields?.headline}
           >
             {headline ? highlightBrainHealth(headline, "text-secondary-container") : null}
@@ -69,18 +71,18 @@ export function HeroFullImage({
             className="lg:w-[340px] shrink-0 bg-black/30 backdrop-blur-md rounded-2xl p-4 flex flex-col gap-3 border border-white/10 animate-fade-up"
             style={{ animationDelay: "450ms" }}
           >
-            {subheadline && (
-              <p
-                className="text-xs text-white/90 leading-relaxed text-pretty"
+            {subheadlineRich && (
+              <div
+                className="text-xs text-white/90 leading-relaxed text-pretty [&>p]:mb-2 [&>p:last-child]:mb-0"
                 data-tina-field={tinaFields?.subheadline}
               >
-                {subheadline}
-              </p>
+                <TinaMarkdown content={subheadlineRich} />
+              </div>
             )}
             <div className="border-t border-white/15 pt-3 flex items-center gap-2.5">
               <TrustAvatars borderClass="border-white/30" />
               <div>
-                <p className="text-xs text-white/65 whitespace-nowrap">Trusted by <span className="font-semibold text-white">3,200+</span> patients and families</p>
+                <p className="text-xs text-white/65 whitespace-nowrap" data-tina-field={tinaFields?.trustText}>{trustText || "Trusted by 3,200+ patients and families"}</p>
               </div>
             </div>
           </div>

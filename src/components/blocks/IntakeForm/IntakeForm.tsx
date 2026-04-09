@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/shared/Button";
 import { Heading } from "@/components/shared/Heading";
+import { Section } from "@/components/shared/Section";
 
 export interface IntakeFormProps {
   headline?: string;
@@ -77,9 +78,8 @@ export function IntakeForm({
     "w-full bg-surface-container-low border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
 
   return (
-    <section
+    <Section
       id="intake"
-      data-scroll-reveal
       className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary"
     >
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
@@ -104,72 +104,42 @@ export function IntakeForm({
             </p>
           )}
           <div data-scroll-item className="p-8 bg-primary-container rounded-xl">
-            <Heading as="h4" size="sm" className="mb-4 flex items-center gap-2">
-              <svg
-                className="w-5 h-5 text-secondary-fixed"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              What to expect:
+            <Heading as="h4" size="sm" className="mb-4 text-white">
+              Includes:
             </Heading>
             <ul className="space-y-4 text-on-primary-container">
-              <li className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                20-minute introductory clinical discussion
-              </li>
-              <li className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Review of your medical family history
-              </li>
-              <li className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Overview of virtual testing procedures
-              </li>
+              {[
+                "Digital brain health assessment",
+                "Clinician review of your results",
+                "Consultation to collect relevant health history",
+                "Clear explanation of findings and risk profile",
+                "Personalized recommendations and next steps",
+                "Optional support from a Brain Health Navigator",
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <svg
+                    className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {item}
+                </li>
+              ))}
             </ul>
+            <div className="mt-6 pt-4 border-t border-white/15">
+              <span className="text-3xl font-bold text-white font-headline">$149</span>
+              <p className="text-on-primary-container/80 text-sm mt-2">
+                This service may be eligible for HSA/FSA reimbursement. We can provide documentation to support submission.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -236,19 +206,29 @@ export function IntakeForm({
                 >
                   Birth Year
                 </label>
-                <select
-                  id="birthYear"
-                  name="birthYear"
-                  required
-                  className={cn(inputClasses, "appearance-none")}
-                >
-                  <option value="">Select year</option>
-                  {birthYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    id="birthYear"
+                    name="birthYear"
+                    required
+                    className={cn(inputClasses, "appearance-none pr-10")}
+                  >
+                    <option value="">Select year</option>
+                    {birthYears.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </div>
 
@@ -260,17 +240,27 @@ export function IntakeForm({
                 >
                   Sex
                 </label>
-                <select
-                  id="sex"
-                  name="sex"
-                  required
-                  className={cn(inputClasses, "appearance-none")}
-                >
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+                <div className="relative">
+                  <select
+                    id="sex"
+                    name="sex"
+                    required
+                    className={cn(inputClasses, "appearance-none pr-10")}
+                  >
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
               <div>
                 <label
@@ -296,24 +286,26 @@ export function IntakeForm({
               <label className="block text-sm font-semibold mb-2">
                 Who is this consultation for?
               </label>
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex gap-4">
+                <label className="relative flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="contactFor"
                     value="self"
-                    className="text-primary focus:ring-primary"
+                    className="peer sr-only"
                   />
-                  <span>Myself</span>
+                  <span className="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-on-surface-variant/40 peer-checked:border-secondary transition-colors after:block after:w-2.5 after:h-2.5 after:rounded-full after:bg-secondary after:scale-0 after:transition-transform peer-checked:after:scale-100" />
+                  <span className="text-sm">Myself</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="relative flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="contactFor"
                     value="someone-else"
-                    className="text-primary focus:ring-primary"
+                    className="peer sr-only"
                   />
-                  <span>Someone Else</span>
+                  <span className="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-on-surface-variant/40 peer-checked:border-secondary transition-colors after:block after:w-2.5 after:h-2.5 after:rounded-full after:bg-secondary after:scale-0 after:transition-transform peer-checked:after:scale-100" />
+                  <span className="text-sm">Someone Else</span>
                 </label>
               </div>
             </div>
@@ -337,7 +329,7 @@ export function IntakeForm({
             <Button
               type="submit"
               variant="solid"
-              color="secondary"
+              color="primary"
               size="lg"
               className="w-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -346,6 +338,6 @@ export function IntakeForm({
           </form>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

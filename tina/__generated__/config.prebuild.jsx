@@ -35,18 +35,21 @@ var heroBlock = {
       type: "string"
     },
     {
-      name: "subheadline",
+      name: "subheadlineRich",
       label: "Subheadline",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
+      type: "rich-text"
     },
     {
       name: "image",
       label: "Image",
       type: "image",
       description: "Poster/fallback image for the hero video"
+    },
+    {
+      name: "trustText",
+      label: "Trust Badge Text",
+      type: "string",
+      description: "Text shown next to the trust avatars (e.g. 'Trusted by 3,200+ patients and families')"
     },
     {
       name: "primaryButtonText",
@@ -454,6 +457,12 @@ var contentBlock = {
         { value: "light", label: "Light" },
         { value: "dark", label: "Dark" }
       ]
+    },
+    {
+      name: "label",
+      label: "Section Label",
+      type: "string",
+      description: "Small uppercase text above the headline (e.g. 'Our Approach')"
     },
     {
       name: "headline",

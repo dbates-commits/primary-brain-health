@@ -8,10 +8,17 @@ export function Footer() {
       <div className="flex flex-col md:flex-row justify-between items-start gap-12 py-20 px-8 md:px-24 max-w-[1400px] mx-auto">
         {/* Brand */}
         <div className="max-w-sm">
-          <div className="text-lg font-bold text-primary mb-4 font-headline">
-            Primary Brain Health
-          </div>
-          <p className="text-primary/60 text-sm leading-relaxed mb-6">
+          <a href="/" className="flex items-center gap-2 mb-4">
+            <img
+              src="/images/pbh-logomark.svg"
+              alt="Primary Brain Health"
+              className="h-10 w-auto"
+            />
+            <span className="text-lg font-bold tracking-[0.12em] uppercase font-headline text-primary">
+              Primary Brain Health
+            </span>
+          </a>
+          <p className="text-on-surface/70 text-sm leading-relaxed mb-6">
             A clinical leader in cognitive longevity and proactive brain care.
             Virtual-first, evidence-based, patient-centered.
           </p>
@@ -27,33 +34,33 @@ export function Footer() {
               <li>
                 <a
                   href="#about"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
                   About
                 </a>
               </li>
               <li>
                 <a
-                  href="#who-it-is-for"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  href="#what-you-gain"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
-                  Who It&apos;s For
+                  What You Gain
                 </a>
               </li>
               <li>
                 <a
                   href="#how-it-works"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
                   How It Works
                 </a>
               </li>
               <li>
                 <a
-                  href="#why-us"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  href="#credibility-trust"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
-                  Why Us
+                  Trust
                 </a>
               </li>
             </ul>
@@ -66,7 +73,7 @@ export function Footer() {
               <li>
                 <a
                   href="#intake"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
                   Contact
                 </a>
@@ -74,7 +81,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
                   Terms &amp; Conditions
                 </Link>
@@ -82,7 +89,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-primary/60 hover:text-secondary transition-colors text-sm"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
                   Privacy Policy
                 </Link>
@@ -94,11 +101,11 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-outline-variant/10 px-8 md:px-24 py-8 flex flex-col md:flex-row justify-between items-center gap-4 max-w-[1400px] mx-auto">
-        <span className="text-primary/60 text-sm">
+        <span className="text-on-surface/70 text-sm">
           &copy; {new Date().getFullYear()} Primary Brain Health. All rights
           reserved.
         </span>
-        <div className="flex items-center gap-2 text-primary/60 text-sm">
+        <div className="flex items-center gap-2 text-on-surface/70 text-sm">
           <svg
             className="w-4 h-4"
             fill="none"

@@ -1,8 +1,10 @@
 import type { CSSProperties } from "react";
+import type { TinaMarkdownContent } from "tinacms/dist/rich-text";
 
 export interface TinaFieldsMap {
   headline?: string;
   subheadline?: string;
+  trustText?: string;
   primaryButtonText?: string;
 }
 
@@ -10,6 +12,8 @@ export interface HeroProps {
   theme?: "light" | "dark" | "primary" | "secondary";
   headline?: string;
   subheadline?: string;
+  subheadlineRich?: TinaMarkdownContent;
+  trustText?: string;
   image?: string;
   primaryButtonText?: string;
   primaryButtonLink?: string;

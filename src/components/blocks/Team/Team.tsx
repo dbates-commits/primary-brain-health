@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Container } from "@/components/shared/Container";
+import { Section } from "@/components/shared/Section";
 import { Card } from "@/components/shared/Card";
 import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
@@ -95,7 +96,7 @@ export function Team({
 
   if (variant === "grid") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -141,13 +142,13 @@ export function Team({
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   if (variant === "carousel") {
     return (
-      <section className={cn("py-20", styles.bg)}>
+      <Section className={cn("py-20", styles.bg)}>
         <Container>
           {(headline || subheadline) && (
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -182,13 +183,13 @@ export function Team({
             </div>
           </div>
         </Container>
-      </section>
+      </Section>
     );
   }
 
   // List variant
   return (
-    <section className={cn("py-20", styles.bg)}>
+    <Section className={cn("py-20", styles.bg)}>
       <Container size="narrow">
         {(headline || subheadline) && (
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -234,6 +235,6 @@ export function Team({
           ))}
         </div>
       </Container>
-    </section>
+    </Section>
   );
 }

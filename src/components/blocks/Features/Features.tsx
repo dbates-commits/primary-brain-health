@@ -2,6 +2,7 @@
 
 import { tinaField } from "tinacms/dist/react";
 import { Heading } from "@/components/shared/Heading";
+import { Section } from "@/components/shared/Section";
 
 interface FeatureItem {
   title: string;
@@ -104,7 +105,7 @@ export function Features({
   // "How It Works" - 4-column timeline layout
   if (columns === "4" && variant === "grid") {
     return (
-      <section className="bg-surface-container-low py-24 md:py-32 px-8 md:px-16" id="how-it-works" data-scroll-reveal data-scroll-stagger="110">
+      <Section className="bg-surface-container-low py-24 md:py-32 px-8 md:px-16" stagger={110}>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-2xl">
@@ -163,7 +164,7 @@ export function Features({
             ))}
           </div>
         </div>
-      </section>
+      </Section>
     );
   }
 
@@ -174,7 +175,7 @@ export function Features({
     headline?.toLowerCase().includes("why us")
   ) {
     return (
-      <section className="py-24 px-8 md:px-16" id="why-us" data-scroll-reveal>
+      <Section className="py-24 px-8 md:px-16">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-12 md:gap-24 opacity-80">
           {items.map((item, index) => (
             <div key={index} data-scroll-item className="flex items-center gap-4">
@@ -193,14 +194,14 @@ export function Features({
             </div>
           ))}
         </div>
-      </section>
+      </Section>
     );
   }
 
   // "Who It's For" - card grid (default grid variant)
   if (variant === "grid") {
     return (
-      <section className="py-24 md:py-32 px-8 md:px-16 neural-texture" id="who-it-is-for" data-scroll-reveal>
+      <Section className="py-24 md:py-32 px-8 md:px-16 neural-texture">
         <div className="max-w-7xl mx-auto">
           {(headline || subheadline) && (
             <div className="text-center mb-16">
@@ -225,18 +226,18 @@ export function Features({
               )}
             </div>
           )}
-          <div className={`grid gap-8 ${columns === "2" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+          <div className={`grid gap-8 ${columns === "2" ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
             {items.map((item, index) => (
               <div
                 key={index}
                 data-scroll-item
-                className="bg-surface-container-low p-10 rounded-xl transition-all hover:-translate-y-2 group"
+                className="bg-surface-container-low p-10 rounded-xl"
               >
                 {item.icon && (
-                  <div className="w-14 h-14 bg-secondary-container flex items-center justify-center rounded-lg mb-8 group-hover:bg-secondary transition-colors">
+                  <div className="w-14 h-14 bg-secondary-container flex items-center justify-center rounded-lg mb-8">
                     <FeatureIcon
                       name={item.icon}
-                      className="w-6 h-6 text-on-secondary-container group-hover:text-on-secondary"
+                      className="w-6 h-6 text-on-secondary-container"
                     />
                   </div>
                 )}
@@ -260,7 +261,7 @@ export function Features({
             ))}
           </div>
         </div>
-      </section>
+      </Section>
     );
   }
 
