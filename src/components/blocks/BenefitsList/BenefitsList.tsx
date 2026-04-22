@@ -21,7 +21,7 @@ export function BenefitsList({
     <section
       data-scroll-reveal
       data-scroll-stagger="110"
-      className="px-6 md:px-10 py-20 md:py-28"
+      className="px-6 md:px-10 pt-10 md:pt-14 pb-20 md:pb-28"
     >
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
         {/* Left: headline + tagline */}

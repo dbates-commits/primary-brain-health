@@ -134,10 +134,12 @@ export function IntakeForm({
                 </li>
               ))}
             </ul>
-            <div className="mt-auto pt-6 border-t border-white/15">
+            <div className="mt-10 pt-8 border-t border-white/15">
               <span className="text-3xl font-normal text-white font-headline">$149</span>
-              <p className="text-on-primary-container/80 text-sm mt-2">
-                This service may be eligible for HSA/FSA reimbursement. We can provide documentation to support submission.
+              <p className="text-on-primary-container/60 text-sm mt-2">
+                This service may be eligible for{' '}
+                <span className="text-white">HSA/FSA reimbursement</span>
+                . We can provide documentation to support submission.
               </p>
             </div>
           </div>

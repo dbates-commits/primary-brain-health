@@ -318,6 +318,15 @@ type PageBlocksScrollReveal {
   headline: String
 }
 
+type PageBlocksScrollFillLogo {
+  label: String
+  headline: String
+  secondLabel: String
+  secondHeadline: String
+  thirdLabel: String
+  thirdHeadline: String
+}
+
 type PageBlocksStackSectionsItems {
   title: String!
   body: String
@@ -344,7 +353,7 @@ type PageBlocksBenefitsList {
   items: [PageBlocksBenefitsListItems]
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksStackSections | PageBlocksBenefitsList
+union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList
 
 type Page implements Node & Document {
   title: String!
@@ -610,6 +619,15 @@ input PageBlocksScrollRevealFilter {
   headline: StringFilter
 }
 
+input PageBlocksScrollFillLogoFilter {
+  label: StringFilter
+  headline: StringFilter
+  secondLabel: StringFilter
+  secondHeadline: StringFilter
+  thirdLabel: StringFilter
+  thirdHeadline: StringFilter
+}
+
 input PageBlocksStackSectionsItemsFilter {
   title: StringFilter
   body: StringFilter
@@ -650,6 +668,7 @@ input PageBlocksFilter {
   logoCloud: PageBlocksLogoCloudFilter
   intakeForm: PageBlocksIntakeFormFilter
   scrollReveal: PageBlocksScrollRevealFilter
+  scrollFillLogo: PageBlocksScrollFillLogoFilter
   stackSections: PageBlocksStackSectionsFilter
   benefitsList: PageBlocksBenefitsListFilter
 }
@@ -1383,6 +1402,15 @@ input PageBlocksScrollRevealMutation {
   headline: String
 }
 
+input PageBlocksScrollFillLogoMutation {
+  label: String
+  headline: String
+  secondLabel: String
+  secondHeadline: String
+  thirdLabel: String
+  thirdHeadline: String
+}
+
 input PageBlocksStackSectionsItemsMutation {
   title: String
   body: String
@@ -1423,6 +1451,7 @@ input PageBlocksMutation {
   logoCloud: PageBlocksLogoCloudMutation
   intakeForm: PageBlocksIntakeFormMutation
   scrollReveal: PageBlocksScrollRevealMutation
+  scrollFillLogo: PageBlocksScrollFillLogoMutation
   stackSections: PageBlocksStackSectionsMutation
   benefitsList: PageBlocksBenefitsListMutation
 }

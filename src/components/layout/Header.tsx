@@ -32,7 +32,7 @@ export function Header() {
 
   const nav: NavItem[] = [
     { label: "FAQs", link: "/faqs" },
-    { label: "Contact", link: "/#intake" },
+    { label: "Contact", link: "/contact" },
   ];
 
   useEffect(() => {

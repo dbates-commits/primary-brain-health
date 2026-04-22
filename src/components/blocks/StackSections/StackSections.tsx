@@ -37,6 +37,13 @@ export function StackSections({
     const update = () => {
       frame = 0;
       if (!container) return;
+      // Mobile (<md): cards stack naturally — skip the sticky-driven transforms
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        setProgress((prev) =>
+          prev.some((v) => v !== 0) ? new Array(items.length).fill(0) : prev
+        );
+        return;
+      }
       const itemEls = container.querySelectorAll<HTMLElement>("[data-stack-item]");
       const next: number[] = [];
       itemEls.forEach((el, i) => {
@@ -81,12 +88,12 @@ export function StackSections({
   const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
   return (
-    <section className="px-6 md:px-10 py-20 md:py-28">
+    <section className="px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-10">
       {(label || headline || subheadline) && (
         <div
           data-scroll-reveal
           data-scroll-stagger="90"
-          className="max-w-4xl mx-auto text-center mb-16 md:mb-24"
+          className="max-w-4xl mx-auto text-center mb-10 md:mb-16"
         >
           {label && (
             <p
@@ -136,7 +143,7 @@ export function StackSections({
             >
               <div
                 className={cn(
-                  "w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[480px] md:min-h-[560px] origin-center",
+                  "w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[560px] origin-center",
                   reversed && "md:[&>*:first-child]:order-2"
                 )}
                 style={{
@@ -147,7 +154,7 @@ export function StackSections({
                   willChange: "transform, filter",
                 }}
               >
-                <div className="flex flex-col justify-end items-start gap-6 p-10">
+                <div className="flex flex-col md:justify-end items-start gap-5 md:gap-6 p-8 md:p-10">
                   {item.icon && (
                     <span
                       aria-hidden="true"
@@ -176,7 +183,7 @@ export function StackSections({
                   )}
                 </div>
 
-                <div className="relative min-h-[280px] md:min-h-full">
+                <div className="relative aspect-[4/3] md:aspect-auto md:min-h-full">
                   {item.image && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

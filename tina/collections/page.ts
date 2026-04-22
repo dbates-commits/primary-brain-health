@@ -12,6 +12,7 @@ import { statsBlock } from "../blocks/stats";
 import { logoCloudBlock } from "../blocks/logoCloud";
 import { intakeFormBlock } from "../blocks/intakeForm";
 import { scrollRevealBlock } from "../blocks/scrollReveal";
+import { scrollFillLogoBlock } from "../blocks/scrollFillLogo";
 import { stackSectionsBlock } from "../blocks/stackSections";
 import { benefitsListBlock } from "../blocks/benefitsList";
 
@@ -72,6 +73,7 @@ export const pageCollection: Collection = {
         logoCloudBlock,
         intakeFormBlock,
         scrollRevealBlock,
+        scrollFillLogoBlock,
         stackSectionsBlock,
         benefitsListBlock,
       ],

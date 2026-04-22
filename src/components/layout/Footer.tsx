@@ -68,12 +68,12 @@ export function Footer() {
             </h5>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#intake"
+                <Link
+                  href="/contact"
                   className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
                 <Link

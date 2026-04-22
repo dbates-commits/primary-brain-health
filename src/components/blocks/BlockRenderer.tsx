@@ -15,6 +15,7 @@ import { Testimonials } from "@/components/blocks/Testimonials";
 import { LogoCloud } from "@/components/blocks/LogoCloud";
 import { IntakeForm } from "@/components/blocks/IntakeForm";
 import { ScrollReveal } from "@/components/blocks/ScrollReveal";
+import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
 import { BenefitsList } from "@/components/blocks/BenefitsList";
 
@@ -248,6 +249,27 @@ export function BlockRenderer({
                 tinaFields={{
                   label: getFieldPath(index, "label"),
                   headline: getFieldPath(index, "headline"),
+                }}
+              />
+            );
+            break;
+
+          case "PageBlocksScrollFillLogo":
+            content = (
+              <ScrollFillLogo
+                label={block.label}
+                headline={block.headline}
+                secondLabel={block.secondLabel}
+                secondHeadline={block.secondHeadline}
+                thirdLabel={block.thirdLabel}
+                thirdHeadline={block.thirdHeadline}
+                tinaFields={{
+                  label: getFieldPath(index, "label"),
+                  headline: getFieldPath(index, "headline"),
+                  secondLabel: getFieldPath(index, "secondLabel"),
+                  secondHeadline: getFieldPath(index, "secondHeadline"),
+                  thirdLabel: getFieldPath(index, "thirdLabel"),
+                  thirdHeadline: getFieldPath(index, "thirdHeadline"),
                 }}
               />
             );

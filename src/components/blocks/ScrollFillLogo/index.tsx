@@ -1,0 +1,1 @@
+export { ScrollFillLogo } from "./ScrollFillLogo";

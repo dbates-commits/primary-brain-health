@@ -301,6 +301,14 @@ fragment PageParts on Page {
       label
       headline
     }
+    ... on PageBlocksScrollFillLogo {
+      label
+      headline
+      secondLabel
+      secondHeadline
+      thirdLabel
+      thirdHeadline
+    }
     ... on PageBlocksStackSections {
       label
       headline
