@@ -8,12 +8,14 @@ import { Button } from "@/components/shared/Button";
 import { Heading } from "@/components/shared/Heading";
 import { cn } from "@/lib/utils";
 
+type RichTextAnswer = {
+  type: string;
+  children: Array<{ type: string; children?: Array<{ type: string; text: string }> }>;
+};
+
 interface FAQItem {
   question: string;
-  answer?: {
-    type: string;
-    children: Array<{ type: string; children?: Array<{ type: string; text: string }> }>;
-  };
+  answer?: string | RichTextAnswer;
   category?: string;
 }
 
@@ -25,6 +27,7 @@ export interface FAQProps {
   items?: FAQItem[];
   showCategories?: boolean;
   ctaText?: string;
+  ctaButtonText?: string;
   ctaLink?: string;
 }
 
@@ -52,7 +55,9 @@ const themeStyles = {
 };
 
 function renderRichText(content: FAQItem["answer"]): string {
-  if (!content?.children) return "";
+  if (!content) return "";
+  if (typeof content === "string") return content;
+  if (!content.children) return "";
   return content.children
     .map((node) => {
       if (node.children) {
@@ -70,6 +75,7 @@ export function FAQ({
   subheadline,
   items = [],
   ctaText,
+  ctaButtonText,
   ctaLink,
 }: FAQProps) {
   const styles = themeStyles[theme];
@@ -77,58 +83,81 @@ export function FAQ({
 
   if (variant === "accordion") {
     return (
-      <Section className={cn("py-20", styles.bg)}>
-        <Container size="narrow">
+      <Section
+        className={cn("py-20 md:py-28 px-6 md:px-10", styles.bg)}
+        stagger={90}
+      >
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-10">
           {(headline || subheadline) && (
-            <div className="text-center mb-12">
+            <div data-scroll-item className="text-center max-w-3xl">
               {headline && (
-                <Heading size="md" className={cn("mb-4", styles.headline)}>
+                <h1 className="font-headline font-normal text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance">
                   {headline}
-                </Heading>
+                </h1>
               )}
               {subheadline && (
-                <p className={cn("text-lg", styles.subheadline)}>{subheadline}</p>
+                <p className="text-base md:text-lg text-on-surface-variant mt-4">
+                  {subheadline}
+                </p>
               )}
             </div>
           )}
-          <div className="space-y-4">
-            {items.map((item, index) => (
-              <div key={index} className={cn("border rounded-lg overflow-hidden", styles.border)}>
-                <button
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className={cn(
-                    "w-full flex items-center justify-between p-5 text-left transition-colors",
-                    styles.hoverBg
-                  )}
-                >
-                  <span className={cn("font-medium pr-4", styles.question)}>{item.question}</span>
-                  <Icon
-                    name="chevronDown"
-                    size="sm"
+
+          <div className="w-full divide-y divide-outline-variant/30">
+            {items.map((item, index) => {
+              const isOpen = openIndex === index;
+              return (
+                <div key={index} data-scroll-item>
+                  <button
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    className="w-full flex items-center justify-between gap-6 py-6 text-left"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-body text-lg md:text-xl font-medium text-on-surface pr-4">
+                      {item.question}
+                    </span>
+                    <span
+                      className={cn(
+                        "relative flex-shrink-0 w-6 h-6 transition-transform duration-300 ease-out",
+                        isOpen && "rotate-45"
+                      )}
+                      aria-hidden="true"
+                    >
+                      <span className="absolute top-1/2 left-0 right-0 h-px bg-on-surface -translate-y-1/2" />
+                      <span className="absolute left-1/2 top-0 bottom-0 w-px bg-on-surface -translate-x-1/2" />
+                    </span>
+                  </button>
+
+                  <div
                     className={cn(
-                      "flex-shrink-0 transition-transform",
-                      styles.answer,
-                      openIndex === index && "rotate-180"
+                      "grid transition-[grid-template-rows] duration-300 ease-out",
+                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                     )}
-                  />
-                </button>
-                {openIndex === index && (
-                  <div className={cn("px-5 pb-5", styles.answer)}>
-                    <p>{renderRichText(item.answer)}</p>
+                  >
+                    <div className="overflow-hidden">
+                      <div className="pb-6 -mt-1 text-on-surface-variant leading-relaxed max-w-3xl">
+                        {renderRichText(item.answer)}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
-          {ctaText && ctaLink && (
-            <div className="text-center mt-12">
-              <p className={cn("mb-4", styles.subheadline)}>{ctaText}</p>
-              <Button href={ctaLink} variant="outline" color={theme === "dark" ? "white" : "primary"}>
-                Contact Us
-              </Button>
+
+          {ctaLink && (ctaButtonText || ctaText) && (
+            <div data-scroll-item className="text-center mt-4">
+              {ctaText && (
+                <p className="mb-4 text-on-surface-variant">{ctaText}</p>
+              )}
+              {ctaButtonText && (
+                <Button href={ctaLink} variant="outline" color="primary">
+                  {ctaButtonText}
+                </Button>
+              )}
             </div>
           )}
-        </Container>
+        </div>
       </Section>
     );
   }

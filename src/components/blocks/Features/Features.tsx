@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { tinaField } from "tinacms/dist/react";
 import { Heading } from "@/components/shared/Heading";
 import { Section } from "@/components/shared/Section";
@@ -105,7 +106,7 @@ export function Features({
   // "How It Works" - 4-column timeline layout
   if (columns === "4" && variant === "grid") {
     return (
-      <Section className="bg-surface-container-low py-24 md:py-32 px-8 md:px-16" stagger={110}>
+      <Section className="bg-white py-24 md:py-32 px-8 md:px-16" stagger={110}>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-2xl">
@@ -143,11 +144,11 @@ export function Features({
                     />
                   )}
                 </div>
-                <div className="text-secondary font-bold font-headline mb-2">
+                <div className="text-secondary font-semibold font-body text-sm uppercase tracking-[0.14em] mb-3">
                   Step {index + 1}
                 </div>
                 <h4
-                  className="text-xl font-bold text-on-surface mb-3 text-balance"
+                  className="text-xl md:text-2xl font-normal font-headline text-on-surface mb-3 text-balance leading-[1.2]"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}
@@ -175,23 +176,31 @@ export function Features({
     headline?.toLowerCase().includes("why us")
   ) {
     return (
-      <Section className="py-24 px-8 md:px-16">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-12 md:gap-24 opacity-80">
+      <Section className="py-14 md:py-20 px-8 md:px-16">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0">
           {items.map((item, index) => (
-            <div key={index} data-scroll-item className="flex items-center gap-4">
-              {item.icon && (
-                <FeatureIcon
-                  name={item.icon}
-                  className="w-8 h-8 text-on-surface"
+            <Fragment key={index}>
+              {index > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="hidden md:block h-4 w-px bg-outline-variant/60 mx-8 lg:mx-10"
                 />
               )}
-              <span
-                className="text-on-surface font-headline font-bold text-lg tracking-tight"
-                data-tina-field={getItemField(index, "title")}
-              >
-                {item.title}
-              </span>
-            </div>
+              <div data-scroll-item className="flex items-center gap-2.5">
+                {item.icon && (
+                  <FeatureIcon
+                    name={item.icon}
+                    className="w-[18px] h-[18px] text-on-surface-variant shrink-0"
+                  />
+                )}
+                <span
+                  className="text-on-surface-variant font-body text-sm md:text-[0.9375rem] tracking-tight"
+                  data-tina-field={getItemField(index, "title")}
+                >
+                  {item.title}
+                </span>
+              </div>
+            </Fragment>
           ))}
         </div>
       </Section>
@@ -231,7 +240,7 @@ export function Features({
               <div
                 key={index}
                 data-scroll-item
-                className="bg-surface-container-low p-10 rounded-xl"
+                className="bg-surface-container-low p-10 rounded-[1.25rem]"
               >
                 {item.icon && (
                   <div className="w-14 h-14 bg-secondary-container flex items-center justify-center rounded-lg mb-8">

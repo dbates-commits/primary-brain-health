@@ -13,7 +13,15 @@ interface NavItem {
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -23,10 +31,8 @@ export function Header() {
   }
 
   const nav: NavItem[] = [
-    { label: "About", link: "#about" },
-    { label: "What You Gain", link: "#what-you-gain" },
-    { label: "How It Works", link: "#how-it-works" },
-    { label: "Trust", link: "#credibility-trust" },
+    { label: "FAQs", link: "/faqs" },
+    { label: "Contact", link: "/#intake" },
   ];
 
   useEffect(() => {
@@ -64,46 +70,53 @@ export function Header() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]">
-      <div className="flex justify-between items-center h-20 px-8 lg:px-16 max-w-[1400px] mx-auto">
+    <nav
+      className={cn(
+        "fixed top-0 w-full z-50 transition-all duration-300",
+        scrolled
+          ? "bg-surface/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]"
+          : "bg-transparent shadow-none"
+      )}
+    >
+      <div className="flex justify-between items-center gap-10 py-5 px-10 max-w-[90rem] mx-auto">
         {/* Logo */}
         <a
           href="/"
           onClick={handleLogoClick}
-          className="flex items-center gap-2"
+          className="flex items-center"
         >
           <img
-            src="/images/pbh-logomark.svg"
+            src="/images/pbh_logostacked_color.svg"
             alt="Primary Brain Health"
             className="h-10 w-auto"
           />
-          <span className="text-lg font-bold tracking-[0.12em] uppercase font-headline text-primary hidden sm:inline">
-            Primary Brain Health
-          </span>
         </a>
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-2">
-          {nav.map((item) => (
-            <a
-              key={item.link}
-              href={item.link}
-              className={cn(
-                "font-body text-base font-semibold tracking-tight px-4 py-2 transition-all",
-                activeHash === item.link
-                  ? "text-secondary"
-                  : "text-on-surface/70 hover:text-on-surface"
-              )}
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
+        {/* Right side: nav + CTA (grouped so they right-align together) */}
+        <div className="flex items-center gap-10">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-8">
+            {nav.map((item) => (
+              <a
+                key={item.link}
+                href={item.link}
+                className={cn(
+                  "font-body text-base font-semibold tracking-tight transition-all",
+                  activeHash === item.link
+                    ? "text-secondary"
+                    : "text-on-surface/70 hover:text-on-surface"
+                )}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
 
-        {/* CTA Button */}
-        <Button href="#intake" variant="solid" color="primary" size="md" className="hidden lg:inline-flex">
-          Book a Consultation
-        </Button>
+          {/* CTA Button */}
+          <Button href="/#intake" variant="solid" color="primary" size="md" className="hidden lg:inline-flex">
+            Book a Consultation
+          </Button>
+        </div>
 
         {/* Mobile Menu Button */}
         <button
@@ -162,7 +175,7 @@ export function Header() {
                 </a>
               ))}
               <Button
-                href="#intake"
+                href="/#intake"
                 onClick={() => setMobileMenuOpen(false)}
                 variant="solid"
                 color="primary"

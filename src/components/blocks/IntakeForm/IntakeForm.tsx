@@ -82,13 +82,13 @@ export function IntakeForm({
       id="intake"
       className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary"
     >
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-16">
         {/* Left: Copy */}
-        <div>
+        <div className="flex flex-col">
           {headline && (
             <h2
               data-scroll-item
-              className="text-4xl md:text-6xl font-extrabold font-headline mb-8 leading-tight text-balance"
+              className="text-4xl md:text-5xl lg:text-6xl font-normal font-headline mb-6 leading-[1.1] text-balance"
               data-tina-field={tinaFields?.headline}
             >
               {headline}
@@ -103,11 +103,11 @@ export function IntakeForm({
               {subheadline}
             </p>
           )}
-          <div data-scroll-item className="p-8 bg-primary-container rounded-xl">
+          <div data-scroll-item className="p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
             <Heading as="h4" size="sm" className="mb-4 text-white">
               Includes:
             </Heading>
-            <ul className="space-y-4 text-on-primary-container">
+            <ul className="space-y-3 text-on-primary-container">
               {[
                 "Digital brain health assessment",
                 "Clinician review of your results",
@@ -134,8 +134,8 @@ export function IntakeForm({
                 </li>
               ))}
             </ul>
-            <div className="mt-6 pt-4 border-t border-white/15">
-              <span className="text-3xl font-bold text-white font-headline">$149</span>
+            <div className="mt-auto pt-6 border-t border-white/15">
+              <span className="text-3xl font-normal text-white font-headline">$149</span>
               <p className="text-on-primary-container/80 text-sm mt-2">
                 This service may be eligible for HSA/FSA reimbursement. We can provide documentation to support submission.
               </p>
@@ -144,9 +144,9 @@ export function IntakeForm({
         </div>
 
         {/* Right: Form */}
-        <div data-scroll-item className="bg-surface-container-lowest p-8 md:p-12 rounded-[2rem] text-on-surface shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+        <div data-scroll-item className="bg-surface-container-lowest p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
                   htmlFor="fullName"
@@ -181,7 +181,7 @@ export function IntakeForm({
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
                   htmlFor="phone"
@@ -232,7 +232,7 @@ export function IntakeForm({
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
                   htmlFor="sex"

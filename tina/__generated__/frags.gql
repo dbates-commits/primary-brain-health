@@ -207,6 +207,7 @@ fragment PageParts on Page {
       }
       showCategories
       ctaText
+      ctaButtonText
       ctaLink
     }
     ... on PageBlocksTeam {
@@ -295,6 +296,32 @@ fragment PageParts on Page {
       headline
       subheadline
       buttonText
+    }
+    ... on PageBlocksScrollReveal {
+      label
+      headline
+    }
+    ... on PageBlocksStackSections {
+      label
+      headline
+      subheadline
+      items {
+        __typename
+        title
+        body
+        icon
+        image
+      }
+    }
+    ... on PageBlocksBenefitsList {
+      headline
+      subheadline
+      items {
+        __typename
+        title
+        body
+        icon
+      }
     }
   }
 }

@@ -843,7 +843,10 @@ var faqBlock = {
         {
           name: "answer",
           label: "Answer",
-          type: "rich-text"
+          type: "string",
+          ui: {
+            component: "textarea"
+          }
         },
         {
           name: "category",
@@ -860,9 +863,15 @@ var faqBlock = {
     },
     {
       name: "ctaText",
-      label: "CTA Text",
+      label: "CTA Description",
       type: "string",
-      description: "e.g., 'Still have questions? Contact us'"
+      description: "Optional text above the CTA button, e.g. 'Still have questions?'"
+    },
+    {
+      name: "ctaButtonText",
+      label: "CTA Button Text",
+      type: "string",
+      description: "e.g. 'View All FAQs' or 'Contact Us'"
     },
     {
       name: "ctaLink",
@@ -1238,6 +1247,175 @@ var intakeFormBlock = {
   ]
 };
 
+// tina/blocks/scrollReveal.ts
+var scrollRevealBlock = {
+  name: "scrollReveal",
+  label: "Scroll Reveal Text",
+  ui: {
+    defaultItem: {
+      label: "YOU ARE DOING THE RIGHT THING AT THE RIGHT PLACE",
+      headline: "We help you understand your brain, reduce your risk, and take action early through advanced assessment, clinical insight, and ongoing personalized care."
+    },
+    itemProps: (item) => ({
+      label: `Scroll Reveal - ${item?.headline?.slice(0, 40) || "Untitled"}`
+    })
+  },
+  fields: [
+    {
+      name: "label",
+      label: "Eyebrow Label",
+      type: "string",
+      description: "Small uppercase text shown above the headline (optional)"
+    },
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string",
+      ui: {
+        component: "textarea"
+      }
+    }
+  ]
+};
+
+// tina/blocks/stackSections.ts
+var stackSectionsBlock = {
+  name: "stackSections",
+  label: "Stack Sections",
+  ui: {
+    defaultItem: {
+      headline: "How It Works",
+      subheadline: "Move at your own pace, with expert guidance when you want it.",
+      items: [
+        {
+          title: "Brain Health Assessment",
+          body: "Evaluate your cognitive function, risk factors, and overall brain health using advanced digital tools and clinical expertise.",
+          icon: "clipboard",
+          image: "/images/woman.png"
+        }
+      ]
+    },
+    itemProps: (item) => ({
+      label: `Stack - ${item?.headline || "Untitled"}`
+    })
+  },
+  fields: [
+    {
+      name: "label",
+      label: "Eyebrow Label",
+      type: "string",
+      description: "Small uppercase label above the headline"
+    },
+    {
+      name: "headline",
+      label: "Section Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Section Subheadline",
+      type: "string",
+      ui: { component: "textarea" }
+    },
+    {
+      name: "items",
+      label: "Stack Items",
+      type: "object",
+      list: true,
+      ui: {
+        itemProps: (item) => ({
+          label: item?.title || "Stack Item"
+        })
+      },
+      fields: [
+        {
+          name: "title",
+          label: "Title",
+          type: "string",
+          required: true
+        },
+        {
+          name: "body",
+          label: "Body",
+          type: "string",
+          ui: { component: "textarea" }
+        },
+        {
+          name: "icon",
+          label: "Icon (SVG)",
+          type: "image",
+          description: "Path to an SVG icon asset"
+        },
+        {
+          name: "image",
+          label: "Image",
+          type: "image"
+        }
+      ]
+    }
+  ]
+};
+
+// tina/blocks/benefitsList.ts
+var benefitsListBlock = {
+  name: "benefitsList",
+  label: "Benefits List (split layout)",
+  ui: {
+    defaultItem: {
+      headline: "What You Gain",
+      subheadline: "Clarity. Control. Confidence. Now and over time.",
+      items: []
+    },
+    itemProps: (item) => ({
+      label: `Benefits - ${item?.headline || "Untitled"}`
+    })
+  },
+  fields: [
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Subheadline",
+      type: "string",
+      ui: { component: "textarea" }
+    },
+    {
+      name: "items",
+      label: "Benefits",
+      type: "object",
+      list: true,
+      ui: {
+        itemProps: (item) => ({
+          label: item?.title || "Benefit"
+        })
+      },
+      fields: [
+        {
+          name: "title",
+          label: "Title",
+          type: "string",
+          required: true
+        },
+        {
+          name: "body",
+          label: "Body",
+          type: "string",
+          ui: { component: "textarea" }
+        },
+        {
+          name: "icon",
+          label: "Icon (SVG)",
+          type: "image",
+          description: "Path to an SVG icon asset"
+        }
+      ]
+    }
+  ]
+};
+
 // tina/collections/page.ts
 var pageCollection = {
   name: "page",
@@ -1294,7 +1472,10 @@ var pageCollection = {
         teamBlock,
         statsBlock,
         logoCloudBlock,
-        intakeFormBlock
+        intakeFormBlock,
+        scrollRevealBlock,
+        stackSectionsBlock,
+        benefitsListBlock
       ]
     }
   ]

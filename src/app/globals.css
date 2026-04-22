@@ -84,8 +84,8 @@
 }
 
 @theme inline {
-  --font-headline: "Interstate", "Manrope", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-headline: var(--font-gilda-display), Georgia, serif;
+  --font-body: "Interstate", system-ui, sans-serif;
 
   --color-primary: var(--color-primary);
   --color-primary-container: var(--color-primary-container);
@@ -183,14 +183,24 @@
 /* Scroll-reveal — added by JS after mount (progressive enhancement) */
 .scroll-hidden {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
 
 .scroll-hidden.scroll-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hidden,
+  .scroll-hidden.scroll-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Neural texture pattern */
@@ -206,7 +216,7 @@
 body {
   background: var(--color-surface);
   color: var(--color-on-surface);
-  font-family: "Inter", sans-serif;
+  font-family: "Interstate", system-ui, sans-serif;
 }
 
 ::selection {

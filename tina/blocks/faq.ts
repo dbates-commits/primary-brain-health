@@ -77,7 +77,10 @@ export const faqBlock: Template = {
         {
           name: "answer",
           label: "Answer",
-          type: "rich-text",
+          type: "string",
+          ui: {
+            component: "textarea",
+          },
         },
         {
           name: "category",
@@ -94,9 +97,15 @@ export const faqBlock: Template = {
     },
     {
       name: "ctaText",
-      label: "CTA Text",
+      label: "CTA Description",
       type: "string",
-      description: "e.g., 'Still have questions? Contact us'",
+      description: "Optional text above the CTA button, e.g. 'Still have questions?'",
+    },
+    {
+      name: "ctaButtonText",
+      label: "CTA Button Text",
+      type: "string",
+      description: "e.g. 'View All FAQs' or 'Contact Us'",
     },
     {
       name: "ctaLink",

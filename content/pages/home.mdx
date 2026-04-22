@@ -23,6 +23,11 @@ blocks:
     primaryButtonText: Book Your Brain Health Consultation
     primaryButtonLink: '#intake'
     _template: hero
+  - headline: >-
+      We help you understand your brain, reduce your risk, and take action early
+      through advanced assessment, clinical insight, and ongoing personalized
+      care.
+    _template: scrollReveal
   - variant: default
     theme: light
     label: Our Approach
@@ -39,68 +44,64 @@ blocks:
     leftColumn: ''
     rightColumn: ''
     _template: content
-  - variant: grid
-    theme: light
-    headline: What You Gain
-    subheadline: 'Clarity. Control. Confidence, now and over time.'
-    columns: '3'
-    items:
-      - title: Know Where You Stand
-        description: >-
-          Understand your brain health clearly. Is this normal? Am I at risk?
-          What should I do next?
-        icon: users
-      - title: Take Control Early
-        description: >-
-          Act before small changes become bigger problems. Reduce risk and
-          improve performance when it matters most.
-        icon: zap
-      - title: A Plan You Can Follow
-        description: >-
-          Clear, practical guidance tailored to you with ongoing support,
-          monitoring, adjustments, and coordination as your needs evolve.
-        icon: star
-    _template: features
-  - variant: grid
-    theme: light
+  - _template: stackSections
     headline: How It Works
-    subheadline: 'Move at your own pace, with expert guidance available when you want it.'
-    columns: '4'
+    subheadline: Move at your own pace, with expert guidance available when you want it.
     items:
       - title: Brain Health Assessment
-        description: >-
+        body: >-
           Evaluate your cognitive function, risk factors, and overall brain
           health using advanced digital tools and clinical expertise.
-        icon: clipboard
+        icon: /images/Brain.svg
+        image: /images/woman.png
       - title: Results and Clarity
-        description: >-
+        body: >-
           You receive a clear explanation of your results and what they mean.
           Optionally review with a Brain Health Navigator who can answer
           questions and help you understand next steps.
-        icon: file
-      - title: Personalized Brain Health Plan
-        description: >-
+        icon: /images/DNA.svg
+        image: /images/doctor-showing-ipad.png
+      - title: Personalized Health Plan
+        body: >-
           Your plan is tailored to your biology, risks, and goals. Move forward
-          independently, with navigator guidance, or with a family member looped
-          in.
-        icon: calendar
+          independently, with navigator guidance, or with a family member
+          looped in.
+        icon: /images/UserCircleCheck.svg
+        image: /images/doctor-writing-prescription.png
       - title: Ongoing Support
-        description: >-
-          We help you track progress, adjust your plan, and coordinate care over
-          time.
-        icon: rocket
-    _template: features
+        body: >-
+          We help you track progress, adjust your plan, and coordinate care
+          over time.
+        icon: /images/ChatsCircle.svg
+        image: /images/laughing-couple.png
+  - _template: benefitsList
+    headline: What You Gain
+    subheadline: Clarity. Control. Confidence. Now and over time.
+    items:
+      - title: Know Where You Stand
+        body: >-
+          Understand your brain health clearly. Is this normal? Am I at risk?
+          What should I do next?
+        icon: /images/UserCircleDashed.svg
+      - title: Take Control Early
+        body: >-
+          Act before small changes become bigger problems. Reduce risk and
+          improve performance when it matters most.
+        icon: /images/CalendarHeart.svg
+      - title: Confidence in What's Next
+        body: Know what to do and have a team behind you.
+        icon: /images/FlowerLotus.svg
   - variant: grid
     theme: light
     headline: Credibility & Trust
     subheadline: Clinically grounded and built for real life.
     columns: '3'
     items:
-      - title: Works Alongside Your Existing Doctors
+      - title: Works with your doctors
         icon: shield
-      - title: Backed by Neuroscience and Advanced Assessment
+      - title: Grounded in neuroscience
         icon: check
-      - title: 'Designed for Prevention, Early Detection, and Long-Term Support'
+      - title: Built for prevention & early detection
         icon: lock
     _template: features
   - headline: Start with a Brain Health Assessment and Consultation
@@ -109,5 +110,32 @@ blocks:
       review risk factors, and get a personalized plan for what to do next.
     buttonText: Book Your Assessment and Consultation
     _template: intakeForm
+  - _template: faq
+    variant: accordion
+    theme: light
+    headline: Frequently Asked Questions
+    subheadline: Quick answers to the questions we hear most often.
+    items:
+      - question: Is PBH medical care or wellness?
+        answer: >-
+          PBH is a clinically grounded brain health service focused on early
+          detection, risk assessment, and personalized next steps. We work
+          alongside your existing healthcare providers.
+      - question: Do I need symptoms to book?
+        answer: >-
+          No. Many of our patients come to PBH to understand their baseline or
+          reduce long-term risk — not because something feels wrong.
+      - question: Is it covered by insurance?
+        answer: >-
+          PBH is not currently billed through insurance. We are a
+          direct-to-patient service, and HSA/FSA funds are typically eligible.
+      - question: Who reviews my results?
+        answer: >-
+          Your results are reviewed by our clinical team, including a
+          board-certified neurologist, and shared with you in a structured
+          consultation.
+    ctaText: Want to see every answer?
+    ctaButtonText: View All FAQs
+    ctaLink: /faqs
 ---
 

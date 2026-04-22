@@ -14,6 +14,9 @@ import { ContentSection } from "@/components/blocks/ContentSection";
 import { Testimonials } from "@/components/blocks/Testimonials";
 import { LogoCloud } from "@/components/blocks/LogoCloud";
 import { IntakeForm } from "@/components/blocks/IntakeForm";
+import { ScrollReveal } from "@/components/blocks/ScrollReveal";
+import { StackSections } from "@/components/blocks/StackSections";
+import { BenefitsList } from "@/components/blocks/BenefitsList";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Block = any;
@@ -123,6 +126,9 @@ export function BlockRenderer({
                 headline={block.headline}
                 subheadline={block.subheadline}
                 items={block.items || []}
+                ctaText={block.ctaText}
+                ctaButtonText={block.ctaButtonText}
+                ctaLink={block.ctaLink}
               />
             );
             break;
@@ -209,6 +215,40 @@ export function BlockRenderer({
                 headline={block.headline}
                 grayscale={block.grayscale}
                 logos={block.logos || []}
+              />
+            );
+            break;
+
+          case "PageBlocksStackSections":
+            content = (
+              <StackSections
+                label={block.label}
+                headline={block.headline}
+                subheadline={block.subheadline}
+                items={block.items || []}
+              />
+            );
+            break;
+
+          case "PageBlocksBenefitsList":
+            content = (
+              <BenefitsList
+                headline={block.headline}
+                subheadline={block.subheadline}
+                items={block.items || []}
+              />
+            );
+            break;
+
+          case "PageBlocksScrollReveal":
+            content = (
+              <ScrollReveal
+                label={block.label}
+                headline={block.headline}
+                tinaFields={{
+                  label: getFieldPath(index, "label"),
+                  headline: getFieldPath(index, "headline"),
+                }}
               />
             );
             break;

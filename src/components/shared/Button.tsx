@@ -26,7 +26,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-headline font-bold rounded-full transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center font-body font-semibold rounded-full transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const sizeStyles = {
     sm: "px-4 py-2 text-sm",

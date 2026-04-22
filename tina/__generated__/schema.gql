@@ -227,7 +227,7 @@ type PageBlocksPricing {
 
 type PageBlocksFaqItems {
   question: String!
-  answer: JSON
+  answer: String
   category: String
 }
 
@@ -239,6 +239,7 @@ type PageBlocksFaq {
   items: [PageBlocksFaqItems]
   showCategories: Boolean
   ctaText: String
+  ctaButtonText: String
   ctaLink: String
 }
 
@@ -312,7 +313,38 @@ type PageBlocksIntakeForm {
   buttonText: String
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm
+type PageBlocksScrollReveal {
+  label: String
+  headline: String
+}
+
+type PageBlocksStackSectionsItems {
+  title: String!
+  body: String
+  icon: String
+  image: String
+}
+
+type PageBlocksStackSections {
+  label: String
+  headline: String
+  subheadline: String
+  items: [PageBlocksStackSectionsItems]
+}
+
+type PageBlocksBenefitsListItems {
+  title: String!
+  body: String
+  icon: String
+}
+
+type PageBlocksBenefitsList {
+  headline: String
+  subheadline: String
+  items: [PageBlocksBenefitsListItems]
+}
+
+union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksStackSections | PageBlocksBenefitsList
 
 type Page implements Node & Document {
   title: String!
@@ -485,7 +517,7 @@ input PageBlocksPricingFilter {
 
 input PageBlocksFaqItemsFilter {
   question: StringFilter
-  answer: RichTextFilter
+  answer: StringFilter
   category: StringFilter
 }
 
@@ -497,6 +529,7 @@ input PageBlocksFaqFilter {
   items: PageBlocksFaqItemsFilter
   showCategories: BooleanFilter
   ctaText: StringFilter
+  ctaButtonText: StringFilter
   ctaLink: StringFilter
 }
 
@@ -572,6 +605,37 @@ input PageBlocksIntakeFormFilter {
   buttonText: StringFilter
 }
 
+input PageBlocksScrollRevealFilter {
+  label: StringFilter
+  headline: StringFilter
+}
+
+input PageBlocksStackSectionsItemsFilter {
+  title: StringFilter
+  body: StringFilter
+  icon: ImageFilter
+  image: ImageFilter
+}
+
+input PageBlocksStackSectionsFilter {
+  label: StringFilter
+  headline: StringFilter
+  subheadline: StringFilter
+  items: PageBlocksStackSectionsItemsFilter
+}
+
+input PageBlocksBenefitsListItemsFilter {
+  title: StringFilter
+  body: StringFilter
+  icon: ImageFilter
+}
+
+input PageBlocksBenefitsListFilter {
+  headline: StringFilter
+  subheadline: StringFilter
+  items: PageBlocksBenefitsListItemsFilter
+}
+
 input PageBlocksFilter {
   hero: PageBlocksHeroFilter
   features: PageBlocksFeaturesFilter
@@ -585,6 +649,9 @@ input PageBlocksFilter {
   stats: PageBlocksStatsFilter
   logoCloud: PageBlocksLogoCloudFilter
   intakeForm: PageBlocksIntakeFormFilter
+  scrollReveal: PageBlocksScrollRevealFilter
+  stackSections: PageBlocksStackSectionsFilter
+  benefitsList: PageBlocksBenefitsListFilter
 }
 
 input PageFilter {
@@ -1227,7 +1294,7 @@ input PageBlocksPricingMutation {
 
 input PageBlocksFaqItemsMutation {
   question: String
-  answer: JSON
+  answer: String
   category: String
 }
 
@@ -1239,6 +1306,7 @@ input PageBlocksFaqMutation {
   items: [PageBlocksFaqItemsMutation]
   showCategories: Boolean
   ctaText: String
+  ctaButtonText: String
   ctaLink: String
 }
 
@@ -1310,6 +1378,37 @@ input PageBlocksIntakeFormMutation {
   buttonText: String
 }
 
+input PageBlocksScrollRevealMutation {
+  label: String
+  headline: String
+}
+
+input PageBlocksStackSectionsItemsMutation {
+  title: String
+  body: String
+  icon: String
+  image: String
+}
+
+input PageBlocksStackSectionsMutation {
+  label: String
+  headline: String
+  subheadline: String
+  items: [PageBlocksStackSectionsItemsMutation]
+}
+
+input PageBlocksBenefitsListItemsMutation {
+  title: String
+  body: String
+  icon: String
+}
+
+input PageBlocksBenefitsListMutation {
+  headline: String
+  subheadline: String
+  items: [PageBlocksBenefitsListItemsMutation]
+}
+
 input PageBlocksMutation {
   hero: PageBlocksHeroMutation
   features: PageBlocksFeaturesMutation
@@ -1323,6 +1422,9 @@ input PageBlocksMutation {
   stats: PageBlocksStatsMutation
   logoCloud: PageBlocksLogoCloudMutation
   intakeForm: PageBlocksIntakeFormMutation
+  scrollReveal: PageBlocksScrollRevealMutation
+  stackSections: PageBlocksStackSectionsMutation
+  benefitsList: PageBlocksBenefitsListMutation
 }
 
 input PageMutation {

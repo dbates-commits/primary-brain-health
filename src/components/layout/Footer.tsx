@@ -4,19 +4,16 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-surface-container-low w-full rounded-t-[2.5rem]">
+    <footer className="bg-[#EFF6F9] w-full rounded-t-[1.25rem]">
       <div className="flex flex-col md:flex-row justify-between items-start gap-12 py-20 px-8 md:px-24 max-w-[1400px] mx-auto">
         {/* Brand */}
         <div className="max-w-sm">
-          <a href="/" className="flex items-center gap-2 mb-4">
+          <a href="/" className="flex items-center mb-4">
             <img
-              src="/images/pbh-logomark.svg"
+              src="/images/pbh_logostacked_color.svg"
               alt="Primary Brain Health"
               className="h-10 w-auto"
             />
-            <span className="text-lg font-bold tracking-[0.12em] uppercase font-headline text-primary">
-              Primary Brain Health
-            </span>
           </a>
           <p className="text-on-surface/70 text-sm leading-relaxed mb-6">
             A clinical leader in cognitive longevity and proactive brain care.
@@ -27,7 +24,7 @@ export function Footer() {
         {/* Link Columns */}
         <div className="grid grid-cols-2 gap-12">
           <div className="space-y-4">
-            <h5 className="font-headline font-bold text-primary text-sm uppercase tracking-widest">
+            <h5 className="font-body font-bold text-primary text-sm uppercase tracking-widest">
               Menu
             </h5>
             <ul className="space-y-2">
@@ -66,7 +63,7 @@ export function Footer() {
             </ul>
           </div>
           <div className="space-y-4">
-            <h5 className="font-headline font-bold text-primary text-sm uppercase tracking-widest">
+            <h5 className="font-body font-bold text-primary text-sm uppercase tracking-widest">
               Support
             </h5>
             <ul className="space-y-2">

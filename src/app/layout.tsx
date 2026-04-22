@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Gilda_Display } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollRevealInit } from "@/components/ScrollRevealInit";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
+const gildaDisplay = Gilda_Display({
+  variable: "--font-gilda-display",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -29,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${inter.variable} ${manrope.variable} font-body antialiased bg-surface text-on-surface`}
+        className={`${gildaDisplay.variable} font-body antialiased bg-white text-on-surface`}
       >
         <ScrollRevealInit />
         <Header />

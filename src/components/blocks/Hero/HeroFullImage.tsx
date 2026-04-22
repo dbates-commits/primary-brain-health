@@ -1,22 +1,23 @@
 "use client";
 
-import { TinaMarkdown } from "tinacms/dist/rich-text";
+import { Button } from "@/components/shared/Button";
 import {
   HeroProps,
-  highlightBrainHealth,
-  TrustAvatars,
   DEFAULT_HERO_IMAGE,
 } from "./hero-utils";
 
 export function HeroFullImage({
   headline,
-  subheadlineRich,
-  trustText,
   image,
+  primaryButtonText,
+  primaryButtonLink,
   tinaFields,
 }: HeroProps) {
   return (
-    <section className="relative overflow-hidden min-h-[520px] lg:min-h-[640px] mx-4 lg:mx-6 mt-8 mb-8 max-w-[1800px] 2xl:mx-auto rounded-3xl">
+    <section
+      className="relative overflow-hidden min-h-[520px] lg:min-h-[720px] mx-4 lg:mx-10 mt-8 mb-8 max-w-[1800px] 2xl:mx-auto rounded-[1.25rem]"
+      style={{ isolation: "isolate", transform: "translateZ(0)" }}
+    >
 
       {/* Background video — fills edge to edge, up behind the header */}
       <video
@@ -24,70 +25,46 @@ export function HeroFullImage({
         muted
         loop
         playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover rounded-[1.25rem]"
         poster={image || DEFAULT_HERO_IMAGE}
       >
         <source src="/videos/hero-video.mp4" type="video/mp4" />
         <img
           src={image || DEFAULT_HERO_IMAGE}
           alt={headline || "Hero background"}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover rounded-[1.25rem]"
         />
       </video>
 
       {/* Gradient overlay — bottom scrim only for text legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-[1.25rem]" />
 
-      {/* Content — pt-20 clears the fixed header */}
-      <div className="relative z-10 flex flex-col justify-end h-full min-h-[520px] lg:min-h-[640px] px-6 md:px-10 xl:px-0 pt-20 lg:pt-24 pb-10 lg:pb-14 max-w-7xl mx-auto w-full">
+      {/* Content — centered column, bottom-aligned */}
+      <div className="relative z-10 flex flex-col items-center justify-end h-full min-h-[520px] lg:min-h-[720px] px-6 md:px-10 pt-24 pb-10 lg:pb-14 gap-10 text-center">
+        <h1
+          className="animate-fade-up font-headline font-normal text-white text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] text-pretty max-w-5xl"
+          style={{ animationDelay: "150ms" }}
+          data-tina-field={tinaFields?.headline}
+        >
+          {headline}
+        </h1>
 
-        {/* Mobile headline */}
-        <div className="lg:hidden mb-auto animate-fade-up" style={{ animationDelay: "150ms" }}>
-          <h1
-            className="text-3xl md:text-5xl font-bold text-white leading-[1.15] text-pretty font-headline"
-            data-tina-field={tinaFields?.headline}
-          >
-            {headline ? highlightBrainHealth(headline, "text-secondary-container") : null}
-          </h1>
-        </div>
-
-        {/* Desktop: headline left, card right */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
-
+        {primaryButtonText && (
           <div
-            className="hidden lg:block flex-1 max-w-[580px] animate-fade-up"
-            style={{ animationDelay: "150ms" }}
+            className="animate-fade-up"
+            style={{ animationDelay: "350ms" }}
+            data-tina-field={tinaFields?.primaryButtonText}
           >
-            <h1
-              className="text-5xl xl:text-6xl font-bold text-white leading-[1.1] text-pretty font-headline"
-              data-tina-field={tinaFields?.headline}
+            <Button
+              href={primaryButtonLink}
+              variant="solid"
+              color="primary"
+              size="lg"
             >
-              {headline ? highlightBrainHealth(headline, "text-secondary-container") : null}
-            </h1>
+              {primaryButtonText}
+            </Button>
           </div>
-
-          {/* Info card */}
-          <div
-            className="lg:w-[340px] shrink-0 bg-black/30 backdrop-blur-md rounded-2xl p-4 flex flex-col gap-3 border border-white/10 animate-fade-up"
-            style={{ animationDelay: "450ms" }}
-          >
-            {subheadlineRich && (
-              <div
-                className="text-xs text-white/90 leading-relaxed text-pretty [&>p]:mb-2 [&>p:last-child]:mb-0"
-                data-tina-field={tinaFields?.subheadline}
-              >
-                <TinaMarkdown content={subheadlineRich} />
-              </div>
-            )}
-            <div className="border-t border-white/15 pt-3 flex items-center gap-2.5">
-              <TrustAvatars borderClass="border-white/30" />
-              <div>
-                <p className="text-xs text-white/65 whitespace-nowrap" data-tina-field={tinaFields?.trustText}>{trustText || "Trusted by 3,200+ patients and families"}</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        )}
       </div>
     </section>
   );
