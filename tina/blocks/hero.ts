@@ -39,9 +39,10 @@ export const heroBlock: Template = {
     },
     {
       name: "image",
-      label: "Image",
-      type: "image",
-      description: "Poster/fallback image for the hero video",
+      label: "Image path",
+      type: "string",
+      description:
+        "Path to the hero poster/fallback image in /public (e.g. /images/hero-brain-consultation.png).",
     },
     {
       name: "trustText",

@@ -63,14 +63,17 @@ export const stackSectionsBlock: Template = {
         },
         {
           name: "icon",
-          label: "Icon (SVG)",
-          type: "image",
-          description: "Path to an SVG icon asset",
+          label: "Icon (SVG path)",
+          type: "string",
+          description:
+            "Path to an SVG icon in /public (e.g. /images/Brain.svg). Uses CSS mask, so must be served same-origin.",
         },
         {
           name: "image",
-          label: "Image",
-          type: "image",
+          label: "Image path",
+          type: "string",
+          description:
+            "Path to an image in /public (e.g. /images/woman.png).",
         },
       ],
     },

@@ -50,9 +50,10 @@ export const benefitsListBlock: Template = {
         },
         {
           name: "icon",
-          label: "Icon (SVG)",
-          type: "image",
-          description: "Path to an SVG icon asset",
+          label: "Icon (SVG path)",
+          type: "string",
+          description:
+            "Path to an SVG icon in /public (e.g. /images/Brain.svg). Uses CSS mask, so must be served same-origin.",
         },
       ],
     },

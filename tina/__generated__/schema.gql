@@ -380,7 +380,7 @@ input PageBlocksHeroFilter {
   theme: StringFilter
   headline: StringFilter
   subheadlineRich: RichTextFilter
-  image: ImageFilter
+  image: StringFilter
   trustText: StringFilter
   primaryButtonText: StringFilter
   primaryButtonLink: StringFilter
@@ -613,8 +613,8 @@ input PageBlocksScrollRevealFilter {
 input PageBlocksStackSectionsItemsFilter {
   title: StringFilter
   body: StringFilter
-  icon: ImageFilter
-  image: ImageFilter
+  icon: StringFilter
+  image: StringFilter
 }
 
 input PageBlocksStackSectionsFilter {
@@ -627,7 +627,7 @@ input PageBlocksStackSectionsFilter {
 input PageBlocksBenefitsListItemsFilter {
   title: StringFilter
   body: StringFilter
-  icon: ImageFilter
+  icon: StringFilter
 }
 
 input PageBlocksBenefitsListFilter {

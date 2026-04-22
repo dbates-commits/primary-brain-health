@@ -577,7 +577,7 @@ export type PageBlocksHeroFilter = {
   theme?: InputMaybe<StringFilter>;
   headline?: InputMaybe<StringFilter>;
   subheadlineRich?: InputMaybe<RichTextFilter>;
-  image?: InputMaybe<ImageFilter>;
+  image?: InputMaybe<StringFilter>;
   trustText?: InputMaybe<StringFilter>;
   primaryButtonText?: InputMaybe<StringFilter>;
   primaryButtonLink?: InputMaybe<StringFilter>;
@@ -810,8 +810,8 @@ export type PageBlocksScrollRevealFilter = {
 export type PageBlocksStackSectionsItemsFilter = {
   title?: InputMaybe<StringFilter>;
   body?: InputMaybe<StringFilter>;
-  icon?: InputMaybe<ImageFilter>;
-  image?: InputMaybe<ImageFilter>;
+  icon?: InputMaybe<StringFilter>;
+  image?: InputMaybe<StringFilter>;
 };
 
 export type PageBlocksStackSectionsFilter = {
@@ -824,7 +824,7 @@ export type PageBlocksStackSectionsFilter = {
 export type PageBlocksBenefitsListItemsFilter = {
   title?: InputMaybe<StringFilter>;
   body?: InputMaybe<StringFilter>;
-  icon?: InputMaybe<ImageFilter>;
+  icon?: InputMaybe<StringFilter>;
 };
 
 export type PageBlocksBenefitsListFilter = {
