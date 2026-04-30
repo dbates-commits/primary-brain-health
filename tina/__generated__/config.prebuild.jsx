@@ -1243,6 +1243,12 @@ var intakeFormBlock = {
       name: "buttonText",
       label: "Button Text",
       type: "string"
+    },
+    {
+      name: "showIncludes",
+      label: "Show 'Includes:' panel",
+      type: "boolean",
+      description: "Toggle the consultation 'Includes:' list. Turn off on general contact pages where the form is for any inquiry."
     }
   ]
 };
@@ -1405,9 +1411,9 @@ var stackSectionsBlock = {
         },
         {
           name: "icon",
-          label: "Icon (SVG path)",
+          label: "Phosphor icon name",
           type: "string",
-          description: "Path to an SVG icon in /public (e.g. /images/Brain.svg). Uses CSS mask, so must be served same-origin."
+          description: "Name of a Phosphor icon (e.g. Brain, ClipboardText, MapTrifold). See https://phosphoricons.com for the full set."
         },
         {
           name: "image",
@@ -1447,6 +1453,18 @@ var benefitsListBlock = {
       ui: { component: "textarea" }
     },
     {
+      name: "image",
+      label: "Background image (left card)",
+      type: "image",
+      description: "Image displayed behind the headline. If empty, a dark color is used as placeholder."
+    },
+    {
+      name: "video",
+      label: "Background video (left card, overrides image)",
+      type: "string",
+      description: "Path to a video file in /public (e.g. /videos/man-sitting-on-bench.mp4). Plays muted on loop. Takes precedence over the image."
+    },
+    {
       name: "items",
       label: "Benefits",
       type: "object",
@@ -1471,9 +1489,9 @@ var benefitsListBlock = {
         },
         {
           name: "icon",
-          label: "Icon (SVG path)",
+          label: "Phosphor icon name",
           type: "string",
-          description: "Path to an SVG icon in /public (e.g. /images/Brain.svg). Uses CSS mask, so must be served same-origin."
+          description: "Name of a Phosphor icon (e.g. Brain, FlowerLotus, CalendarHeart). See https://phosphoricons.com for the full set."
         }
       ]
     }

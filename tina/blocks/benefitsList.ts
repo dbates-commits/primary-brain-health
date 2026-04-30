@@ -26,6 +26,20 @@ export const benefitsListBlock: Template = {
       ui: { component: "textarea" },
     },
     {
+      name: "image",
+      label: "Background image (left card)",
+      type: "image",
+      description:
+        "Image displayed behind the headline. If empty, a dark color is used as placeholder.",
+    },
+    {
+      name: "video",
+      label: "Background video (left card, overrides image)",
+      type: "string",
+      description:
+        "Path to a video file in /public (e.g. /videos/man-sitting-on-bench.mp4). Plays muted on loop. Takes precedence over the image.",
+    },
+    {
       name: "items",
       label: "Benefits",
       type: "object",
@@ -50,10 +64,10 @@ export const benefitsListBlock: Template = {
         },
         {
           name: "icon",
-          label: "Icon (SVG path)",
+          label: "Phosphor icon name",
           type: "string",
           description:
-            "Path to an SVG icon in /public (e.g. /images/Brain.svg). Uses CSS mask, so must be served same-origin.",
+            "Name of a Phosphor icon (e.g. Brain, FlowerLotus, CalendarHeart). See https://phosphoricons.com for the full set.",
         },
       ],
     },

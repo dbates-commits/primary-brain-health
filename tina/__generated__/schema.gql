@@ -311,6 +311,7 @@ type PageBlocksIntakeForm {
   headline: String
   subheadline: String
   buttonText: String
+  showIncludes: Boolean
 }
 
 type PageBlocksScrollReveal {
@@ -350,6 +351,8 @@ type PageBlocksBenefitsListItems {
 type PageBlocksBenefitsList {
   headline: String
   subheadline: String
+  image: String
+  video: String
   items: [PageBlocksBenefitsListItems]
 }
 
@@ -612,6 +615,7 @@ input PageBlocksIntakeFormFilter {
   headline: StringFilter
   subheadline: StringFilter
   buttonText: StringFilter
+  showIncludes: BooleanFilter
 }
 
 input PageBlocksScrollRevealFilter {
@@ -651,6 +655,8 @@ input PageBlocksBenefitsListItemsFilter {
 input PageBlocksBenefitsListFilter {
   headline: StringFilter
   subheadline: StringFilter
+  image: ImageFilter
+  video: StringFilter
   items: PageBlocksBenefitsListItemsFilter
 }
 
@@ -1395,6 +1401,7 @@ input PageBlocksIntakeFormMutation {
   headline: String
   subheadline: String
   buttonText: String
+  showIncludes: Boolean
 }
 
 input PageBlocksScrollRevealMutation {
@@ -1434,6 +1441,8 @@ input PageBlocksBenefitsListItemsMutation {
 input PageBlocksBenefitsListMutation {
   headline: String
   subheadline: String
+  image: String
+  video: String
   items: [PageBlocksBenefitsListItemsMutation]
 }
 

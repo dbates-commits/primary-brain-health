@@ -63,10 +63,10 @@ export const stackSectionsBlock: Template = {
         },
         {
           name: "icon",
-          label: "Icon (SVG path)",
+          label: "Phosphor icon name",
           type: "string",
           description:
-            "Path to an SVG icon in /public (e.g. /images/Brain.svg). Uses CSS mask, so must be served same-origin.",
+            "Name of a Phosphor icon (e.g. Brain, ClipboardText, MapTrifold). See https://phosphoricons.com for the full set.",
         },
         {
           name: "image",

@@ -11,6 +11,7 @@ export interface IntakeFormProps {
   headline?: string;
   subheadline?: string;
   buttonText?: string;
+  showIncludes?: boolean;
   tinaFields?: {
     headline?: string;
     subheadline?: string;
@@ -21,6 +22,7 @@ export function IntakeForm({
   headline,
   subheadline,
   buttonText = "Book a Consultation",
+  showIncludes = true,
   tinaFields,
 }: IntakeFormProps) {
   const [submitting, setSubmitting] = useState(false);
@@ -103,46 +105,48 @@ export function IntakeForm({
               {subheadline}
             </p>
           )}
-          <div data-scroll-item className="p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
-            <Heading as="h4" size="sm" className="mb-4 text-white">
-              Includes:
-            </Heading>
-            <ul className="space-y-3 text-on-primary-container">
-              {[
-                "Digital brain health assessment",
-                "Clinician review of your results",
-                "Consultation to collect relevant health history",
-                "Clear explanation of findings and risk profile",
-                "Personalized recommendations and next steps",
-                "Optional support from a Brain Health Navigator",
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <svg
-                    className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-10 pt-8 border-t border-white/15">
-              <span className="text-3xl font-normal text-white font-headline">$149</span>
-              <p className="text-on-primary-container/60 text-sm mt-2">
-                This service may be eligible for{' '}
-                <span className="text-white">HSA/FSA reimbursement</span>
-                . We can provide documentation to support submission.
-              </p>
+          {showIncludes && (
+            <div data-scroll-item className="p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
+              <Heading as="h4" size="sm" className="mb-4 text-white">
+                Includes:
+              </Heading>
+              <ul className="space-y-3 text-on-primary-container">
+                {[
+                  "Digital brain health assessment",
+                  "Clinician review of your results",
+                  "Consultation to collect relevant health history",
+                  "Clear explanation of findings and risk profile",
+                  "Personalized recommendations and next steps",
+                  "Optional support from a Brain Health Navigator",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-10 pt-8 border-t border-white/15">
+                <span className="text-3xl font-normal text-white font-headline">$149</span>
+                <p className="text-on-primary-container/60 text-sm mt-2">
+                  This service may be eligible for{' '}
+                  <span className="text-white">HSA/FSA reimbursement</span>
+                  . We can provide documentation to support submission.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right: Form */}

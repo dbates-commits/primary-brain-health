@@ -236,6 +236,8 @@ export function BlockRenderer({
               <BenefitsList
                 headline={block.headline}
                 subheadline={block.subheadline}
+                image={block.image}
+                video={block.video}
                 items={block.items || []}
               />
             );
@@ -281,6 +283,7 @@ export function BlockRenderer({
                 headline={block.headline}
                 subheadline={block.subheadline}
                 buttonText={block.buttonText}
+                showIncludes={block.showIncludes ?? true}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),
                   subheadline: getFieldPath(index, "subheadline"),

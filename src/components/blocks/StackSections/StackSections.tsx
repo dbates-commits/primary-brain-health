@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { PhosphorIcon } from "@/components/shared/PhosphorIcon";
 
 interface StackItem {
   title?: string;
@@ -93,7 +94,7 @@ export function StackSections({
         <div
           data-scroll-reveal
           data-scroll-stagger="90"
-          className="max-w-4xl mx-auto text-center mb-10 md:mb-16"
+          className="max-w-4xl mx-auto text-center mb-0"
         >
           {label && (
             <p
@@ -125,7 +126,11 @@ export function StackSections({
       <div ref={containerRef} className="max-w-6xl mx-auto relative">
         {items.map((item, i) => {
           const reversed = i % 2 === 1;
-          const stickyTopRem = 6 + i * 0.875;
+          const isLast = i === items.length - 1;
+          // Cards stagger their sticky offset so each previous card peeks
+          // above the next. The last card sits flush with the first so it
+          // covers earlier cards completely.
+          const stickyTopRem = isLast ? 6 : 6 + i * 0.875;
           const p = easeOutCubic(progress[i] ?? 0);
           // Subtle retreat: scale down + dim as the next card approaches
           const scale = 1 - p * 0.05;
@@ -143,8 +148,8 @@ export function StackSections({
             >
               <div
                 className={cn(
-                  "w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[560px] origin-center",
-                  reversed && "md:[&>*:first-child]:order-2"
+                  "relative w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[560px] origin-center",
+                  reversed && "md:[&>div:first-of-type]:order-2"
                 )}
                 style={{
                   transform: `scale(${scale}) translateY(${translateY}px)`,
@@ -154,26 +159,24 @@ export function StackSections({
                   willChange: "transform, filter",
                 }}
               >
-                <div className="flex flex-col md:justify-end items-start gap-5 md:gap-6 p-8 md:p-10">
+                <div className="relative flex flex-col md:justify-end items-start gap-5 md:gap-6 p-8 md:p-10">
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-5 left-8 md:top-7 md:left-10 font-headline font-normal text-primary text-2xl md:text-3xl leading-none tabular-nums"
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   {item.icon && (
-                    <span
+                    <PhosphorIcon
+                      name={item.icon}
                       aria-hidden="true"
-                      className="block w-10 h-10 bg-on-surface"
-                      style={{
-                        maskImage: `url(${item.icon})`,
-                        WebkitMaskImage: `url(${item.icon})`,
-                        maskSize: "contain",
-                        WebkitMaskSize: "contain",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskRepeat: "no-repeat",
-                        maskPosition: "center",
-                        WebkitMaskPosition: "center",
-                      }}
+                      weight="regular"
+                      className="w-10 h-10 text-on-surface"
                     />
                   )}
                   {item.title && (
                     <h3 className="font-headline font-normal text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance">
-                      {item.title}
+                      {item.title}:
                     </h3>
                   )}
                   {item.body && (

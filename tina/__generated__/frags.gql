@@ -296,6 +296,7 @@ fragment PageParts on Page {
       headline
       subheadline
       buttonText
+      showIncludes
     }
     ... on PageBlocksScrollReveal {
       label
@@ -324,6 +325,8 @@ fragment PageParts on Page {
     ... on PageBlocksBenefitsList {
       headline
       subheadline
+      image
+      video
       items {
         __typename
         title

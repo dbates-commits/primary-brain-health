@@ -32,5 +32,12 @@ export const intakeFormBlock: Template = {
       label: "Button Text",
       type: "string",
     },
+    {
+      name: "showIncludes",
+      label: "Show 'Includes:' panel",
+      type: "boolean",
+      description:
+        "Toggle the consultation 'Includes:' list. Turn off on general contact pages where the form is for any inquiry.",
+    },
   ],
 };
