@@ -15,7 +15,7 @@ interface PhosphorIconProps extends IconProps {
 
 export function PhosphorIcon({ name, ...props }: PhosphorIconProps) {
   if (!name) return null;
-  const Icon = (PhosphorIcons as Record<string, ComponentType<IconProps>>)[name];
+  const Icon = (PhosphorIcons as unknown as Record<string, ComponentType<IconProps>>)[name];
   if (!Icon) return null;
   return <Icon {...props} />;
 }
