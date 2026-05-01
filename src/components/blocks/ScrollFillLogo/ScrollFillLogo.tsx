@@ -56,17 +56,32 @@ export function ScrollFillLogo({
     brush.style.strokeDashoffset = String(length);
   }, []);
 
+  const hasFirst = Boolean(label || headline);
+  const hasSecond = Boolean(secondLabel || secondHeadline);
+  const hasThird = Boolean(thirdLabel || thirdHeadline);
+  const slideCount =
+    (hasFirst ? 1 : 0) + (hasSecond ? 1 : 0) + (hasThird ? 1 : 0);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    // Each slide owns an equal slice of scroll progress. Within its slice
+    // it fades in over the first ~20% and fades out over the last ~20%,
+    // leaving a long, calm hold in the middle. The final slide skips the
+    // fade-out and holds through the end of the section.
+    const slideRefs = [
+      hasFirst ? firstTextRef : null,
+      hasSecond ? secondTextRef : null,
+      hasThird ? thirdTextRef : null,
+    ].filter((r): r is React.RefObject<HTMLDivElement | null> => r !== null);
+    const count = slideRefs.length;
+    const fadeFrac = 0.15;
 
     let ticking = false;
     const update = () => {
       ticking = false;
       const brush = brushRef.current;
-      const firstText = firstTextRef.current;
-      const secondText = secondTextRef.current;
-      const thirdText = thirdTextRef.current;
       const length = lengthRef.current;
       if (!brush || !length) return;
 
@@ -94,29 +109,30 @@ export function ScrollFillLogo({
         svgRef.current.style.opacity = String(logoOpacity);
       }
 
-      // Text 1: fade in during entry (fraction 0.4 → 0.8 — settles as the
-      // section pins), fade out around progress 0.28 → 0.36.
-      if (firstText) {
-        const inT = smoothstep(interp(entryFraction, 0.4, 0.8));
-        const outT = smoothstep(interp(progress, 0.28, 0.36));
-        firstText.style.opacity = String(inT * (1 - outT));
-        firstText.style.transform = `translateY(${(1 - inT) * 24}px)`;
-      }
+      slideRefs.forEach((ref, i) => {
+        const el = ref.current;
+        if (!el) return;
 
-      // Text 2: in 0.34 → 0.45, out 0.60 → 0.68
-      if (secondText) {
-        const inT = smoothstep(interp(progress, 0.34, 0.45));
-        const outT = smoothstep(interp(progress, 0.60, 0.68));
-        secondText.style.opacity = String(inT * (1 - outT));
-        secondText.style.transform = `translateY(${(1 - inT) * 24}px)`;
-      }
+        const sliceStart = i / count;
+        const sliceEnd = (i + 1) / count;
+        const span = sliceEnd - sliceStart;
+        const inEnd = sliceStart + span * fadeFrac;
+        const outStart = sliceEnd - span * fadeFrac;
+        const isLast = i === count - 1;
 
-      // Text 3: in 0.66 → 0.78, holds through end
-      if (thirdText) {
-        const inT = smoothstep(interp(progress, 0.66, 0.78));
-        thirdText.style.opacity = String(inT);
-        thirdText.style.transform = `translateY(${(1 - inT) * 24}px)`;
-      }
+        // First slide uses the section-entry fraction for its initial fade
+        // so it appears as the section pins, before scroll-progress starts.
+        const inT =
+          i === 0
+            ? smoothstep(interp(entryFraction, 0.4, 0.85))
+            : smoothstep(interp(progress, sliceStart, inEnd));
+        const outT = isLast
+          ? 0
+          : smoothstep(interp(progress, outStart, sliceEnd));
+
+        el.style.opacity = String(inT * (1 - outT));
+        el.style.transform = `translateY(${(1 - inT) * 24}px)`;
+      });
     };
 
     const onScroll = () => {
@@ -132,12 +148,18 @@ export function ScrollFillLogo({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [hasFirst, hasSecond, hasThird]);
 
   return (
     <section
       ref={containerRef}
-      className="relative bg-surface h-[120vh] sm:h-[140vh]"
+      className="relative bg-surface"
+      style={{
+        // Sticky viewport (100vh) + per-slide scroll runway. The last slide
+        // gets an extra ~50vh tail so it holds at full opacity well after it
+        // finishes fading in, before the section unsticks.
+        height: `${100 + Math.max(slideCount, 1) * 100 + 50}vh`,
+      }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
         <svg

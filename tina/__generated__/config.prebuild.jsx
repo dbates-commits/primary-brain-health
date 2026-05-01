@@ -2151,6 +2151,9 @@ var settingsCollection = {
   label: "Site Settings",
   path: "content/global",
   format: "json",
+  match: {
+    exclude: "ctas/**"
+  },
   ui: {
     allowedActions: {
       create: false,
