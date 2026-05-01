@@ -356,7 +356,16 @@ type PageBlocksBenefitsList {
   items: [PageBlocksBenefitsListItems]
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList
+type PageBlocksVideoSpotlight {
+  headline: String
+  subheadline: String
+  video: String
+  poster: String
+  leftImage: String
+  rightImage: String
+}
+
+union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksVideoSpotlight
 
 type Page implements Node & Document {
   title: String!
@@ -660,6 +669,15 @@ input PageBlocksBenefitsListFilter {
   items: PageBlocksBenefitsListItemsFilter
 }
 
+input PageBlocksVideoSpotlightFilter {
+  headline: StringFilter
+  subheadline: StringFilter
+  video: StringFilter
+  poster: ImageFilter
+  leftImage: ImageFilter
+  rightImage: ImageFilter
+}
+
 input PageBlocksFilter {
   hero: PageBlocksHeroFilter
   features: PageBlocksFeaturesFilter
@@ -677,6 +695,7 @@ input PageBlocksFilter {
   scrollFillLogo: PageBlocksScrollFillLogoFilter
   stackSections: PageBlocksStackSectionsFilter
   benefitsList: PageBlocksBenefitsListFilter
+  videoSpotlight: PageBlocksVideoSpotlightFilter
 }
 
 input PageFilter {
@@ -1446,6 +1465,15 @@ input PageBlocksBenefitsListMutation {
   items: [PageBlocksBenefitsListItemsMutation]
 }
 
+input PageBlocksVideoSpotlightMutation {
+  headline: String
+  subheadline: String
+  video: String
+  poster: String
+  leftImage: String
+  rightImage: String
+}
+
 input PageBlocksMutation {
   hero: PageBlocksHeroMutation
   features: PageBlocksFeaturesMutation
@@ -1463,6 +1491,7 @@ input PageBlocksMutation {
   scrollFillLogo: PageBlocksScrollFillLogoMutation
   stackSections: PageBlocksStackSectionsMutation
   benefitsList: PageBlocksBenefitsListMutation
+  videoSpotlight: PageBlocksVideoSpotlightMutation
 }
 
 input PageMutation {

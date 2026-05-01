@@ -334,6 +334,14 @@ fragment PageParts on Page {
         icon
       }
     }
+    ... on PageBlocksVideoSpotlight {
+      headline
+      subheadline
+      video
+      poster
+      leftImage
+      rightImage
+    }
   }
 }
 

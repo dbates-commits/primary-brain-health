@@ -18,6 +18,7 @@ import { ScrollReveal } from "@/components/blocks/ScrollReveal";
 import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
 import { BenefitsList } from "@/components/blocks/BenefitsList";
+import { VideoSpotlight } from "@/components/blocks/VideoSpotlight";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Block = any;
@@ -272,6 +273,23 @@ export function BlockRenderer({
                   secondHeadline: getFieldPath(index, "secondHeadline"),
                   thirdLabel: getFieldPath(index, "thirdLabel"),
                   thirdHeadline: getFieldPath(index, "thirdHeadline"),
+                }}
+              />
+            );
+            break;
+
+          case "PageBlocksVideoSpotlight":
+            content = (
+              <VideoSpotlight
+                headline={block.headline}
+                subheadline={block.subheadline}
+                video={block.video}
+                poster={block.poster}
+                leftImage={block.leftImage}
+                rightImage={block.rightImage}
+                tinaFields={{
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
                 }}
               />
             );

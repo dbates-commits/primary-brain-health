@@ -15,6 +15,7 @@ import { scrollRevealBlock } from "../blocks/scrollReveal";
 import { scrollFillLogoBlock } from "../blocks/scrollFillLogo";
 import { stackSectionsBlock } from "../blocks/stackSections";
 import { benefitsListBlock } from "../blocks/benefitsList";
+import { videoSpotlightBlock } from "../blocks/videoSpotlight";
 
 export const pageCollection: Collection = {
   name: "page",
@@ -76,6 +77,7 @@ export const pageCollection: Collection = {
         scrollFillLogoBlock,
         stackSectionsBlock,
         benefitsListBlock,
+        videoSpotlightBlock,
       ],
     },
   ],
