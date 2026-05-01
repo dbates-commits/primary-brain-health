@@ -140,7 +140,7 @@ export function StackSections({
             <div
               key={i}
               data-stack-item
-              className="md:sticky md:h-[85vh] md:flex md:items-center mb-8 md:mb-0"
+              className="md:sticky md:h-[85vh] md:flex md:items-start md:pt-10 mb-8 md:mb-0"
               style={{
                 zIndex: i + 1,
                 top: `${stickyTopRem}rem`,

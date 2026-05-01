@@ -652,7 +652,7 @@ input PageBlocksStackSectionsItemsFilter {
   title: StringFilter
   body: StringFilter
   icon: StringFilter
-  image: StringFilter
+  image: ImageFilter
 }
 
 input PageBlocksStackSectionsFilter {

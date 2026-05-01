@@ -1392,9 +1392,8 @@ var stackSectionsBlock = {
         },
         {
           name: "image",
-          label: "Image path",
-          type: "string",
-          description: "Path to an image in /public (e.g. /images/woman.png)."
+          label: "Image",
+          type: "image"
         }
       ]
     }

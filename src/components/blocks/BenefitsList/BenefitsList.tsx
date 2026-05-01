@@ -29,11 +29,11 @@ export function BenefitsList({
       data-scroll-stagger="110"
       className="px-6 md:px-10 pt-10 md:pt-14 pb-20 md:pb-28"
     >
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-stretch">
-        {/* Left: headline card with bg image (or dark placeholder) */}
+      <div className="max-w-6xl mx-auto flex flex-col gap-12 md:gap-16">
+        {/* Top: full-width hero card with video/image and overlaid copy */}
         <div
           data-scroll-item
-          className="lg:col-span-5 relative overflow-hidden rounded-[1.25rem] bg-on-surface min-h-[420px] lg:min-h-[520px] flex flex-col justify-end p-8 md:p-10 lg:p-12"
+          className="relative overflow-hidden rounded-[1.25rem] bg-on-surface min-h-[420px] md:min-h-[480px] lg:min-h-[560px] flex flex-col justify-end p-8 md:p-10 lg:p-14"
         >
           {video ? (
             <video
@@ -42,7 +42,7 @@ export function BenefitsList({
               loop
               playsInline
               poster={image || undefined}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-top"
             >
               <source src={video} type="video/mp4" />
             </video>
@@ -59,40 +59,40 @@ export function BenefitsList({
           )}
           {/* Subtle bottom-up gradient so text stays readable on busy images */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
-          <div className="relative z-10">
+          <div className="relative z-10 max-w-2xl">
             {headline && (
               <h2 className="font-headline font-normal text-white text-3xl md:text-4xl lg:text-5xl leading-[1.05] text-balance">
                 {headline}
               </h2>
             )}
             {subheadline && (
-              <p className="mt-4 text-base md:text-lg text-white/85 text-pretty max-w-sm">
+              <p className="mt-4 text-base md:text-lg text-white/85 text-pretty">
                 {subheadline}
               </p>
             )}
           </div>
         </div>
 
-        {/* Right: list of benefits */}
-        <div className="lg:col-span-7 flex flex-col gap-10">
+        {/* Bottom: benefit items in three columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-12">
           {items.map((item, i) => (
-            <div key={i} data-scroll-item className="flex items-start gap-4">
+            <div key={i} data-scroll-item className="flex flex-col gap-4">
               {item.icon && (
                 <PhosphorIcon
                   name={item.icon}
                   aria-hidden="true"
                   weight="regular"
-                  className="shrink-0 w-8 h-8 md:w-9 md:h-9 text-on-surface translate-y-[0.15em]"
+                  className="shrink-0 w-9 h-9 md:w-10 md:h-10 text-on-surface"
                 />
               )}
-              <div className="flex-1 min-w-0">
+              <div className="flex flex-col">
                 {item.title && (
                   <h3 className="font-headline font-normal text-on-surface text-2xl md:text-3xl leading-[1.2] text-balance">
                     {item.title}
                   </h3>
                 )}
                 {item.body && (
-                  <p className="mt-2 text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md">
+                  <p className="mt-2 text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty">
                     {item.body}
                   </p>
                 )}

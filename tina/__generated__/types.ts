@@ -866,7 +866,7 @@ export type PageBlocksStackSectionsItemsFilter = {
   title?: InputMaybe<StringFilter>;
   body?: InputMaybe<StringFilter>;
   icon?: InputMaybe<StringFilter>;
-  image?: InputMaybe<StringFilter>;
+  image?: InputMaybe<ImageFilter>;
 };
 
 export type PageBlocksStackSectionsFilter = {

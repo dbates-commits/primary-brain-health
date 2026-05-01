@@ -79,7 +79,14 @@ export function FAQ({
   ctaLink,
 }: FAQProps) {
   const styles = themeStyles[theme];
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndices, setOpenIndices] = useState<Set<number>>(() => new Set([0]));
+  const toggleIndex = (index: number) =>
+    setOpenIndices((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
 
   if (variant === "accordion") {
     return (
@@ -105,11 +112,11 @@ export function FAQ({
 
           <div className="w-full divide-y divide-outline-variant/30">
             {items.map((item, index) => {
-              const isOpen = openIndex === index;
+              const isOpen = openIndices.has(index);
               return (
                 <div key={index} data-scroll-item>
                   <button
-                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    onClick={() => toggleIndex(index)}
                     className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >

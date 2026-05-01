@@ -76,7 +76,7 @@ export function ScrollFillLogo({
       hasThird ? thirdTextRef : null,
     ].filter((r): r is React.RefObject<HTMLDivElement | null> => r !== null);
     const count = slideRefs.length;
-    const fadeFrac = 0.15;
+    const fadeFrac = 0.3;
 
     let ticking = false;
     const update = () => {
