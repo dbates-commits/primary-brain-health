@@ -110,7 +110,7 @@ export function FAQ({
                 <div key={index} data-scroll-item>
                   <button
                     onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="w-full flex items-center justify-between gap-6 py-6 text-left"
+                    className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
                     <span className="font-body text-lg md:text-xl font-medium text-on-surface pr-4">

@@ -6,6 +6,7 @@ import { authorCollection } from "./collections/author";
 import { testimonialCollection } from "./collections/testimonial";
 import { globalCtaCollection } from "./collections/globalCta";
 import { settingsCollection } from "./collections/settings";
+import { faqCollection } from "./collections/faq";
 
 // Your hosting provider likely exposes this as an environment variable
 const branch =
@@ -43,6 +44,7 @@ export default defineConfig({
       testimonialCollection,
       globalCtaCollection,
       settingsCollection,
+      faqCollection,
     ],
   },
 });

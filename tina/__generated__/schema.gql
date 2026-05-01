@@ -68,6 +68,8 @@ type Query {
   globalCtaConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: GlobalCtaFilter): GlobalCtaConnection!
   settings(relativePath: String): Settings!
   settingsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: SettingsFilter): SettingsConnection!
+  faq(relativePath: String): Faq!
+  faqConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: FaqFilter): FaqConnection!
 }
 
 input DocumentFilter {
@@ -78,6 +80,7 @@ input DocumentFilter {
   testimonial: TestimonialFilter
   globalCta: GlobalCtaFilter
   settings: SettingsFilter
+  faq: FaqFilter
 }
 
 type DocumentConnectionEdges {
@@ -103,7 +106,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Page | Post | Project | Author | Testimonial | GlobalCta | Settings | Folder
+union DocumentNode = Page | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder
 
 type PageBlocksHero {
   theme: String
@@ -225,10 +228,10 @@ type PageBlocksPricing {
   tiers: [PageBlocksPricingTiers]
 }
 
+union PageBlocksFaqItemsFaq = Faq
+
 type PageBlocksFaqItems {
-  question: String!
-  answer: String
-  category: String
+  faq: PageBlocksFaqItemsFaq
 }
 
 type PageBlocksFaq {
@@ -237,6 +240,7 @@ type PageBlocksFaq {
   headline: String
   subheadline: String
   items: [PageBlocksFaqItems]
+  limit: Float
   showCategories: Boolean
   ctaText: String
   ctaButtonText: String
@@ -536,10 +540,12 @@ input PageBlocksPricingFilter {
   tiers: PageBlocksPricingTiersFilter
 }
 
+input PageBlocksFaqItemsFaqFilter {
+  faq: FaqFilter
+}
+
 input PageBlocksFaqItemsFilter {
-  question: StringFilter
-  answer: StringFilter
-  category: StringFilter
+  faq: PageBlocksFaqItemsFaqFilter
 }
 
 input PageBlocksFaqFilter {
@@ -548,6 +554,7 @@ input PageBlocksFaqFilter {
   headline: StringFilter
   subheadline: StringFilter
   items: PageBlocksFaqItemsFilter
+  limit: NumberFilter
   showCategories: BooleanFilter
   ctaText: StringFilter
   ctaButtonText: StringFilter
@@ -1177,6 +1184,34 @@ type SettingsConnection implements Connection {
   edges: [SettingsConnectionEdges]
 }
 
+type Faq implements Node & Document {
+  question: String!
+  answer: String!
+  category: String
+  sortOrder: Float
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+input FaqFilter {
+  question: StringFilter
+  answer: StringFilter
+  category: StringFilter
+  sortOrder: NumberFilter
+}
+
+type FaqConnectionEdges {
+  cursor: String!
+  node: Faq
+}
+
+type FaqConnection implements Connection {
+  pageInfo: PageInfo!
+  totalCount: Float!
+  edges: [FaqConnectionEdges]
+}
+
 type Mutation {
   addPendingDocument(collection: String!, relativePath: String!, template: String): DocumentNode!
   updateDocument(collection: String, relativePath: String!, params: DocumentUpdateMutation!): DocumentNode!
@@ -1197,6 +1232,8 @@ type Mutation {
   createGlobalCta(relativePath: String!, params: GlobalCtaMutation!): GlobalCta!
   updateSettings(relativePath: String!, params: SettingsMutation!): Settings!
   createSettings(relativePath: String!, params: SettingsMutation!): Settings!
+  updateFaq(relativePath: String!, params: FaqMutation!): Faq!
+  createFaq(relativePath: String!, params: FaqMutation!): Faq!
 }
 
 input DocumentUpdateMutation {
@@ -1207,6 +1244,7 @@ input DocumentUpdateMutation {
   testimonial: TestimonialMutation
   globalCta: GlobalCtaMutation
   settings: SettingsMutation
+  faq: FaqMutation
   relativePath: String
 }
 
@@ -1218,6 +1256,7 @@ input DocumentMutation {
   testimonial: TestimonialMutation
   globalCta: GlobalCtaMutation
   settings: SettingsMutation
+  faq: FaqMutation
 }
 
 input PageBlocksHeroMutation {
@@ -1337,9 +1376,7 @@ input PageBlocksPricingMutation {
 }
 
 input PageBlocksFaqItemsMutation {
-  question: String
-  answer: String
-  category: String
+  faq: String
 }
 
 input PageBlocksFaqMutation {
@@ -1348,6 +1385,7 @@ input PageBlocksFaqMutation {
   headline: String
   subheadline: String
   items: [PageBlocksFaqItemsMutation]
+  limit: Float
   showCategories: Boolean
   ctaText: String
   ctaButtonText: String
@@ -1645,6 +1683,13 @@ input SettingsMutation {
   socialImage: String
   header: SettingsHeaderMutation
   footer: SettingsFooterMutation
+}
+
+input FaqMutation {
+  question: String
+  answer: String
+  category: String
+  sortOrder: Float
 }
 
 schema {

@@ -120,20 +120,56 @@ export function BlockRenderer({
             );
             break;
 
-          case "PageBlocksFaq":
+          case "PageBlocksFaq": {
+            // Resolve referenced FAQ documents → { question, answer, category }.
+            // Order by each FAQ's sortOrder when set, otherwise preserve the
+            // editor's ordering on the block. Apply `limit` after sorting so
+            // the homepage block can show e.g. the first 4.
+            type FaqDoc = {
+              question?: string | null;
+              answer?: string | null;
+              category?: string | null;
+              sortOrder?: number | null;
+            };
+            type FaqRefItem = { faq?: FaqDoc | null };
+            const rawRefs = (block.items ?? []) as FaqRefItem[];
+            const resolved = rawRefs
+              .map((r) => r.faq)
+              .filter(
+                (f): f is FaqDoc =>
+                  Boolean(f && typeof f.question === "string" && f.question)
+              );
+            const sorted = resolved.slice().sort((a, b) => {
+              const ao = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+              const bo = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+              return ao - bo;
+            });
+            const limit =
+              typeof block.limit === "number" && block.limit > 0
+                ? block.limit
+                : undefined;
+            const faqItems = (limit ? sorted.slice(0, limit) : sorted).map(
+              (f) => ({
+                question: f.question ?? "",
+                answer: f.answer ?? undefined,
+                category: f.category ?? undefined,
+              })
+            );
+
             content = (
               <FAQ
                 variant={block.variant}
                 theme={block.theme}
                 headline={block.headline}
                 subheadline={block.subheadline}
-                items={block.items || []}
+                items={faqItems}
                 ctaText={block.ctaText}
                 ctaButtonText={block.ctaButtonText}
                 ctaLink={block.ctaLink}
               />
             );
             break;
+          }
 
           case "PageBlocksCta":
             content = (

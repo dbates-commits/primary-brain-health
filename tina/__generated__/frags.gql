@@ -201,10 +201,29 @@ fragment PageParts on Page {
       subheadline
       items {
         __typename
-        question
-        answer
-        category
+        faq {
+          ... on Faq {
+            __typename
+            question
+            answer
+            category
+            sortOrder
+          }
+          ... on Document {
+            _sys {
+              filename
+              basename
+              hasReferences
+              breadcrumbs
+              path
+              relativePath
+              extension
+            }
+            id
+          }
+        }
       }
+      limit
       showCategories
       ctaText
       ctaButtonText
@@ -675,4 +694,12 @@ fragment SettingsParts on Settings {
       youtube
     }
   }
+}
+
+fragment FaqParts on Faq {
+  __typename
+  question
+  answer
+  category
+  sortOrder
 }

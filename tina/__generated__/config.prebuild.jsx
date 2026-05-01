@@ -774,20 +774,7 @@ var faqBlock = {
       variant: "accordion",
       theme: "light",
       headline: "Frequently Asked Questions",
-      items: [
-        {
-          question: "What is your refund policy?",
-          answer: "We offer a 30-day money-back guarantee on all plans."
-        },
-        {
-          question: "Can I upgrade my plan later?",
-          answer: "Yes, you can upgrade or downgrade your plan at any time."
-        },
-        {
-          question: "Do you offer customer support?",
-          answer: "Yes, we offer 24/7 customer support via email and chat."
-        }
-      ]
+      items: []
     },
     itemProps: (item) => ({
       label: `FAQ - ${item?.variant || "accordion"} (${item?.items?.length || 0} items)`
@@ -828,33 +815,21 @@ var faqBlock = {
       label: "FAQ Items",
       type: "object",
       list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: item?.question || "FAQ Item"
-        })
-      },
+      description: "Pick FAQs from the FAQ collection. Order here is overridden by each FAQ's Sort Order if set.",
       fields: [
         {
-          name: "question",
-          label: "Question",
-          type: "string",
-          required: true
-        },
-        {
-          name: "answer",
-          label: "Answer",
-          type: "string",
-          ui: {
-            component: "textarea"
-          }
-        },
-        {
-          name: "category",
-          label: "Category",
-          type: "string",
-          description: "Optional category for grouping"
+          name: "faq",
+          label: "FAQ",
+          type: "reference",
+          collections: ["faq"]
         }
       ]
+    },
+    {
+      name: "limit",
+      label: "Limit",
+      type: "number",
+      description: "Show only the first N FAQs (after sorting). Leave empty to show all."
     },
     {
       name: "showCategories",
@@ -2360,6 +2335,44 @@ var settingsCollection = {
   ]
 };
 
+// tina/collections/faq.ts
+var faqCollection = {
+  name: "faq",
+  label: "FAQs",
+  path: "content/faqs",
+  format: "json",
+  fields: [
+    {
+      name: "question",
+      label: "Question",
+      type: "string",
+      required: true,
+      isTitle: true
+    },
+    {
+      name: "answer",
+      label: "Answer",
+      type: "string",
+      required: true,
+      ui: {
+        component: "textarea"
+      }
+    },
+    {
+      name: "category",
+      label: "Category",
+      type: "string",
+      description: "Optional category for grouping/filters"
+    },
+    {
+      name: "sortOrder",
+      label: "Sort Order",
+      type: "number",
+      description: "Lower numbers appear first. FAQs without a sort order fall back to alphabetical by filename."
+    }
+  ]
+};
+
 // tina/config.ts
 var branch = process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || process.env.HEAD || "main";
 var isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
@@ -2387,7 +2400,8 @@ var config_default = defineConfig({
       authorCollection,
       testimonialCollection,
       globalCtaCollection,
-      settingsCollection
+      settingsCollection,
+      faqCollection
     ]
   }
 });
