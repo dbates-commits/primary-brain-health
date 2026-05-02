@@ -29,6 +29,12 @@ export interface FAQProps {
   ctaText?: string;
   ctaButtonText?: string;
   ctaLink?: string;
+  tinaFields?: {
+    headline?: string;
+    subheadline?: string;
+    ctaText?: string;
+    ctaButtonText?: string;
+  };
 }
 
 const themeStyles = {
@@ -77,6 +83,7 @@ export function FAQ({
   ctaText,
   ctaButtonText,
   ctaLink,
+  tinaFields,
 }: FAQProps) {
   const styles = themeStyles[theme];
   const [openIndices, setOpenIndices] = useState<Set<number>>(() => new Set([0]));
@@ -98,12 +105,18 @@ export function FAQ({
           {(headline || subheadline) && (
             <div data-scroll-item className="text-center max-w-3xl">
               {headline && (
-                <h1 className="font-headline font-normal text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance">
+                <h1
+                  data-tina-field={tinaFields?.headline}
+                  className="font-headline font-normal text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance"
+                >
                   {headline}
                 </h1>
               )}
               {subheadline && (
-                <p className="text-base md:text-lg text-on-surface-variant mt-4">
+                <p
+                  data-tina-field={tinaFields?.subheadline}
+                  className="text-base md:text-lg text-on-surface-variant mt-4"
+                >
                   {subheadline}
                 </p>
               )}
@@ -155,12 +168,19 @@ export function FAQ({
           {ctaLink && (ctaButtonText || ctaText) && (
             <div data-scroll-item className="text-center mt-4">
               {ctaText && (
-                <p className="mb-4 text-on-surface-variant">{ctaText}</p>
+                <p
+                  data-tina-field={tinaFields?.ctaText}
+                  className="mb-4 text-on-surface-variant"
+                >
+                  {ctaText}
+                </p>
               )}
               {ctaButtonText && (
-                <Button href={ctaLink} variant="outline" color="primary">
-                  {ctaButtonText}
-                </Button>
+                <span data-tina-field={tinaFields?.ctaButtonText}>
+                  <Button href={ctaLink} variant="outline" color="primary">
+                    {ctaButtonText}
+                  </Button>
+                </span>
               )}
             </div>
           )}

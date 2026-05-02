@@ -323,13 +323,13 @@ type PageBlocksScrollReveal {
   headline: String
 }
 
-type PageBlocksScrollFillLogo {
+type PageBlocksScrollFillLogoSlides {
   label: String
   headline: String
-  secondLabel: String
-  secondHeadline: String
-  thirdLabel: String
-  thirdHeadline: String
+}
+
+type PageBlocksScrollFillLogo {
+  slides: [PageBlocksScrollFillLogoSlides]
 }
 
 type PageBlocksStackSectionsItems {
@@ -639,13 +639,13 @@ input PageBlocksScrollRevealFilter {
   headline: StringFilter
 }
 
-input PageBlocksScrollFillLogoFilter {
+input PageBlocksScrollFillLogoSlidesFilter {
   label: StringFilter
   headline: StringFilter
-  secondLabel: StringFilter
-  secondHeadline: StringFilter
-  thirdLabel: StringFilter
-  thirdHeadline: StringFilter
+}
+
+input PageBlocksScrollFillLogoFilter {
+  slides: PageBlocksScrollFillLogoSlidesFilter
 }
 
 input PageBlocksStackSectionsItemsFilter {
@@ -1466,13 +1466,13 @@ input PageBlocksScrollRevealMutation {
   headline: String
 }
 
-input PageBlocksScrollFillLogoMutation {
+input PageBlocksScrollFillLogoSlidesMutation {
   label: String
   headline: String
-  secondLabel: String
-  secondHeadline: String
-  thirdLabel: String
-  thirdHeadline: String
+}
+
+input PageBlocksScrollFillLogoMutation {
+  slides: [PageBlocksScrollFillLogoSlidesMutation]
 }
 
 input PageBlocksStackSectionsItemsMutation {

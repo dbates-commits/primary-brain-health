@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { tinaField } from "tinacms/dist/react";
 import { cn } from "@/lib/utils";
 import { PhosphorIcon } from "@/components/shared/PhosphorIcon";
 
@@ -16,6 +17,13 @@ interface StackSectionsProps {
   headline?: string;
   subheadline?: string;
   items?: StackItem[];
+  tinaFields?: {
+    label?: string;
+    headline?: string;
+    subheadline?: string;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockData?: any;
 }
 
 export function StackSections({
@@ -23,7 +31,13 @@ export function StackSections({
   headline,
   subheadline,
   items = [],
+  tinaFields,
+  blockData,
 }: StackSectionsProps) {
+  const getItemField = (index: number, field: string) =>
+    blockData?.items?.[index]
+      ? tinaField(blockData.items[index], field)
+      : undefined;
   const containerRef = useRef<HTMLDivElement>(null);
   // Per-card progress (0 = fully visible, 1 = fully covered by next card)
   const [progress, setProgress] = useState<number[]>(() =>
@@ -99,6 +113,7 @@ export function StackSections({
           {label && (
             <p
               data-scroll-item
+              data-tina-field={tinaFields?.label}
               className="font-body font-bold text-primary text-xs md:text-sm uppercase tracking-[0.18em] mb-4"
             >
               {label}
@@ -107,6 +122,7 @@ export function StackSections({
           {headline && (
             <h2
               data-scroll-item
+              data-tina-field={tinaFields?.headline}
               className="font-headline font-normal text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
             >
               {headline}
@@ -115,6 +131,7 @@ export function StackSections({
           {subheadline && (
             <p
               data-scroll-item
+              data-tina-field={tinaFields?.subheadline}
               className="mt-5 text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto text-pretty"
             >
               {subheadline}
@@ -175,12 +192,18 @@ export function StackSections({
                     />
                   )}
                   {item.title && (
-                    <h3 className="font-headline font-normal text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance">
+                    <h3
+                      data-tina-field={getItemField(i, "title")}
+                      className="font-headline font-normal text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
+                    >
                       {item.title}:
                     </h3>
                   )}
                   {item.body && (
-                    <p className="text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md">
+                    <p
+                      data-tina-field={getItemField(i, "body")}
+                      className="text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md"
+                    >
                       {item.body}
                     </p>
                   )}

@@ -1,22 +1,17 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { tinaField } from "tinacms/dist/react";
 
-interface ScrollFillLogoProps {
+interface Slide {
   label?: string;
   headline?: string;
-  secondLabel?: string;
-  secondHeadline?: string;
-  thirdLabel?: string;
-  thirdHeadline?: string;
-  tinaFields?: {
-    label?: string;
-    headline?: string;
-    secondLabel?: string;
-    secondHeadline?: string;
-    thirdLabel?: string;
-    thirdHeadline?: string;
-  };
+}
+
+interface ScrollFillLogoProps {
+  slides?: Slide[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockData?: any;
 }
 
 // Ribbon shape: an arcing trajectory from lower-left to upper-right with a
@@ -31,21 +26,26 @@ const interp = (t: number, a: number, b: number) =>
   Math.max(0, Math.min(1, (t - a) / (b - a)));
 
 export function ScrollFillLogo({
-  label,
-  headline,
-  secondLabel,
-  secondHeadline,
-  thirdLabel,
-  thirdHeadline,
-  tinaFields,
+  slides = [],
+  blockData,
 }: ScrollFillLogoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const brushRef = useRef<SVGPathElement>(null);
-  const firstTextRef = useRef<HTMLDivElement>(null);
-  const secondTextRef = useRef<HTMLDivElement>(null);
-  const thirdTextRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
   const lengthRef = useRef(0);
+
+  // Filter out empty slides for rendering, but remember the original index so
+  // each slide's tinaField path points back at the right repeater item.
+  const populated = slides
+    .map((slide, originalIndex) => ({ ...slide, originalIndex }))
+    .filter((s) => s.label || s.headline);
+  const count = populated.length;
+
+  const getSlideField = (originalIndex: number, field: string) =>
+    blockData?.slides?.[originalIndex]
+      ? tinaField(blockData.slides[originalIndex], field)
+      : undefined;
 
   useLayoutEffect(() => {
     const brush = brushRef.current;
@@ -56,26 +56,14 @@ export function ScrollFillLogo({
     brush.style.strokeDashoffset = String(length);
   }, []);
 
-  const hasFirst = Boolean(label || headline);
-  const hasSecond = Boolean(secondLabel || secondHeadline);
-  const hasThird = Boolean(thirdLabel || thirdHeadline);
-  const slideCount =
-    (hasFirst ? 1 : 0) + (hasSecond ? 1 : 0) + (hasThird ? 1 : 0);
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Each slide owns an equal slice of scroll progress. Within its slice
-    // it fades in over the first ~20% and fades out over the last ~20%,
-    // leaving a long, calm hold in the middle. The final slide skips the
-    // fade-out and holds through the end of the section.
-    const slideRefs = [
-      hasFirst ? firstTextRef : null,
-      hasSecond ? secondTextRef : null,
-      hasThird ? thirdTextRef : null,
-    ].filter((r): r is React.RefObject<HTMLDivElement | null> => r !== null);
-    const count = slideRefs.length;
+    // Each slide owns an equal slice of scroll progress. Within its slice it
+    // fades in over the first ~30% and fades out over the last ~30%, leaving
+    // a long, calm hold in the middle. The final slide skips the fade-out
+    // and holds through the end of the section.
     const fadeFrac = 0.3;
 
     let ticking = false;
@@ -93,7 +81,7 @@ export function ScrollFillLogo({
 
       // Entry fraction: 0 when the section is a full viewport below, 1 when
       // its top has reached the viewport top (sticky activated). Used so the
-      // first text can fade in before the scroll-linked `progress` starts.
+      // first slide can fade in before the scroll-linked `progress` starts.
       const entryFraction = Math.max(
         0,
         Math.min(1, 1 - rect.top / viewportH)
@@ -101,17 +89,14 @@ export function ScrollFillLogo({
 
       brush.style.strokeDashoffset = String(length * (1 - progress));
 
-      // Ribbon container: hold invisible until the section is pinned and the
-      // brush has started drawing, then fade in. Without this, the freshly
-      // drawn brush appears at full opacity from the first pixel.
       if (svgRef.current) {
         const logoOpacity = smoothstep(interp(progress, 0.08, 0.28));
         svgRef.current.style.opacity = String(logoOpacity);
       }
 
-      slideRefs.forEach((ref, i) => {
-        const el = ref.current;
-        if (!el) return;
+      for (let i = 0; i < count; i++) {
+        const el = slideRefs.current[i];
+        if (!el) continue;
 
         const sliceStart = i / count;
         const sliceEnd = (i + 1) / count;
@@ -120,8 +105,6 @@ export function ScrollFillLogo({
         const outStart = sliceEnd - span * fadeFrac;
         const isLast = i === count - 1;
 
-        // First slide uses the section-entry fraction for its initial fade
-        // so it appears as the section pins, before scroll-progress starts.
         const inT =
           i === 0
             ? smoothstep(interp(entryFraction, 0.4, 0.85))
@@ -132,7 +115,7 @@ export function ScrollFillLogo({
 
         el.style.opacity = String(inT * (1 - outT));
         el.style.transform = `translateY(${(1 - inT) * 24}px)`;
-      });
+      }
     };
 
     const onScroll = () => {
@@ -148,7 +131,7 @@ export function ScrollFillLogo({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [hasFirst, hasSecond, hasThird]);
+  }, [count]);
 
   return (
     <section
@@ -158,7 +141,7 @@ export function ScrollFillLogo({
         // Sticky viewport (100vh) + per-slide scroll runway. The last slide
         // gets an extra ~50vh tail so it holds at full opacity well after it
         // finishes fading in, before the section unsticks.
-        height: `${100 + Math.max(slideCount, 1) * 100 + 50}vh`,
+        height: `${100 + Math.max(count, 1) * 100 + 50}vh`,
       }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
@@ -183,86 +166,40 @@ export function ScrollFillLogo({
         </svg>
 
         <div className="relative z-10 grid max-w-6xl px-6 md:px-10 mx-auto text-center">
-          <div
-            ref={firstTextRef}
-            className="col-start-1 row-start-1"
-            style={{
-              opacity: 0,
-              transform: "translateY(24px)",
-              willChange: "opacity, transform",
-            }}
-          >
-            {label && (
-              <p
-                className="text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-10"
-                data-tina-field={tinaFields?.label}
-              >
-                {label}
-              </p>
-            )}
-            {headline && (
-              <p
-                className="font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface"
-                data-tina-field={tinaFields?.headline}
-              >
-                {headline}
-              </p>
-            )}
-          </div>
-
-          <div
-            ref={secondTextRef}
-            className="col-start-1 row-start-1"
-            style={{
-              opacity: 0,
-              transform: "translateY(24px)",
-              willChange: "opacity, transform",
-            }}
-          >
-            {secondLabel && (
-              <p
-                className="text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-8"
-                data-tina-field={tinaFields?.secondLabel}
-              >
-                {secondLabel}
-              </p>
-            )}
-            {secondHeadline && (
-              <p
-                className="font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface"
-                data-tina-field={tinaFields?.secondHeadline}
-              >
-                {secondHeadline}
-              </p>
-            )}
-          </div>
-
-          <div
-            ref={thirdTextRef}
-            className="col-start-1 row-start-1"
-            style={{
-              opacity: 0,
-              transform: "translateY(24px)",
-              willChange: "opacity, transform",
-            }}
-          >
-            {thirdLabel && (
-              <p
-                className="text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-8"
-                data-tina-field={tinaFields?.thirdLabel}
-              >
-                {thirdLabel}
-              </p>
-            )}
-            {thirdHeadline && (
-              <p
-                className="font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface"
-                data-tina-field={tinaFields?.thirdHeadline}
-              >
-                {thirdHeadline}
-              </p>
-            )}
-          </div>
+          {populated.map((slide, i) => (
+            <div
+              key={slide.originalIndex}
+              ref={(el) => {
+                slideRefs.current[i] = el;
+              }}
+              className="col-start-1 row-start-1"
+              style={{
+                opacity: 0,
+                transform: "translateY(24px)",
+                willChange: "opacity, transform",
+              }}
+            >
+              {slide.label && (
+                <p
+                  className="text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-10"
+                  data-tina-field={getSlideField(slide.originalIndex, "label")}
+                >
+                  {slide.label}
+                </p>
+              )}
+              {slide.headline && (
+                <p
+                  className="font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface"
+                  data-tina-field={getSlideField(
+                    slide.originalIndex,
+                    "headline"
+                  )}
+                >
+                  {slide.headline}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>

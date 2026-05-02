@@ -166,6 +166,12 @@ export function BlockRenderer({
                 ctaText={block.ctaText}
                 ctaButtonText={block.ctaButtonText}
                 ctaLink={block.ctaLink}
+                tinaFields={{
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
+                  ctaText: getFieldPath(index, "ctaText"),
+                  ctaButtonText: getFieldPath(index, "ctaButtonText"),
+                }}
               />
             );
             break;
@@ -264,6 +270,12 @@ export function BlockRenderer({
                 headline={block.headline}
                 subheadline={block.subheadline}
                 items={block.items || []}
+                tinaFields={{
+                  label: getFieldPath(index, "label"),
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
+                }}
+                blockData={data?.blocks?.[index]}
               />
             );
             break;
@@ -276,6 +288,11 @@ export function BlockRenderer({
                 image={block.image}
                 video={block.video}
                 items={block.items || []}
+                tinaFields={{
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
+                }}
+                blockData={data?.blocks?.[index]}
               />
             );
             break;
@@ -296,20 +313,8 @@ export function BlockRenderer({
           case "PageBlocksScrollFillLogo":
             content = (
               <ScrollFillLogo
-                label={block.label}
-                headline={block.headline}
-                secondLabel={block.secondLabel}
-                secondHeadline={block.secondHeadline}
-                thirdLabel={block.thirdLabel}
-                thirdHeadline={block.thirdHeadline}
-                tinaFields={{
-                  label: getFieldPath(index, "label"),
-                  headline: getFieldPath(index, "headline"),
-                  secondLabel: getFieldPath(index, "secondLabel"),
-                  secondHeadline: getFieldPath(index, "secondHeadline"),
-                  thirdLabel: getFieldPath(index, "thirdLabel"),
-                  thirdHeadline: getFieldPath(index, "thirdHeadline"),
-                }}
+                slides={block.slides || []}
+                blockData={data?.blocks?.[index]}
               />
             );
             break;

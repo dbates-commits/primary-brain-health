@@ -1,5 +1,6 @@
 "use client";
 
+import { tinaField } from "tinacms/dist/react";
 import { PhosphorIcon } from "@/components/shared/PhosphorIcon";
 
 interface BenefitItem {
@@ -14,6 +15,12 @@ interface BenefitsListProps {
   image?: string;
   video?: string;
   items?: BenefitItem[];
+  tinaFields?: {
+    headline?: string;
+    subheadline?: string;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockData?: any;
 }
 
 export function BenefitsList({
@@ -22,7 +29,13 @@ export function BenefitsList({
   image,
   video,
   items = [],
+  tinaFields,
+  blockData,
 }: BenefitsListProps) {
+  const getItemField = (index: number, field: string) =>
+    blockData?.items?.[index]
+      ? tinaField(blockData.items[index], field)
+      : undefined;
   return (
     <section
       data-scroll-reveal
@@ -61,12 +74,18 @@ export function BenefitsList({
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
           <div className="relative z-10 max-w-2xl">
             {headline && (
-              <h2 className="font-headline font-normal text-white text-3xl md:text-4xl lg:text-5xl leading-[1.05] text-balance">
+              <h2
+                data-tina-field={tinaFields?.headline}
+                className="font-headline font-normal text-white text-3xl md:text-4xl lg:text-5xl leading-[1.05] text-balance"
+              >
                 {headline}
               </h2>
             )}
             {subheadline && (
-              <p className="mt-4 text-base md:text-lg text-white/85 text-pretty">
+              <p
+                data-tina-field={tinaFields?.subheadline}
+                className="mt-4 text-base md:text-lg text-white/85 text-pretty"
+              >
                 {subheadline}
               </p>
             )}
@@ -87,12 +106,18 @@ export function BenefitsList({
               )}
               <div className="flex flex-col">
                 {item.title && (
-                  <h3 className="font-headline font-normal text-on-surface text-2xl md:text-3xl leading-[1.2] text-balance">
+                  <h3
+                    data-tina-field={getItemField(i, "title")}
+                    className="font-headline font-normal text-on-surface text-2xl md:text-3xl leading-[1.2] text-balance"
+                  >
                     {item.title}
                   </h3>
                 )}
                 {item.body && (
-                  <p className="mt-2 text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty">
+                  <p
+                    data-tina-field={getItemField(i, "body")}
+                    className="mt-2 text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty"
+                  >
                     {item.body}
                   </p>
                 )}

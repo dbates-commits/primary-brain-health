@@ -322,12 +322,11 @@ fragment PageParts on Page {
       headline
     }
     ... on PageBlocksScrollFillLogo {
-      label
-      headline
-      secondLabel
-      secondHeadline
-      thirdLabel
-      thirdHeadline
+      slides {
+        __typename
+        label
+        headline
+      }
     }
     ... on PageBlocksStackSections {
       label
