@@ -11,6 +11,7 @@ export interface IntakeFormProps {
   headline?: string;
   subheadline?: string;
   buttonText?: string;
+  buttonTextMobile?: string;
   showIncludes?: boolean;
   tinaFields?: {
     headline?: string;
@@ -22,6 +23,7 @@ export function IntakeForm({
   headline,
   subheadline,
   buttonText = "Book a Consultation",
+  buttonTextMobile,
   showIncludes = true,
   tinaFields,
 }: IntakeFormProps) {
@@ -46,18 +48,20 @@ export function IntakeForm({
 
     const form = e.currentTarget;
     const data = {
-      fullName: (form.elements.namedItem("fullName") as HTMLInputElement).value,
+      firstName: (form.elements.namedItem("firstName") as HTMLInputElement)
+        .value,
+      lastName: (form.elements.namedItem("lastName") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
-      birthYear: (form.elements.namedItem("birthYear") as HTMLInputElement)
+      yearOfBirth: (form.elements.namedItem("yearOfBirth") as HTMLSelectElement)
         .value,
-      sex: (form.elements.namedItem("sex") as HTMLSelectElement).value,
-      yearsOfEducation: (
-        form.elements.namedItem("yearsOfEducation") as HTMLSelectElement
+      gender: (form.elements.namedItem("gender") as HTMLSelectElement).value,
+      educationLevel: (
+        form.elements.namedItem("educationLevel") as HTMLSelectElement
       ).value,
-      contactFor: (
+      patientIdentification: (
         form.querySelector(
-          'input[name="contactFor"]:checked'
+          'input[name="patientIdentification"]:checked'
         ) as HTMLInputElement
       )?.value,
       message: (form.elements.namedItem("message") as HTMLTextAreaElement)
@@ -77,14 +81,14 @@ export function IntakeForm({
   };
 
   const inputClasses =
-    "w-full bg-surface-container-low border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
+    "w-full bg-surface-container-low border-none rounded-lg px-3 py-3 sm:px-4 sm:py-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
 
   return (
     <Section
       id="intake"
-      className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary"
+      className="py-16 md:py-32 px-4 sm:px-6 md:px-16 bg-primary text-on-primary"
     >
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-16">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
         {/* Left: Copy */}
         <div className="flex flex-col">
           {headline && (
@@ -106,7 +110,7 @@ export function IntakeForm({
             </p>
           )}
           {showIncludes && (
-            <div data-scroll-item className="p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
+            <div data-scroll-item className="p-6 sm:p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
               <Heading as="h4" size="sm" className="mb-4 text-white">
                 Includes:
               </Heading>
@@ -150,25 +154,46 @@ export function IntakeForm({
         </div>
 
         {/* Right: Form */}
-        <div data-scroll-item className="bg-surface-container-lowest p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg">
+        <div data-scroll-item className="bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
-                  htmlFor="fullName"
+                  htmlFor="firstName"
                   className="block text-sm font-semibold mb-2"
                 >
-                  Full Name
+                  First Name
                 </label>
                 <input
-                  id="fullName"
-                  name="fullName"
+                  id="firstName"
+                  name="firstName"
                   type="text"
+                  autoComplete="given-name"
                   required
-                  placeholder="Jane Doe"
+                  placeholder="Jane"
                   className={inputClasses}
                 />
               </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-semibold mb-2"
+                >
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  placeholder="Doe"
+                  className={inputClasses}
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
                   htmlFor="email"
@@ -180,14 +205,12 @@ export function IntakeForm({
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   placeholder="jane@example.com"
                   className={inputClasses}
                 />
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
                   htmlFor="phone"
@@ -199,27 +222,34 @@ export function IntakeForm({
                   id="phone"
                   name="phone"
                   type="tel"
+                  autoComplete="tel"
                   required
                   placeholder="(555) 000-0000"
                   onChange={handlePhoneInput}
                   className={inputClasses}
                 />
               </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
-                  htmlFor="birthYear"
+                  htmlFor="yearOfBirth"
                   className="block text-sm font-semibold mb-2"
                 >
-                  Birth Year
+                  Year of Birth
                 </label>
                 <div className="relative">
                   <select
-                    id="birthYear"
-                    name="birthYear"
+                    id="yearOfBirth"
+                    name="yearOfBirth"
                     required
+                    defaultValue=""
                     className={cn(inputClasses, "appearance-none pr-10")}
                   >
-                    <option value="">Select year</option>
+                    <option value="" disabled>
+                      Select year
+                    </option>
                     {birthYears.map((year) => (
                       <option key={year} value={year}>
                         {year}
@@ -236,27 +266,27 @@ export function IntakeForm({
                   </svg>
                 </div>
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
-                  htmlFor="sex"
+                  htmlFor="gender"
                   className="block text-sm font-semibold mb-2"
                 >
-                  Sex
+                  Gender
                 </label>
                 <div className="relative">
                   <select
-                    id="sex"
-                    name="sex"
+                    id="gender"
+                    name="gender"
                     required
+                    defaultValue=""
                     className={cn(inputClasses, "appearance-none pr-10")}
                   >
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="" disabled>
+                      Select
+                    </option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                   <svg
                     className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
@@ -268,57 +298,58 @@ export function IntakeForm({
                   </svg>
                 </div>
               </div>
-              <div>
-                <label
-                  htmlFor="yearsOfEducation"
-                  className="block text-sm font-semibold mb-2"
+            </div>
+
+            <div>
+              <label
+                htmlFor="educationLevel"
+                className="block text-sm font-semibold mb-2"
+              >
+                Highest Level of Education
+              </label>
+              <div className="relative">
+                <select
+                  id="educationLevel"
+                  name="educationLevel"
+                  required
+                  defaultValue=""
+                  className={cn(inputClasses, "appearance-none pr-10")}
                 >
-                  Highest Level of Education
-                </label>
-                <div className="relative">
-                  <select
-                    id="yearsOfEducation"
-                    name="yearsOfEducation"
-                    required
-                    defaultValue=""
-                    className={cn(inputClasses, "appearance-none pr-10")}
-                  >
-                    <option value="" disabled>
-                      Select
-                    </option>
-                    <option value="Less than high school">
-                      Less than high school
-                    </option>
-                    <option value="High school graduate">
-                      High school graduate
-                    </option>
-                    <option value="Associates (2 years)">
-                      Associates (2 years)
-                    </option>
-                    <option value="Bachelors (4 years)">
-                      Bachelors (4 years)
-                    </option>
-                    <option value="Masters (6 years)">
-                      Masters (6 years)
-                    </option>
-                    <option value="Doctorate (8+ years)">
-                      Doctorate (8+ years)
-                    </option>
-                  </select>
-                  <svg
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
+                  <option value="" disabled>
+                    Select
+                  </option>
+                  <option value="Less than high school">
+                    Less than high school
+                  </option>
+                  <option value="High school graduate">
+                    High school graduate
+                  </option>
+                  <option value="Associates (2 years)">
+                    Associates (2 years)
+                  </option>
+                  <option value="Bachelors (4 years)">
+                    Bachelors (4 years)
+                  </option>
+                  <option value="Masters (6 years)">
+                    Masters (6 years)
+                  </option>
+                  <option value="Doctorate (8+ years)">
+                    Doctorate (8+ years)
+                  </option>
+                </select>
+                <svg
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </div>
             </div>
 
@@ -330,8 +361,8 @@ export function IntakeForm({
                 <label className="relative flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
-                    name="contactFor"
-                    value="self"
+                    name="patientIdentification"
+                    value="Self"
                     className="peer sr-only"
                   />
                   <span className="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-on-surface-variant/40 peer-checked:border-secondary transition-colors after:block after:w-2.5 after:h-2.5 after:rounded-full after:bg-secondary after:scale-0 after:transition-transform peer-checked:after:scale-100" />
@@ -340,8 +371,8 @@ export function IntakeForm({
                 <label className="relative flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
-                    name="contactFor"
-                    value="someone-else"
+                    name="patientIdentification"
+                    value="Someone else"
                     className="peer sr-only"
                   />
                   <span className="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-on-surface-variant/40 peer-checked:border-secondary transition-colors after:block after:w-2.5 after:h-2.5 after:rounded-full after:bg-secondary after:scale-0 after:transition-transform peer-checked:after:scale-100" />
@@ -371,9 +402,18 @@ export function IntakeForm({
               variant="solid"
               color="primary"
               size="lg"
-              className="w-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full text-balance shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? "Submitting..." : buttonText}
+              {submitting ? (
+                "Submitting..."
+              ) : (
+                <>
+                  <span className="sm:hidden">
+                    {buttonTextMobile || buttonText}
+                  </span>
+                  <span className="hidden sm:inline">{buttonText}</span>
+                </>
+              )}
             </Button>
           </form>
         </div>

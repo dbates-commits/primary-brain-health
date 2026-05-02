@@ -315,6 +315,7 @@ type PageBlocksIntakeForm {
   headline: String
   subheadline: String
   buttonText: String
+  buttonTextMobile: String
   showIncludes: Boolean
 }
 
@@ -637,6 +638,7 @@ input PageBlocksIntakeFormFilter {
   headline: StringFilter
   subheadline: StringFilter
   buttonText: StringFilter
+  buttonTextMobile: StringFilter
   showIncludes: BooleanFilter
 }
 
@@ -1471,6 +1473,7 @@ input PageBlocksIntakeFormMutation {
   headline: String
   subheadline: String
   buttonText: String
+  buttonTextMobile: String
   showIncludes: Boolean
 }
 

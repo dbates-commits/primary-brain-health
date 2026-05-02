@@ -315,6 +315,7 @@ fragment PageParts on Page {
       headline
       subheadline
       buttonText
+      buttonTextMobile
       showIncludes
     }
     ... on PageBlocksScrollReveal {

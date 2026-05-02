@@ -1,61 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getResend, FROM_ADDRESS } from "@/lib/email";
+import {
+  submitHubSpotForm,
+  HubSpotSubmitError,
+  HUBSPOT_PORTAL_ID,
+  HUBSPOT_INTAKE_FORM_GUID,
+} from "@/lib/hubspot";
 
 interface IntakeBody {
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   phone?: string;
-  birthYear?: string;
-  sex?: string;
-  yearsOfEducation?: string;
-  contactFor?: string;
+  yearOfBirth?: string;
+  gender?: string;
+  educationLevel?: string;
+  patientIdentification?: string;
   message?: string;
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function row(label: string, value?: string) {
-  if (!value) return "";
-  return `<tr><td style="padding:6px 12px;font-weight:600;background:#f5f3ee;width:200px">${escapeHtml(
-    label
-  )}</td><td style="padding:6px 12px">${escapeHtml(value)}</td></tr>`;
-}
-
-function buildEmail(body: IntakeBody) {
-  const subject = `New consultation intake — ${body.fullName || "Unknown"}`;
-  const text =
-    `New brain health consultation intake\n\n` +
-    `Full Name: ${body.fullName || "—"}\n` +
-    `Email: ${body.email || "—"}\n` +
-    `Phone: ${body.phone || "—"}\n` +
-    `Birth Year: ${body.birthYear || "—"}\n` +
-    `Sex: ${body.sex || "—"}\n` +
-    `Years of Education: ${body.yearsOfEducation || "—"}\n` +
-    `Consultation For: ${body.contactFor || "—"}\n` +
-    `Message: ${body.message || "—"}\n`;
-  const html = `
-    <div style="font-family:system-ui,sans-serif;color:#1b1c19">
-      <h2 style="margin:0 0 16px">New consultation intake</h2>
-      <table style="border-collapse:collapse;width:100%;max-width:640px">
-        ${row("Full Name", body.fullName)}
-        ${row("Email", body.email)}
-        ${row("Phone", body.phone)}
-        ${row("Birth Year", body.birthYear)}
-        ${row("Sex", body.sex)}
-        ${row("Years of Education", body.yearsOfEducation)}
-        ${row("Consultation For", body.contactFor)}
-        ${row("Message", body.message)}
-      </table>
-    </div>
-  `;
-  return { subject, text, html };
 }
 
 export async function POST(request: NextRequest) {
@@ -66,45 +26,54 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const to = process.env.INTAKE_TO_ADDRESS;
-  if (!to) {
+  if (!HUBSPOT_PORTAL_ID || !HUBSPOT_INTAKE_FORM_GUID) {
     console.warn(
-      "[intake] INTAKE_TO_ADDRESS not set — intake submission received but no email sent.",
+      "[intake] HUBSPOT_PORTAL_ID or HUBSPOT_INTAKE_FORM_GUID not set — submission received but not forwarded.",
       body
     );
     return NextResponse.json({ success: true, sent: false });
   }
 
-  const resend = getResend();
-  if (!resend) {
-    console.warn(
-      "[intake] RESEND_API_KEY not set — intake submission received but no email sent.",
-      body
-    );
-    return NextResponse.json({ success: true, sent: false });
-  }
+  const fields = [
+    { name: "firstname", value: body.firstName ?? "" },
+    { name: "lastname", value: body.lastName ?? "" },
+    { name: "email", value: body.email ?? "" },
+    { name: "phone", value: body.phone ?? "" },
+    { name: "year_of_birth", value: body.yearOfBirth ?? "" },
+    { name: "gender", value: body.gender ?? "" },
+    { name: "education_level", value: body.educationLevel ?? "" },
+    {
+      name: "patient_identification",
+      value: body.patientIdentification ?? "",
+    },
+    { name: "message", value: body.message ?? "" },
+  ];
 
-  const { subject, text, html } = buildEmail(body);
+  const referer = request.headers.get("referer") ?? undefined;
 
   try {
-    const { error } = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to,
-      replyTo: body.email,
-      subject,
-      text,
-      html,
+    await submitHubSpotForm({
+      portalId: HUBSPOT_PORTAL_ID,
+      formGuid: HUBSPOT_INTAKE_FORM_GUID,
+      fields,
+      context: {
+        pageUri: referer,
+        pageName: "Consultation Intake",
+      },
     });
-    if (error) {
-      console.error("[intake] Resend error", error);
+    return NextResponse.json({ success: true, sent: true });
+  } catch (err) {
+    if (err instanceof HubSpotSubmitError) {
+      console.error("[intake] HubSpot rejected submission", {
+        status: err.status,
+        body: err.body,
+      });
       return NextResponse.json(
-        { error: "Email send failed" },
+        { error: "Submission failed" },
         { status: 502 }
       );
     }
-    return NextResponse.json({ success: true, sent: true });
-  } catch (err) {
-    console.error("[intake] Send threw", err);
-    return NextResponse.json({ error: "Email send failed" }, { status: 502 });
+    console.error("[intake] Unexpected error submitting form", err);
+    return NextResponse.json({ error: "Submission failed" }, { status: 502 });
   }
 }

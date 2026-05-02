@@ -39,7 +39,9 @@ export function ContactForm({
 
     const form = e.currentTarget;
     const data = {
-      fullName: (form.elements.namedItem("fullName") as HTMLInputElement).value,
+      firstName: (form.elements.namedItem("firstName") as HTMLInputElement)
+        .value,
+      lastName: (form.elements.namedItem("lastName") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
       message: (form.elements.namedItem("message") as HTMLTextAreaElement)
@@ -59,14 +61,14 @@ export function ContactForm({
   };
 
   const inputClasses =
-    "w-full bg-surface-container-low border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
+    "w-full bg-surface-container-low border-none rounded-lg px-3 py-3 sm:px-4 sm:py-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
 
   return (
     <Section
       id="contact"
-      className="py-24 md:py-32 px-8 md:px-16 bg-primary text-on-primary"
+      className="py-16 md:py-32 px-4 sm:px-6 md:px-16 bg-primary text-on-primary"
     >
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">
         {/* Left: Copy */}
         <div className="flex flex-col">
           {headline && (
@@ -92,24 +94,44 @@ export function ContactForm({
         {/* Right: Form */}
         <div
           data-scroll-item
-          className="bg-surface-container-lowest p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg"
+          className="bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg"
         >
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-semibold mb-2"
-              >
-                Full Name
-              </label>
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                required
-                placeholder="Jane Doe"
-                className={inputClasses}
-              />
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-semibold mb-2"
+                >
+                  First Name
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  placeholder="Jane"
+                  className={inputClasses}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-semibold mb-2"
+                >
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  placeholder="Doe"
+                  className={inputClasses}
+                />
+              </div>
             </div>
 
             <div>
@@ -169,7 +191,7 @@ export function ContactForm({
               variant="solid"
               color="primary"
               size="lg"
-              className="w-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full text-balance shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Sending..." : buttonText}
             </Button>

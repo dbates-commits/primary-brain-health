@@ -343,6 +343,7 @@ export function BlockRenderer({
                 headline={block.headline}
                 subheadline={block.subheadline}
                 buttonText={block.buttonText}
+                buttonTextMobile={block.buttonTextMobile}
                 showIncludes={block.showIncludes ?? true}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),

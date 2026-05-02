@@ -33,6 +33,13 @@ export const intakeFormBlock: Template = {
       type: "string",
     },
     {
+      name: "buttonTextMobile",
+      label: "Button Text (Mobile)",
+      type: "string",
+      description:
+        "Shorter button label shown on small screens (<640px). Falls back to Button Text if empty.",
+    },
+    {
       name: "showIncludes",
       label: "Show 'Includes:' panel",
       type: "boolean",
