@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   title: "Primary Brain Health | Expert Cognitive Longevity Care",
   description:
     "Primary Brain Health is a virtual-first clinic dedicated to dementia prevention and cognitive optimization. Book your initial brain health consultation today.",
+  icons: {
+    icon: [
+      { url: "/images/favicon_32.png", type: "image/png", sizes: "32x32" },
+      { url: "/images/favicon_64.png", type: "image/png", sizes: "64x64" },
+      { url: "/images/favicon_128.png", type: "image/png", sizes: "128x128" },
+      { url: "/images/favicon_256.png", type: "image/png", sizes: "256x256" },
+    ],
+    shortcut: "/images/favicon_32.png",
+    apple: { url: "/images/favicon_256.png", sizes: "256x256" },
+  },
 };
 
 export default function RootLayout({
