@@ -14,12 +14,15 @@ interface ScrollFillLogoProps {
   blockData?: any;
 }
 
-// Ribbon shape: an arcing trajectory from lower-left to upper-right with a
-// single loop detour in the middle. Line-in and line-out are both segments
-// of the same underlying arc — the line continues following the same curve
-// after the loop, not a straight line. One fluid gesture throughout.
+// Page-loop ribbon: exported from /public/images/page-loop.svg. A single
+// gesture sweeping lower-right → upper-mid (with a loop) → off the
+// lower-left edge. The path intentionally extends past the 1440×776
+// viewBox on both ends so the gesture bleeds off the section.
 const RIBBON_PATH =
-  "M 0 500 C 200 460, 320 400, 466 342 C 540 320, 600 130, 700 100 C 850 100, 870 280, 750 290 C 650 290, 530 320, 600 300 C 800 240, 1000 160, 1200 100";
+  "M1447.65 501.677C817.598 268.795 613.098 568.118 369.498 470.375C125.898 372.632 238.062 -10.1091 540.379 96.6115C842.697 203.332 938.092 1180.3 -313.759 393.052";
+const RIBBON_VIEWBOX = "0 0 1440 776";
+const RIBBON_STROKE_COLOR = "#F2F8FA";
+const RIBBON_STROKE_WIDTH = 120;
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t);
 const interp = (t: number, a: number, b: number) =>
@@ -87,7 +90,9 @@ export function ScrollFillLogo({
         Math.min(1, 1 - rect.top / viewportH)
       );
 
-      brush.style.strokeDashoffset = String(length * (1 - progress));
+      // Negative offset makes the dash slide off the path's *end* instead of
+      // its start, so the stroke fills in from the opposite direction.
+      brush.style.strokeDashoffset = String(-length * (1 - progress));
 
       if (svgRef.current) {
         const logoOpacity = smoothstep(interp(progress, 0.08, 0.28));
@@ -147,19 +152,23 @@ export function ScrollFillLogo({
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
         <svg
           ref={svgRef}
-          viewBox="0 0 1200 600"
+          viewBox={RIBBON_VIEWBOX}
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
           preserveAspectRatio="xMidYMid meet"
-          className="absolute inset-0 w-full h-auto hidden"
-          style={{ overflow: "visible", opacity: 0 }}
+          className="absolute inset-0 w-full h-full"
+          style={{
+            overflow: "visible",
+            opacity: 0,
+            transform: "translateY(-50px)",
+          }}
         >
           <path
             ref={brushRef}
             d={RIBBON_PATH}
             fill="none"
-            stroke="var(--color-primary)"
-            strokeWidth="60"
+            stroke={RIBBON_STROKE_COLOR}
+            strokeWidth={RIBBON_STROKE_WIDTH}
             strokeLinecap="round"
             strokeLinejoin="round"
           />

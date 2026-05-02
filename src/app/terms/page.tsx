@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Primary Brain Health",
+  title: "Terms & Conditions",
   description:
     "Terms and conditions governing the use of Primary Brain Health clinical services, digital interfaces, and cognitive assessment tools.",
 };

@@ -1,4 +1,5 @@
 import type { Template } from "tinacms";
+import { IconPicker } from "../fields/IconPicker";
 
 export const benefitsListBlock: Template = {
   name: "benefitsList",
@@ -64,10 +65,13 @@ export const benefitsListBlock: Template = {
         },
         {
           name: "icon",
-          label: "Phosphor icon name",
+          label: "Icon",
           type: "string",
-          description:
-            "Name of a Phosphor icon (e.g. Brain, FlowerLotus, CalendarHeart). See https://phosphoricons.com for the full set.",
+          description: "Pick a Phosphor icon.",
+          ui: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component: IconPicker as any,
+          },
         },
       ],
     },

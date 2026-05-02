@@ -1,4 +1,5 @@
 import type { Template } from "tinacms";
+import { IconPicker } from "../fields/IconPicker";
 
 export const featuresBlock: Template = {
   name: "features",
@@ -100,20 +101,11 @@ export const featuresBlock: Template = {
           name: "icon",
           label: "Icon",
           type: "string",
-          options: [
-            { value: "rocket", label: "Rocket" },
-            { value: "shield", label: "Shield" },
-            { value: "zap", label: "Zap" },
-            { value: "heart", label: "Heart" },
-            { value: "star", label: "Star" },
-            { value: "check", label: "Check" },
-            { value: "clock", label: "Clock" },
-            { value: "globe", label: "Globe" },
-            { value: "lock", label: "Lock" },
-            { value: "chart", label: "Chart" },
-            { value: "users", label: "Users" },
-            { value: "code", label: "Code" },
-          ],
+          description: "Pick a Phosphor icon.",
+          ui: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component: IconPicker as any,
+          },
         },
         {
           name: "image",

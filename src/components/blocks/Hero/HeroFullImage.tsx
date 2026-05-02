@@ -11,10 +11,11 @@ export function HeroFullImage({
   tinaFields,
 }: HeroProps) {
   return (
-    <section
-      className="relative overflow-hidden min-h-[520px] lg:min-h-[720px] mx-4 lg:mx-10 mt-8 mb-0 max-w-[1800px] 2xl:mx-auto rounded-[1.25rem]"
-      style={{ isolation: "isolate", transform: "translateZ(0)" }}
-    >
+    <div className="mx-auto max-w-[1880px] px-6 lg:px-10 mt-8">
+      <section
+        className="relative overflow-hidden min-h-[520px] lg:min-h-[720px] rounded-[1.25rem]"
+        style={{ isolation: "isolate", transform: "translateZ(0)" }}
+      >
       {/* Background video — fills edge to edge, up behind the header */}
       <video
         autoPlay
@@ -62,6 +63,7 @@ export function HeroFullImage({
           </div>
         )}
       </div>
-    </section>
+      </section>
+    </div>
   );
 }

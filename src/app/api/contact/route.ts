@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getResend, FROM_ADDRESS } from "@/lib/email";
 
-interface IntakeBody {
+interface ContactBody {
   fullName?: string;
   email?: string;
   phone?: string;
-  birthYear?: string;
-  sex?: string;
-  yearsOfEducation?: string;
-  contactFor?: string;
   message?: string;
 }
 
@@ -23,53 +19,48 @@ function escapeHtml(value: string) {
 
 function row(label: string, value?: string) {
   if (!value) return "";
-  return `<tr><td style="padding:6px 12px;font-weight:600;background:#f5f3ee;width:200px">${escapeHtml(
+  return `<tr><td style="padding:6px 12px;font-weight:600;background:#f5f3ee;width:160px">${escapeHtml(
     label
   )}</td><td style="padding:6px 12px">${escapeHtml(value)}</td></tr>`;
 }
 
-function buildEmail(body: IntakeBody) {
-  const subject = `New consultation intake — ${body.fullName || "Unknown"}`;
+function buildEmail(body: ContactBody) {
+  const subject = `New contact form submission — ${body.fullName || "Unknown"}`;
   const text =
-    `New brain health consultation intake\n\n` +
-    `Full Name: ${body.fullName || "—"}\n` +
+    `New message from the contact form\n\n` +
+    `Name: ${body.fullName || "—"}\n` +
     `Email: ${body.email || "—"}\n` +
-    `Phone: ${body.phone || "—"}\n` +
-    `Birth Year: ${body.birthYear || "—"}\n` +
-    `Sex: ${body.sex || "—"}\n` +
-    `Years of Education: ${body.yearsOfEducation || "—"}\n` +
-    `Consultation For: ${body.contactFor || "—"}\n` +
-    `Message: ${body.message || "—"}\n`;
+    `Phone: ${body.phone || "—"}\n\n` +
+    `Message:\n${body.message || "—"}\n`;
   const html = `
     <div style="font-family:system-ui,sans-serif;color:#1b1c19">
-      <h2 style="margin:0 0 16px">New consultation intake</h2>
-      <table style="border-collapse:collapse;width:100%;max-width:640px">
-        ${row("Full Name", body.fullName)}
+      <h2 style="margin:0 0 16px">New contact form submission</h2>
+      <table style="border-collapse:collapse;width:100%;max-width:640px;margin-bottom:16px">
+        ${row("Name", body.fullName)}
         ${row("Email", body.email)}
         ${row("Phone", body.phone)}
-        ${row("Birth Year", body.birthYear)}
-        ${row("Sex", body.sex)}
-        ${row("Years of Education", body.yearsOfEducation)}
-        ${row("Consultation For", body.contactFor)}
-        ${row("Message", body.message)}
       </table>
+      <h3 style="margin:24px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:#44474d">Message</h3>
+      <div style="white-space:pre-wrap;line-height:1.5">${escapeHtml(
+        body.message || ""
+      )}</div>
     </div>
   `;
   return { subject, text, html };
 }
 
 export async function POST(request: NextRequest) {
-  let body: IntakeBody;
+  let body: ContactBody;
   try {
-    body = (await request.json()) as IntakeBody;
+    body = (await request.json()) as ContactBody;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const to = process.env.INTAKE_TO_ADDRESS;
+  const to = process.env.CONTACT_TO_ADDRESS;
   if (!to) {
     console.warn(
-      "[intake] INTAKE_TO_ADDRESS not set — intake submission received but no email sent.",
+      "[contact] CONTACT_TO_ADDRESS not set — contact submission received but no email sent.",
       body
     );
     return NextResponse.json({ success: true, sent: false });
@@ -78,7 +69,7 @@ export async function POST(request: NextRequest) {
   const resend = getResend();
   if (!resend) {
     console.warn(
-      "[intake] RESEND_API_KEY not set — intake submission received but no email sent.",
+      "[contact] RESEND_API_KEY not set — contact submission received but no email sent.",
       body
     );
     return NextResponse.json({ success: true, sent: false });
@@ -96,7 +87,7 @@ export async function POST(request: NextRequest) {
       html,
     });
     if (error) {
-      console.error("[intake] Resend error", error);
+      console.error("[contact] Resend error", error);
       return NextResponse.json(
         { error: "Email send failed" },
         { status: 502 }
@@ -104,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ success: true, sent: true });
   } catch (err) {
-    console.error("[intake] Send threw", err);
+    console.error("[contact] Send threw", err);
     return NextResponse.json({ error: "Email send failed" }, { status: 502 });
   }
 }

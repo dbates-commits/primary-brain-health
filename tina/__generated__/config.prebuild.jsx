@@ -64,6 +64,235 @@ var heroBlock = {
   ]
 };
 
+// tina/fields/IconPicker.tsx
+import { useMemo, useState } from "react";
+import * as PhosphorIcons from "@phosphor-icons/react";
+import { wrapFieldsWithMeta } from "tinacms";
+import { jsx, jsxs } from "react/jsx-runtime";
+var Icons = PhosphorIcons;
+var ALL_ICON_NAMES = Object.keys(Icons).filter(
+  (name) => /^[A-Z]/.test(name) && !name.endsWith("Icon") && name !== "IconContext"
+).sort();
+var MAX_RESULTS = 240;
+function IconPickerInner({ input }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const value = input.value || "";
+  const Selected = value ? Icons[value] : null;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return ALL_ICON_NAMES.slice(0, MAX_RESULTS);
+    return ALL_ICON_NAMES.filter((n) => n.toLowerCase().includes(q)).slice(
+      0,
+      MAX_RESULTS
+    );
+  }, [query]);
+  return jsxs("div", { style: { width: "100%" }, children: [
+    jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: () => setOpen((v) => !v),
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          width: "100%",
+          padding: "8px 10px",
+          border: "1px solid var(--tina-color-grey-3, #d4d4d8)",
+          borderRadius: 6,
+          background: "white",
+          cursor: "pointer",
+          fontSize: 14
+        },
+        children: [
+          jsx(
+            "span",
+            {
+              style: {
+                width: 28,
+                height: 28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#f4f4f5",
+                borderRadius: 4,
+                color: "#1f2937"
+              },
+              children: Selected ? jsx(Selected, { size: 20, weight: "regular" }) : null
+            }
+          ),
+          jsx(
+            "span",
+            {
+              style: {
+                flex: 1,
+                textAlign: "left",
+                color: value ? "#111827" : "#9ca3af",
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                fontSize: 13
+              },
+              children: value || "Select an icon"
+            }
+          ),
+          jsx("span", { style: { color: "#9ca3af", fontSize: 12 }, children: open ? "\u25B2" : "\u25BC" })
+        ]
+      }
+    ),
+    open && jsxs(
+      "div",
+      {
+        style: {
+          marginTop: 8,
+          padding: 10,
+          border: "1px solid var(--tina-color-grey-3, #d4d4d8)",
+          borderRadius: 6,
+          background: "white"
+        },
+        children: [
+          jsxs(
+            "div",
+            {
+              style: {
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                marginBottom: 10
+              },
+              children: [
+                jsx(
+                  "input",
+                  {
+                    type: "text",
+                    placeholder: "Search Phosphor icons\u2026",
+                    value: query,
+                    onChange: (e) => setQuery(e.target.value),
+                    autoFocus: true,
+                    style: {
+                      flex: 1,
+                      padding: "6px 10px",
+                      border: "1px solid #d4d4d8",
+                      borderRadius: 4,
+                      fontSize: 13,
+                      outline: "none"
+                    }
+                  }
+                ),
+                value && jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => {
+                      input.onChange("");
+                    },
+                    style: {
+                      padding: "6px 10px",
+                      border: "1px solid #d4d4d8",
+                      borderRadius: 4,
+                      background: "white",
+                      fontSize: 12,
+                      color: "#6b7280",
+                      cursor: "pointer"
+                    },
+                    children: "Clear"
+                  }
+                )
+              ]
+            }
+          ),
+          jsx(
+            "div",
+            {
+              style: {
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(48px, 1fr))",
+                gap: 4,
+                maxHeight: 320,
+                overflowY: "auto",
+                padding: 2
+              },
+              children: filtered.map((name) => {
+                const Icon = Icons[name];
+                if (!Icon) return null;
+                const isSelected = value === name;
+                return jsx(
+                  "button",
+                  {
+                    type: "button",
+                    title: name,
+                    onClick: () => {
+                      input.onChange(name);
+                      setOpen(false);
+                      setQuery("");
+                    },
+                    style: {
+                      aspectRatio: "1 / 1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: `1px solid ${isSelected ? "#2563eb" : "transparent"}`,
+                      background: isSelected ? "#eff6ff" : "transparent",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      color: "#1f2937",
+                      transition: "background 80ms"
+                    },
+                    onMouseEnter: (e) => {
+                      if (!isSelected)
+                        e.currentTarget.style.background = "#f4f4f5";
+                    },
+                    onMouseLeave: (e) => {
+                      if (!isSelected)
+                        e.currentTarget.style.background = "transparent";
+                    },
+                    children: jsx(Icon, { size: 20, weight: "regular" })
+                  },
+                  name
+                );
+              })
+            }
+          ),
+          filtered.length === MAX_RESULTS && !query && jsxs(
+            "p",
+            {
+              style: {
+                marginTop: 8,
+                fontSize: 11,
+                color: "#9ca3af",
+                textAlign: "center"
+              },
+              children: [
+                "Showing first ",
+                MAX_RESULTS,
+                " of ",
+                ALL_ICON_NAMES.length,
+                " icons \u2014 search to find more."
+              ]
+            }
+          ),
+          filtered.length === 0 && jsxs(
+            "p",
+            {
+              style: {
+                marginTop: 8,
+                fontSize: 12,
+                color: "#9ca3af",
+                textAlign: "center"
+              },
+              children: [
+                'No icons match "',
+                query,
+                '".'
+              ]
+            }
+          )
+        ]
+      }
+    )
+  ] });
+}
+var IconPicker = wrapFieldsWithMeta(IconPickerInner);
+
 // tina/blocks/features.ts
 var featuresBlock = {
   name: "features",
@@ -165,20 +394,11 @@ var featuresBlock = {
           name: "icon",
           label: "Icon",
           type: "string",
-          options: [
-            { value: "rocket", label: "Rocket" },
-            { value: "shield", label: "Shield" },
-            { value: "zap", label: "Zap" },
-            { value: "heart", label: "Heart" },
-            { value: "star", label: "Star" },
-            { value: "check", label: "Check" },
-            { value: "clock", label: "Clock" },
-            { value: "globe", label: "Globe" },
-            { value: "lock", label: "Lock" },
-            { value: "chart", label: "Chart" },
-            { value: "users", label: "Users" },
-            { value: "code", label: "Code" }
-          ]
+          description: "Pick a Phosphor icon.",
+          ui: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component: IconPicker
+          }
         },
         {
           name: "image",
@@ -1065,16 +1285,11 @@ var statsBlock = {
           name: "icon",
           label: "Icon",
           type: "string",
-          options: [
-            { value: "users", label: "Users" },
-            { value: "globe", label: "Globe" },
-            { value: "chart", label: "Chart" },
-            { value: "clock", label: "Clock" },
-            { value: "heart", label: "Heart" },
-            { value: "star", label: "Star" },
-            { value: "zap", label: "Zap" },
-            { value: "shield", label: "Shield" }
-          ]
+          description: "Pick a Phosphor icon.",
+          ui: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component: IconPicker
+          }
         },
         {
           name: "description",
@@ -1380,9 +1595,13 @@ var stackSectionsBlock = {
         },
         {
           name: "icon",
-          label: "Phosphor icon name",
+          label: "Icon",
           type: "string",
-          description: "Name of a Phosphor icon (e.g. Brain, ClipboardText, MapTrifold). See https://phosphoricons.com for the full set."
+          description: "Pick a Phosphor icon.",
+          ui: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component: IconPicker
+          }
         },
         {
           name: "image",
@@ -1457,9 +1676,13 @@ var benefitsListBlock = {
         },
         {
           name: "icon",
-          label: "Phosphor icon name",
+          label: "Icon",
           type: "string",
-          description: "Name of a Phosphor icon (e.g. Brain, FlowerLotus, CalendarHeart). See https://phosphoricons.com for the full set."
+          description: "Pick a Phosphor icon.",
+          ui: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component: IconPicker
+          }
         }
       ]
     }
@@ -1516,6 +1739,40 @@ var videoSpotlightBlock = {
       label: "Right Decorative Image",
       type: "image",
       description: "Decorative image peeking out behind the video on the right"
+    }
+  ]
+};
+
+// tina/blocks/contactForm.ts
+var contactFormBlock = {
+  name: "contactForm",
+  label: "Contact Form",
+  ui: {
+    defaultItem: {
+      headline: "Let's get in touch",
+      subheadline: "Have a question for our team? Fill out the form and we'll get back to you within one business day.",
+      buttonText: "Send Message"
+    },
+    itemProps: (item) => ({
+      label: `Contact Form - ${item?.headline?.slice(0, 40) || "Untitled"}`
+    })
+  },
+  fields: [
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Subheadline",
+      type: "string",
+      ui: { component: "textarea" }
+    },
+    {
+      name: "buttonText",
+      label: "Submit Button Text",
+      type: "string"
     }
   ]
 };
@@ -1581,7 +1838,8 @@ var pageCollection = {
         scrollFillLogoBlock,
         stackSectionsBlock,
         benefitsListBlock,
-        videoSpotlightBlock
+        videoSpotlightBlock,
+        contactFormBlock
       ]
     }
   ]

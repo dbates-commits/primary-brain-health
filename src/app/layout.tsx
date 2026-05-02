@@ -11,10 +11,19 @@ const gildaDisplay = Gilda_Display({
   subsets: ["latin"],
 });
 
+const siteTitle = "Primary Brain Health | Expert Cognitive Longevity Care";
+const siteDescription =
+  "Primary Brain Health is a virtual-first clinic dedicated to dementia prevention and cognitive optimization. Book your initial brain health consultation today.";
+
 export const metadata: Metadata = {
-  title: "Primary Brain Health | Expert Cognitive Longevity Care",
-  description:
-    "Primary Brain Health is a virtual-first clinic dedicated to dementia prevention and cognitive optimization. Book your initial brain health consultation today.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  ),
+  title: {
+    default: siteTitle,
+    template: "%s | Primary Brain Health",
+  },
+  description: siteDescription,
   icons: {
     icon: [
       { url: "/images/favicon_32.png", type: "image/png", sizes: "32x32" },
@@ -24,6 +33,26 @@ export const metadata: Metadata = {
     ],
     shortcut: "/images/favicon_32.png",
     apple: { url: "/images/favicon_256.png", sizes: "256x256" },
+  },
+  openGraph: {
+    type: "website",
+    title: siteTitle,
+    description: siteDescription,
+    siteName: "Primary Brain Health",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Primary Brain Health",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    images: ["/images/og-image.jpg"],
   },
 };
 

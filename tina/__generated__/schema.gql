@@ -369,7 +369,13 @@ type PageBlocksVideoSpotlight {
   rightImage: String
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksVideoSpotlight
+type PageBlocksContactForm {
+  headline: String
+  subheadline: String
+  buttonText: String
+}
+
+union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksVideoSpotlight | PageBlocksContactForm
 
 type Page implements Node & Document {
   title: String!
@@ -685,6 +691,12 @@ input PageBlocksVideoSpotlightFilter {
   rightImage: ImageFilter
 }
 
+input PageBlocksContactFormFilter {
+  headline: StringFilter
+  subheadline: StringFilter
+  buttonText: StringFilter
+}
+
 input PageBlocksFilter {
   hero: PageBlocksHeroFilter
   features: PageBlocksFeaturesFilter
@@ -703,6 +715,7 @@ input PageBlocksFilter {
   stackSections: PageBlocksStackSectionsFilter
   benefitsList: PageBlocksBenefitsListFilter
   videoSpotlight: PageBlocksVideoSpotlightFilter
+  contactForm: PageBlocksContactFormFilter
 }
 
 input PageFilter {
@@ -1512,6 +1525,12 @@ input PageBlocksVideoSpotlightMutation {
   rightImage: String
 }
 
+input PageBlocksContactFormMutation {
+  headline: String
+  subheadline: String
+  buttonText: String
+}
+
 input PageBlocksMutation {
   hero: PageBlocksHeroMutation
   features: PageBlocksFeaturesMutation
@@ -1530,6 +1549,7 @@ input PageBlocksMutation {
   stackSections: PageBlocksStackSectionsMutation
   benefitsList: PageBlocksBenefitsListMutation
   videoSpotlight: PageBlocksVideoSpotlightMutation
+  contactForm: PageBlocksContactFormMutation
 }
 
 input PageMutation {

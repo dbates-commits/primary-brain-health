@@ -53,7 +53,7 @@ export function IntakeForm({
         .value,
       sex: (form.elements.namedItem("sex") as HTMLSelectElement).value,
       yearsOfEducation: (
-        form.elements.namedItem("yearsOfEducation") as HTMLInputElement
+        form.elements.namedItem("yearsOfEducation") as HTMLSelectElement
       ).value,
       contactFor: (
         form.querySelector(
@@ -273,18 +273,52 @@ export function IntakeForm({
                   htmlFor="yearsOfEducation"
                   className="block text-sm font-semibold mb-2"
                 >
-                  Years of Education
+                  Highest Level of Education
                 </label>
-                <input
-                  id="yearsOfEducation"
-                  name="yearsOfEducation"
-                  type="number"
-                  min="0"
-                  max="30"
-                  required
-                  placeholder="16"
-                  className={inputClasses}
-                />
+                <div className="relative">
+                  <select
+                    id="yearsOfEducation"
+                    name="yearsOfEducation"
+                    required
+                    defaultValue=""
+                    className={cn(inputClasses, "appearance-none pr-10")}
+                  >
+                    <option value="" disabled>
+                      Select
+                    </option>
+                    <option value="Less than high school">
+                      Less than high school
+                    </option>
+                    <option value="High school graduate">
+                      High school graduate
+                    </option>
+                    <option value="Associates (2 years)">
+                      Associates (2 years)
+                    </option>
+                    <option value="Bachelors (4 years)">
+                      Bachelors (4 years)
+                    </option>
+                    <option value="Masters (6 years)">
+                      Masters (6 years)
+                    </option>
+                    <option value="Doctorate (8+ years)">
+                      Doctorate (8+ years)
+                    </option>
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
               </div>
             </div>
 

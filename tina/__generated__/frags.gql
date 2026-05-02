@@ -360,6 +360,11 @@ fragment PageParts on Page {
       leftImage
       rightImage
     }
+    ... on PageBlocksContactForm {
+      headline
+      subheadline
+      buttonText
+    }
   }
 }
 

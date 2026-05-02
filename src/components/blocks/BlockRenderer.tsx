@@ -19,6 +19,7 @@ import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
 import { BenefitsList } from "@/components/blocks/BenefitsList";
 import { VideoSpotlight } from "@/components/blocks/VideoSpotlight";
+import { ContactForm } from "@/components/blocks/ContactForm";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Block = any;
@@ -343,6 +344,20 @@ export function BlockRenderer({
                 subheadline={block.subheadline}
                 buttonText={block.buttonText}
                 showIncludes={block.showIncludes ?? true}
+                tinaFields={{
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
+                }}
+              />
+            );
+            break;
+
+          case "PageBlocksContactForm":
+            content = (
+              <ContactForm
+                headline={block.headline}
+                subheadline={block.subheadline}
+                buttonText={block.buttonText}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),
                   subheadline: getFieldPath(index, "subheadline"),

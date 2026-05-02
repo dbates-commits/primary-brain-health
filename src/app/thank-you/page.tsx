@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Request Received | Primary Brain Health",
+  title: "Request Received",
   description:
     "Your consultation request has been successfully received by Primary Brain Health.",
 };

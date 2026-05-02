@@ -108,7 +108,7 @@ export function StackSections({
         <div
           data-scroll-reveal
           data-scroll-stagger="90"
-          className="max-w-4xl mx-auto text-center mb-0"
+          className="max-w-4xl mx-auto text-center mb-10 md:mb-0"
         >
           {label && (
             <p
@@ -179,7 +179,7 @@ export function StackSections({
                 <div className="relative flex flex-col md:justify-end items-start gap-5 md:gap-6 p-8 md:p-10">
                   <span
                     aria-hidden="true"
-                    className="absolute top-5 left-8 md:top-7 md:left-10 font-headline font-normal text-primary text-2xl md:text-3xl leading-none tabular-nums"
+                    className="font-headline font-normal text-primary text-base md:text-lg leading-none tabular-nums"
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
@@ -188,7 +188,7 @@ export function StackSections({
                       name={item.icon}
                       aria-hidden="true"
                       weight="regular"
-                      className="w-10 h-10 text-on-surface"
+                      className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
                     />
                   )}
                   {item.title && (

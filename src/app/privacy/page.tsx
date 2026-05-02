@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Primary Brain Health",
+  title: "Privacy Policy",
   description:
     "Learn how Primary Brain Health protects your sensitive health information with clinical rigor and HIPAA-compliant practices.",
 };

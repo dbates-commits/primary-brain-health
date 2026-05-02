@@ -1,5 +1,49 @@
+import type { Metadata } from "next";
 import { client } from "@tina/__generated__/client";
 import { PageClient } from "@/components/PageClient";
+
+const FALLBACK_OG_IMAGE = "/images/og-image.jpg";
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const result = await client.queries.page({ relativePath: "home.mdx" });
+    const page = result?.data?.page;
+    const title = page?.title || undefined;
+    const description = page?.description || undefined;
+    const ogImage = page?.socialImage || FALLBACK_OG_IMAGE;
+
+    return {
+      // Use `absolute` so the layout's "%s | Primary Brain Health" template
+      // doesn't tack the brand on twice for the homepage.
+      ...(title && { title: { absolute: title } }),
+      ...(description && { description }),
+      alternates: { canonical: "/" },
+      openGraph: {
+        type: "website",
+        url: "/",
+        siteName: "Primary Brain Health",
+        ...(title && { title }),
+        ...(description && { description }),
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: title || "Primary Brain Health",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        ...(title && { title }),
+        ...(description && { description }),
+        images: [ogImage],
+      },
+    };
+  } catch {
+    return {};
+  }
+}
 
 export default async function Home() {
   let result: Awaited<ReturnType<typeof client.queries.page>> | null = null;
