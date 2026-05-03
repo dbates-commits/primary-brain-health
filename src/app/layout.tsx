@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollRevealInit } from "@/components/ScrollRevealInit";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 const gildaDisplay = Gilda_Display({
   variable: "--font-gilda-display",
@@ -66,6 +67,7 @@ export default function RootLayout({
       <body
         className={`${gildaDisplay.variable} font-body antialiased bg-white text-on-surface`}
       >
+        <ScrollToTop />
         <ScrollRevealInit />
         <Header />
         <main className="pt-20">{children}</main>

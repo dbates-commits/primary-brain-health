@@ -146,12 +146,14 @@ export function ScrollFillLogo({
   return (
     <section
       ref={containerRef}
-      className="relative bg-surface"
+      className="relative bg-surface [--sfl-per:60vh] md:[--sfl-per:100vh] [--sfl-tail:30vh] md:[--sfl-tail:50vh]"
       style={{
-        // Sticky viewport (100vh) + per-slide scroll runway. The last slide
-        // gets an extra ~50vh tail so it holds at full opacity well after it
-        // finishes fading in, before the section unsticks.
-        height: `${100 + Math.max(count, 1) * 100 + 50}vh`,
+        // Section = 100vh sticky stage + per-slide scroll runway × count
+        // + tail. Per-slide and tail are smaller on mobile (via Tailwind
+        // arbitrary CSS vars) so the section is ~28% shorter on phones —
+        // less swiping, same effect since fade timing is scroll-progress-
+        // based (a fraction of whatever the total runway is).
+        height: `calc(100vh + ${Math.max(count, 1)} * var(--sfl-per) + var(--sfl-tail))`,
       }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">

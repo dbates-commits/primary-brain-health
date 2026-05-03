@@ -26,6 +26,12 @@ export function Header() {
   function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
       e.preventDefault();
+      // Strip any hash (e.g. #intake) from the URL without adding a
+      // history entry, so the back button doesn't bounce the user back
+      // into the anchor they just left.
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }

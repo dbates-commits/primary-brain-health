@@ -102,12 +102,16 @@ export function Footer() {
           &copy; {new Date().getFullYear()} Primary Brain Health. All rights
           reserved.
         </span>
-        <div className="flex items-center gap-2 text-on-surface/70 text-sm">
+        <a
+          href="mailto:contact@primarybrainhealth.com"
+          className="flex items-center gap-2 text-on-surface/70 hover:text-on-surface text-sm transition-colors"
+        >
           <svg
             className="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -117,7 +121,7 @@ export function Footer() {
             />
           </svg>
           contact@primarybrainhealth.com
-        </div>
+        </a>
       </div>
     </footer>
   );
