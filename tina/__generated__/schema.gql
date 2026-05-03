@@ -115,6 +115,7 @@ type PageBlocksHero {
   image: String
   trustText: String
   primaryButtonText: String
+  primaryButtonTextMobile: String
   primaryButtonLink: String
 }
 
@@ -415,6 +416,7 @@ input PageBlocksHeroFilter {
   image: StringFilter
   trustText: StringFilter
   primaryButtonText: StringFilter
+  primaryButtonTextMobile: StringFilter
   primaryButtonLink: StringFilter
 }
 
@@ -1281,6 +1283,7 @@ input PageBlocksHeroMutation {
   image: String
   trustText: String
   primaryButtonText: String
+  primaryButtonTextMobile: String
   primaryButtonLink: String
 }
 

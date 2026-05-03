@@ -37,17 +37,12 @@ export function BenefitsList({
       ? tinaField(blockData.items[index], field)
       : undefined;
   return (
-    <section
-      data-scroll-reveal
-      data-scroll-stagger="110"
-      className="px-6 md:px-10 pt-10 md:pt-14 pb-20 md:pb-28"
-    >
+    <section className="px-6 md:px-10 pt-10 md:pt-14 pb-20 md:pb-28">
       <div className="max-w-6xl mx-auto flex flex-col gap-12 md:gap-16">
-        {/* Top: full-width hero card with video/image and overlaid copy */}
-        <div
-          data-scroll-item
-          className="relative overflow-hidden rounded-[1.25rem] bg-on-surface min-h-[420px] md:min-h-[480px] lg:min-h-[560px] flex flex-col justify-end p-8 md:p-10 lg:p-14"
-        >
+        {/* Top: full-width hero card with video/image and overlaid copy.
+            The card itself shows immediately; the text overlay fades in
+            on its own as it scrolls into view. */}
+        <div className="relative overflow-hidden rounded-[1.25rem] bg-on-surface min-h-[420px] md:min-h-[480px] lg:min-h-[560px] flex flex-col justify-end p-8 md:p-10 lg:p-14">
           {video ? (
             <video
               autoPlay
@@ -72,7 +67,7 @@ export function BenefitsList({
           )}
           {/* Subtle bottom-up gradient so text stays readable on busy images */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
-          <div className="relative z-10 max-w-2xl">
+          <div data-scroll-reveal-self className="relative z-10 max-w-2xl">
             {headline && (
               <h2
                 data-tina-field={tinaFields?.headline}
@@ -95,7 +90,11 @@ export function BenefitsList({
         {/* Bottom: benefit items in three columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-12">
           {items.map((item, i) => (
-            <div key={i} data-scroll-item className="flex flex-col gap-4">
+            <div
+              key={i}
+              data-scroll-reveal-self
+              className="flex flex-col gap-4"
+            >
               {item.icon && (
                 <PhosphorIcon
                   name={item.icon}

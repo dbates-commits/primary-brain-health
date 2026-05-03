@@ -67,6 +67,7 @@ export function BlockRenderer({
                 trustText={block.trustText}
                 image={block.image}
                 primaryButtonText={block.primaryButtonText}
+                primaryButtonTextMobile={block.primaryButtonTextMobile}
                 primaryButtonLink={block.primaryButtonLink}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),

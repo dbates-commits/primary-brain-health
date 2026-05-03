@@ -78,7 +78,7 @@ export function Header() {
           : "bg-transparent shadow-none"
       )}
     >
-      <div className="flex justify-between items-center gap-10 py-5 px-10 max-w-[90rem] mx-auto">
+      <div className="flex justify-between items-center gap-10 py-5 px-6 lg:px-10 max-w-[90rem] mx-auto">
         {/* Logo */}
         <a
           href="/"

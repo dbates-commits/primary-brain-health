@@ -12,6 +12,7 @@ fragment PageParts on Page {
       image
       trustText
       primaryButtonText
+      primaryButtonTextMobile
       primaryButtonLink
     }
     ... on PageBlocksFeatures {

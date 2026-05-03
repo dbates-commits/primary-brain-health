@@ -57,6 +57,12 @@ var heroBlock = {
       type: "string"
     },
     {
+      name: "primaryButtonTextMobile",
+      label: "Primary Button Text (Mobile)",
+      type: "string",
+      description: "Shorter button label shown on small screens (<640px). Falls back to Primary Button Text if empty."
+    },
+    {
       name: "primaryButtonLink",
       label: "Primary Button Link",
       type: "string"

@@ -16,6 +16,7 @@ export interface HeroProps {
   trustText?: string;
   image?: string;
   primaryButtonText?: string;
+  primaryButtonTextMobile?: string;
   primaryButtonLink?: string;
   tinaFields?: TinaFieldsMap;
 }

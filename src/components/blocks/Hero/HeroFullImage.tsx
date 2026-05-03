@@ -7,13 +7,14 @@ export function HeroFullImage({
   headline,
   image,
   primaryButtonText,
+  primaryButtonTextMobile,
   primaryButtonLink,
   tinaFields,
 }: HeroProps) {
   return (
     <div className="mx-auto max-w-[1880px] px-6 lg:px-10 mt-8">
       <section
-        className="relative overflow-hidden min-h-[520px] lg:min-h-[720px] rounded-[1.25rem]"
+        className="relative overflow-hidden min-h-[440px] sm:min-h-[520px] lg:min-h-[720px] rounded-[1.25rem]"
         style={{ isolation: "isolate", transform: "translateZ(0)" }}
       >
       {/* Background video — fills edge to edge, up behind the header */}
@@ -37,7 +38,7 @@ export function HeroFullImage({
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-[1.25rem]" />
 
       {/* Content — centered column, bottom-aligned */}
-      <div className="relative z-10 flex flex-col items-center justify-end h-full min-h-[520px] lg:min-h-[720px] px-6 md:px-10 pt-24 pb-10 lg:pb-14 gap-10 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-end h-full min-h-[440px] sm:min-h-[520px] lg:min-h-[720px] px-6 md:px-10 pt-20 sm:pt-24 pb-8 sm:pb-10 lg:pb-14 gap-6 sm:gap-10 text-center">
         <h1
           className="animate-fade-up font-headline font-normal text-white text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] text-pretty max-w-5xl"
           style={{ animationDelay: "150ms" }}
@@ -57,8 +58,12 @@ export function HeroFullImage({
               variant="solid"
               color="primary"
               size="lg"
+              className="text-balance"
             >
-              {primaryButtonText}
+              <span className="sm:hidden">
+                {primaryButtonTextMobile || primaryButtonText}
+              </span>
+              <span className="hidden sm:inline">{primaryButtonText}</span>
             </Button>
           </div>
         )}
