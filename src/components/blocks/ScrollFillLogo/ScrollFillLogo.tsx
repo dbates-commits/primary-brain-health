@@ -110,9 +110,14 @@ export function ScrollFillLogo({
         const outStart = sliceEnd - span * fadeFrac;
         const isLast = i === count - 1;
 
+        // Slide 1 is visible from the moment the section enters view — no
+        // entry-fade ramp. This avoids the awkward white gap on mobile
+        // where a viewport-tall sticky stage has to fill before the user
+        // sees any text. Subsequent slides still fade in via scroll
+        // progress as they cross into their slice.
         const inT =
           i === 0
-            ? smoothstep(interp(entryFraction, 0.4, 0.85))
+            ? 1
             : smoothstep(interp(progress, sliceStart, inEnd));
         const outT = isLast
           ? 0
