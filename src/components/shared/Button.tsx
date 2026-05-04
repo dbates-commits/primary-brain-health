@@ -69,7 +69,13 @@ export function Button({
 
   if (href) {
     return (
-      <Link href={href} className={styles} data-tina-field={tinaField} {...rest}>
+      <Link
+        href={href}
+        onClick={onClick}
+        className={styles}
+        data-tina-field={tinaField}
+        {...rest}
+      >
         {children}
       </Link>
     );

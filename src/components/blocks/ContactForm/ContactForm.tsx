@@ -54,7 +54,7 @@ export function ContactForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      router.push("/thank-you");
+      router.push("/thank-you/contact");
     } finally {
       setSubmitting(false);
     }

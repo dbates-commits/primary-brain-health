@@ -11,21 +11,24 @@ export default function ThankYouPage() {
   return (
     <div className="flex-grow pb-20 px-6 neural-texture">
       <div className="max-w-7xl mx-auto">
-        {/* Success Header */}
-        <section className="text-center mb-16 pt-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-secondary-container text-secondary rounded-full mb-8">
+        {/* Success Header — matched to /thank-you/contact for visual
+            consistency. Heading and icon are smaller and lighter; the
+            rich next-steps content sits below. */}
+        <section className="text-center pt-24 md:pt-32 pb-12 md:pb-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-container text-secondary rounded-full mb-8">
             <svg
-              className="w-10 h-10"
+              className="w-8 h-8"
               fill="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-on-surface tracking-tight mb-6 leading-[1.1] font-headline">
-            Thank You for Reaching Out
+          <h1 className="text-4xl md:text-5xl font-normal font-headline text-on-surface leading-[1.1] mb-5 text-balance">
+            Thank you for reaching out
           </h1>
-          <p className="text-xl md:text-2xl text-on-surface-variant leading-relaxed max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-on-surface-variant leading-relaxed max-w-2xl mx-auto text-pretty">
             Your request for a brain health consultation has been received. We
             are honored to support you on your journey toward cognitive clarity
             and wellness.
