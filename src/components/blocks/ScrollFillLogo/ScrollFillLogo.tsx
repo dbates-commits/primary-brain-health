@@ -156,7 +156,7 @@ export function ScrollFillLogo({
         height: `calc(100vh + ${Math.max(count, 1)} * var(--sfl-per) + var(--sfl-tail))`,
       }}
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-start md:items-center justify-center pt-[15vh] md:pt-0">
         <svg
           ref={svgRef}
           viewBox={RIBBON_VIEWBOX}
