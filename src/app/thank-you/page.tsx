@@ -141,13 +141,13 @@ export default function ThankYouPage() {
               <div className="flex flex-col gap-4 relative z-10">
                 <Link
                   href="/#about"
-                  className="bg-secondary text-on-secondary px-8 py-4 rounded-xl font-headline font-bold text-center transition-all hover:brightness-110 shadow-lg"
+                  className="bg-secondary text-on-secondary px-8 py-4 rounded-full font-headline font-bold text-center transition-all hover:brightness-110 shadow-lg"
                 >
                   Learn More
                 </Link>
                 <Link
                   href="/"
-                  className="text-on-primary-container border border-on-primary-container/30 px-8 py-4 rounded-xl font-headline font-bold text-center hover:bg-white/5 transition-colors"
+                  className="text-on-primary-container border border-on-primary-container/30 px-8 py-4 rounded-full font-headline font-bold text-center hover:bg-white/5 transition-colors"
                 >
                   Return to Home
                 </Link>
