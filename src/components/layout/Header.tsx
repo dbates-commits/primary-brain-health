@@ -36,6 +36,25 @@ export function Header() {
     }
   }
 
+  function handleConsultationClick(
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
+  ) {
+    setMobileMenuOpen(false);
+    // On the homepage, Next.js Link no-ops when the URL hash already matches
+    // (e.g. user previously clicked here, then scrolled away). Intercept and
+    // scroll manually so the CTA always brings the user to #intake.
+    if (pathname === "/") {
+      e.preventDefault();
+      const intake = document.getElementById("intake");
+      if (intake) {
+        intake.scrollIntoView({ behavior: "smooth" });
+        if (window.location.hash !== "#intake") {
+          window.history.replaceState(null, "", "/#intake");
+        }
+      }
+    }
+  }
+
   const nav: NavItem[] = [
     { label: "FAQs", link: "/faqs" },
     { label: "Contact", link: "/contact" },
@@ -119,7 +138,14 @@ export function Header() {
           </div>
 
           {/* CTA Button */}
-          <Button href="/#intake" variant="solid" color="primary" size="md" className="hidden lg:inline-flex">
+          <Button
+            href="/#intake"
+            onClick={handleConsultationClick}
+            variant="solid"
+            color="primary"
+            size="md"
+            className="hidden lg:inline-flex"
+          >
             Book a Consultation
           </Button>
         </div>
@@ -182,7 +208,7 @@ export function Header() {
               ))}
               <Button
                 href="/#intake"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={handleConsultationClick}
                 variant="solid"
                 color="primary"
                 size="md"

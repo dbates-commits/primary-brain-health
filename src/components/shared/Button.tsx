@@ -8,7 +8,7 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement | HTMLAncho
   color?: "primary" | "secondary" | "white" | "dark";
   size?: "sm" | "md" | "lg";
   className?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   type?: "button" | "submit";
   "data-tina-field"?: string;
 }
