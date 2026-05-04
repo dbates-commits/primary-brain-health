@@ -30,14 +30,6 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="#about"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
-                >
-                  About
-                </a>
-              </li>
-              <li>
-                <a
                   href="#what-you-gain"
                   className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
@@ -54,11 +46,19 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="#credibility-trust"
+                  href="#intake"
                   className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
                 >
-                  Trust
+                  Get Assessed
                 </a>
+              </li>
+              <li>
+                <Link
+                  href="/faqs"
+                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                >
+                  FAQs
+                </Link>
               </li>
             </ul>
           </div>
