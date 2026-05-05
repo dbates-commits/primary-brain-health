@@ -147,7 +147,7 @@ export function ScrollFillLogo({
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
             preserveAspectRatio="xMidYMid meet"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(55vmin,420px)] h-auto pointer-events-none"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-[calc(-50%+32px)] w-[min(68.75vmin,525px)] h-auto pointer-events-none"
             style={{
               overflow: "visible",
               opacity: 0,
