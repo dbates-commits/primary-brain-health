@@ -357,26 +357,33 @@ export function IntakeForm({
               <label className="block text-sm font-semibold mb-2">
                 Who is this consultation for?
               </label>
-              <div className="flex gap-4">
-                <label className="relative flex items-center gap-3 cursor-pointer">
+              <div
+                role="radiogroup"
+                aria-label="Who is this consultation for?"
+                className="grid grid-cols-2 gap-1 p-1 bg-surface-container-low rounded-full"
+              >
+                <label className="relative cursor-pointer">
                   <input
                     type="radio"
                     name="patientIdentification"
                     value="Self"
+                    defaultChecked
                     className="peer sr-only"
                   />
-                  <span className="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-on-surface-variant/40 peer-checked:border-secondary transition-colors after:block after:w-2.5 after:h-2.5 after:rounded-full after:bg-secondary after:scale-0 after:transition-transform peer-checked:after:scale-100" />
-                  <span className="text-sm">Myself</span>
+                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
+                    Myself
+                  </span>
                 </label>
-                <label className="relative flex items-center gap-3 cursor-pointer">
+                <label className="relative cursor-pointer">
                   <input
                     type="radio"
                     name="patientIdentification"
                     value="Someone else"
                     className="peer sr-only"
                   />
-                  <span className="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-on-surface-variant/40 peer-checked:border-secondary transition-colors after:block after:w-2.5 after:h-2.5 after:rounded-full after:bg-secondary after:scale-0 after:transition-transform peer-checked:after:scale-100" />
-                  <span className="text-sm">Someone Else</span>
+                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
+                    Someone Else
+                  </span>
                 </label>
               </div>
             </div>
