@@ -1652,18 +1652,6 @@ var benefitsListBlock = {
       ui: { component: "textarea" }
     },
     {
-      name: "image",
-      label: "Background image (left card)",
-      type: "image",
-      description: "Image displayed behind the headline. If empty, a dark color is used as placeholder."
-    },
-    {
-      name: "video",
-      label: "Background video (left card, overrides image)",
-      type: "string",
-      description: "Path to a video file in /public (e.g. /videos/man-sitting-on-bench.mp4). Plays muted on loop. Takes precedence over the image."
-    },
-    {
       name: "items",
       label: "Benefits",
       type: "object",

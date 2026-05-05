@@ -12,8 +12,6 @@ interface BenefitItem {
 interface BenefitsListProps {
   headline?: string;
   subheadline?: string;
-  image?: string;
-  video?: string;
   items?: BenefitItem[];
   tinaFields?: {
     headline?: string;
@@ -26,8 +24,6 @@ interface BenefitsListProps {
 export function BenefitsList({
   headline,
   subheadline,
-  image,
-  video,
   items = [],
   tinaFields,
   blockData,
@@ -39,61 +35,39 @@ export function BenefitsList({
   return (
     <section className="px-6 md:px-10 pt-10 md:pt-14 pb-20 md:pb-28">
       <div className="max-w-6xl mx-auto flex flex-col gap-12 md:gap-16">
-        {/* Top: full-width hero card with video/image and overlaid copy.
-            The card itself shows immediately; the text overlay fades in
-            on its own as it scrolls into view. */}
-        <div className="relative overflow-hidden rounded-[1.25rem] bg-on-surface min-h-[420px] md:min-h-[480px] lg:min-h-[560px] flex flex-col justify-end p-8 md:p-10 lg:p-14">
-          {video ? (
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              poster={image || undefined}
-              className="absolute inset-0 w-full h-full object-cover object-top"
-            >
-              <source src={video} type="video/mp4" />
-            </video>
-          ) : (
-            image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={image}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            )
-          )}
-          {/* Subtle bottom-up gradient so text stays readable on busy images */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
-          <div data-scroll-reveal-self className="relative z-10 max-w-2xl">
+        {(headline || subheadline) && (
+          <div
+            data-scroll-reveal
+            data-scroll-stagger="90"
+            className="max-w-4xl mx-auto text-center"
+          >
             {headline && (
               <h2
+                data-scroll-item
                 data-tina-field={tinaFields?.headline}
-                className="font-headline font-normal text-white text-3xl md:text-4xl lg:text-5xl leading-[1.05] text-balance"
+                className="font-headline font-normal text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
               >
                 {headline}
               </h2>
             )}
             {subheadline && (
               <p
+                data-scroll-item
                 data-tina-field={tinaFields?.subheadline}
-                className="mt-4 text-base md:text-lg text-white/85 text-pretty"
+                className="mt-5 text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto text-pretty"
               >
                 {subheadline}
               </p>
             )}
           </div>
-        </div>
+        )}
 
-        {/* Bottom: benefit items in three columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-12">
           {items.map((item, i) => (
             <div
               key={i}
               data-scroll-reveal-self
-              className="flex flex-col gap-4"
+              className="flex flex-col items-center text-center gap-4 bg-[#EFF6F9] rounded-[1.25rem] p-8 md:p-10 shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)]"
             >
               {item.icon && (
                 <PhosphorIcon
@@ -103,7 +77,7 @@ export function BenefitsList({
                   className="shrink-0 w-9 h-9 md:w-10 md:h-10 text-on-surface"
                 />
               )}
-              <div className="flex flex-col">
+              <div className="flex flex-col items-center">
                 {item.title && (
                   <h3
                     data-tina-field={getItemField(i, "title")}

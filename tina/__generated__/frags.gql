@@ -345,8 +345,6 @@ fragment PageParts on Page {
     ... on PageBlocksBenefitsList {
       headline
       subheadline
-      image
-      video
       items {
         __typename
         title

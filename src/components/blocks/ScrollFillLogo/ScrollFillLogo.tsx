@@ -187,43 +187,60 @@ export function ScrollFillLogo({
           {/* Slides share a single grid cell so the stage sizes to the
               tallest slide; cross-fades toggle which one is visible. */}
           <div className="relative z-10 grid">
-            {populated.map((slide, i) => (
-              <div
-                key={slide.originalIndex}
-                ref={(el) => {
-                  slideRefs.current[i] = el;
-                }}
-                className="col-start-1 row-start-1"
-                style={{
-                  opacity: 0,
-                  transform: "translateY(24px)",
-                  willChange: "opacity, transform",
-                }}
-              >
-                {slide.label && (
-                  <p
-                    className="text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-10"
-                    data-tina-field={getSlideField(
-                      slide.originalIndex,
-                      "label",
-                    )}
-                  >
-                    {slide.label}
-                  </p>
-                )}
-                {slide.headline && (
-                  <p
-                    className="font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface"
-                    data-tina-field={getSlideField(
-                      slide.originalIndex,
-                      "headline",
-                    )}
-                  >
-                    {slide.headline}
-                  </p>
-                )}
-              </div>
-            ))}
+            {populated.map((slide, i) => {
+              // Slide 0's label + headline ride a continuous fade-up sweep
+              // chained after the hero (hero h1 at 150ms, CTA at 350ms),
+              // so the page entrance reads as one motion. Subsequent
+              // slides keep the scroll-driven cross-fade.
+              const isFirst = i === 0;
+              return (
+                <div
+                  key={slide.originalIndex}
+                  ref={(el) => {
+                    slideRefs.current[i] = el;
+                  }}
+                  className="col-start-1 row-start-1"
+                  style={
+                    isFirst
+                      ? { willChange: "opacity, transform" }
+                      : {
+                          opacity: 0,
+                          transform: "translateY(24px)",
+                          willChange: "opacity, transform",
+                        }
+                  }
+                >
+                  {slide.label && (
+                    <p
+                      className={`text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-10${
+                        isFirst ? " animate-fade-up" : ""
+                      }`}
+                      style={isFirst ? { animationDelay: "550ms" } : undefined}
+                      data-tina-field={getSlideField(
+                        slide.originalIndex,
+                        "label",
+                      )}
+                    >
+                      {slide.label}
+                    </p>
+                  )}
+                  {slide.headline && (
+                    <p
+                      className={`font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface${
+                        isFirst ? " animate-fade-up" : ""
+                      }`}
+                      style={isFirst ? { animationDelay: "750ms" } : undefined}
+                      data-tina-field={getSlideField(
+                        slide.originalIndex,
+                        "headline",
+                      )}
+                    >
+                      {slide.headline}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

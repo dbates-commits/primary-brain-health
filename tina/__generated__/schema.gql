@@ -357,8 +357,6 @@ type PageBlocksBenefitsListItems {
 type PageBlocksBenefitsList {
   headline: String
   subheadline: String
-  image: String
-  video: String
   items: [PageBlocksBenefitsListItems]
 }
 
@@ -681,8 +679,6 @@ input PageBlocksBenefitsListItemsFilter {
 input PageBlocksBenefitsListFilter {
   headline: StringFilter
   subheadline: StringFilter
-  image: ImageFilter
-  video: StringFilter
   items: PageBlocksBenefitsListItemsFilter
 }
 
@@ -1517,8 +1513,6 @@ input PageBlocksBenefitsListItemsMutation {
 input PageBlocksBenefitsListMutation {
   headline: String
   subheadline: String
-  image: String
-  video: String
   items: [PageBlocksBenefitsListItemsMutation]
 }
 

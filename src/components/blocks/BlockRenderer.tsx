@@ -287,8 +287,6 @@ export function BlockRenderer({
               <BenefitsList
                 headline={block.headline}
                 subheadline={block.subheadline}
-                image={block.image}
-                video={block.video}
                 items={block.items || []}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),

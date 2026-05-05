@@ -157,7 +157,7 @@ export function StackSections({
             <div
               key={i}
               data-stack-item
-              className="md:sticky md:h-[70vh] md:flex md:items-start md:pt-10 mb-8 md:mb-0"
+              className="md:sticky md:h-[clamp(540px,55vh,620px)] md:flex md:items-start md:pt-10 mb-8 md:mb-0"
               style={{
                 zIndex: i + 1,
                 top: `${stickyTopRem}rem`,
@@ -176,37 +176,39 @@ export function StackSections({
                   willChange: "transform, filter",
                 }}
               >
-                <div className="relative flex flex-col md:justify-end items-start gap-5 md:gap-6 p-8 md:p-10">
+                <div className="relative flex flex-col md:justify-end items-start p-8 md:p-10">
                   <span
                     aria-hidden="true"
-                    className="font-headline font-normal text-primary text-base md:text-lg leading-none tabular-nums"
+                    className="pointer-events-none select-none absolute right-4 -bottom-8 md:right-6 md:-bottom-12 font-headline font-normal leading-none tabular-nums text-primary/[0.08] text-[240px] md:text-[360px]"
                   >
-                    {String(i + 1).padStart(2, "0")}
+                    {i + 1}
                   </span>
-                  {item.icon && (
-                    <PhosphorIcon
-                      name={item.icon}
-                      aria-hidden="true"
-                      weight="regular"
-                      className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
-                    />
-                  )}
-                  {item.title && (
-                    <h3
-                      data-tina-field={getItemField(i, "title")}
-                      className="font-headline font-normal text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
-                    >
-                      {item.title}:
-                    </h3>
-                  )}
-                  {item.body && (
-                    <p
-                      data-tina-field={getItemField(i, "body")}
-                      className="text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md"
-                    >
-                      {item.body}
-                    </p>
-                  )}
+                  <div className="relative flex flex-col items-start gap-5 md:gap-6">
+                    {item.icon && (
+                      <PhosphorIcon
+                        name={item.icon}
+                        aria-hidden="true"
+                        weight="regular"
+                        className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
+                      />
+                    )}
+                    {item.title && (
+                      <h3
+                        data-tina-field={getItemField(i, "title")}
+                        className="font-headline font-normal text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
+                      >
+                        {item.title}
+                      </h3>
+                    )}
+                    {item.body && (
+                      <p
+                        data-tina-field={getItemField(i, "body")}
+                        className="text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md"
+                      >
+                        {item.body}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="relative aspect-[4/3] md:aspect-auto md:min-h-full">
