@@ -84,16 +84,18 @@ export function ScrollFillLogo({
       const passed = viewportH - rect.top;
       const progress = Math.max(0, Math.min(1, passed / total));
 
-      // Brush paints in across the first ~55% of the section so the shape
-      // is fully drawn while the stage is still pinned, leaving runway for
-      // the section to scroll off and reveal the next block.
-      const brushProgress = smoothstep(interp(progress, 0, 0.55));
+      // Brush starts painting after progress ~0.15 so that on shorter
+      // viewports — where the section's top edge is already partially
+      // visible at page load (progress can be 0.04–0.08) — nothing is
+      // drawn until the user actively scrolls. Completes by ~0.6, well
+      // before the section exits, so the next block enters cleanly.
+      const brushProgress = smoothstep(interp(progress, 0.15, 0.6));
       brush.style.strokeDashoffset = String(-length * (1 - brushProgress));
 
       if (svgRef.current) {
-        // Logo fades in quickly as the section enters so the brush has
-        // something to paint on for the full scroll range.
-        const logoOpacity = smoothstep(interp(progress, 0, 0.1));
+        // Logo opacity fades in just ahead of the brush so the shape is
+        // ready to paint on, but stays invisible at page load.
+        const logoOpacity = smoothstep(interp(progress, 0.13, 0.2));
         svgRef.current.style.opacity = String(logoOpacity);
       }
 
