@@ -50,6 +50,18 @@ export function StackSections({
   >(() =>
     Array.from({ length: items.length }, () => ({ entry: 0, retreat: 0 }))
   );
+  // Mobile (<md): hand the entry fade-up to the existing CSS-only
+  // [data-scroll-reveal-self] observer (one-shot). The per-frame React
+  // re-render + chasing CSS transition combo was causing scroll stutter
+  // on phones; on desktop we keep the scroll-driven sticky choreography.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -60,6 +72,19 @@ export function StackSections({
       frame = 0;
       if (!container) return;
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      if (isMobile) {
+        // Skip per-frame work on mobile — set a one-time "fully present"
+        // default so any computed opacity/transform resolves to the resting
+        // state, then bail. The CSS scroll-reveal handles the fade-up.
+        setProgress((prev) => {
+          if (prev.every((p) => p.entry === 1 && p.retreat === 0)) return prev;
+          return Array.from({ length: items.length }, () => ({
+            entry: 1,
+            retreat: 0,
+          }));
+        });
+        return;
+      }
       const itemEls =
         container.querySelectorAll<HTMLElement>("[data-stack-item]");
       const viewportH = window.innerHeight;
@@ -185,30 +210,39 @@ export function StackSections({
               }}
             >
               <div
+                data-scroll-reveal-self
                 className={cn(
                   "relative w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
                   reversed && "md:[&>div:first-of-type]:order-2"
                 )}
-                style={{
-                  opacity: cardOpacity,
-                  transform: `scale(${scale}) translateY(${
-                    retreatTranslateY + entryTranslateY
-                  }px)`,
-                  filter: `brightness(${1 - dim})`,
-                  transition:
-                    "transform 600ms cubic-bezier(0.22, 1, 0.36, 1), filter 600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
-                  willChange: "transform, filter, opacity",
-                }}
+                style={
+                  isMobile
+                    ? undefined
+                    : {
+                        opacity: cardOpacity,
+                        transform: `scale(${scale}) translateY(${
+                          retreatTranslateY + entryTranslateY
+                        }px)`,
+                        filter: `brightness(${1 - dim})`,
+                        transition:
+                          "transform 600ms cubic-bezier(0.22, 1, 0.36, 1), filter 600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
+                        willChange: "transform, filter, opacity",
+                      }
+                }
               >
                 <div className="relative flex flex-col md:justify-end items-start p-8 md:p-10">
                   <span
                     aria-hidden="true"
                     className="pointer-events-none select-none absolute right-4 -bottom-8 md:right-6 md:-bottom-12 font-headline font-normal leading-none tabular-nums text-primary/[0.08] text-[240px] md:text-[360px]"
-                    style={{
-                      opacity: watermarkOpacity,
-                      transition:
-                        "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)",
-                    }}
+                    style={
+                      isMobile
+                        ? undefined
+                        : {
+                            opacity: watermarkOpacity,
+                            transition:
+                              "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+                          }
+                    }
                   >
                     {i + 1}
                   </span>
