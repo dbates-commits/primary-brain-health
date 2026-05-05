@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Request Received",
@@ -41,8 +40,8 @@ export default function ThankYouPage() {
           <div className="lg:col-span-7 rounded-[2.5rem] overflow-hidden relative min-h-[500px] shadow-2xl">
             <img
               className="absolute inset-0 w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdI6xP2qNT0_fckY7ur-SislKKwDjM5J3Osc6aAaUm6HmNIp-Cml1hD9k8WfD_SL5vF83bHyjqx9IWsecgEro3OwhgZWodQxQJBgwW-gRhzqcalFR9okDkQ-LbvOPcrEN5r_tfY0PJrIV1iW6Ugkj3ZcO4JUsC9nLhBGxX6xxqA9nWBqWBmvAuZ03oADig6qqtczaoDeo3zreKmDu5BswrIzMtiX1j_8etm3yJgeEXB0pe8GvY-IViH7A-_11ZdNwDY8ZjQOT4H1w"
-              alt="Serene older man sitting in a sunlit garden"
+              src="/uploads/group-walking-outside@2x.jpg"
+              alt="A small group walking together outdoors"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
             <div className="absolute bottom-10 left-10 right-10">
@@ -127,34 +126,6 @@ export default function ThankYouPage() {
               </ul>
             </div>
 
-            {/* CTA Card */}
-            <div className="bg-primary text-on-primary p-10 rounded-[2rem] flex flex-col justify-between shadow-2xl relative overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="text-2xl font-extrabold font-headline mb-4 leading-tight">
-                  Curious about our process?
-                </h3>
-                <p className="text-on-primary-container text-base mb-8 opacity-90 leading-relaxed">
-                  Explore our resource library for data-driven insights on
-                  proactive cognitive health.
-                </p>
-              </div>
-              <div className="flex flex-col gap-4 relative z-10">
-                <Link
-                  href="/#about"
-                  className="bg-secondary text-on-secondary px-8 py-4 rounded-full font-headline font-bold text-center transition-all hover:brightness-110 shadow-lg"
-                >
-                  Learn More
-                </Link>
-                <Link
-                  href="/"
-                  className="text-on-primary-container border border-on-primary-container/30 px-8 py-4 rounded-full font-headline font-bold text-center hover:bg-white/5 transition-colors"
-                >
-                  Return to Home
-                </Link>
-              </div>
-              {/* Decorative element */}
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />
-            </div>
           </div>
         </div>
       </div>

@@ -39,9 +39,16 @@ export function StackSections({
       ? tinaField(blockData.items[index], field)
       : undefined;
   const containerRef = useRef<HTMLDivElement>(null);
-  // Per-card progress (0 = fully visible, 1 = fully covered by next card)
-  const [progress, setProgress] = useState<number[]>(() =>
-    new Array(items.length).fill(0)
+  // Per-card progress.
+  //   entry:   0 = below fade-in window, 1 = at sticky pin (overlap begins).
+  //            Drives the fade-up so each card is opaque *before* it covers
+  //            the previous one.
+  //   retreat: 0 = fully visible, 1 = fully covered by next card. Drives
+  //            the existing scale-down + dim retreat as the next card pins.
+  const [progress, setProgress] = useState<
+    { entry: number; retreat: number }[]
+  >(() =>
+    Array.from({ length: items.length }, () => ({ entry: 0, retreat: 0 }))
   );
 
   useEffect(() => {
@@ -52,35 +59,38 @@ export function StackSections({
     const update = () => {
       frame = 0;
       if (!container) return;
-      // Mobile (<md): cards stack naturally — skip the sticky-driven transforms
-      if (window.matchMedia("(max-width: 767px)").matches) {
-        setProgress((prev) =>
-          prev.some((v) => v !== 0) ? new Array(items.length).fill(0) : prev
-        );
-        return;
-      }
-      const itemEls = container.querySelectorAll<HTMLElement>("[data-stack-item]");
-      const next: number[] = [];
+      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      const itemEls =
+        container.querySelectorAll<HTMLElement>("[data-stack-item]");
+      const viewportH = window.innerHeight;
+      // Fade-up window: card starts becoming visible once its top crosses
+      // 85% of the viewport, fully opaque by the time it reaches 35%. The
+      // sticky pin sits much higher (~6rem ≈ 100px), so cards are always
+      // fully opaque before they begin overlapping the previous card.
+      const fadeStartY = viewportH * 0.85;
+      const fadeEndY = viewportH * 0.35;
+      const rem = parseFloat(
+        getComputedStyle(document.documentElement).fontSize
+      );
+      const next: { entry: number; retreat: number }[] = [];
       itemEls.forEach((el, i) => {
-        const nextEl = itemEls[i + 1];
-        if (!nextEl) {
-          next[i] = 0;
-          return;
+        const rect = el.getBoundingClientRect();
+        const entryRaw = (fadeStartY - rect.top) / (fadeStartY - fadeEndY);
+        const entry = Math.max(0, Math.min(1, entryRaw));
+
+        let retreat = 0;
+        if (!isMobile) {
+          const nextEl = itemEls[i + 1];
+          if (nextEl) {
+            const nextTopRem = 6 + (i + 1) * 0.875;
+            const nextRect = nextEl.getBoundingClientRect();
+            const toPinPx = nextRect.top - nextTopRem * rem;
+            const animDistance = rect.height;
+            const raw = 1 - toPinPx / animDistance;
+            retreat = Math.max(0, Math.min(1, raw));
+          }
         }
-        // Progress = how close the next card's top is to its sticky pin point.
-        // When next card's top reaches this card's pin position, progress = 1.
-        const thisTopRem = 6 + i * 0.875;
-        const nextTopRem = 6 + (i + 1) * 0.875;
-        const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        const thisRect = el.getBoundingClientRect();
-        const nextRect = nextEl.getBoundingClientRect();
-        // Distance from next card's top to its pin position
-        const toPinPx = nextRect.top - nextTopRem * rem;
-        // The scroll distance over which we animate (height of this card)
-        const animDistance = thisRect.height;
-        const raw = 1 - toPinPx / animDistance;
-        next[i] = Math.max(0, Math.min(1, raw));
-        void thisTopRem;
+        next[i] = { entry, retreat };
       });
       setProgress(next);
     };
@@ -148,11 +158,22 @@ export function StackSections({
           // above the next. The last card sits flush with the first so it
           // covers earlier cards completely.
           const stickyTopRem = isLast ? 6 : 6 + i * 0.875;
-          const p = easeOutCubic(progress[i] ?? 0);
-          // Subtle retreat: scale down + dim as the next card approaches
-          const scale = 1 - p * 0.05;
-          const translateY = -p * 16; // cards lift slightly as they retreat
-          const dim = p * 0.35; // brightness dim
+          const cardP = progress[i] ?? { entry: 0, retreat: 0 };
+          // Entry: scroll-driven fade-up. Cap at 0.7 so cards are fully
+          // opaque while still 30% of the runway away from overlap.
+          const entryEased = easeOutCubic(Math.min(1, cardP.entry / 0.7));
+          const cardOpacity = entryEased;
+          const entryTranslateY = (1 - entryEased) * 32;
+          // Watermark lags ~30% behind the card so the digit ghosts in
+          // after the card itself has settled.
+          const watermarkOpacity = easeOutCubic(
+            Math.min(1, Math.max(0, cardP.entry - 0.3) / 0.5)
+          );
+          // Retreat: existing scale/lift/dim as next card approaches.
+          const retreatEased = easeOutCubic(cardP.retreat);
+          const scale = 1 - retreatEased * 0.05;
+          const retreatTranslateY = -retreatEased * 16;
+          const dim = retreatEased * 0.35;
           return (
             <div
               key={i}
@@ -169,17 +190,25 @@ export function StackSections({
                   reversed && "md:[&>div:first-of-type]:order-2"
                 )}
                 style={{
-                  transform: `scale(${scale}) translateY(${translateY}px)`,
+                  opacity: cardOpacity,
+                  transform: `scale(${scale}) translateY(${
+                    retreatTranslateY + entryTranslateY
+                  }px)`,
                   filter: `brightness(${1 - dim})`,
                   transition:
-                    "transform 600ms cubic-bezier(0.22, 1, 0.36, 1), filter 600ms cubic-bezier(0.22, 1, 0.36, 1)",
-                  willChange: "transform, filter",
+                    "transform 600ms cubic-bezier(0.22, 1, 0.36, 1), filter 600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  willChange: "transform, filter, opacity",
                 }}
               >
                 <div className="relative flex flex-col md:justify-end items-start p-8 md:p-10">
                   <span
                     aria-hidden="true"
                     className="pointer-events-none select-none absolute right-4 -bottom-8 md:right-6 md:-bottom-12 font-headline font-normal leading-none tabular-nums text-primary/[0.08] text-[240px] md:text-[360px]"
+                    style={{
+                      opacity: watermarkOpacity,
+                      transition:
+                        "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
                   >
                     {i + 1}
                   </span>
