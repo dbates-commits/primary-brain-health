@@ -139,7 +139,7 @@ export function ScrollFillLogo({
   }, [count]);
 
   return (
-    <section ref={containerRef} className="relative bg-surface h-[150vh]">
+    <section ref={containerRef} className="relative bg-surface h-[110vh]">
       {/* Sticky stage is pinned 120px from the viewport top with the slide
           content anchored to the top (items-start), so the gap above the
           label is a consistent 120px regardless of viewport height. */}

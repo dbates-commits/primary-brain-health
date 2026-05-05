@@ -138,7 +138,7 @@ export function StackSections({
   const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
   return (
-    <section className="px-6 md:px-10 pt-[368px] md:pt-[432px] pb-6 md:pb-10">
+    <section className="px-6 md:px-10 pt-20 md:pt-28 pb-6 md:pb-10">
       {(label || headline || subheadline) && (
         <div
           data-scroll-reveal
