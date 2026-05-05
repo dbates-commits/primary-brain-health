@@ -248,14 +248,23 @@ export function StackSections({
                     }
                   />
                   <div className="relative flex flex-col items-start gap-5 md:gap-6">
-                    {item.icon && (
-                      <PhosphorIcon
-                        name={item.icon}
-                        aria-hidden="true"
-                        weight="regular"
-                        className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
-                      />
-                    )}
+                    {item.icon &&
+                      (item.icon.includes("/") || item.icon.endsWith(".svg") ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.icon}
+                          alt=""
+                          aria-hidden="true"
+                          className="h-12 w-auto"
+                        />
+                      ) : (
+                        <PhosphorIcon
+                          name={item.icon}
+                          aria-hidden="true"
+                          weight="regular"
+                          className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
+                        />
+                      ))}
                     {item.title && (
                       <h3
                         data-tina-field={getItemField(i, "title")}

@@ -73,7 +73,56 @@
 }
 
 :root {
-  /* Design System: "The Cognitive Sanctuary" */
+  /* ===========================================================
+     Design System: "The Cognitive Sanctuary"
+     -----------------------------------------------------------
+     Color token naming (Material Design 3 convention)
+
+     Roles
+       primary    — brand action color (CTAs, focus states, links)
+       secondary  — accent / supporting color
+       surface    — page + card backgrounds
+       error      — destructive / validation
+       outline    — strokes, dividers, hairlines
+       inverse    — light-on-dark contexts (e.g. dark cards)
+
+     Modifiers (each role can have any subset of these)
+       --color-{role}                 — base color
+       --color-on-{role}              — text/icons that sit ON the base
+                                         (e.g. on-primary is the text
+                                         color used inside a primary
+                                         button)
+       --color-{role}-container       — softer/quieter variant of the
+                                         role, used as a fill behind
+                                         {role}-tinted text
+       --color-on-{role}-container    — text color inside a *-container
+       --color-{role}-fixed           — pale variant that stays constant
+                                         across light/dark themes
+       --color-{role}-fixed-dim       — slightly deeper -fixed
+       --color-{role}-variant         — alternate tone (used on outline
+                                         + on-surface for the dimmer
+                                         body-text shade)
+
+     Surface tiers (low → highest = increasingly elevated)
+       --color-surface-container-lowest
+       --color-surface-container-low
+       --color-surface-container
+       --color-surface-container-high
+       --color-surface-container-highest
+       --color-surface-dim            — recessed / muted surface
+
+     Inverse pair
+       --color-inverse-surface        — dark fill for inverted regions
+       --color-inverse-on-surface     — text on the inverse fill
+       --color-inverse-primary        — primary recolored for inverse
+
+     Usage
+       In CSS: `background: var(--color-primary)`
+       In Tailwind: `bg-primary`, `text-on-surface`, etc.
+         (Tokens are wired through the @theme inline block below.)
+       In SVG: `fill="var(--color-primary-fixed)"` works directly.
+     =========================================================== */
+
   /* Primary palette — Dark Teal per identity guide */
   --color-primary: #006e8a;
   --color-primary-container: #004d61;

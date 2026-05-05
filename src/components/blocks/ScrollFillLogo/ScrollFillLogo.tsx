@@ -22,7 +22,10 @@ const LOGO_PATH =
 const BRUSH_PATH =
   "M200 700C215 730 230 755 246.807 778.811C502.312 1034.32 942.099 667.084 823.229 359.318C770.442 222.65 535.371 148.994 437.229 280.317C179.39 625.325 794.312 840.202 1037.19 929.24";
 const LOGO_VIEWBOX = "0 0 1291 1291";
-const LOGO_FILL = "#F2F8FA";
+// Sourced from the design system (--color-primary-fixed). Slightly
+// deeper than the prior off-white (#F2F8FA) so the logo reads against
+// the warm surface bg without losing its watercolor softness.
+const LOGO_FILL = "var(--color-primary-fixed)";
 const BRUSH_STROKE_WIDTH = 170;
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t);

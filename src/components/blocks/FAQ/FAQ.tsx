@@ -115,7 +115,7 @@ export function FAQ({
               {subheadline && (
                 <p
                   data-tina-field={tinaFields?.subheadline}
-                  className="text-base md:text-lg text-on-surface-variant mt-4"
+                  className="text-base md:text-lg text-on-surface-variant mt-4 text-balance md:text-wrap"
                 >
                   {subheadline}
                 </p>
