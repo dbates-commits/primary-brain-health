@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useLayoutEffect, useRef } from "react";
 import { tinaField } from "tinacms/dist/react";
+import { Eyebrow } from "@/components/shared/Eyebrow";
 
 interface Slide {
   label?: string;
@@ -218,10 +219,8 @@ export function ScrollFillLogo({
                   }
                 >
                   {slide.label && (
-                    <p
-                      className={`text-lg font-body font-bold uppercase tracking-[0.18em] text-primary mb-6 md:mb-10${
-                        isFirst ? " animate-fade-up" : ""
-                      }`}
+                    <Eyebrow
+                      className={`mb-6 md:mb-10${isFirst ? " animate-fade-up" : ""}`}
                       style={isFirst ? { animationDelay: "550ms" } : undefined}
                       data-tina-field={getSlideField(
                         slide.originalIndex,
@@ -229,7 +228,7 @@ export function ScrollFillLogo({
                       )}
                     >
                       {slide.label}
-                    </p>
+                    </Eyebrow>
                   )}
                   {slide.headline && (
                     <p

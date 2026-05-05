@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Eyebrow } from "@/components/shared/Eyebrow";
 
 export const metadata: Metadata = {
   title: "Request Received",
@@ -46,9 +47,7 @@ export default function ThankYouPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
             <div className="absolute bottom-10 left-10 right-10">
               <div className="bg-surface-container-lowest/90 backdrop-blur-md p-8 rounded-[1.5rem] border border-white/20 shadow-xl">
-                <p className="text-secondary font-bold text-sm uppercase tracking-[0.2em] mb-3 font-body">
-                  Restorative Care
-                </p>
+                <Eyebrow className="mb-3">Restorative Care</Eyebrow>
                 <h3 className="text-3xl font-bold text-on-surface mb-3 font-headline leading-tight">
                   A focused approach to your vitality.
                 </h3>
