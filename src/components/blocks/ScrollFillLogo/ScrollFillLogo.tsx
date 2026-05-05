@@ -89,8 +89,10 @@ export function ScrollFillLogo({
       // visible at page load (progress can be 0.04–0.08) — nothing is
       // drawn until the user actively scrolls. Completes by ~0.6, well
       // before the section exits, so the next block enters cleanly.
+      // Positive offset draws the stroke from the path's *start* (M200
+      // 700, left side) toward its end, so the logo always fills L→R.
       const brushProgress = smoothstep(interp(progress, 0.15, 0.6));
-      brush.style.strokeDashoffset = String(-length * (1 - brushProgress));
+      brush.style.strokeDashoffset = String(length * (1 - brushProgress));
 
       if (svgRef.current) {
         // Logo opacity fades in just ahead of the brush so the shape is
