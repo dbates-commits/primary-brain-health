@@ -63,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth bg-[#EFF6F9]">
       <body
         className={`${gildaDisplay.variable} font-body antialiased bg-white text-on-surface`}
       >

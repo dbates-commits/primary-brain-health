@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Button } from "@/components/shared/Button";
 
 export default function NotFound() {
   return (
@@ -7,12 +7,9 @@ export default function NotFound() {
       <p className="text-on-surface-variant text-lg mb-8 max-w-md">
         The page you're looking for doesn't exist or has been moved.
       </p>
-      <Link
-        href="/"
-        className="bg-primary text-on-primary px-6 py-3 rounded-full font-headline text-sm font-bold hover:brightness-110 active:scale-95 transition-all duration-200"
-      >
+      <Button href="/" variant="solid" color="primary" size="md">
         Back to Home
-      </Link>
+      </Button>
     </div>
   );
 }
