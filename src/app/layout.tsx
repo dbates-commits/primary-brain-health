@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Gilda_Display } from "next/font/google";
+import { Gilda_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -9,6 +9,12 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 const gildaDisplay = Gilda_Display({
   variable: "--font-gilda-display",
   weight: "400",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
@@ -65,7 +71,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth bg-[#EFF6F9]">
       <body
-        className={`${gildaDisplay.variable} font-body antialiased bg-white text-on-surface`}
+        className={`${gildaDisplay.variable} ${inter.variable} font-body antialiased bg-white text-on-surface`}
       >
         <ScrollToTop />
         <ScrollRevealInit />

@@ -30,7 +30,7 @@ export default function ContactThankYouPage() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-primary text-on-primary px-8 py-4 rounded-full font-headline font-bold transition-all hover:brightness-110 shadow-lg"
+          className="inline-flex items-center gap-2 bg-primary text-on-primary px-8 py-4 rounded-full font-body font-bold transition-all hover:brightness-110 shadow-lg"
         >
           Return Home
         </Link>

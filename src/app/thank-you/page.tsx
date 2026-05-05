@@ -46,7 +46,7 @@ export default function ThankYouPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
             <div className="absolute bottom-10 left-10 right-10">
               <div className="bg-surface-container-lowest/90 backdrop-blur-md p-8 rounded-[1.5rem] border border-white/20 shadow-xl">
-                <p className="text-secondary font-bold text-sm uppercase tracking-[0.2em] mb-3 font-headline">
+                <p className="text-secondary font-bold text-sm uppercase tracking-[0.2em] mb-3 font-body">
                   Restorative Care
                 </p>
                 <h3 className="text-3xl font-bold text-on-surface mb-3 font-headline leading-tight">
@@ -82,11 +82,11 @@ export default function ThankYouPage() {
               </h2>
               <ul className="space-y-8">
                 <li className="flex gap-5">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold font-headline text-base">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold font-body text-base">
                     1
                   </div>
                   <div>
-                    <p className="font-bold text-on-surface text-lg mb-1 font-headline">
+                    <p className="font-bold text-on-surface text-lg mb-1 font-body">
                       Initial Review
                     </p>
                     <p className="text-on-surface-variant text-base leading-relaxed">
@@ -96,11 +96,11 @@ export default function ThankYouPage() {
                   </div>
                 </li>
                 <li className="flex gap-5">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold font-headline text-base">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold font-body text-base">
                     2
                   </div>
                   <div>
-                    <p className="font-bold text-on-surface text-lg mb-1 font-headline">
+                    <p className="font-bold text-on-surface text-lg mb-1 font-body">
                       Personal Outreach
                     </p>
                     <p className="text-on-surface-variant text-base leading-relaxed">
@@ -110,11 +110,11 @@ export default function ThankYouPage() {
                   </div>
                 </li>
                 <li className="flex gap-5">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold font-headline text-base">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold font-body text-base">
                     3
                   </div>
                   <div>
-                    <p className="font-bold text-on-surface text-lg mb-1 font-headline">
+                    <p className="font-bold text-on-surface text-lg mb-1 font-body">
                       Scheduling
                     </p>
                     <p className="text-on-surface-variant text-base leading-relaxed">

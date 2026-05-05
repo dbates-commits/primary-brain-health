@@ -231,9 +231,12 @@ export function StackSections({
                 }
               >
                 <div className="relative flex flex-col md:justify-end items-start p-8 md:p-10">
-                  <span
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/images/watermark-${i + 1}.svg`}
+                    alt=""
                     aria-hidden="true"
-                    className="pointer-events-none select-none absolute right-4 -bottom-8 md:right-6 md:-bottom-12 font-headline font-normal leading-none tabular-nums text-primary/[0.08] text-[240px] md:text-[360px]"
+                    className="pointer-events-none select-none absolute right-6 -bottom-4 md:right-10 md:-bottom-6 h-[200px] md:h-[300px] w-auto"
                     style={
                       isMobile
                         ? undefined
@@ -243,9 +246,7 @@ export function StackSections({
                               "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                           }
                     }
-                  >
-                    {i + 1}
-                  </span>
+                  />
                   <div className="relative flex flex-col items-start gap-5 md:gap-6">
                     {item.icon && (
                       <PhosphorIcon

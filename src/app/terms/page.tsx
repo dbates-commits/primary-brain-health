@@ -12,7 +12,7 @@ export default function TermsPage() {
       <article className="max-w-3xl mx-auto [&_p]:text-lg [&_p]:leading-[2] [&_p]:text-primary/90 [&_p]:mb-8 [&_h2]:mt-16 [&_h2]:mb-6 [&_li]:text-lg [&_li]:leading-[1.8] [&_li]:text-on-surface-variant">
         {/* Header */}
         <header className="mb-16">
-          <span className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4 block font-headline">
+          <span className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4 block font-body">
             Legal Documentation
           </span>
           <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-on-surface tracking-tight mb-6">
@@ -136,7 +136,7 @@ export default function TermsPage() {
             Have questions regarding these terms?
           </p>
           <a
-            className="font-headline font-bold text-secondary inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="font-body font-bold text-secondary inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
             href="mailto:legal@primarybrainhealth.com"
           >
             <svg
