@@ -51,7 +51,7 @@ export default function ThankYouPage() {
                 <h3 className="text-3xl font-bold text-on-surface mb-3 font-headline leading-tight">
                   A focused approach to your vitality.
                 </h3>
-                <p className="text-on-surface-variant text-lg leading-relaxed">
+                <p className="text-on-surface-variant text-lg leading-relaxed text-balance">
                   Our specialists treat every case with clinical precision and
                   personal empathy.
                 </p>
@@ -63,20 +63,7 @@ export default function ThankYouPage() {
           <div className="lg:col-span-5 flex flex-col gap-8">
             {/* Next Steps Card */}
             <div className="bg-surface-container-low p-10 rounded-[2rem] flex-grow shadow-sm border border-outline-variant/10">
-              <h2 className="text-3xl font-bold text-on-surface mb-8 flex items-center gap-3 font-headline">
-                <svg
-                  className="w-8 h-8 text-secondary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
-                  />
-                </svg>
+              <h2 className="text-3xl font-bold text-on-surface mb-8 font-headline">
                 Next Steps
               </h2>
               <ul className="space-y-8">
