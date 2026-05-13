@@ -7,6 +7,6 @@
   },
   "secondaryButton": {
     "text": "Learn More",
-    "link": "/services"
+    "link": "/"
   }
 }

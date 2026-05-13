@@ -47,7 +47,7 @@ export default function PrivacyPolicyPage() {
             trust. This Privacy Policy outlines how we treat your sensitive
             information with the same clinical rigor and restorative care that we
             apply to our therapeutic practices. Your privacy is the bedrock of
-            our sanctuary.
+            our service.
           </p>
         </section>
 

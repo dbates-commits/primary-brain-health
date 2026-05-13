@@ -43,9 +43,10 @@ export default function TermsPage() {
           </h2>
           <p>
             By accessing and using the clinical services, digital interfaces, and
-            cognitive assessment tools provided by Primary Brain Health (the
-            &ldquo;Sanctuary,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or
-            &ldquo;our&rdquo;), you signify your irrevocable agreement to be
+            cognitive assessment tools provided by Primary Brain Health
+            (&ldquo;Primary Brain Health,&rdquo; &ldquo;PBH,&rdquo;
+            &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;), you
+            signify your irrevocable agreement to be
             bound by these Terms &amp; Conditions. These terms constitute a
             legally binding agreement between you and our healthcare collective.
           </p>
@@ -75,7 +76,7 @@ export default function TermsPage() {
               during the intake process.
             </li>
             <li>
-              The Sanctuary reserves the right to modify service protocols based
+              Primary Brain Health reserves the right to modify service protocols based
               on emerging neuro-scientific evidence.
             </li>
           </ul>
@@ -94,7 +95,7 @@ export default function TermsPage() {
             &ldquo;deep-linking,&rdquo; &ldquo;page-scraping,&rdquo; or
             &ldquo;robots&rdquo;) to access or monitor our proprietary cognitive
             protocols. Any attempt to bypass the visual or structural integrity
-            of the Cognitive Sanctuary interface is strictly prohibited.
+            of our service interface is strictly prohibited.
           </p>
 
           <h2 className="font-headline text-3xl font-bold text-on-surface">
@@ -107,7 +108,7 @@ export default function TermsPage() {
             from the use or inability to use our cognitive services.
           </p>
           <p className="!italic !text-on-surface-variant border-l-2 border-secondary/30 pl-6 py-2">
-            The total liability of the Sanctuary for any claim arising out of or
+            The total liability of Primary Brain Health for any claim arising out of or
             relating to these terms shall not exceed the amount paid by the user
             for the specific consultation or service cycle in question.
           </p>
@@ -116,7 +117,7 @@ export default function TermsPage() {
             5. Governing Law
           </h2>
           <p>
-            These Terms &amp; Conditions and your use of our Sanctuary shall be
+            These Terms &amp; Conditions and your use of our service shall be
             governed by and construed in accordance with the laws of the
             jurisdiction in which our primary clinical headquarters is situated,
             without regard to its conflict of law provisions.
