@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollRevealInit } from "@/components/ScrollRevealInit";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { Analytics } from "@vercel/analytics/next";
 
 const gildaDisplay = Gilda_Display({
   variable: "--font-gilda-display",
@@ -78,6 +79,7 @@ export default function RootLayout({
         <Header />
         <main className="pt-20">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
