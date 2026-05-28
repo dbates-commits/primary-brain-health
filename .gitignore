@@ -43,3 +43,23 @@ next-env.d.ts
 
 *storybook.log
 storybook-static
+
+# private docs (proposal + pricing) — kept locally, never shared
+docs/_private/
+
+# phase-2 internal docs (kept locally, not in repo)
+docs/phase-2/*.csv
+docs/phase-2/*.xlsx
+docs/phase-2/*.pdf
+docs/phase-2/estimate.md
+docs/phase-2/build-*.py
+docs/phase-2/PROPOSAL_DRAFT.md
+docs/phase-2/PROPOSAL_REDLINE.md
+docs/phase-2/PHASE2_PIVOT_ANALYSIS.md
+docs/phase-2/tuily-allocation-plan.md
+docs/phase-2/sign-to-kickoff-deliverables.md
+docs/phase-2/specialist-job-posting.md
+docs/phase-2/2026-05-19-videographer-quote-analysis.md
+docs/phase-2/PROPOSAL.md
+docs/phase-2/v2/*.csv
+docs/phase-2/v2/specialist-job-posting.md
