@@ -63,3 +63,10 @@ docs/phase-2/2026-05-19-videographer-quote-analysis.md
 docs/phase-2/PROPOSAL.md
 docs/phase-2/v2/*.csv
 docs/phase-2/v2/specialist-job-posting.md
+docs/phase-2/v2/specialist-posting-upwork.md
+docs/phase-2/v2/specialist-contract-terms.md
+docs/phase-2/SOW2-scope-no-pricing.md
+docs/phase-2/SOW2-scope-no-pricing-v2.md
+
+# local editor/harness config (machine-specific paths)
+.claude/settings.json
