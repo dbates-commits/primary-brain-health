@@ -1,0 +1,32 @@
+flowchart TD
+    Start([Visitor arrives at primarybrainhealth.com]) --> Landing[/Landing page<br/>$149 value prop, CTAs, FAQ, trust signals/]
+    Landing --> CTAClick{Clicks<br/>Start your assessment?}
+    CTAClick -->|No, leaves| Exit1([Exit - abandonment email sent if email captured])
+    CTAClick -->|Yes| Signup[/get-started<br/>Name, email, password, DOB, ZIP, state/]
+
+    Signup --> SignupValid{Form valid?}
+    SignupValid -->|Validation errors| Signup
+    SignupValid -->|Valid| Consent[/get-started/consent<br/>Wellness consent + HIPAA NPP acknowledgment/]
+
+    Consent --> ConsentAccept{Consent accepted?}
+    ConsentAccept -->|Declined / abandoned| Exit2([Exit - abandonment cron fires at 1h + 24h])
+    ConsentAccept -->|Accepted| Payment[/get-started/payment<br/>Stripe Payment Element + order summary + refund policy/]
+
+    Payment --> PaymentResult{Payment result?}
+    PaymentResult -->|Declined / 3DS failed| PaymentError[Show error, surface retry, preserve form state]
+    PaymentError --> Payment
+    PaymentResult -->|Network / Stripe outage| PaymentError
+    PaymentResult -->|Abandoned| Exit2
+    PaymentResult -->|Succeeded| Confirm[/get-started/confirmation<br/>Receipt summary, what's next, handoff CTA/]
+
+    Confirm --> TokenGen[Backend: generate signed handoff token<br/>JWT/HMAC, 5-15 min TTL]
+    TokenGen --> Redirect[Browser: redirect to wellness app domain<br/>with token as query param]
+    Redirect --> Handoff([Wellness app starts assessment session<br/>- VisualBoston scope ends here])
+
+    Exit2 -.->|User clicks resume link in email| Signup
+
+    style Start fill:#041632,color:#fbf9f4
+    style Handoff fill:#446558,color:#fbf9f4
+    style Exit1 fill:#ba1a1a,color:#fbf9f4
+    style Exit2 fill:#ba1a1a,color:#fbf9f4
+    style PaymentError fill:#fbf9f4,color:#041632

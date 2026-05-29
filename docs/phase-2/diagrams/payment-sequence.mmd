@@ -1,0 +1,43 @@
+sequenceDiagram
+    autonumber
+    participant Browser
+    participant PBH as PBH Backend<br/>(Next.js on Vercel)
+    participant Stripe
+    participant Neon as Neon DB<br/>(users, payments, audit_log)
+    participant Resend
+    participant HubSpot
+    participant Wellness as Wellness App<br/>(PBH-owned, vendor TBD)
+
+    Browser->>PBH: POST /api/payment/intent<br/>(amount, customer info)
+    PBH->>Stripe: Create Customer + PaymentIntent<br/>(setup_future_usage: 'off_session')
+    Stripe-->>PBH: { clientSecret, intentId }
+    PBH->>Neon: INSERT audit_log<br/>(PAYMENT_INTENT_CREATED)
+    PBH-->>Browser: { clientSecret }
+
+    Browser->>Stripe: Confirm payment via<br/>Payment Element (in-iframe)
+    Stripe-->>Browser: 3DS challenge (if applicable)
+    Browser->>Stripe: 3DS response
+    Stripe-->>Browser: confirmPayment success
+
+    Browser->>Browser: Show interstitial,<br/>navigate to /confirmation
+
+    Stripe->>PBH: Webhook: payment_intent.succeeded<br/>(with signature header)
+    PBH->>PBH: Verify signature + idempotency dedupe
+    PBH->>Neon: INSERT audit_log<br/>(PAYMENT_SUCCEEDED, event.id)
+    PBH->>Neon: INSERT payments row<br/>+ UPDATE consents (payment-confirmed)
+    PBH->>Neon: SET user.hsa_fsa flag<br/>(from PaymentMethod metadata)
+
+    par Async side effects (don't block webhook 200)
+        PBH->>Resend: Send receipt email<br/>(HSA/FSA-formatted)
+        PBH->>HubSpot: Update lifecycle to 'paid'<br/>(via retry queue)
+    end
+
+    PBH-->>Stripe: 200 OK
+
+    Browser->>PBH: GET /api/handoff/token
+    PBH->>PBH: Generate signed JWT<br/>(customer_id, user_id, payment_ref, 5-15 min TTL)
+    PBH->>Neon: INSERT audit_log<br/>(HANDOFF_TOKEN_ISSUED)
+    PBH-->>Browser: { token }
+
+    Browser->>Wellness: Redirect with token<br/>(VisualBoston scope ends here)
+    Wellness->>Wellness: Validate token + start session

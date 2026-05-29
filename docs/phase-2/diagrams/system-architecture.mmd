@@ -1,0 +1,42 @@
+graph LR
+    subgraph Visitor["Visitor's browser"]
+        Browser[Browser<br/>Next.js + Tailwind]
+    end
+
+    subgraph VBScope["VisualBoston engineering scope"]
+        Marketing[Marketing site<br/>primarybrainhealth.com<br/>Next.js + TinaCMS]
+        Funnel[Funnel app<br/>app.primarybrainhealth.com<br/>Next.js + Auth.js]
+        API[API routes<br/>/api/payment/intent<br/>/api/webhook/stripe<br/>/api/handoff/token<br/>/api/consent]
+        Neon[(Neon Postgres<br/>Scale tier + BAA<br/>users, consents,<br/>payments, audit_log,<br/>jobs queue)]
+        Resend[Resend<br/>transactional email<br/>via React Email]
+    end
+
+    subgraph ThirdParty["Third-party services"]
+        Stripe[Stripe<br/>Payment Element + webhooks<br/>SAQ-A path]
+        HubSpot[HubSpot<br/>CRM lifecycle + no-PHI events]
+        GA4[Google Analytics 4<br/>funnel events]
+        TinaCloud[Tina Cloud<br/>CMS backend]
+    end
+
+    subgraph PBHScope["PBH-owned (out of VisualBoston scope)"]
+        WellnessApp[Wellness app<br/>vendor TBD<br/>- assessment runner<br/>- BHN dashboard<br/>- intake gate<br/>- Athena handoff]
+        Athena[athenahealth EMR<br/>MIM PA / Cognoa PC CA]
+    end
+
+    Browser --> Marketing
+    Browser --> Funnel
+    Funnel --> API
+    API <--> Neon
+    API <--> Stripe
+    API --> Resend
+    API --> HubSpot
+    Browser --> GA4
+    Marketing <--> TinaCloud
+    Stripe -->|webhook| API
+    API -.->|signed-token redirect| WellnessApp
+    WellnessApp --> Athena
+
+    style VBScope fill:#fbf9f4,color:#041632,stroke:#446558,stroke-width:2px
+    style ThirdParty fill:#f4f0e4,color:#041632,stroke:#446558,stroke-width:1px,stroke-dasharray: 4 2
+    style PBHScope fill:#e6e0cf,color:#041632,stroke:#ba1a1a,stroke-width:2px,stroke-dasharray: 6 3
+    style Browser fill:#041632,color:#fbf9f4
