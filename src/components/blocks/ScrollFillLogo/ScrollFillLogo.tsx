@@ -144,10 +144,12 @@ export function ScrollFillLogo({
 
   return (
     <section ref={containerRef} className="relative bg-surface h-[110vh]">
-      {/* Sticky stage is pinned 120px from the viewport top with the slide
-          content anchored to the top (items-start), so the gap above the
-          label is a consistent 120px regardless of viewport height. */}
-      <div className="sticky top-[20vh] h-[45vh] pt-24 w-full overflow-hidden flex items-center justify-center">
+      {/* Sticky stage is pinned 20vh from the viewport top. No overflow clip:
+          the logomark is sized in vmin, so on short/landscape viewports it can
+          be taller than the 45vh band — clipping it there sliced the mark's top
+          loop. Letting it overflow keeps it fully visible, centered behind the
+          text, the same way it renders on desktop. */}
+      <div className="sticky top-[20vh] h-[45vh] pt-24 w-full flex items-center justify-center">
         <div className="relative w-full max-w-4xl mx-auto px-6 md:px-10 text-center">
           <svg
             ref={svgRef}
