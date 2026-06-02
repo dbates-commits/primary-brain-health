@@ -50,3 +50,8 @@ docs/_private/
 
 # local editor/harness config (machine-specific paths)
 .claude/settings.json
+.gstack/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
