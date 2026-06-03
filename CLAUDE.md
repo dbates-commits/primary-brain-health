@@ -12,6 +12,10 @@ npm run lint         # ESLint
 
 Tina admin is at `/admin/index.html` during development.
 
+## Issue Tracking
+
+This repo uses **beads** (`bd`) for issue tracking, stored in `.beads/`. Use `bd list`, `bd show <id>`, `bd create`, `bd update <id> --status done`. Issue data lives in a local Dolt DB (`.beads/dolt/`, gitignored); `main` tracks only the beads scaffolding. Issues are shared via the `beads-backup` branch (kept off `main`, pushed to `origin` only): `bd backup export-git` to publish, `bd backup fetch-git` to restore on a fresh clone. `.beads/.beads-credential-key` is a machine-local secret; never commit it.
+
 ## Architecture
 
 **Stack**: Next.js 16 (App Router, async Server Components), React 19, TypeScript, Tailwind CSS 4, TinaCMS 3.

@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Primary Brain Health
+
+Marketing site and DTC consultation funnel for Primary Brain Health, built on Next.js + TinaCMS.
+
+## Stack
+
+- **Next.js 16** (App Router, async Server Components), **React 19**, **TypeScript**
+- **Tailwind CSS 4** with the "Cognitive Sanctuary" design system (tokens in `src/app/globals.css`)
+- **TinaCMS 3** as the content layer — content lives as MDX/JSON in `content/`
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # Next.js + TinaCMS dev server
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The Tina admin is at
+[http://localhost:3000/admin/index.html](http://localhost:3000/admin/index.html).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build    # tinacms build && next build
+npm run lint     # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Layout
 
-## Learn More
+- `content/` — page/blog/project content (MDX + JSON), edited via TinaCMS
+- `tina/` — Tina schema (`collections/`, `blocks/`) and generated GraphQL client
+- `src/components/blocks/` — block components mapped by `BlockRenderer.tsx`
+- `src/app/` — App Router routes; `api/intake/` handles consultation form POSTs
 
-To learn more about Next.js, take a look at the following resources:
+See [`CLAUDE.md`](./CLAUDE.md) for architecture and conventions.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Issue Tracking
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This repo uses [**beads**](https://github.com/steveyegge/beads) (`bd`), a CLI issue
+tracker that lives alongside the code in `.beads/`.
 
-## Deploy on Vercel
+```bash
+bd list                 # view issues
+bd create "Title"       # new issue
+bd show <id>            # issue detail
+bd update <id> --status done
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Issue data is stored in a local Dolt database (`.beads/dolt/`, not committed). On
+`main`, git tracks only the beads scaffolding (`config.yaml`, `metadata.json`,
+`README.md`, `.gitignore`) — never the issues themselves.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Fresh clone / new machine** — restore the shared issue snapshot:
+
+```bash
+git fetch origin
+bd bootstrap            # creates the local pbh DB if missing
+bd backup fetch-git     # restores issues from the beads-backup branch
+bd list
+```
+
+**Sharing changes** — publish your issue snapshot to the `beads-backup` branch
+(pushed to `origin` only, kept off `main`):
+
+```bash
+bd backup export-git    # commit + push issue snapshot to beads-backup
+```
+
+> `.beads/.beads-credential-key` is a machine-local secret and is gitignored — never commit it.
