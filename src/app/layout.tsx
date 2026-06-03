@@ -70,6 +70,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth bg-[#EFF6F9]">
+      <head>
+        {/* Adobe Fonts (Typekit) — delivers "larken" + "indivisible" */}
+        <link
+          rel="preconnect"
+          href="https://use.typekit.net"
+          crossOrigin="anonymous"
+        />
+        <link rel="stylesheet" href="https://use.typekit.net/qrz4jhn.css" />
+      </head>
       <body
         className={`${gildaDisplay.variable} ${inter.variable} font-body antialiased bg-white text-on-surface`}
       >

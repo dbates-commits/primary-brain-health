@@ -107,7 +107,7 @@ export function FAQ({
               {headline && (
                 <h1
                   data-tina-field={tinaFields?.headline}
-                  className="font-headline font-normal text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance"
+                  className="font-headline font-thin text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance"
                 >
                   {headline}
                 </h1>

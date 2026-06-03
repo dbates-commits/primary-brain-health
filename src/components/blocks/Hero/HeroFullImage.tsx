@@ -40,7 +40,7 @@ export function HeroFullImage({
       {/* Content — centered column, bottom-aligned */}
       <div className="relative z-10 flex flex-col items-center justify-end h-full min-h-[440px] sm:min-h-[520px] lg:min-h-[min(78vh,720px)] px-6 md:px-10 pt-20 sm:pt-24 pb-8 sm:pb-10 lg:pb-14 gap-6 sm:gap-10 text-center">
         <h1
-          className="animate-fade-up font-headline font-normal text-white text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] text-pretty max-w-5xl"
+          className="animate-fade-up font-headline font-thin text-white text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] text-pretty max-w-5xl"
           style={{ animationDelay: "150ms" }}
           data-tina-field={tinaFields?.headline}
         >

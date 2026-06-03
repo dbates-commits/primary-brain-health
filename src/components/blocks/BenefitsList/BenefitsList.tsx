@@ -45,7 +45,7 @@ export function BenefitsList({
               <h2
                 data-scroll-item
                 data-tina-field={tinaFields?.headline}
-                className="font-headline font-normal text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
+                className="font-headline font-thin text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
               >
                 {headline}
               </h2>
@@ -87,7 +87,7 @@ export function BenefitsList({
                 {item.title && (
                   <h3
                     data-tina-field={getItemField(i, "title")}
-                    className="font-headline font-normal text-on-surface text-2xl md:text-3xl leading-[1.2] text-balance"
+                    className="font-headline font-thin text-on-surface text-2xl md:text-3xl leading-[1.2] text-balance"
                   >
                     {item.title}
                   </h3>

@@ -148,7 +148,7 @@ export function Features({
                   Step {index + 1}
                 </div>
                 <h4
-                  className="text-xl md:text-2xl font-normal font-headline text-on-surface mb-3 text-balance leading-[1.2]"
+                  className="text-xl md:text-2xl font-thin font-headline text-on-surface mb-3 text-balance leading-[1.2]"
                   data-tina-field={getItemField(index, "title")}
                 >
                   {item.title}

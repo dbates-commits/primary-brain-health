@@ -73,7 +73,7 @@ export function ScrollReveal({ label, headline, tinaFields }: ScrollRevealProps)
         )}
 
         <p
-          className="font-headline font-normal text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-[1.2] text-balance"
+          className="font-headline font-thin text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-[1.2] text-balance"
           data-tina-field={tinaFields?.headline}
         >
           {words.map((word, i) => {

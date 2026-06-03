@@ -126,11 +126,26 @@ export function StackSections({
     };
 
     update();
+    // Recompute after layout-shifting events that don't fire `scroll`:
+    //  - next paint (post-mount layout settle)
+    //  - web fonts loading in (e.g. Larken via Typekit swaps the headline
+    //    metrics, shifting every card's measured position)
+    //  - full window load (images/late stylesheets)
+    // Without these, a card can stay pinned at the stale opacity:0 it was
+    // assigned before the real layout existed — most visible in Firefox,
+    // whose font-swap + scroll-restoration timing skips the recompute.
+    const settle = requestAnimationFrame(update);
+    window.addEventListener("load", update);
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(update).catch(() => {});
+    }
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", update);
+      cancelAnimationFrame(settle);
       if (frame) cancelAnimationFrame(frame);
     };
   }, [items.length]);
@@ -158,7 +173,7 @@ export function StackSections({
             <h2
               data-scroll-item
               data-tina-field={tinaFields?.headline}
-              className="font-headline font-normal text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
+              className="font-headline font-thin text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
             >
               {headline}
             </h2>
@@ -268,7 +283,7 @@ export function StackSections({
                     {item.title && (
                       <h3
                         data-tina-field={getItemField(i, "title")}
-                        className="font-headline font-normal text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
+                        className="font-headline font-thin text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
                       >
                         {item.title}
                       </h3>

@@ -75,7 +75,7 @@ export function ContactForm({
             <h2
               data-scroll-item
               data-tina-field={tinaFields?.headline}
-              className="text-4xl md:text-5xl lg:text-6xl font-normal font-headline mb-6 leading-[1.1] text-balance"
+              className="text-4xl md:text-5xl lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
             >
               {headline}
             </h2>

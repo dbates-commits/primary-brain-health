@@ -234,7 +234,7 @@ export function ScrollFillLogo({
                   )}
                   {slide.headline && (
                     <p
-                      className={`font-headline font-normal text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface${
+                      className={`font-headline font-thin text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface${
                         isFirst ? " animate-fade-up" : ""
                       }`}
                       style={isFirst ? { animationDelay: "750ms" } : undefined}
