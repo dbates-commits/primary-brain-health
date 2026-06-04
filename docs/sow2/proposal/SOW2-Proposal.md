@@ -1,4 +1,4 @@
-> **Revised June 1, 2026.** This SOW updates the signed agreement with the reworked Phase 2 / Phase 3 scope and the timeline rebaselined to the June 1 start. Phase 1 scope and fee are unchanged. A summary of what changed accompanies this document.
+> **Revised June 4, 2026 (v4).** This revision incorporates PBH's June 3 feedback: (1) a named V1 cleanup acceptance gate (P1–P8, verified on staging by the June 12 joint demo), with a real About/Team page surfaced in nav by Phase 2 go-live (Oct 9) resolving P2/P4; (2) ~$7,000 of N4 (dedicated Eisai surfaces) reallocated to the Eisai V14 change order by default, bringing PBH-billed Phase 2 back inside the original $36,750 envelope and the PBH-billed engagement total to ~$155,600; (3) deliverable N2 renamed to "BHN HubSpot view" (naming only, no scope change). Builds on the June 1 reworked Phase 2 / Phase 3 scope and the June 1 rebaselined timeline. Phase 1 scope and fee are unchanged. A summary of what changed accompanies this document.
 s
 ## Table of contents
 
@@ -22,7 +22,7 @@ This engagement is structured as **three modular phases** so PBH can sequence in
 | Phase                                 | Outcome                                                                                                                                                      | Window                |
 | :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- |
 | **Phase 1 - MVP**                     | Live consumer funnel supporting the $149 → BHN → handoff flow, with PCI-compliant payment                                                                    | Jun 1 – Aug 14, 2026  |
-| **Phase 2 - Fast-follow**      | Operational tooling + Eisai-ready surfaces: BHN scheduling page, BHN-facing dashboard, cohort/waitlist mechanics, Eisai transitional landing + co-branded results, testimonials, lighter Nav/IA. Editorial deferred to Phase 3      | Aug 24 – Oct 9, 2026 |
+| **Phase 2 - Fast-follow**      | Operational tooling + Eisai-ready surfaces: BHN scheduling page, BHN HubSpot view, cohort/waitlist mechanics, Eisai transitional landing + co-branded results, testimonials, lighter Nav/IA. Editorial deferred to Phase 3      | Aug 24 – Oct 9, 2026 |
 | **Phase 3 - Conversion optimization** | Marketing-conversion levers + relocated editorial: families pathway, providers pathway, pricing, founder explainer video, hero loop, press strip, newsletter - plus Brain Health Journey Map, Cognitive Self-Screener, Blog Hub, Resource Library (relocated from Phase 2) | Oct 12 – Nov 20, 2026  |
 
 Each phase is priced independently. PBH may approve Phase 1 in isolation and decide on Phases 2 and 3 after MVP go-live based on what the funnel is telling us.
@@ -271,6 +271,13 @@ PBH is a healthcare-adjacent product and the funnel handles payment - accessibil
 - PCI SAQ-A documentation delivered
 - Two-day hypercare period (Aug 17–18) covered by VisualBoston
 
+#### V1 cleanup acceptance gate (P1–P8) — Jun 12, 2026
+
+The V1 site-cleanup punchlist (RFP V1 defects P1–P8) is **closed and verified on staging by Jun 12, 2026**, demonstrated in the joint demo alongside PBH's Week-4 sandbox prototype walkthrough — preserving the original Jun 12 RFP gate date as a named acceptance criterion.
+
+- **P1, P3, P5, P6, P7, P8 — closed and verified.** Placeholder blog content removed; orphaned `/blog` removed from index; Terms-of-Service "Sanctuary" template artifact corrected; blog imagery/styling defects mooted by removal; homepage hero-loop clipping fixed and QA'd across mobile / tablet / desktop.
+- **P2 and P4 — resolved via a new About/Team page surfaced by Phase 2 go-live (Oct 9, 2026).** The V1 `/about` (Team) page was a TinaCMS template stub containing placeholder content only — fabricated team members and an unpopulated "Our Impact" stats block — never a built product surface; it is removed in the interim so no fabricated pre-launch claims remain live. In its place, VisualBoston designs and builds a **real `/about` Team page** (verified bios; net-new design — the V1 stub layout does not carry over) as a **Phase 2 deliverable, surfaced in the main navigation by Phase 2 go-live (Oct 9, 2026)** — taking the RFP's "add to main navigation — surface in Aug–Sept" path for P2. **Named acceptance criterion:** on the Phase 2 go-live build, `/about` is reachable from the primary nav and renders the real Team page. The "Our Impact" metrics (P4) are **deliberately hidden until verified pilot cohort numbers are available**, surfacing in a later update rather than launching with placeholder figures. This folds into the existing Phase 2 Nav/IA scope and the `team`/`stats` components already built for V1 — **no change to the Phase 2 fee.** (P1/P3/P5/P6/P7/P8 remain closed and verified at the Jun 12 gate above; P2/P4 carry this forward commitment to Oct 9.)
+
 ---
 
 ### Phase 2 - Fast-follow (Aug 24 – Oct 9)
@@ -283,11 +290,11 @@ Editorial and authority assets, built **only after** we're confident the MVP fun
 | :--- | :--- | :--- |
 | F1 | **Testimonials with video** | Dedicated `/testimonials` page; 6–10 patient stories (mix of video + written). Reusable testimonial card component. Featured testimonials placed contextually (homepage, About, intake confirmation). Care-partner track ("I did this for my mom"). HIPAA-aware (written releases). Partially reusable for the Eisai cohort variant. Video production: see optional content services below |
 | N1 | **BHN scheduling page (`/talk-to-a-navigator`)** *(new)* | Public-facing scheduling page embedding HubSpot Meetings with cohort-aware routing (`?cohort={pbh-paid\|eisai-sponsored\|bbva-sponsored}&user_id={hashed}`). Outcome-tagged links for funnel-by-cohort reporting. Reachable from cockpit "You're Finished" page **and** from primary CTA in emailed PDF report. The conversion moment between assessment completion and BHN consult - where conversion economics live |
-| N2 | **BHN-facing lightweight dashboard** *(new)* | Read-only view of today's BHN queue: results-delivered-not-yet-booked, upcoming consults, post-consult handoff status. Built on HubSpot saved views + minimal wrapper styling - **scope-bounded to read-only presentation; not a custom CRUD UI**. Any heavier internal-tool needs (note-taking, multi-step workflows) are Phase 3 change orders |
+| N2 | **BHN HubSpot view** *(new)* | Read-only view of today's BHN queue: results-delivered-not-yet-booked, upcoming consults, post-consult handoff status. Built on HubSpot saved views + minimal wrapper styling - **scope-bounded to read-only presentation; not a custom CRUD UI**. Any heavier internal-tool needs (note-taking, multi-step workflows) are Phase 3 change orders. *(Renamed from "BHN-facing dashboard" per PBH, Jun 3 — naming only, no scope change; the term "dashboard" is reserved for the separate PBH-owned BHN staff tool described in Section 3.)* |
 | N3 | **Cohort segmentation + waitlist mechanics in HubSpot** *(new)* | Distinct HubSpot lists per cohort (`pbh-paid`, `eisai-sponsored`, `bbva-sponsored`). Public waitlist page (`/talk-to-a-navigator/waitlist`) with toggleable kill-switch routing (no-deploy feature flag controllable by PBH ops). The surge release valve: throttle the Eisai cohort first; the PBH paid cohort never sees the waitlist. Cohort-aware routing logic + URL-param + signed-token claim plumbing |
-| N4 | **Eisai transitional landing page + co-branded results variant** *(new)* | (1) Linus-branded transitional landing page receiving traffic from `leqembi.com` / `eisaipatientsupport.com`; sponsor-mark visible (not headline co-branding); HIPAA consent + Eisai sponsor-specific consent variant; sets `cohort=eisai-sponsored` flag at signup; no Stripe step. (2) Co-branded results-page variant for the Eisai cohort - same layout, same data, sponsor mark visible, sponsor-appropriate disclaimer language. |
+| N4 | **Eisai transitional landing page + co-branded results variant** *(new)* | (1) Linus-branded transitional landing page receiving traffic from `leqembi.com` / `eisaipatientsupport.com`; sponsor-mark visible (not headline co-branding); HIPAA consent + Eisai sponsor-specific consent variant; sets `cohort=eisai-sponsored` flag at signup; no Stripe step. (2) Co-branded results-page variant for the Eisai cohort - same layout, same data, sponsor mark visible, sponsor-appropriate disclaimer language. **Cross-engagement billing (per PBH, Jun 3):** ~$7,000 of N4 (the dedicated Eisai surfaces) bills to the **Eisai V14 change order by default**, contingent on cross-engagement decision #4 landing as funnel-in. Sponsor-mark branding follows the same constraint (visible, not headline co-branding) regardless of which engagement bills it. **Fallback:** if the V14 CO does not close, the $7,000 reverts to PBH's Phase 2 envelope at the same milestone schedule (see Phase 2 pricing). |
 | N5 | **Cohort flag schema spec** *(new)* | Shared spec document defining the `cohort` enum (`pbh-paid \| eisai-sponsored \| bbva-sponsored \| none`), HubSpot contact property configuration, URL-parameter parsing rules, and signed-token claim format. A shared specification referenced by both the PBH and Eisai cohort implementations. An early (Week 1) deliverable - inexpensive to define up front, costly to retrofit later |
-| F6 | **Navigation & IA Overhaul (lighter scope)** | Updated primary nav: About / How It Works / Resources / For Families / For Providers / Blog / Book Consultation. Sticky persistent CTA. Footer rebuild. **Deferred to Phase 3:** mega-menu, breadcrumbs |
+| F6 | **Navigation & IA Overhaul + About/Team page** | Updated primary nav: About / How It Works / Resources / For Families / For Providers / Blog / Book Consultation. Sticky persistent CTA. Footer rebuild. **Includes a real `/about` Team page** — net-new design replacing the retired V1 placeholder stub, verified bios, "Our Impact" metrics hidden until verified pilot data — surfaced in nav by Phase 2 go-live, resolving cleanup items P2/P4 (see the V1 cleanup gate). **Deferred to Phase 3:** mega-menu, breadcrumbs. |
 
 **Relocated from Phase 2 to Phase 3** (see Phase 3 deliverables below): F2 Brain Health Journey Map, F3 Cognitive Self-Screener, F4 Blog/Editorial Hub, F5 Resource Library. Same work, later timing - net-neutral on engagement total cost.
 
@@ -730,12 +737,14 @@ Fixed-fee structure with milestone-based invoicing. Phase 1 begins with a split 
 
 | Invoice # | Description | Terms | Send Date | Amount |
 | :---- | :---- | :---- | ----: | ----: |
-| 5 | Phase 2 - Discovery + design signed off (BHN scheduling page, BHN-facing dashboard, cohort/waitlist mechanics, Eisai transitional landing + co-branded results variant, cohort schema spec, testimonials, lighter Nav/IA) | Net 14 | ~Sep 11, 2026 | $11,500 |
+| 5 | Phase 2 - Discovery + design signed off (BHN scheduling page, BHN HubSpot view, cohort/waitlist mechanics, Eisai transitional landing + co-branded results variant, cohort schema spec, testimonials, lighter Nav/IA) | Net 14 | ~Sep 11, 2026 | $11,500 |
 | 6 | Phase 2 - Build in staging | Net 14 | ~Oct 2, 2026 | $15,150 |
 | 7 | Phase 2 - Go-live + CMS docs addendum delivered | Net 14 | ~Oct 9, 2026 | $12,050 |
-| | | | **Phase 2 total:** | **$38,700** |
+| | | | **Phase 2 scope total:** | **$38,700** |
+| | Less: N4 dedicated Eisai surfaces billed via **Eisai V14 CO** *(default)* | | | **−$7,000** |
+| | | | **PBH-billed Phase 2 (default):** | **$31,700** |
 
-*Phase 2 is ~$1,950 above the original Phase 2 envelope ($36,750) - the new operational surfaces (BHN scheduling, dashboard, cohort/waitlist mechanics, Eisai cohort surfaces) cost slightly more than the editorial they replace.*
+*Full Phase 2 scope is $38,700. Per PBH (Jun 3), ~$7,000 of N4 (the dedicated Eisai surfaces) bills to the **Eisai V14 change order by default** (contingent on cross-engagement decision #4 landing as funnel-in), bringing **PBH-billed Phase 2 to $31,700 — inside the original $36,750 envelope.** Fallback: if the V14 CO does not close, the $7,000 reverts to PBH Phase 2 ($38,700 total) at the same milestone schedule. The ~$7,000 is carved against the N4 line specifically; the V14 CO should name the N4 deliverables rather than only the dollar figure.*
 
 ### Phase 3 - Conversion optimization (Oct 12 – Nov 20)
 
@@ -759,7 +768,7 @@ Fixed-fee structure with milestone-based invoicing. Phase 1 begins with a split 
 | Patient testimonials video (3–5) + care-partner testimonial (1)         | On-camera shoots, partner videographer (2-day or 3-day shoot depending on subject locations)           |                  $16,500 – $19,500 \* |
 | Hero loop additions (2 clips)                                           | Parents-with-young-child + multigenerational family, custom shoot, color-matched to existing hero loop |                             $4,500 \* |
 | Resources: 3 PDF guides, 2 checklists, 1 glossary - **light design only** (Karla, VB-subcontracted) | Includes accessibility / tagged PDFs + 2 revision rounds. **Editorial / writing for the resource bundle scoped separately and quoted when healthcare-content writer is sourced.** | **$1,750 – $2,250** † |
-| Photography: team headshots + 1 branded photoshoot                      | Replace stock About-page imagery; new hero / section imagery                                           |                       $3,500 – $7,500 |
+| Photography: team headshots + 1 branded photoshoot                      | New hero / section imagery (replaces stock); team headshots for the Phase 2 About/Team page         |                       $3,500 – $7,500 |
 | Email sequences: welcome + 3 nurture flows                              | Copywriting for the Phase 3 newsletter system                                                          |                       $2,500 – $5,000 |
 |                                                                         | **Envelope if all elected (excluding resource-bundle editorial, separately quoted):**                  |                 **$37,250 – $47,250** |
 
@@ -813,14 +822,16 @@ Non-seam incidents (CMS bugs, dependency issues, generic site errors, non-paymen
 
 ### Engagement total
 
-| | Signed | Revised | Δ |
+| | Signed | v4 (PBH-billed) | Δ vs signed |
 | :---- | ----: | ----: | ----: |
 | Phase 1 - MVP | $83,300 | $83,300 | - |
-| Phase 2 - Fast-follow | $36,750 | $38,700 | +$1,950 |
+| Phase 2 - Fast-follow | $36,750 | $31,700 | −$5,050 |
 | Phase 3 - Conversion optimization | $22,600 | $40,600 | +$18,000 |
-| **Subtotal (phases 1–3, optional services excluded)** | **$142,650** | **$162,600** | **+$19,950** |
+| **PBH-billed subtotal (phases 1–3, optional services excluded)** | **$142,650** | **$155,600** | **+$12,950** |
 
-**How to read the delta:** All $19,950 of growth comes from net-new work in Phase 2 (BHN scheduling page, BHN dashboard, cohort/waitlist mechanics, Eisai transitional + co-branded results, cohort schema spec) - the editorial relocation Phase 2 → Phase 3 is dollar-neutral on the engagement total. The Phase 3 +$18,000 is the editorial deliverables F2–F5 moving in (same work, later phase). The Phase 2 +$1,950 is genuinely new work that costs slightly more than what got displaced.
+*Full v4 build value (before cross-engagement reallocation) is **$162,600**. Per PBH's June 3 direction, ~$7,000 of N4 (the dedicated Eisai surfaces) bills to the **Eisai V14 change order by default**, bringing the **PBH-billed total to $155,600** and Phase 2 back inside its original $36,750 envelope. **Fallback:** if the V14 CO does not close, the $7,000 reverts to PBH Phase 2 and the PBH-billed total returns to $162,600.*
+
+**How to read the delta:** The full v4 build value remains $162,600 — Phase 2 carries +$1,950 of genuinely new operational work (BHN scheduling page, BHN HubSpot view, cohort/waitlist mechanics, Eisai transitional + co-branded results, cohort schema spec), and Phase 3 carries +$18,000 from the editorial deliverables F2–F5 relocating in (same work, later phase — dollar-neutral on the engagement total). The reallocation of ~$7,000 to the Eisai V14 CO is a *billing* shift, not a scope reduction: the work still ships, it is simply invoiced through the Eisai engagement by default.
 
 **Invoice Schedule**: This engagement follows a milestone-based billing structure. Invoices are issued upon completion of each milestone. Depending on when milestones are accomplished, invoices may be sent separately or combined. Payment is due within 14 days (Net 14).
 
