@@ -65,3 +65,18 @@ bd backup export-git    # commit + push issue snapshot to beads-backup
 ```
 
 > `.beads/.beads-credential-key` is a machine-local secret and is gitignored — never commit it.
+
+### Visual issue board (beads-ui)
+
+[beads-ui](https://github.com/mantoni/beads-ui) is a local web viewer for `bd`. It
+shells out to your `bd` CLI and reads your own local `.beads` DB — there's no extra
+server to run and no change to how issues sync (still `export-git` / `fetch-git`).
+
+```bash
+npm install -g beads-ui          # one-time
+bdui start --port 4000 --open    # open the board at http://127.0.0.1:4000
+bdui stop                        # shut it down
+```
+
+> Use `--port 4000` (not the default 3000) while `npm run dev` is running, or the
+> two will collide on port 3000. If the board ever looks stale, `bdui restart --port 4000`.
