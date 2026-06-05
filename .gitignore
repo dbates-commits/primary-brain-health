@@ -48,6 +48,9 @@ storybook-static
 # everything internal lives under docs/_private/ (incl. docs/_private/phase-2/)
 docs/_private/
 
+# SOW proposal contains pricing — keep local, never tracked
+docs/sow2/proposal/SOW2-Proposal.md
+
 # local editor/harness config (machine-specific paths)
 .claude/settings.json
 .gstack/
