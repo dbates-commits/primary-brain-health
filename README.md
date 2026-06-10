@@ -64,6 +64,10 @@ bd list
 bd backup export-git    # commit + push issue snapshot to beads-backup
 ```
 
+**Linear sync** — issues mirror to Linear via `bd linear sync`. See
+[`docs/beads-linear-sync.md`](docs/beads-linear-sync.md) for the pull/push workflow. Always
+run `bd backup fetch-git` **before** syncing, or you will duplicate every issue in Linear.
+
 > `.beads/.beads-credential-key` is a machine-local secret and is gitignored — never commit it.
 
 ### Visual issue board (beads-ui)
