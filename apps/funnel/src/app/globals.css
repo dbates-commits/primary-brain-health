@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@pbh/tokens/theme.css";
+
+body {
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+}

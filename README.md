@@ -1,34 +1,55 @@
 # Primary Brain Health
 
-Marketing site and DTC consultation funnel for Primary Brain Health, built on Next.js + TinaCMS.
+Marketing site and DTC consultation funnel for Primary Brain Health — a
+**pnpm + Turborepo monorepo** built on Next.js + TinaCMS.
 
 ## Stack
 
+- **pnpm workspaces** + **Turborepo** — package management and cached task running
 - **Next.js 16** (App Router, async Server Components), **React 19**, **TypeScript**
-- **Tailwind CSS 4** with the "Cognitive Sanctuary" design system (tokens in `src/app/globals.css`)
-- **TinaCMS 3** as the content layer — content lives as MDX/JSON in `content/`
+- **Tailwind CSS 4** with the "Cognitive Sanctuary" design system (tokens in `@pbh/tokens`)
+- **TinaCMS 3** as the content layer for the marketing app — content as MDX/JSON in `apps/marketing/content/`
+
+## Workspace layout
+
+```
+apps/
+  marketing/   Next.js + TinaCMS marketing site (the V1 site)  → :3000
+  funnel/      Next.js funnel app (auth + Stripe + handoff)     → :3001
+packages/
+  ui/          @pbh/ui     — shared design-system primitives (Button, Heading, …) + cn()
+  tokens/      @pbh/tokens — Tailwind 4 theme + CSS variables (theme.css)
+  types/       @pbh/types  — shared TS types (e.g. signed-token handoff payload)
+  config/      @pbh/config — shared ESLint flat config + tsconfig presets
+```
+
+`@pbh/*` are real workspace packages (not path aliases); apps consume them via
+`transpilePackages` in `next.config.ts`. See
+[`docs/sow2/technical/monorepo-plan.md`](docs/sow2/technical/monorepo-plan.md).
 
 ## Getting Started
 
 ```bash
-npm install
-npm run dev      # Next.js + TinaCMS dev server
+pnpm install
+pnpm dev            # runs all apps in parallel (Turborepo): marketing :3000, funnel :3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The Tina admin is at
-[http://localhost:3000/admin/index.html](http://localhost:3000/admin/index.html).
+Open marketing at [http://localhost:3000](http://localhost:3000) (Tina admin at
+`/admin/index.html`) and the funnel at [http://localhost:3001](http://localhost:3001).
 
 ```bash
-npm run build    # tinacms build && next build
-npm run lint     # ESLint
+pnpm build                       # build everything (cached, only rebuilds what changed)
+pnpm --filter marketing build    # build just one app
+pnpm --filter funnel dev         # run just one app
+pnpm lint                        # eslint across the workspace
+pnpm typecheck                   # tsc --noEmit across the workspace
+pnpm format                      # prettier --write
 ```
 
-## Project Layout
-
-- `content/` — page/blog/project content (MDX + JSON), edited via TinaCMS
-- `tina/` — Tina schema (`collections/`, `blocks/`) and generated GraphQL client
-- `src/components/blocks/` — block components mapped by `BlockRenderer.tsx`
-- `src/app/` — App Router routes; `api/intake/` handles consultation form POSTs
+> **Tina builds** (`tinacms build`, run as part of `marketing` build) require
+> TinaCloud credentials (`NEXT_PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN`) or local
+> mode. Without them, `next build` still succeeds — content fetches fall back to
+> empty. Env/secrets wiring is tracked in pbh-bws.5.
 
 See [`CLAUDE.md`](./CLAUDE.md) for architecture and conventions.
 
@@ -82,5 +103,5 @@ bdui start --port 4000 --open    # open the board at http://127.0.0.1:4000
 bdui stop                        # shut it down
 ```
 
-> Use `--port 4000` (not the default 3000) while `npm run dev` is running, or the
+> Use `--port 4000` (not the default 3000) while `pnpm dev` is running, or the
 > two will collide on port 3000. If the board ever looks stale, `bdui restart --port 4000`.

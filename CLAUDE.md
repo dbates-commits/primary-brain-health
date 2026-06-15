@@ -4,13 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+This is a **pnpm + Turborepo monorepo**. Run these from the repo root:
+
 ```bash
-npm run dev          # Start dev server with Tina CMS (Next.js + TinaCMS)
-npm run build        # Production build (tinacms build && next build)
-npm run lint         # ESLint
+pnpm install                     # install all workspaces
+pnpm dev                         # all apps in parallel (marketing :3000, funnel :3001)
+pnpm build                       # build everything (Turborepo cached)
+pnpm lint                        # eslint across the workspace
+pnpm typecheck                   # tsc --noEmit across the workspace
+pnpm --filter marketing dev      # run a single app/package (marketing | funnel | @pbh/ui …)
+pnpm --filter funnel build
 ```
 
-Tina admin is at `/admin/index.html` during development.
+Marketing's Tina admin is at `/admin/index.html` during development. Note: the
+`marketing` build runs `tinacms build` first, which needs TinaCloud creds (or
+local mode); plain `next build` works without them.
+
+## Workspace layout
+
+- `apps/marketing/` — the Next.js + TinaCMS marketing site (formerly the repo root)
+- `apps/funnel/` — the funnel app (auth + Stripe + signed-token handoff), `:3001`
+- `packages/ui/` (`@pbh/ui`) — shared design-system primitives + `cn()`; consumed via `transpilePackages`
+- `packages/tokens/` (`@pbh/tokens`) — Tailwind 4 theme + CSS variables (`theme.css`)
+- `packages/types/` (`@pbh/types`) — shared TS types (signed-token handoff payload, …)
+- `packages/config/` (`@pbh/config`) — shared ESLint flat config (`eslint/base`) + tsconfig presets
+
+Path aliases `@/*` and `@tina/*` are scoped to each app. Cross-app sharing goes
+through the `@pbh/*` packages. See `docs/sow2/technical/monorepo-plan.md`.
 
 ## Issue Tracking
 
@@ -19,6 +39,9 @@ This repo uses **beads** (`bd`) for issue tracking, stored in `.beads/`. Use `bd
 ## Architecture
 
 **Stack**: Next.js 16 (App Router, async Server Components), React 19, TypeScript, Tailwind CSS 4, TinaCMS 3.
+
+> Paths in this Architecture section are relative to **`apps/marketing/`** (the
+> marketing app), unless prefixed with `packages/`.
 
 ### Content Pipeline
 
@@ -51,7 +74,7 @@ The hero lives under `src/components/blocks/Hero/`:
 
 ### Design System
 
-Theme is called "The Cognitive Sanctuary", defined as CSS custom properties in `src/app/globals.css` and wired into Tailwind 4 via `@theme inline`.
+Theme is called "The Cognitive Sanctuary", defined as CSS custom properties in `packages/tokens/theme.css` (`@pbh/tokens`) and wired into Tailwind 4 via `@theme inline`. Each app imports it from its `globals.css` (`@import "@pbh/tokens/theme.css";`). App-specific `@font-face` declarations and keyframes stay in the app's own `globals.css`.
 
 - **Primary**: `#041632` (dark navy)
 - **Secondary**: `#446558` (forest green)
@@ -63,8 +86,11 @@ Use design token classes (`text-primary`, `bg-surface`, `text-on-surface-variant
 
 ### Path Aliases
 
+Scoped to each app (e.g. within `apps/marketing/`):
 - `@/*` → `src/*`
 - `@tina/*` → `tina/*`
+
+Cross-app shared code is imported from the `@pbh/*` workspace packages, not via aliases.
 
 ### API
 
@@ -75,4 +101,4 @@ Use design token classes (`text-primary`, `bg-surface`, `text-on-surface-variant
 - Tina field paths use `tinaField()` from `tinacms/dist/react` to enable click-to-edit in the CMS admin
 - `BlockRenderer` auto-generates section IDs by slugifying block headlines for scroll-anchored navigation
 - The Header uses `IntersectionObserver` to highlight nav items as sections scroll into view
-- `cn()` from `src/lib/utils.ts` combines `clsx` + `tailwind-merge` for class composition
+- `cn()` from `@pbh/ui/utils` combines `clsx` + `tailwind-merge` for class composition (shared design-system primitives also live in `@pbh/ui`)

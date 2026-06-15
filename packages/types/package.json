@@ -1,0 +1,17 @@
+{
+  "name": "@pbh/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo \"(no lint)\" && exit 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@pbh/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
