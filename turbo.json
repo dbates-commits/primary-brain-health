@@ -5,7 +5,15 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/admin/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/admin/**"],
+      "env": [
+        "TINA_TOKEN",
+        "NEXT_PUBLIC_TINA_CLIENT_ID",
+        "TINA_PUBLIC_IS_LOCAL",
+        "GITHUB_BRANCH",
+        "VERCEL_GIT_COMMIT_REF",
+        "HEAD"
+      ]
     },
     "dev": {
       "cache": false,
