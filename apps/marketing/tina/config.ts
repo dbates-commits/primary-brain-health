@@ -8,12 +8,11 @@ import { globalCtaCollection } from "./collections/globalCta";
 import { settingsCollection } from "./collections/settings";
 import { faqCollection } from "./collections/faq";
 
-// Your hosting provider likely exposes this as an environment variable
-const branch =
-  process.env.GITHUB_BRANCH ||
-  process.env.VERCEL_GIT_COMMIT_REF ||
-  process.env.HEAD ||
-  "main";
+// Which branch TinaCloud reads/indexes content from. Feature branches are not
+// indexed on TinaCloud, so deploys (incl. Vercel previews) default to the
+// indexed "main" branch. Override per-environment with NEXT_PUBLIC_TINA_BRANCH
+// once a branch has been indexed on TinaCloud.
+const branch = process.env.NEXT_PUBLIC_TINA_BRANCH || "main";
 
 const isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
 

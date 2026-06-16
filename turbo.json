@@ -9,10 +9,8 @@
       "env": [
         "TINA_TOKEN",
         "NEXT_PUBLIC_TINA_CLIENT_ID",
-        "TINA_PUBLIC_IS_LOCAL",
-        "GITHUB_BRANCH",
-        "VERCEL_GIT_COMMIT_REF",
-        "HEAD"
+        "NEXT_PUBLIC_TINA_BRANCH",
+        "TINA_PUBLIC_IS_LOCAL"
       ]
     },
     "dev": {
