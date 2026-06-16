@@ -92,6 +92,87 @@ must restore it from `beads-backup`.
 
 ---
 
+## Fresh clone / fresh install
+
+On a brand-new clone, beads has no local issues yet — the `.beads/dolt/` database is
+gitignored runtime state and does **not** travel with `main`. All 41 issues live in the
+`beads-backup` branch and must be restored. Run these once, from the repo root:
+
+```bash
+# 0. Prereqs: `bd` installed, and .env has LINEAR_API_KEY + LINEAR_TEAM_ID filled in.
+set -a; . ./.env; set +a    # load Linear creds into the shell (env vars only — never `bd config set`)
+
+# 1. Create the local pbh database
+bd bootstrap
+
+# 2. Restore issues + the external_ref → Linear mappings from beads-backup
+git fetch origin
+bd backup fetch-git
+
+# 3. Verify
+bd list                     # should list the issues (41 in a healthy repo)
+bd linear teams             # confirms the API key works
+bd linear status            # MUST show "Local Only: 0"
+```
+
+A successful `bd backup fetch-git` reports what it restored, e.g.:
+
+```
+Fetched backup snapshot from git branch beads-backup and restored local database
+  Issues: 41
+  Dependencies: 111
+  Labels: 112
+```
+
+### Gotcha: `database "pbh" not found` on a fresh clone
+
+If every `bd` command fails with:
+
+```
+Error: failed to open database: database "pbh" not found on Dolt server at 127.0.0.1:5XXXX
+```
+
+…and `bd bootstrap` reports **"Database already exists … Nothing to do"** (so it never restores
+from `beads-backup`), the clone shipped a **stale, empty `.beads/dolt/` Dolt repo**. Bootstrap
+sees that directory and bails, but the empty repo isn't a usable `pbh` database, so every
+command — including `bd backup fetch-git` — errors out.
+
+Confirm the local Dolt repo is empty (no real data) before clearing it:
+
+```bash
+git check-ignore .beads/dolt                 # should print ".beads/dolt" (it's gitignored)
+cat .beads/dolt/.dolt/repo_state.json        # empty repo: no "branches" / "remotes" entries
+```
+
+The real issues are safe in `origin/beads-backup`, so removing the empty local Dolt repo is
+non-destructive. Then re-run the fresh-install steps:
+
+```bash
+bd dolt stop
+rm -rf .beads/dolt .beads/dolt-server.*      # gitignored, empty — real data is in beads-backup
+bd bootstrap                                 # now creates pbh fresh
+git fetch origin
+bd backup fetch-git                          # restores the 41 issues + mappings
+bd linear status                             # verify "Local Only: 0"
+```
+
+> ⚠️ Only do this when `repo_state.json` shows an **empty** repo (no branches/remotes). If the
+> local Dolt repo contains issues you haven't published with `bd backup export-git`, removing it
+> loses them.
+
+### Other fresh-install snags
+
+- **`LINEAR_API_KEY NOT set`** — you opened a new shell and forgot to load `.env`. Re-run
+  `set -a; . ./.env; set +a`. The Linear keys are env-vars-only by design (see the warning in
+  `.env.example`); they are never stored in the beads config.
+- **`bd linear teams` errors / empty** — bad or missing `LINEAR_API_KEY`. Regenerate it at
+  Linear → Settings → Security & access → Personal API keys.
+- **`bd linear status` shows `Local Only` ≠ 0 right after a fresh restore** — your
+  `bd backup fetch-git` didn't actually run against the restored DB. Re-run it and re-check
+  before any `--push` (pushing with stale mappings is what creates duplicates).
+
+---
+
 ## Daily workflow: pull new/updated issues FROM Linear
 
 Use this when teammates created or changed issues in Linear and you want them locally.
