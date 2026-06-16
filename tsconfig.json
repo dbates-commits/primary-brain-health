@@ -9,7 +9,6 @@
     { "path": "apps/marketing" },
     { "path": "apps/funnel" },
     { "path": "packages/ui" },
-    { "path": "packages/tokens" },
     { "path": "packages/types" }
   ]
 }
