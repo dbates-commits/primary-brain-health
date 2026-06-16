@@ -1,0 +1,118 @@
+/* =============================================================
+   @pbh/tokens — "The Cognitive Sanctuary" design tokens
+   -------------------------------------------------------------
+   Shared color + font tokens for every PBH app (marketing + funnel).
+   Tailwind 4 CSS-first theme. Consume from an app's globals.css:
+
+     @import "tailwindcss";
+     @import "@pbh/tokens/theme.css";
+
+   Color token naming follows the Material Design 3 convention
+   (primary / secondary / surface / error / outline / inverse with
+   on-*, *-container, *-fixed, *-variant modifiers). Use the token
+   classes (`bg-primary`, `text-on-surface`, …) rather than raw hex.
+   ============================================================= */
+
+/* Register the shared design-system component source so Tailwind 4
+   generates the utility classes used *inside* @pbh/ui (Button, Card,
+   …). Automatic content detection skips node_modules, where pnpm
+   symlinks workspace packages — without this, those classes are only
+   emitted by accident when an app's own source happens to use them
+   (which is why funnel rendered @pbh/ui unstyled). Path is relative to
+   this file; every app inherits it by importing @pbh/tokens/theme.css. */
+@source "../ui/src";
+
+:root {
+  /* Primary palette — Dark Teal per identity guide */
+  --color-primary: #006e8a;
+  --color-primary-container: #004d61;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #a3d4e4;
+  --color-primary-fixed: #d1eaf2;
+  --color-primary-fixed-dim: #8ec7da;
+
+  /* Secondary palette — Aqua accent per identity guide */
+  --color-secondary: #009ea1;
+  --color-secondary-container: #b3e8e9;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #007577;
+  --color-secondary-fixed: #b3e8e9;
+  --color-secondary-fixed-dim: #80d6d8;
+
+  /* Surface hierarchy */
+  --color-surface: #ffffff;
+  --color-surface-container: #f0eee9;
+  --color-surface-container-low: #f5f3ee;
+  --color-surface-container-high: #eae8e3;
+  --color-surface-container-highest: #e4e2dd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-dim: #dbdad5;
+  --color-surface-variant: #e4e2dd;
+
+  /* On-surface */
+  --color-on-surface: #1b1c19;
+  --color-on-surface-variant: #44474d;
+
+  /* Outline */
+  --color-outline: #75777e;
+  --color-outline-variant: #c5c6ce;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+
+  /* Inverse */
+  --color-inverse-surface: #30312e;
+  --color-inverse-on-surface: #f2f1ec;
+  --color-inverse-primary: #8ec7da;
+
+  /* Surface tint */
+  --color-surface-tint: #006e8a;
+}
+
+@theme inline {
+  /* === FONT TOGGLE ===
+     Active: Larken for headlines, Inter for everything else (body,
+     buttons, nav, eyebrows). To revert to the original Gilda Display
+     + Interstate pairing, comment the two ACTIVE lines below and
+     uncomment the two ORIGINAL lines. Nothing else needs to change. */
+
+  /* ACTIVE (Larken + Inter) */
+  --font-headline: "Larken", Georgia, serif;
+  --font-body: var(--font-inter, "Inter"), system-ui, sans-serif;
+
+  /* ORIGINAL (revert) */
+  /* --font-headline: var(--font-gilda-display), Georgia, serif; */
+  /* --font-body: "Interstate", system-ui, sans-serif; */
+
+  --color-primary: var(--color-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary: var(--color-on-primary);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-secondary-fixed: var(--color-secondary-fixed);
+  --color-surface: var(--color-surface);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+  --color-inverse-surface: var(--color-inverse-surface);
+  --color-inverse-on-surface: var(--color-inverse-on-surface);
+  --color-inverse-primary: var(--color-inverse-primary);
+  --color-surface-tint: var(--color-surface-tint);
+}
