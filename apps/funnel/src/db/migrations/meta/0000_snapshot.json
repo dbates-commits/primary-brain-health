@@ -1,5 +1,5 @@
 {
-  "id": "434ccd3c-b393-43fd-a002-8257fa402b1c",
+  "id": "af7b61ad-af82-44dd-9a1a-69b11f25b2fe",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -216,35 +216,41 @@
           "primaryKey": false,
           "notNull": true
         },
-        "password_hash": {
-          "name": "password_hash",
+        "first_name": {
+          "name": "first_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "legal_name": {
-          "name": "legal_name",
+        "last_name": {
+          "name": "last_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "date_of_birth": {
           "name": "date_of_birth",
           "type": "date",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "zip": {
           "name": "zip",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "state_of_residence": {
           "name": "state_of_residence",
           "type": "char(2)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "stripe_customer_id": {
           "name": "stripe_customer_id",

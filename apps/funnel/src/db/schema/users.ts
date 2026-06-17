@@ -12,11 +12,13 @@ import { citext } from "./_types";
 export const users = pgTable("users", {
   id: uuid().primaryKey().defaultRandom(),
   email: citext().notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  legalName: text("legal_name").notNull(),
-  dateOfBirth: date("date_of_birth").notNull(),
-  zip: text().notNull(),
-  stateOfResidence: char("state_of_residence", { length: 2 }).notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  // Collected in step 2 of signup, so nullable until that step completes.
+  passwordHash: text("password_hash"),
+  dateOfBirth: date("date_of_birth"),
+  zip: text(),
+  stateOfResidence: char("state_of_residence", { length: 2 }),
   stripeCustomerId: text("stripe_customer_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
