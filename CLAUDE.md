@@ -102,3 +102,21 @@ Cross-app shared code is imported from the `@pbh/*` workspace packages, not via 
 - `BlockRenderer` auto-generates section IDs by slugifying block headlines for scroll-anchored navigation
 - The Header uses `IntersectionObserver` to highlight nav items as sections scroll into view
 - `cn()` from `@pbh/ui/utils` combines `clsx` + `tailwind-merge` for class composition (shared design-system primitives also live in `@pbh/ui`)
+
+## Code Style
+
+- **Always use braces for `if` statements.** No single-line or braceless `if`s — every `if`/`else if`/`else` body goes on its own line(s) wrapped in `{ }`, even one-liners and early returns/guard clauses.
+
+  ```ts
+  // ✗ Do not
+  if (!user) return null;
+  if (count > 0) doThing();
+
+  // ✓ Do
+  if (!user) {
+    return null;
+  }
+  if (count > 0) {
+    doThing();
+  }
+  ```
