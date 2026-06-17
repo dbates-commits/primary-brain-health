@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@pbh/ui";
 import { createAccount, type SignupState } from "./actions";
-import { US_STATES } from "./us-states";
 
 const initialState: SignupState = { status: "idle" };
 
@@ -22,9 +21,6 @@ export function SignupForm() {
   const [state, action, pending] = useActionState(createAccount, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
-  // Controlled so it survives React's post-action form.reset() — an uncontrolled
-  // <select> only honors defaultValue on mount, so it would snap back otherwise.
-  const [stateOfResidence, setStateOfResidence] = useState("");
 
   if (state.status === "success") {
     return (
@@ -42,20 +38,38 @@ export function SignupForm() {
 
   return (
     <form action={action} className="mt-8 space-y-5" noValidate>
-      <div>
-        <label htmlFor="legalName" className={labelClass}>
-          Full legal name
-        </label>
-        <input
-          id="legalName"
-          name="legalName"
-          type="text"
-          autoComplete="name"
-          required
-          defaultValue={values?.legalName ?? ""}
-          className={fieldClass}
-        />
-        <FieldError message={fieldErrors?.legalName} />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor="firstName" className={labelClass}>
+            First name
+          </label>
+          <input
+            id="firstName"
+            name="firstName"
+            type="text"
+            autoComplete="given-name"
+            required
+            defaultValue={values?.firstName ?? ""}
+            className={fieldClass}
+          />
+          <FieldError message={fieldErrors?.firstName} />
+        </div>
+
+        <div>
+          <label htmlFor="lastName" className={labelClass}>
+            Last name
+          </label>
+          <input
+            id="lastName"
+            name="lastName"
+            type="text"
+            autoComplete="family-name"
+            required
+            defaultValue={values?.lastName ?? ""}
+            className={fieldClass}
+          />
+          <FieldError message={fieldErrors?.lastName} />
+        </div>
       </div>
 
       <div>
@@ -72,81 +86,6 @@ export function SignupForm() {
           className={fieldClass}
         />
         <FieldError message={fieldErrors?.email} />
-      </div>
-
-      <div>
-        <label htmlFor="password" className={labelClass}>
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          minLength={8}
-          required
-          className={fieldClass}
-        />
-        <FieldError message={fieldErrors?.password} />
-      </div>
-
-      <div>
-        <label htmlFor="dateOfBirth" className={labelClass}>
-          Date of birth
-        </label>
-        <input
-          id="dateOfBirth"
-          name="dateOfBirth"
-          type="date"
-          autoComplete="bday"
-          required
-          defaultValue={values?.dateOfBirth ?? ""}
-          className={fieldClass}
-        />
-        <FieldError message={fieldErrors?.dateOfBirth} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="zip" className={labelClass}>
-            ZIP code
-          </label>
-          <input
-            id="zip"
-            name="zip"
-            type="text"
-            inputMode="numeric"
-            autoComplete="postal-code"
-            required
-            defaultValue={values?.zip ?? ""}
-            className={fieldClass}
-          />
-          <FieldError message={fieldErrors?.zip} />
-        </div>
-
-        <div>
-          <label htmlFor="stateOfResidence" className={labelClass}>
-            State of residence
-          </label>
-          <select
-            id="stateOfResidence"
-            name="stateOfResidence"
-            required
-            value={stateOfResidence}
-            onChange={(e) => setStateOfResidence(e.target.value)}
-            className={fieldClass}
-          >
-            <option value="" disabled>
-              Select a state
-            </option>
-            {US_STATES.map((s) => (
-              <option key={s.code} value={s.code}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <FieldError message={fieldErrors?.stateOfResidence} />
-        </div>
       </div>
 
       {state.status === "error" && !fieldErrors && (

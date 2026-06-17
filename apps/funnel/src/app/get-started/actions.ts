@@ -3,16 +3,12 @@
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
-import { hashPassword } from "@/lib/password";
-import { US_STATE_CODES } from "./us-states";
 
 /** Non-secret fields echoed back so the form can repopulate after a reset. */
 export type SignupValues = {
-  legalName: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  dateOfBirth: string;
-  zip: string;
-  stateOfResidence: string;
 };
 
 export type SignupState =
@@ -26,48 +22,27 @@ export type SignupState =
     };
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-const ZIP_RE = /^\d{5}(-\d{4})?$/;
 
 export async function createAccount(
   _prev: SignupState,
   formData: FormData,
 ): Promise<SignupState> {
-  const legalName = String(formData.get("legalName") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
-  const zip = String(formData.get("zip") ?? "").trim();
-  const stateOfResidence = String(formData.get("stateOfResidence") ?? "").trim();
 
-  // Echoed back on error so the form keeps what the user typed (never the password).
-  const values: SignupValues = {
-    legalName,
-    email,
-    dateOfBirth,
-    zip,
-    stateOfResidence,
-  };
+  // Echoed back on error so the form keeps what the user typed.
+  const values: SignupValues = { firstName, lastName, email };
 
   const fieldErrors: Record<string, string> = {};
-  if (!legalName) {
-    fieldErrors.legalName = "Enter your full legal name.";
+  if (!firstName) {
+    fieldErrors.firstName = "Enter your first name.";
+  }
+  if (!lastName) {
+    fieldErrors.lastName = "Enter your last name.";
   }
   if (!EMAIL_RE.test(email)) {
     fieldErrors.email = "Enter a valid email address.";
-  }
-  if (password.length < 8) {
-    fieldErrors.password = "Password must be at least 8 characters.";
-  }
-  if (!dateOfBirth || Number.isNaN(Date.parse(dateOfBirth))) {
-    fieldErrors.dateOfBirth = "Enter your date of birth.";
-  } else if (Date.parse(dateOfBirth) > Date.now()) {
-    fieldErrors.dateOfBirth = "Date of birth can't be in the future.";
-  }
-  if (!ZIP_RE.test(zip)) {
-    fieldErrors.zip = "Enter a valid ZIP code.";
-  }
-  if (!US_STATE_CODES.has(stateOfResidence)) {
-    fieldErrors.stateOfResidence = "Select your state of residence.";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -80,16 +55,12 @@ export async function createAccount(
   }
 
   try {
-    const passwordHash = await hashPassword(password);
     const [created] = await db
       .insert(users)
       .values({
         email,
-        passwordHash,
-        legalName,
-        dateOfBirth,
-        zip,
-        stateOfResidence,
+        firstName,
+        lastName,
       })
       .returning({ id: users.id });
 
