@@ -42,6 +42,7 @@ export function SignupForm({
     <form action={action} className="mt-8" noValidate>
       <fieldset
         disabled={pending}
+        aria-busy={pending}
         className="m-0 min-w-0 space-y-5 border-0 p-0 transition-opacity disabled:opacity-60"
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -55,10 +56,15 @@ export function SignupForm({
               type="text"
               autoComplete="given-name"
               required
+              aria-required="true"
+              aria-invalid={fieldErrors?.firstName ? true : undefined}
+              aria-describedby={
+                fieldErrors?.firstName ? "firstName-error" : undefined
+              }
               defaultValue={values?.firstName ?? ""}
               className={fieldClass}
             />
-            <FieldError message={fieldErrors?.firstName} />
+            <FieldError id="firstName-error" message={fieldErrors?.firstName} />
           </div>
 
           <div>
@@ -71,10 +77,15 @@ export function SignupForm({
               type="text"
               autoComplete="family-name"
               required
+              aria-required="true"
+              aria-invalid={fieldErrors?.lastName ? true : undefined}
+              aria-describedby={
+                fieldErrors?.lastName ? "lastName-error" : undefined
+              }
               defaultValue={values?.lastName ?? ""}
               className={fieldClass}
             />
-            <FieldError message={fieldErrors?.lastName} />
+            <FieldError id="lastName-error" message={fieldErrors?.lastName} />
           </div>
         </div>
 
@@ -88,14 +99,19 @@ export function SignupForm({
             type="email"
             autoComplete="email"
             required
+            aria-required="true"
+            aria-invalid={fieldErrors?.email ? true : undefined}
+            aria-describedby={fieldErrors?.email ? "email-error" : undefined}
             defaultValue={values?.email ?? ""}
             className={fieldClass}
           />
-          <FieldError message={fieldErrors?.email} />
+          <FieldError id="email-error" message={fieldErrors?.email} />
         </div>
 
         {state.status === "error" && !fieldErrors && (
-          <p className="animate-error-in text-sm text-error">{state.message}</p>
+          <p role="alert" className="animate-error-in text-sm text-error">
+            {state.message}
+          </p>
         )}
 
         <Button type="submit" color="primary" className="w-full">

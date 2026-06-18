@@ -41,11 +41,17 @@ export function ConsentForm({
 
       <fieldset
         disabled={pending}
+        aria-busy={pending}
         className="m-0 min-w-0 space-y-5 border-0 p-0 transition-opacity disabled:opacity-60"
       >
         <p className="font-headline text-lg text-primary">Welcome {name}</p>
 
-        <div className="max-h-72 space-y-4 overflow-y-auto rounded-xl border border-outline/40 bg-surface p-5 text-sm text-on-surface-variant">
+        <div
+          role="region"
+          aria-label="Wellness and privacy terms"
+          tabIndex={0}
+          className="max-h-72 space-y-4 overflow-y-auto rounded-xl border border-outline/40 bg-surface p-5 text-sm text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary"
+        >
           <p className="font-headline text-base text-primary">
             Wellness &amp; privacy terms
           </p>
@@ -55,10 +61,20 @@ export function ConsentForm({
         </div>
 
         <div>
-          <label className={`${labelClass} flex items-start gap-3 font-normal`}>
+          <label
+            htmlFor="agreed"
+            className={`${labelClass} flex items-start gap-3 font-normal`}
+          >
             <input
+              id="agreed"
               type="checkbox"
               name="agreed"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.agreed ? true : undefined}
+              aria-describedby={
+                fieldErrors?.agreed ? "agreed-error" : undefined
+              }
               className="mt-1 size-4 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
             />
             <span>
@@ -66,11 +82,13 @@ export function ConsentForm({
               of Privacy Practices.
             </span>
           </label>
-          <FieldError message={fieldErrors?.agreed} />
+          <FieldError id="agreed-error" message={fieldErrors?.agreed} />
         </div>
 
         {state.status === "error" && !fieldErrors && (
-          <p className="animate-error-in text-sm text-error">{state.message}</p>
+          <p role="alert" className="animate-error-in text-sm text-error">
+            {state.message}
+          </p>
         )}
 
         <Button type="submit" color="primary" className="w-full">
