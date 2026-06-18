@@ -6,6 +6,7 @@ import { consents } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
 import { CONSENT_VERSION } from "@/lib/consent";
 import { getClientIp, hashIp } from "@/lib/request-meta";
+import { isPgError, PgErrorCode } from "@/lib/db-errors";
 
 export type ConsentState =
   | { status: "idle" }
@@ -80,6 +81,15 @@ export async function recordConsent(
 
     return { status: "success" };
   } catch (err) {
+    // userId came from a (client-trusted) hidden field; a bad/stale value
+    // trips the FK to users.id rather than being a transient failure.
+    if (isPgError(err, PgErrorCode.ForeignKeyViolation)) {
+      return {
+        status: "error",
+        message:
+          "We couldn't find your account. Please restart and create your account again.",
+      };
+    }
     console.error("recordConsent failed:", err);
     return {
       status: "error",
