@@ -3,6 +3,7 @@
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
+import { isPgError, PgErrorCode } from "@/lib/db-errors";
 
 /** Non-secret fields echoed back so the form can repopulate after a reset. */
 export type SignupValues = {
@@ -13,7 +14,13 @@ export type SignupValues = {
 
 export type SignupState =
   | { status: "idle" }
-  | { status: "success"; userId: string; email: string }
+  | {
+      status: "success";
+      userId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    }
   | {
       status: "error";
       message: string;
@@ -70,18 +77,16 @@ export async function createAccount(
       metadata: { source: "get-started" },
     });
 
-    return { status: "success", userId: created.id, email };
+    return { status: "success", userId: created.id, email, firstName, lastName };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    // 23505 = unique_violation
-    if (
-      message.includes("users_email_unique") ||
-      (err as { code?: string }).code === "23505"
-    ) {
+    if (isPgError(err, PgErrorCode.UniqueViolation, "users_email_unique")) {
       return {
         status: "error",
-        message: "An account with that email already exists.",
-        fieldErrors: { email: "This email is already registered." },
+        message: "Please fix the fields below.",
+        fieldErrors: {
+          email:
+            "An account with this email already exists. Try signing in instead.",
+        },
         values,
       };
     }

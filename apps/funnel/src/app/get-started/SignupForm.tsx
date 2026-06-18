@@ -7,7 +7,12 @@ import { fieldClass, FieldError, labelClass } from "./form-styles";
 
 const initialState: SignupState = { status: "idle" };
 
-export type SignupResult = { userId: string; email: string };
+export type SignupResult = {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+};
 
 export function SignupForm({
   onComplete,
@@ -24,7 +29,12 @@ export function SignupForm({
   useEffect(() => {
     if (state.status === "success" && !advanced.current) {
       advanced.current = true;
-      onComplete({ userId: state.userId, email: state.email });
+      onComplete({
+        userId: state.userId,
+        email: state.email,
+        firstName: state.firstName,
+        lastName: state.lastName,
+      });
     }
   }, [state, onComplete]);
 

@@ -17,9 +17,11 @@ const PLACEHOLDER_TERMS = [
 
 export function ConsentForm({
   userId,
+  name,
   onComplete,
 }: {
   userId: string;
+  name: string;
   onComplete: () => void;
 }) {
   const [state, action, pending] = useActionState(recordConsent, initialState);
@@ -36,6 +38,8 @@ export function ConsentForm({
   return (
     <form action={action} className="mt-8 space-y-5" noValidate>
       <input type="hidden" name="userId" value={userId} />
+
+      <p className="font-headline text-lg text-primary">Welcome {name}</p>
 
       <div className="max-h-72 space-y-4 overflow-y-auto rounded-xl border border-outline/40 bg-surface p-5 text-sm text-on-surface-variant">
         <p className="font-headline text-base text-primary">

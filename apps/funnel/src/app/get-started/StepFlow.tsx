@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { SignupForm, type SignupResult } from "./SignupForm";
 import { ConsentForm } from "./ConsentForm";
+import { PaymentStep } from "./PaymentStep";
 
 /**
  * Single-page stepper for the get-started funnel. State lives in client memory
@@ -12,12 +13,14 @@ import { ConsentForm } from "./ConsentForm";
  * To add a step later: add an entry to STEPS and a case to renderStep — the
  * advance/merge plumbing stays the same.
  */
-const STEPS = ["signup", "consent", "done"] as const;
+const STEPS = ["signup", "consent", "payment", "done"] as const;
 type Step = (typeof STEPS)[number];
 
 type FlowContext = {
   userId?: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
 };
 
 export function StepFlow() {
@@ -31,12 +34,17 @@ export function StepFlow() {
 
   const handleSignupComplete = useCallback(
     (result: SignupResult) => {
-      advance({ userId: result.userId, email: result.email });
+      advance({
+        userId: result.userId,
+        email: result.email,
+        firstName: result.firstName,
+        lastName: result.lastName,
+      });
     },
     [advance],
   );
 
-  const handleConsentComplete = useCallback(() => {
+  const handleStepComplete = useCallback(() => {
     advance();
   }, [advance]);
 
@@ -51,9 +59,13 @@ export function StepFlow() {
       return (
         <ConsentForm
           userId={context.userId ?? ""}
-          onComplete={handleConsentComplete}
+          name={context.firstName ?? ""}
+          onComplete={handleStepComplete}
         />
       );
+
+    case "payment":
+      return <PaymentStep onComplete={handleStepComplete} />;
 
     case "done":
       return (
@@ -63,8 +75,8 @@ export function StepFlow() {
           </p>
           <p className="mt-2 text-on-surface-variant">
             Welcome aboard — we&apos;ve created your account for{" "}
-            <strong>{context.email}</strong> and saved your consent. Payment
-            lands in a later step.
+            <strong>{context.email}</strong>, saved your consent, and taken
+            payment.
           </p>
         </div>
       );
