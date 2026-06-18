@@ -13,7 +13,7 @@ export type SignupValues = {
 
 export type SignupState =
   | { status: "idle" }
-  | { status: "success"; email: string }
+  | { status: "success"; userId: string; email: string }
   | {
       status: "error";
       message: string;
@@ -70,7 +70,7 @@ export async function createAccount(
       metadata: { source: "get-started" },
     });
 
-    return { status: "success", email };
+    return { status: "success", userId: created.id, email };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     // 23505 = unique_violation
