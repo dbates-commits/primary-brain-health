@@ -39,64 +39,69 @@ export function SignupForm({
   }, [state, onComplete]);
 
   return (
-    <form action={action} className="mt-8 space-y-5" noValidate>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="firstName" className={labelClass}>
-            First name
-          </label>
-          <input
-            id="firstName"
-            name="firstName"
-            type="text"
-            autoComplete="given-name"
-            required
-            defaultValue={values?.firstName ?? ""}
-            className={fieldClass}
-          />
-          <FieldError message={fieldErrors?.firstName} />
+    <form action={action} className="mt-8" noValidate>
+      <fieldset
+        disabled={pending}
+        className="m-0 min-w-0 space-y-5 border-0 p-0 transition-opacity disabled:opacity-60"
+      >
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="firstName" className={labelClass}>
+              First name
+            </label>
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              autoComplete="given-name"
+              required
+              defaultValue={values?.firstName ?? ""}
+              className={fieldClass}
+            />
+            <FieldError message={fieldErrors?.firstName} />
+          </div>
+
+          <div>
+            <label htmlFor="lastName" className={labelClass}>
+              Last name
+            </label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              autoComplete="family-name"
+              required
+              defaultValue={values?.lastName ?? ""}
+              className={fieldClass}
+            />
+            <FieldError message={fieldErrors?.lastName} />
+          </div>
         </div>
 
         <div>
-          <label htmlFor="lastName" className={labelClass}>
-            Last name
+          <label htmlFor="email" className={labelClass}>
+            Email
           </label>
           <input
-            id="lastName"
-            name="lastName"
-            type="text"
-            autoComplete="family-name"
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
             required
-            defaultValue={values?.lastName ?? ""}
+            defaultValue={values?.email ?? ""}
             className={fieldClass}
           />
-          <FieldError message={fieldErrors?.lastName} />
+          <FieldError message={fieldErrors?.email} />
         </div>
-      </div>
 
-      <div>
-        <label htmlFor="email" className={labelClass}>
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          defaultValue={values?.email ?? ""}
-          className={fieldClass}
-        />
-        <FieldError message={fieldErrors?.email} />
-      </div>
+        {state.status === "error" && !fieldErrors && (
+          <p className="animate-error-in text-sm text-error">{state.message}</p>
+        )}
 
-      {state.status === "error" && !fieldErrors && (
-        <p className="text-sm text-error">{state.message}</p>
-      )}
-
-      <Button type="submit" color="primary" className="w-full">
-        {pending ? "Creating account…" : "Create account"}
-      </Button>
+        <Button type="submit" color="primary" className="w-full">
+          {pending ? "Creating account…" : "Create account"}
+        </Button>
+      </fieldset>
     </form>
   );
 }

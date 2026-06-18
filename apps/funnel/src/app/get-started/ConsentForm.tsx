@@ -36,42 +36,47 @@ export function ConsentForm({
   }, [state, onComplete]);
 
   return (
-    <form action={action} className="mt-8 space-y-5" noValidate>
+    <form action={action} className="mt-8" noValidate>
       <input type="hidden" name="userId" value={userId} />
 
-      <p className="font-headline text-lg text-primary">Welcome {name}</p>
+      <fieldset
+        disabled={pending}
+        className="m-0 min-w-0 space-y-5 border-0 p-0 transition-opacity disabled:opacity-60"
+      >
+        <p className="font-headline text-lg text-primary">Welcome {name}</p>
 
-      <div className="max-h-72 space-y-4 overflow-y-auto rounded-xl border border-outline/40 bg-surface p-5 text-sm text-on-surface-variant">
-        <p className="font-headline text-base text-primary">
-          Wellness &amp; privacy terms
-        </p>
-        {PLACEHOLDER_TERMS.map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
-        ))}
-      </div>
+        <div className="max-h-72 space-y-4 overflow-y-auto rounded-xl border border-outline/40 bg-surface p-5 text-sm text-on-surface-variant">
+          <p className="font-headline text-base text-primary">
+            Wellness &amp; privacy terms
+          </p>
+          {PLACEHOLDER_TERMS.map((paragraph, i) => (
+            <p key={i}>{paragraph}</p>
+          ))}
+        </div>
 
-      <div>
-        <label className={`${labelClass} flex items-start gap-3 font-normal`}>
-          <input
-            type="checkbox"
-            name="agreed"
-            className="mt-1 size-4 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
-          />
-          <span>
-            I have read and agree to the wellness terms and the HIPAA Notice of
-            Privacy Practices.
-          </span>
-        </label>
-        <FieldError message={fieldErrors?.agreed} />
-      </div>
+        <div>
+          <label className={`${labelClass} flex items-start gap-3 font-normal`}>
+            <input
+              type="checkbox"
+              name="agreed"
+              className="mt-1 size-4 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
+            />
+            <span>
+              I have read and agree to the wellness terms and the HIPAA Notice
+              of Privacy Practices.
+            </span>
+          </label>
+          <FieldError message={fieldErrors?.agreed} />
+        </div>
 
-      {state.status === "error" && !fieldErrors && (
-        <p className="text-sm text-error">{state.message}</p>
-      )}
+        {state.status === "error" && !fieldErrors && (
+          <p className="animate-error-in text-sm text-error">{state.message}</p>
+        )}
 
-      <Button type="submit" color="primary" className="w-full">
-        {pending ? "Saving…" : "Agree and continue"}
-      </Button>
+        <Button type="submit" color="primary" className="w-full">
+          {pending ? "Saving…" : "Agree and continue"}
+        </Button>
+      </fieldset>
     </form>
   );
 }
