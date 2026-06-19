@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { SignupForm, type SignupResult } from "./SignupForm";
+import { DetailsForm } from "./DetailsForm";
 import { ConsentForm } from "./ConsentForm";
 import { PaymentStep } from "./PaymentStep";
 
@@ -13,7 +14,7 @@ import { PaymentStep } from "./PaymentStep";
  * To add a step later: add an entry to STEPS and a case to renderStep — the
  * advance/merge plumbing stays the same.
  */
-const STEPS = ["signup", "consent", "payment", "done"] as const;
+const STEPS = ["signup", "details", "consent", "payment", "done"] as const;
 type Step = (typeof STEPS)[number];
 
 type FlowContext = {
@@ -53,6 +54,15 @@ export function StepFlow() {
   switch (step) {
     case "signup":
       return <SignupForm onComplete={handleSignupComplete} />;
+
+    case "details":
+      // userId is guaranteed once we've advanced past signup.
+      return (
+        <DetailsForm
+          userId={context.userId ?? ""}
+          onComplete={handleStepComplete}
+        />
+      );
 
     case "consent":
       // userId is guaranteed once we've advanced past signup.
