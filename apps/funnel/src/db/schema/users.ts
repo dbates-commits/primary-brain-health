@@ -16,7 +16,8 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   // Collected in step 2 of signup, so nullable until that step completes.
   passwordHash: text("password_hash"),
-  dateOfBirth: date("date_of_birth"),
+  // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.
+  dateOfBirth: date("date_of_birth", { mode: "string" }),
   zip: text(),
   stateOfResidence: char("state_of_residence", { length: 2 }),
   stripeCustomerId: text("stripe_customer_id").unique(),
@@ -26,7 +27,11 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .default(sql`now()`)
-    .$onUpdate(() => sql`now()`),
+    // Return a Date, not sql`now()`: drizzle's UPDATE builder params the
+    // $onUpdate result through the column encoder without checking for SQL
+    // (unlike the INSERT path), so a raw SQL value hits `value.toISOString()`
+    // and throws. A Date encodes cleanly.
+    .$onUpdate(() => new Date()),
 });
 
 export type User = typeof users.$inferSelect;
