@@ -69,7 +69,6 @@ export function StepFlow() {
       return (
         <ConsentForm
           userId={context.userId ?? ""}
-          name={context.firstName ?? ""}
           onComplete={handleStepComplete}
         />
       );
