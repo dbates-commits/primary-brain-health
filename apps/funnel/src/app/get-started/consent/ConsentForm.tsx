@@ -2,8 +2,9 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@pbh/ui";
-import { recordConsent, type ConsentState } from "./consent-actions";
-import { FieldError } from "./form-styles";
+import { recordConsent, type ConsentState } from "./actions";
+import { FieldError } from "@/components/FieldError";
+import { StepHeader } from "@/components/StepHeader";
 
 const initialState: ConsentState = { status: "idle" };
 
@@ -59,9 +60,14 @@ export function ConsentForm({
     <form
       action={action}
       noValidate
-      className="mt-8 flex flex-col items-center gap-8 bg-surface"
+      className="flex flex-col items-center gap-8 bg-surface"
     >
       <input type="hidden" name="userId" value={userId} />
+
+      <StepHeader
+        title="Almost there!"
+        subtitle="Please, read carefully the following form to know what the terms of the assessments and consultation."
+      />
 
       <div
         role="region"

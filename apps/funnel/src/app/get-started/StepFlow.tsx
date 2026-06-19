@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { SignupForm, type SignupResult } from "./SignupForm";
-import { DetailsForm } from "./DetailsForm";
-import { ConsentForm } from "./ConsentForm";
-import { PaymentStep } from "./PaymentStep";
+import { SignupForm, type SignupResult } from "./signup";
+import { DetailsForm } from "./details";
+import { ConsentForm } from "./consent";
+import { PaymentStep } from "./payment";
 
 /**
  * Single-page stepper for the get-started funnel. State lives in client memory
@@ -60,6 +60,7 @@ export function StepFlow() {
       return (
         <DetailsForm
           userId={context.userId ?? ""}
+          name={context.firstName ?? ""}
           onComplete={handleStepComplete}
         />
       );
