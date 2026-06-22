@@ -150,7 +150,7 @@ Internal reference. Every abbreviation, acronym, and project-specific term used 
 | ID | Refers to |
 | :---- | :---- |
 | **V1** | The current live website (the "version 1" PBH site VisualBoston shipped under SOW #1) |
-| **P1–P8** | Phase 1 V1-cleanup defects (P8 = hero loop clipping, the only one still open) |
+| **P1–P8** | Phase 1 V1-cleanup defects. As of Jun 12, 2026, P1/P3/P5/P6/P7/P8 are closed and verified on staging; P2 (`/about` nav link) and P4 ("Our Impact" empty) carry to Phase 2 go-live (Oct 9) via the real About/Team page. |
 | **F1–F6** | Phase 2 Fast-follow deliverables (Testimonials, Journey Map, Screener, Blog Hub, Resource Library, Nav/IA overhaul) |
 | **C1–C7** | Phase 3 Conversion optimization deliverables (Families pathway, Providers pathway, Pricing, Founder video, Hero loop expansion, Press strip, Newsletter system) |
 
