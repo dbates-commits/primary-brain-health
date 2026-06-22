@@ -15,6 +15,13 @@ export const base = defineConfig([
     "dist/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Always require braces on control statements — no single-line/braceless
+      // `if`s. See the Code Style section in CLAUDE.md.
+      curly: ["error", "all"],
+    },
+  },
 ]);
 
 export default base;
