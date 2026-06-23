@@ -20,6 +20,13 @@ export const users = pgTable("users", {
   dateOfBirth: date("date_of_birth", { mode: "string" }),
   zip: text(),
   stateOfResidence: char("state_of_residence", { length: 2 }),
+  // Intake-form fields (marketing consultation form). Nullable: the funnel
+  // signup flow does not collect these.
+  phone: text(),
+  gender: text(),
+  educationLevel: text("education_level"),
+  patientIdentification: text("patient_identification"),
+  message: text(),
   stripeCustomerId: text("stripe_customer_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
