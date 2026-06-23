@@ -12,10 +12,30 @@ import { completeProfile, type DetailsState } from "./actions";
 import { FieldError } from "@/components/FieldError";
 import { Label } from "@/components/Label";
 import { StepHeader } from "@/components/StepHeader";
-import { fieldClass } from "@/components/form-constants";
+import { fieldClass, textareaClass } from "@/components/form-constants";
 import { US_STATES } from "./us-states";
+import {
+  EDUCATION_LEVELS,
+  GENDER_OPTIONS,
+  PATIENT_IDENTIFICATION_OPTIONS,
+} from "./field-options";
 
 const initialState: DetailsState = { status: "idle" };
+
+/** Format up to 10 digits as `(XXX) XXX-XXXX`, mirroring the intake form. */
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  const area = digits.slice(0, 3);
+  const prefix = digits.slice(3, 6);
+  const line = digits.slice(6, 10);
+  if (digits.length <= 3) {
+    return area;
+  }
+  if (digits.length <= 6) {
+    return `(${area}) ${prefix}`;
+  }
+  return `(${area}) ${prefix}-${line}`;
+}
 
 export function DetailsForm({
   userId,
@@ -31,17 +51,36 @@ export function DetailsForm({
   const values = state.status === "error" ? state.values : undefined;
 
   const [stateOfResidence, setStateOfResidence] = useState("");
-  const selectRef = useRef<HTMLSelectElement>(null);
+  const [phone, setPhone] = useState("");
+  const [gender, setGender] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+  const [patientIdentification, setPatientIdentification] = useState("");
+
+  const stateRef = useRef<HTMLSelectElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const genderRef = useRef<HTMLSelectElement>(null);
+  const educationRef = useRef<HTMLSelectElement>(null);
+  const patientRef = useRef<HTMLSelectElement>(null);
 
   // React 19 auto-resets the <form> after a server action (requestFormReset),
-  // which yanks this <select> back to its first option (Alabama, since the
-  // placeholder is disabled). The controlled `value` is unchanged across the
-  // error re-render, so React doesn't re-assert it — we re-apply it from state
-  // here, after the commit/reset, to keep the user's selection.
+  // which yanks controlled <select>s back to their first option and clears the
+  // phone field. The controlled `value`s are unchanged across the error
+  // re-render, so React doesn't re-assert them — we re-apply each from state
+  // here, after the commit/reset, to keep the user's input.
   useLayoutEffect(() => {
-    const el = selectRef.current;
-    if (el && el.value !== stateOfResidence) {
-      el.value = stateOfResidence;
+    const fields: [{ current: HTMLInputElement | HTMLSelectElement | null }, string][] =
+      [
+        [stateRef, stateOfResidence],
+        [phoneRef, phone],
+        [genderRef, gender],
+        [educationRef, educationLevel],
+        [patientRef, patientIdentification],
+      ];
+    for (const [ref, value] of fields) {
+      const el = ref.current;
+      if (el && el.value !== value) {
+        el.value = value;
+      }
     }
   });
 
@@ -68,26 +107,56 @@ export function DetailsForm({
           aria-busy={pending}
           className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
         >
-          <div>
-            <Label htmlFor="dateOfBirth">Date of birth</Label>
-            <input
-              id="dateOfBirth"
-              name="dateOfBirth"
-              type="date"
-              autoComplete="bday"
-              required
-              aria-required="true"
-              aria-invalid={fieldErrors?.dateOfBirth ? true : undefined}
-              aria-describedby={
-                fieldErrors?.dateOfBirth ? "dateOfBirth-error" : undefined
-              }
-              defaultValue={values?.dateOfBirth ?? ""}
-              className={fieldClass}
-            />
-            <FieldError
-              id="dateOfBirth-error"
-              message={fieldErrors?.dateOfBirth}
-            />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="dateOfBirth">Date of birth</Label>
+              <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                autoComplete="bday"
+                required
+                aria-required="true"
+                aria-invalid={fieldErrors?.dateOfBirth ? true : undefined}
+                aria-describedby={
+                  fieldErrors?.dateOfBirth ? "dateOfBirth-error" : undefined
+                }
+                defaultValue={values?.dateOfBirth ?? ""}
+                className={fieldClass}
+              />
+              <FieldError
+                id="dateOfBirth-error"
+                message={fieldErrors?.dateOfBirth}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="gender">Gender</Label>
+              <select
+                ref={genderRef}
+                id="gender"
+                name="gender"
+                required
+                aria-required="true"
+                aria-invalid={fieldErrors?.gender ? true : undefined}
+                aria-describedby={
+                  fieldErrors?.gender ? "gender-error" : undefined
+                }
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className={fieldClass}
+              >
+                <option value="" disabled>
+                  Select
+                </option>
+                {GENDER_OPTIONS.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+              <FieldError id="gender-error" message={fieldErrors?.gender} />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -113,7 +182,7 @@ export function DetailsForm({
             <div>
               <Label htmlFor="stateOfResidence">State of residence</Label>
               <select
-                ref={selectRef}
+                ref={stateRef}
                 id="stateOfResidence"
                 name="stateOfResidence"
                 autoComplete="address-level1"
@@ -143,6 +212,112 @@ export function DetailsForm({
                 message={fieldErrors?.stateOfResidence}
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="phone">Phone number</Label>
+            <input
+              ref={phoneRef}
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="(555) 000-0000"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.phone ? true : undefined}
+              aria-describedby={fieldErrors?.phone ? "phone-error" : undefined}
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+              className={fieldClass}
+            />
+            <FieldError id="phone-error" message={fieldErrors?.phone} />
+          </div>
+
+          <div>
+            <Label htmlFor="educationLevel">Highest level of education</Label>
+            <select
+              ref={educationRef}
+              id="educationLevel"
+              name="educationLevel"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.educationLevel ? true : undefined}
+              aria-describedby={
+                fieldErrors?.educationLevel ? "educationLevel-error" : undefined
+              }
+              value={educationLevel}
+              onChange={(e) => setEducationLevel(e.target.value)}
+              className={fieldClass}
+            >
+              <option value="" disabled>
+                Select
+              </option>
+              {EDUCATION_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+            <FieldError
+              id="educationLevel-error"
+              message={fieldErrors?.educationLevel}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="patientIdentification">
+              Who is this assessment for?
+            </Label>
+            <select
+              ref={patientRef}
+              id="patientIdentification"
+              name="patientIdentification"
+              required
+              aria-required="true"
+              aria-invalid={
+                fieldErrors?.patientIdentification ? true : undefined
+              }
+              aria-describedby={
+                fieldErrors?.patientIdentification
+                  ? "patientIdentification-error"
+                  : undefined
+              }
+              value={patientIdentification}
+              onChange={(e) => setPatientIdentification(e.target.value)}
+              className={fieldClass}
+            >
+              <option value="" disabled>
+                Select
+              </option>
+              {PATIENT_IDENTIFICATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <FieldError
+              id="patientIdentification-error"
+              message={fieldErrors?.patientIdentification}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="message">Message (optional)</Label>
+            <textarea
+              id="message"
+              name="message"
+              rows={4}
+              placeholder="Tell us more about your concerns…"
+              aria-invalid={fieldErrors?.message ? true : undefined}
+              aria-describedby={
+                fieldErrors?.message ? "message-error" : undefined
+              }
+              defaultValue={values?.message ?? ""}
+              className={textareaClass}
+            />
+            <FieldError id="message-error" message={fieldErrors?.message} />
           </div>
 
           {state.status === "error" && !fieldErrors && (

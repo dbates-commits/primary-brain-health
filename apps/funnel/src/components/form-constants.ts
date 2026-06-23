@@ -10,3 +10,10 @@
  */
 export const fieldClass =
   "mt-2 h-12 w-full rounded-lg bg-surface-container-low px-3.5 text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-primary";
+
+/**
+ * Multi-line variant of {@link fieldClass}: same fill/radius/focus, but
+ * auto-height with vertical padding instead of the fixed 48px row.
+ */
+export const textareaClass =
+  "mt-2 w-full rounded-lg bg-surface-container-low px-3.5 py-3 text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-primary";
