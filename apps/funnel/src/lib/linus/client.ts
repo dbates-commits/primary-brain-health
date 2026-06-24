@@ -128,6 +128,21 @@ export async function enrollSubject(
 }
 
 /**
+ * `GET /v1/participants/{id}/enrollments` — list a subject's active (not yet
+ * completed) enrollments and their redirect links. Read-only; safe to call when
+ * rendering a page.
+ */
+export async function listEnrollments(
+  participantId: string,
+): Promise<Enrollment[]> {
+  return linusRequest<Enrollment[]>(
+    `/participants/${encodeURIComponent(participantId)}/enrollments`,
+    { method: "GET" },
+    "list enrollments",
+  );
+}
+
+/**
  * `GET /v1/participants/{id}/enrollments/{enrollmentId}/reports/{reportType}` —
  * retrieve a results report (base64-encoded PDF). Wrapped for completeness;
  * no UI uses it yet (reports only exist once a subject finishes the assessment).

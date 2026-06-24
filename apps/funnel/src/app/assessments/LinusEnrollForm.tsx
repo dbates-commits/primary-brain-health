@@ -1,10 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Card } from "@pbh/ui";
+import { Button } from "@pbh/ui";
 import { Label } from "@/components/Label";
 import { fieldClass } from "@/components/form-constants";
-import { registerAndEnroll, type LinusState } from "./actions";
+import { registerAndEnroll } from "./actions";
+import { EnrollmentResults } from "./EnrollmentResults";
+import type { LinusState } from "./register-and-enroll";
 
 const initialState: LinusState = { status: "idle" };
 
@@ -61,48 +63,10 @@ export function LinusEnrollForm() {
       </form>
 
       {state.status === "success" && (
-        <div className="flex flex-col gap-4">
-          <div>
-            <p className="text-xs font-semibold text-on-surface-variant">
-              Linus participant ID
-            </p>
-            <p className="font-mono text-sm break-all text-on-surface">
-              {state.participantId}
-            </p>
-          </div>
-
-          {state.enrollments.length > 0 ? (
-            <ul className="flex flex-col gap-4">
-              {state.enrollments.map((enrollment) => (
-                <li key={enrollment.campaignId}>
-                  <Card variant="bordered">
-                    <p className="text-lg font-semibold text-on-surface">
-                      {enrollment.name}
-                    </p>
-                    <p className="font-mono text-xs break-all text-gray-500">
-                      {enrollment.campaignId}
-                    </p>
-                    <a
-                      href={enrollment.redirect}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-block text-primary underline"
-                    >
-                      Open assessment →
-                    </a>
-                  </Card>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Card variant="bordered">
-              <p className="text-on-surface">
-                The subject was registered, but no campaigns are configured. Set
-                the <code>LINUS_CAMPAIGNS</code> environment variable to add them.
-              </p>
-            </Card>
-          )}
-        </div>
+        <EnrollmentResults
+          participantId={state.participantId}
+          enrollments={state.enrollments}
+        />
       )}
     </div>
   );

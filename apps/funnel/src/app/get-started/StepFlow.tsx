@@ -75,7 +75,9 @@ export function StepFlow() {
       );
 
     case "payment":
-      return <PaymentStep onComplete={handleStepComplete} />;
+      // Paying registers + enrolls server-side and forwards to /assessments, so
+      // this step navigates away rather than advancing the in-page stepper.
+      return <PaymentStep userId={context.userId ?? ""} />;
 
     case "done":
       return (
