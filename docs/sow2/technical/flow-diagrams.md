@@ -12,7 +12,7 @@ Three diagrams:
 
 ## 1. User funnel
 
-Visitor journey from landing through the Stripe success → wellness app handoff. Includes abandonment + retry paths.
+Visitor journey from landing through the Stripe success → Linus Remote Assessments handoff. Includes abandonment + retry paths.
 
 ```mermaid
 flowchart TD
@@ -37,8 +37,8 @@ flowchart TD
     PaymentResult -->|Succeeded| Confirm[/get-started/confirmation<br/>Receipt summary, what's next, handoff CTA/]
 
     Confirm --> TokenGen[Backend: generate signed handoff token<br/>JWT/HMAC, 5–15 min TTL]
-    TokenGen --> Redirect[Browser: redirect to wellness app domain<br/>with token as query param]
-    Redirect --> Handoff([Wellness app starts assessment session<br/>- VisualBoston scope ends here])
+    TokenGen --> Redirect[Browser: redirect to Linus Remote Assessments domain<br/>with token as query param]
+    Redirect --> Handoff([Linus Remote Assessments starts assessment session<br/>- VisualBoston scope ends here])
 
     Exit2 -.->|User clicks resume link in email| Signup
 
@@ -67,7 +67,7 @@ sequenceDiagram
     participant Neon as Neon DB<br/>(users, payments, audit_log)
     participant Resend
     participant HubSpot
-    participant Wellness as Wellness App<br/>(PBH-owned, vendor TBD)
+    participant Wellness as Linus Remote Assessments<br/>(PBH-owned, vendor TBD)
 
     Browser->>PBH: POST /api/payment/intent<br/>(amount, customer info)
     PBH->>Stripe: Create Customer + PaymentIntent<br/>(setup_future_usage: 'off_session')
@@ -132,7 +132,7 @@ graph LR
     end
 
     subgraph PBHScope["PBH-owned (out of VisualBoston scope)"]
-        WellnessApp[Wellness app<br/>vendor TBD<br/>- assessment runner<br/>- BHN dashboard<br/>- intake gate<br/>- Athena handoff]
+        WellnessApp[Linus Remote Assessments<br/>vendor TBD<br/>- assessment runner<br/>- BHN dashboard<br/>- intake gate<br/>- Athena handoff]
         Athena[athenahealth EMR<br/>MIM PA / Cognoa PC CA]
     end
 
@@ -160,7 +160,7 @@ graph LR
 - 🟡 Dashed yellow box (third-party services) - we integrate with, don't build
 - 🔴 Dashed red box (PBH-owned scope) - out of scope, PBH or vendor TBD
 
-The dotted arrow from API → Wellness App is the **handoff seam** - VisualBoston's deliverable ends with the signed-token redirect. The wellness app and everything downstream is PBH's scope.
+The dotted arrow from API → Linus Remote Assessments is the **handoff seam** - VisualBoston's deliverable ends with the signed-token redirect. The Linus Remote Assessments and everything downstream is PBH's scope.
 
 ---
 

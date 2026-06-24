@@ -1,6 +1,6 @@
 # Stripe Payment Architecture - Notes
 
-Pre-implementation research and decision notes for the PBH Website v2 funnel ($149 → BHN → wellness-app handoff). These notes feed into the **Payment architecture spec** that's a named deliverable of the Slice 1 discovery phase.
+Pre-implementation research and decision notes for the PBH Website v2 funnel ($149 → BHN → Linus Remote Assessments handoff). These notes feed into the **Payment architecture spec** that's a named deliverable of the Slice 1 discovery phase.
 
 Status: notes / research. Not yet a spec.
 
@@ -17,13 +17,13 @@ The RFP requires four things that map cleanly to Stripe primitives:
 | PCI SAQ-A (card data never touches PBH servers) | Stripe Checkout or Payment Element (both hosted-iframe → SAQ-A) |
 | HSA/FSA card support | Standard Stripe - works automatically *if MCC is right* (see gotchas) |
 | Apple Pay / Google Pay | Native in Payment Element |
-| Card on file (reused by wellness app downstream) | `Customer` object + `setup_future_usage: 'off_session'` |
+| Card on file (reused by Linus Remote Assessments downstream) | `Customer` object + `setup_future_usage: 'off_session'` |
 | Sales-tax by jurisdiction | Stripe Tax |
 | Webhook reliability | Stripe Webhooks + idempotency keys |
 
 Alternatives considered and rejected:
 
-- **Braintree (PayPal)** - viable, but Stripe has stronger developer experience, better HSA/FSA edge-case documentation, and the Customer-object handoff to the wellness app is more idiomatic
+- **Braintree (PayPal)** - viable, but Stripe has stronger developer experience, better HSA/FSA edge-case documentation, and the Customer-object handoff to the Linus Remote Assessments is more idiomatic
 - **Square** - weaker JS SDK, less developer-friendly
 - **Adyen** - enterprise-scale, overkill for a single $149 charge product
 
@@ -62,15 +62,15 @@ Three SAQ-A-compatible flavors:
 3. Website creates PaymentIntent
      - amount: 14900 (USD cents)
      - customer: <Customer id>
-     - setup_future_usage: 'off_session'   ← enables card-on-file for wellness app
+     - setup_future_usage: 'off_session'   ← enables card-on-file for Linus Remote Assessments
      - automatic_payment_methods: { enabled: true }
 4. Browser confirms payment via Payment Element (Stripe-hosted iframe)
 5. Stripe → webhook → website backend:
      - payment_succeeded   → mark order paid, fire GA4 event, update HubSpot,
                               trigger Resend receipt
      - payment_failed      → fire GA4 event, surface error to user
-6. Browser receives confirmation, redirects to wellness app with signed token
-7. Wellness app references the same Stripe Customer / PaymentMethod for
+6. Browser receives confirmation, redirects to Linus Remote Assessments with signed token
+7. Linus Remote Assessments references the same Stripe Customer / PaymentMethod for
    downstream medical-care intake charge (separate scope, owned by engineering pod)
 ```
 
@@ -139,11 +139,11 @@ These need to be decided jointly with PBH's engineering pod before the Slice 1 b
 
 | Seam | Decision needed |
 | :---- | :---- |
-| Stripe account ownership | One Stripe account shared between website and wellness app, or separate accounts with Customer transfer? Strongly recommend **one shared account** to keep the `Customer` and `PaymentMethod` references valid downstream. |
-| API key access for wellness app | How does the wellness app authenticate to Stripe? Same restricted key, or its own? |
-| Refund authority | Does the website handle refunds, or does the wellness app? Recommend wellness app for clinical/customer-service reasons; website only for pre-redirect failure refunds. |
-| Webhook routing | Single webhook endpoint (website), or split between website and wellness app? Recommend website-only for payment lifecycle, wellness-app-only for downstream charges. |
-| Customer-object handoff | The signed redirect token must include the Stripe Customer ID so the wellness app can immediately use the card on file without extra lookup. |
+| Stripe account ownership | One Stripe account shared between website and Linus Remote Assessments, or separate accounts with Customer transfer? Strongly recommend **one shared account** to keep the `Customer` and `PaymentMethod` references valid downstream. |
+| API key access for Linus Remote Assessments | How does the Linus Remote Assessments authenticate to Stripe? Same restricted key, or its own? |
+| Refund authority | Does the website handle refunds, or does the Linus Remote Assessments? Recommend Linus Remote Assessments for clinical/customer-service reasons; website only for pre-redirect failure refunds. |
+| Webhook routing | Single webhook endpoint (website), or split between website and Linus Remote Assessments? Recommend website-only for payment lifecycle, Linus Remote Assessments-only for downstream charges. |
+| Customer-object handoff | The signed redirect token must include the Stripe Customer ID so the Linus Remote Assessments can immediately use the card on file without extra lookup. |
 
 ---
 
@@ -166,7 +166,7 @@ These need to be decided jointly with PBH's engineering pod before the Slice 1 b
 
 - Exact MCC code Stripe assigns at onboarding - confirm with support
 - Whether PBH operates as a single legal entity for Stripe purposes or has separate entities for the wellness vs. medical sides
-- Whether the wellness app's downstream charge is a separate Customer-level transaction, a SetupIntent → off-session charge, or a subscription
+- Whether the Linus Remote Assessments's downstream charge is a separate Customer-level transaction, a SetupIntent → off-session charge, or a subscription
 - Whether sales tax applies in any of PBH's serviced jurisdictions for this category of service (Stripe Tax handles automatically once MCC is set, but verify expected behavior)
 - Receipt template wording - needs Nina's copy + PBH counsel sign-off for non-medical-evaluation language
 - LMN flow - Slice 1 or deferred?

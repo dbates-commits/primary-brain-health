@@ -19,8 +19,8 @@ The funnel app stores:
 
 **Not in this database**:
 - Card numbers / CVV / full PAN - never; lives only at Stripe
-- Assessment responses / clinical data - owned by the wellness app, not this database
-- BHN consultation notes, EMR data - wellness app + Athena
+- Assessment responses / clinical data - owned by the Linus Remote Assessments, not this database
+- BHN consultation notes, EMR data - Linus Remote Assessments + Athena
 - Marketing site content - TinaCMS, separate codebase (`apps/marketing`)
 
 ## Why Neon
@@ -47,7 +47,7 @@ Two readings of the funnel data:
 
 **Conservative reading (recommended)**: Funnel data is HIPAA-covered. Being a user of Primary Brain Health implies a health interest; consents reference HIPAA NPP; the funnel is the entry door to a clinical experience. Auditors and counsel will lean this way.
 
-**Pragmatic reading**: Funnel is pre-clinical, PII-only. HIPAA actually attaches once clinical data is collected (in the wellness app). Most healthcare DTC funnels operate this way.
+**Pragmatic reading**: Funnel is pre-clinical, PII-only. HIPAA actually attaches once clinical data is collected (in the Linus Remote Assessments). Most healthcare DTC funnels operate this way.
 
 **Decision**: conservative reading. Reasons:
 
@@ -55,7 +55,7 @@ Two readings of the funnel data:
 2. Counsel review of "is this HIPAA-covered?" is itself expensive and slow
 3. Retrofitting HIPAA later (migrating data, signing BAAs after the fact, post-launch audit trails) is significantly worse than building HIPAA-aware from day one
 4. PBH risk tolerance reads conservative from the RFP language ("HIPAA-aware data handling at the seam")
-5. The wellness app is going to need HIPAA anyway - having matching posture across both prevents seam confusion
+5. The Linus Remote Assessments is going to need HIPAA anyway - having matching posture across both prevents seam confusion
 
 ## Schema sketch (preliminary, finalized in discovery)
 

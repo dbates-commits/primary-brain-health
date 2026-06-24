@@ -6,7 +6,7 @@ import { citext } from "./_types";
  * Account identity. PII; conservatively HIPAA-adjacent.
  *
  * No card data ever lives here (that stays at Stripe) and no clinical /
- * assessment data (owned by the wellness app). See
+ * assessment data (owned by Linus Remote Assessments). See
  * docs/sow2/technical/database-plan.md.
  */
 export const users = pgTable("users", {
