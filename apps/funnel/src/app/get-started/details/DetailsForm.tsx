@@ -150,8 +150,8 @@ export function DetailsForm({
                   Select
                 </option>
                 {GENDER_OPTIONS.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
+                  <option key={g.value} value={g.value}>
+                    {g.label}
                   </option>
                 ))}
               </select>
@@ -255,8 +255,8 @@ export function DetailsForm({
                 Select
               </option>
               {EDUCATION_LEVELS.map((level) => (
-                <option key={level} value={level}>
-                  {level}
+                <option key={level.value} value={level.value}>
+                  {level.label}
                 </option>
               ))}
             </select>

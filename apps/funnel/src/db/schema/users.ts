@@ -28,6 +28,10 @@ export const users = pgTable("users", {
   patientIdentification: text("patient_identification"),
   message: text(),
   stripeCustomerId: text("stripe_customer_id").unique(),
+  // Linus Health subject id, set the first time we register this user as a
+  // subject. Persisted so we never re-register (which would create a duplicate
+  // Linus subject) — once set, we reuse it and skip straight to enrollment.
+  linusParticipantId: text("linus_participant_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
