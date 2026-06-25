@@ -35,16 +35,16 @@ export function AssessmentCard({
             </p>
           )}
         </div>
-        {infoUrl && (
-          <a
-            href={infoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-primary underline decoration-from-font"
-          >
-            Assessment Information
-          </a>
-        )}
+        {/* Placeholder link until each assessment has a real info URL. */}
+        <a
+          href={infoUrl ?? "#"}
+          {...(infoUrl
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+          className="text-sm text-primary underline decoration-from-font"
+        >
+          Assessment Information
+        </a>
       </div>
 
       <div className="flex flex-col items-stretch justify-center gap-2.5 sm:shrink-0 sm:items-center">
