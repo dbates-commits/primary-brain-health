@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@pbh/ui";
+import { Button, Heading } from "@pbh/ui";
 import { Label } from "@/components/Label";
 import { fieldClass } from "@/components/form-constants";
 import { registerAndEnroll } from "./actions";
@@ -30,6 +30,16 @@ export function LinusEnrollForm() {
 
   return (
     <div className="flex flex-col gap-8">
+      <div>
+        <Heading as="h1" size="lg" className="mb-2">
+          Enroll a subject
+        </Heading>
+        <p className="text-on-surface-variant">
+          Enter a registered user’s email to generate their assessment
+          enrollment links.
+        </p>
+      </div>
+
       <form action={action} noValidate>
         <fieldset
           disabled={pending}

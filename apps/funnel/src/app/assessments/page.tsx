@@ -35,20 +35,21 @@ export default async function AssessmentsPage() {
     <main>
       <Section className="py-24">
         <Container size="narrow">
-          <Heading as="h1" size="lg" className="mb-2">
-            Enroll a subject
-          </Heading>
-          <p className="mb-8 text-on-surface-variant">
-            Enter a registered user’s email to generate their assessment
-            enrollment links.
-          </p>
-
           {result?.status === "error" ? (
-            <Card variant="bordered">
-              <p role="alert" className="text-error">
-                {result.message}
+            <>
+              <Heading as="h1" size="lg" className="mb-2">
+                Enroll a subject
+              </Heading>
+              <p className="mb-8 text-on-surface-variant">
+                Enter a registered user’s email to generate their assessment
+                enrollment links.
               </p>
-            </Card>
+              <Card variant="bordered">
+                <p role="alert" className="text-error">
+                  {result.message}
+                </p>
+              </Card>
+            </>
           ) : (
             <LinusEnrollForm />
           )}
