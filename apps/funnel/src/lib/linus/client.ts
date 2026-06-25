@@ -41,6 +41,10 @@ async function getAccessToken(): Promise<string> {
   }
 
   const config = getLinusConfig();
+  // TODO(linus-debug): remove temporary integration logging
+  console.log(
+    `[linus] -> POST ${config.tokenUrl} (oauth token, audience=${config.audience}, client_id=${config.clientId})`,
+  );
   const res = await fetch(config.tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -53,15 +57,26 @@ async function getAccessToken(): Promise<string> {
     // Never cache a credentialed token response.
     cache: "no-store",
   });
+  // TODO(linus-debug): remove temporary integration logging
+  console.log(`[linus] <- ${res.status} POST ${config.tokenUrl} (oauth token)`);
   if (!res.ok) {
     const body = await res.text().catch(() => "");
+    // TODO(linus-debug): remove temporary integration logging
+    console.error(
+      `[linus] oauth token failed: ${res.status} ${config.tokenUrl} (audience=${config.audience}) :: ${body}`,
+    );
     throw new LinusApiError(res.status, body, "oauth token");
   }
 
   const data = (await res.json()) as {
     access_token: string;
     expires_in: number;
+    token_type?: string;
   };
+  // TODO(linus-debug): remove temporary integration logging
+  console.log(
+    `[linus] token acquired: type=${data.token_type ?? "?"} expires_in=${data.expires_in}s len=${data.access_token?.length ?? 0}`,
+  );
   cachedToken = {
     accessToken: data.access_token,
     expiresAt: Date.now() + data.expires_in * 1000,
@@ -76,19 +91,36 @@ async function linusRequest<T>(
 ): Promise<T> {
   const config = getLinusConfig();
   const token = await getAccessToken();
+  // TODO(linus-debug): remove temporary integration logging
+  console.log(
+    `[linus] -> ${init.method ?? "GET"} ${config.baseUrl}${path} (auth: ${
+      token ? `Bearer present, len=${token.length}` : "MISSING"
+    })`,
+  );
   const res = await fetch(`${config.baseUrl}${path}`, {
     ...init,
     headers: {
       ...init.headers,
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
+      // Some WAFs (the API is behind CloudFront) block requests with no
+      // User-Agent — set an explicit one for our server-to-server calls.
+      "User-Agent": "PrimaryBrainHealth-Funnel/1.0",
     },
     cache: "no-store",
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
+    // TODO(linus-debug): remove temporary integration logging
+    console.error(
+      `[linus] <- ${res.status} ${init.method ?? "GET"} ${config.baseUrl}${path} (${context}) :: ${body}`,
+    );
     throw new LinusApiError(res.status, body, context);
   }
+  // TODO(linus-debug): remove temporary integration logging
+  console.log(
+    `[linus] <- ${res.status} ${init.method ?? "GET"} ${config.baseUrl}${path} (${context})`,
+  );
   return (await res.json()) as T;
 }
 
