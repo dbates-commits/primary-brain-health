@@ -1,5 +1,9 @@
 import { Card, Heading } from "@pbh/ui";
 import { AssessmentCard } from "./AssessmentCard";
+import {
+  ASSESSMENT_CONTENT,
+  ASSESSMENT_ORDER_FALLBACK,
+} from "./assessment-content";
 import type { EnrollmentView } from "./register-and-enroll";
 
 /**
@@ -15,8 +19,27 @@ export function AssessmentsView({
   firstName?: string;
   enrollments: EnrollmentView[];
 }) {
-  const [first, ...rest] = enrollments;
-  const total = enrollments.length;
+  // Apply the Figma copy by campaign key and sort into the design's order
+  // (DAC first → "Start Here"). Falls back to the env-configured fields for
+  // any campaign without a constants entry.
+  const ordered = enrollments
+    .map((enrollment) => {
+      const content = ASSESSMENT_CONTENT[enrollment.key];
+      return {
+        enrollment: {
+          ...enrollment,
+          name: content?.label ?? enrollment.name,
+          description: content?.description ?? enrollment.description,
+          duration: content?.duration ?? enrollment.duration,
+        },
+        order: content?.order ?? ASSESSMENT_ORDER_FALLBACK,
+      };
+    })
+    .sort((a, b) => a.order - b.order)
+    .map((item) => item.enrollment);
+
+  const [first, ...rest] = ordered;
+  const total = ordered.length;
   // We don't track assessment completion yet, so this is always 0 for now.
   // TODO(linus): derive from real completion status once we have it.
   const completed = 0;
@@ -24,10 +47,10 @@ export function AssessmentsView({
   return (
     <div className="mx-auto flex w-full max-w-[840px] flex-col gap-10 px-4 sm:px-6">
       <header className="flex flex-col items-center gap-4 text-center">
-        <Heading as="h1" size="lg">
+        <Heading as="h1" size="lg" className="font-thin">
           Welcome Back{firstName ? `, ${firstName}` : ""}!
         </Heading>
-        <p className="text-xl text-on-surface-variant">
+        <p className="text-xl font-normal text-on-surface-variant">
           Complete your preferred assessments and then view your report
         </p>
       </header>
@@ -67,7 +90,7 @@ export function AssessmentsView({
           )}
 
           <footer className="flex flex-col items-center justify-between gap-4 px-2 sm:flex-row sm:px-6">
-            <p className="font-headline text-2xl text-on-surface sm:text-[2rem]">
+            <p className="font-headline text-2xl font-thin text-on-surface sm:text-[2rem]">
               {completed} / {total} assessments complete
             </p>
             {/* Enabled once all assessments are complete — not tracked yet. */}

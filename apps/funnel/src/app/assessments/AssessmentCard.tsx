@@ -21,12 +21,12 @@ export function AssessmentCard({
         "flex flex-col gap-6 rounded-xl border p-6 sm:flex-row sm:items-center sm:gap-6",
         highlighted
           ? "border-primary bg-primary/[0.03]"
-          : "border-outline-variant bg-white",
+          : "border-[#d8d8d8] bg-white",
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h3 className="font-headline text-2xl text-on-surface sm:text-[2rem] sm:leading-tight">
+          <h3 className="font-headline text-2xl font-thin text-on-surface sm:text-[2rem] sm:leading-tight">
             {name}
           </h3>
           {description && (
