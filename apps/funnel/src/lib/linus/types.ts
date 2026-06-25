@@ -12,6 +12,12 @@ export interface LinusCampaign {
   name: string;
   /** Linus campaign UUID — differs between sandbox and production. */
   campaignId: string;
+  /** Optional one-line description shown under the title on the card. */
+  description?: string;
+  /** Optional duration label, e.g. "less than 10 min". */
+  duration?: string;
+  /** Optional link target for the "Assessment Information" card link. */
+  infoUrl?: string;
 }
 
 /** Linus `sexAssignedAtBirth` enum (also the canonical `users.gender` values). */

@@ -5,7 +5,7 @@ import { Button } from "@pbh/ui";
 import { Label } from "@/components/Label";
 import { fieldClass } from "@/components/form-constants";
 import { registerAndEnroll } from "./actions";
-import { EnrollmentResults } from "./EnrollmentResults";
+import { AssessmentsView } from "./AssessmentsView";
 import type { LinusState } from "./register-and-enroll";
 
 const initialState: LinusState = { status: "idle" };
@@ -17,6 +17,16 @@ export function LinusEnrollForm() {
   );
   const errorMessage = state.status === "error" ? state.message : undefined;
   const lastEmail = state.status === "idle" ? "" : state.email;
+
+  // On success, replace the lookup form entirely with the assessments view.
+  if (state.status === "success") {
+    return (
+      <AssessmentsView
+        firstName={state.firstName}
+        enrollments={state.enrollments}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -61,13 +71,6 @@ export function LinusEnrollForm() {
           </Button>
         </fieldset>
       </form>
-
-      {state.status === "success" && (
-        <EnrollmentResults
-          participantId={state.participantId}
-          enrollments={state.enrollments}
-        />
-      )}
     </div>
   );
 }

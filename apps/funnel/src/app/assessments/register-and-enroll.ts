@@ -28,6 +28,10 @@ export interface EnrollmentView {
   name: string;
   campaignId: string;
   redirect: string;
+  /** Optional display fields, sourced from the campaign config. */
+  description?: string;
+  duration?: string;
+  infoUrl?: string;
 }
 
 export type LinusState =
@@ -35,6 +39,7 @@ export type LinusState =
   | {
       status: "success";
       email: string;
+      firstName: string;
       participantId: string;
       enrollments: EnrollmentView[];
     }
@@ -123,9 +128,18 @@ export async function registerAndEnrollUser(user: User): Promise<LinusState> {
         name: campaign.name,
         campaignId: campaign.campaignId,
         redirect: enrollment.redirect,
+        description: campaign.description,
+        duration: campaign.duration,
+        infoUrl: campaign.infoUrl,
       });
     }
-    return { status: "success", email, participantId, enrollments };
+    return {
+      status: "success",
+      email,
+      firstName: user.firstName,
+      participantId,
+      enrollments,
+    };
   } catch (err) {
     return { status: "error", email, message: describeError(err, "enroll") };
   }
@@ -229,11 +243,15 @@ export async function listAssessments(userId: string): Promise<LinusState> {
         name: campaign?.name ?? "Assessment",
         campaignId: enrollment.campaignId,
         redirect: enrollment.redirect,
+        description: campaign?.description,
+        duration: campaign?.duration,
+        infoUrl: campaign?.infoUrl,
       };
     });
     return {
       status: "success",
       email: user.email,
+      firstName: user.firstName,
       participantId: user.linusParticipantId,
       enrollments: views,
     };

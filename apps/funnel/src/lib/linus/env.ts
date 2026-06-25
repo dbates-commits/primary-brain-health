@@ -88,6 +88,26 @@ export function getCampaigns(): LinusCampaign[] {
         `LINUS_CAMPAIGNS[${index}] must have string "key", "name", and "campaignId".`,
       );
     }
-    return { key: e.key, name: e.name, campaignId: e.campaignId };
+    // Optional display fields — accept a string or treat as absent, but fail
+    // loudly on a wrong type so a typo doesn't silently disappear.
+    const optionalString = (field: string, value: unknown): string | undefined => {
+      if (value === undefined) {
+        return undefined;
+      }
+      if (typeof value !== "string") {
+        throw new Error(
+          `LINUS_CAMPAIGNS[${index}].${field} must be a string if present.`,
+        );
+      }
+      return value;
+    };
+    return {
+      key: e.key,
+      name: e.name,
+      campaignId: e.campaignId,
+      description: optionalString("description", e.description),
+      duration: optionalString("duration", e.duration),
+      infoUrl: optionalString("infoUrl", e.infoUrl),
+    };
   });
 }
