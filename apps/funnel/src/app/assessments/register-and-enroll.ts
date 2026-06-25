@@ -7,7 +7,7 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { users, type User } from "@/db/schema";
+import { linusEnrollments, users, type User } from "@/db/schema";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import {
   buildRegisterInput,
@@ -16,7 +16,6 @@ import {
 import {
   enrollSubject,
   LinusApiError,
-  listEnrollments,
   registerSubject,
 } from "@/lib/linus/client";
 import { getCampaigns } from "@/lib/linus/env";
@@ -102,6 +101,23 @@ export async function registerAndEnrollUser(user: User): Promise<LinusState> {
     for (const campaign of campaigns) {
       // Idempotent: returns the existing active enrollment if there is one.
       const enrollment = await enrollSubject(participantId, campaign.campaignId);
+      // Persist the redirect now: the post-payment page reads it from here
+      // rather than the list endpoint, which doesn't reliably return it.
+      await db
+        .insert(linusEnrollments)
+        .values({
+          userId: user.id,
+          campaignId: campaign.campaignId,
+          enrollmentId: enrollment.enrollmentId,
+          redirect: enrollment.redirect,
+        })
+        .onConflictDoUpdate({
+          target: [linusEnrollments.userId, linusEnrollments.campaignId],
+          set: {
+            enrollmentId: enrollment.enrollmentId,
+            redirect: enrollment.redirect,
+          },
+        });
       enrollments.push({
         key: campaign.key,
         name: campaign.name,
@@ -165,8 +181,10 @@ export async function registerAndEnrollUserById(
 }
 
 /**
- * Read-only: list a user's active assessment links for display. No writes — the
- * `/assessments` page uses this after payment has already done the enrollment.
+ * Read-only: list a user's stored assessment links for display. Reads the
+ * redirects we persisted at enroll time (not the Linus list endpoint, which
+ * doesn't reliably return them) — the `/assessments` page uses this after
+ * payment has already done the enrollment.
  */
 export async function listAssessments(userId: string): Promise<LinusState> {
   if (!userId) {
@@ -200,8 +218,11 @@ export async function listAssessments(userId: string): Promise<LinusState> {
     const byCampaignId = new Map(
       getCampaigns().map((campaign) => [campaign.campaignId, campaign]),
     );
-    const enrollments = await listEnrollments(user.linusParticipantId);
-    const views: EnrollmentView[] = enrollments.map((enrollment) => {
+    const stored = await db
+      .select()
+      .from(linusEnrollments)
+      .where(eq(linusEnrollments.userId, user.id));
+    const views: EnrollmentView[] = stored.map((enrollment) => {
       const campaign = byCampaignId.get(enrollment.campaignId);
       return {
         key: campaign?.key ?? enrollment.campaignId,
