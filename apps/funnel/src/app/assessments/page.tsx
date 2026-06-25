@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { Card, Container, Eyebrow, Heading, Section } from "@pbh/ui";
+import { Card, Container, Heading, Section } from "@pbh/ui";
 import { AssessmentsView } from "./AssessmentsView";
 import { LinusEnrollForm } from "./LinusEnrollForm";
 import { ASSESSMENT_UID_COOKIE, listAssessments } from "./register-and-enroll";
@@ -35,8 +35,7 @@ export default async function AssessmentsPage() {
     <main>
       <Section className="py-24">
         <Container size="narrow">
-          <Eyebrow>Brain Health</Eyebrow>
-          <Heading as="h1" size="lg" className="mt-2 mb-2">
+          <Heading as="h1" size="lg" className="mb-2">
             Enroll a subject
           </Heading>
           <p className="mb-8 text-on-surface-variant">
