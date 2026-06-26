@@ -108,13 +108,28 @@ function describeError(err: unknown, action: string): string {
  * Register a known user as a Linus subject if we haven't already, then enroll
  * them in every configured campaign and return the enrollment redirect links.
  * Never throws — failures come back as an error state.
+ *
+ * `allowRegister` gates creating a brand-new Linus subject. The payment step
+ * passes it (true) so registration happens exactly once, on successful payment;
+ * read paths (e.g. the /assessments load) pass false so they never create a
+ * subject — if there's no stored participantId they just surface an error.
  */
-export async function registerAndEnrollUser(user: User): Promise<LinusState> {
+export async function registerAndEnrollUser(
+  user: User,
+  { allowRegister = true }: { allowRegister?: boolean } = {},
+): Promise<LinusState> {
   const email = user.email;
 
   // Register once, then reuse the stored participant id on every later visit.
   let participantId = user.linusParticipantId;
   if (!participantId) {
+    if (!allowRegister) {
+      return {
+        status: "error",
+        email,
+        message: "You're not registered for any assessments yet.",
+      };
+    }
     try {
       const subject = await registerSubject(buildRegisterInput(user));
       participantId = subject.participantId;
@@ -203,9 +218,15 @@ export async function runRegisterAndEnroll(
   return registerAndEnrollUser(user);
 }
 
-/** Look up a user by id, then register + enroll (payment path). */
+/**
+ * Look up a user by id, then register + enroll. The payment step calls this with
+ * the default (registration allowed); the /assessments load passes
+ * `allowRegister: false` so it never creates a subject — registration is gated
+ * to a successful payment.
+ */
 export async function registerAndEnrollUserById(
   userId: string,
+  options: { allowRegister?: boolean } = {},
 ): Promise<LinusState> {
   if (!userId) {
     return {
@@ -226,6 +247,6 @@ export async function registerAndEnrollUserById(
       message: "We couldn't find your account.",
     };
   }
-  return registerAndEnrollUser(user);
+  return registerAndEnrollUser(user, options);
 }
 

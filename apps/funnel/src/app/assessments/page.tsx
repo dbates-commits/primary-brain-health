@@ -20,7 +20,10 @@ export const metadata = {
  */
 export default async function AssessmentsPage() {
   const uid = (await cookies()).get(ASSESSMENT_UID_COOKIE)?.value;
-  const result = uid ? await registerAndEnrollUserById(uid) : null;
+  // Read path: never register here — registration is gated to the payment step.
+  const result = uid
+    ? await registerAndEnrollUserById(uid, { allowRegister: false })
+    : null;
 
   if (result?.status === "success") {
     return (
