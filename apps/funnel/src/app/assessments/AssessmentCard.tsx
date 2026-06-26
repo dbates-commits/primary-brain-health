@@ -1,4 +1,5 @@
 import { cn } from "@pbh/ui";
+import { AssessmentModalButton } from "./AssessmentModalButton";
 import type { EnrollmentView } from "./register-and-enroll";
 
 /**
@@ -53,14 +54,7 @@ export function AssessmentCard({
             {duration}
           </p>
         )}
-        <a
-          href={redirect}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-14 items-center justify-center rounded-full bg-primary px-6 font-body text-base font-bold text-on-primary whitespace-nowrap transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
-        >
-          Start Assessment
-        </a>
+        <AssessmentModalButton redirect={redirect} name={name} />
       </div>
     </div>
   );
