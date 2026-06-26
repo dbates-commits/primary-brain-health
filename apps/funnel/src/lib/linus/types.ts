@@ -58,3 +58,12 @@ export interface Enrollment {
 }
 
 export type ReportType = "patient-report" | "provider-report";
+
+/** One item from `GET .../reports/{reportType}` (the response is an array). */
+export interface ReportItem {
+  enrollmentId: string;
+  participantId: string;
+  reportType: ReportType;
+  /** Base64-encoded PDF. */
+  reportData: string;
+}

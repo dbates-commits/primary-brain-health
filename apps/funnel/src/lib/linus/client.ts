@@ -161,8 +161,14 @@ export async function enrollSubject(
 
 /**
  * `GET /v1/participants/{id}/enrollments` — list a subject's active (not yet
- * completed) enrollments and their redirect links. Read-only; safe to call when
- * rendering a page.
+ * completed) enrollments. Read-only.
+ *
+ * IMPORTANT: despite what the Linus docs say, this endpoint does NOT currently
+ * return the `redirect` link — only the `POST .../enrollments` response does
+ * (confirmed by Linus; a GET fix is on their roadmap). So instead of calling
+ * this, we re-POST `enrollSubject` (idempotent — it returns the existing valid
+ * link or generates a new one) to get a fresh redirect on demand. This wrapper
+ * is unused today; switch back if/when GET returns `redirect`.
  */
 export async function listEnrollments(
   participantId: string,
@@ -191,4 +197,19 @@ export async function getReport(
     { method: "GET" },
     "get report",
   );
+}
+
+/**
+ * Pull the base64 PDF out of a report response (the API returns an array of
+ * report items). Returns `undefined` if the payload has no usable report data.
+ */
+export function extractReportData(report: unknown): string | undefined {
+  const item = Array.isArray(report) ? report[0] : report;
+  if (item && typeof item === "object" && "reportData" in item) {
+    const data = (item as { reportData?: unknown }).reportData;
+    if (typeof data === "string" && data.length > 0) {
+      return data;
+    }
+  }
+  return undefined;
 }

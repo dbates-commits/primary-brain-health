@@ -7,7 +7,7 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { linusEnrollments, users, type User } from "@/db/schema";
+import { users, type User } from "@/db/schema";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import {
   buildRegisterInput,
@@ -15,6 +15,8 @@ import {
 } from "@/lib/linus/build-register-input";
 import {
   enrollSubject,
+  extractReportData,
+  getReport,
   LinusApiError,
   registerSubject,
 } from "@/lib/linus/client";
@@ -27,11 +29,14 @@ export interface EnrollmentView {
   key: string;
   name: string;
   campaignId: string;
+  enrollmentId: string;
   redirect: string;
   /** Optional display fields, sourced from the campaign config. */
   description?: string;
   duration?: string;
   infoUrl?: string;
+  /** Per-enrollment report route URL when a report is ready; else undefined. */
+  reportUrl?: string;
 }
 
 export type LinusState =
@@ -44,6 +49,48 @@ export type LinusState =
       enrollments: EnrollmentView[];
     }
   | { status: "error"; email: string; message: string };
+
+/**
+ * Probe one enrollment's report. Returns a same-origin URL that streams the PDF
+ * (so the card's "View Report" button can open it in a new tab) when a report is
+ * ready, else undefined. Never throws — a missing report (404) or any error just
+ * means "not available yet".
+ */
+async function getReportUrl(
+  participantId: string,
+  enrollmentId: string,
+): Promise<string | undefined> {
+  try {
+    const report = await getReport(participantId, enrollmentId, "patient-report");
+    // TODO(linus-debug): remove temporary report logging
+    console.log(
+      `[linus] report for enrollment ${enrollmentId}:`,
+      JSON.stringify(report),
+    );
+    return extractReportData(report)
+      ? `/assessments/report/${encodeURIComponent(enrollmentId)}`
+      : undefined;
+  } catch (err) {
+    // TODO(linus-debug): remove temporary report logging
+    console.log(
+      `[linus] report for enrollment ${enrollmentId} unavailable:`,
+      err instanceof LinusApiError ? `${err.status} ${err.body}` : err,
+    );
+    return undefined;
+  }
+}
+
+/** Set `reportUrl` on each view in parallel from its enrollment's report. */
+async function attachReportUrls(
+  participantId: string,
+  views: EnrollmentView[],
+): Promise<void> {
+  await Promise.all(
+    views.map(async (view) => {
+      view.reportUrl = await getReportUrl(participantId, view.enrollmentId);
+    }),
+  );
+}
 
 /** Turn a Linus/config error into a user-facing message. */
 function describeError(err: unknown, action: string): string {
@@ -104,35 +151,23 @@ export async function registerAndEnrollUser(user: User): Promise<LinusState> {
     const campaigns = getCampaigns();
     const enrollments: EnrollmentView[] = [];
     for (const campaign of campaigns) {
-      // Idempotent: returns the existing active enrollment if there is one.
+      // Idempotent: re-POSTing returns the existing active enrollment's link if
+      // one is valid, or generates a fresh one — so we always get a usable
+      // redirect without persisting (and risking) a stale link. (Per Linus:
+      // GET .../enrollments does not return the redirect.)
       const enrollment = await enrollSubject(participantId, campaign.campaignId);
-      // Persist the redirect now: the post-payment page reads it from here
-      // rather than the list endpoint, which doesn't reliably return it.
-      await db
-        .insert(linusEnrollments)
-        .values({
-          userId: user.id,
-          campaignId: campaign.campaignId,
-          enrollmentId: enrollment.enrollmentId,
-          redirect: enrollment.redirect,
-        })
-        .onConflictDoUpdate({
-          target: [linusEnrollments.userId, linusEnrollments.campaignId],
-          set: {
-            enrollmentId: enrollment.enrollmentId,
-            redirect: enrollment.redirect,
-          },
-        });
       enrollments.push({
         key: campaign.key,
         name: campaign.name,
         campaignId: campaign.campaignId,
+        enrollmentId: enrollment.enrollmentId,
         redirect: enrollment.redirect,
         description: campaign.description,
         duration: campaign.duration,
         infoUrl: campaign.infoUrl,
       });
     }
+    await attachReportUrls(participantId, enrollments);
     return {
       status: "success",
       email,
@@ -194,72 +229,3 @@ export async function registerAndEnrollUserById(
   return registerAndEnrollUser(user);
 }
 
-/**
- * Read-only: list a user's stored assessment links for display. Reads the
- * redirects we persisted at enroll time (not the Linus list endpoint, which
- * doesn't reliably return them) — the `/assessments` page uses this after
- * payment has already done the enrollment.
- */
-export async function listAssessments(userId: string): Promise<LinusState> {
-  if (!userId) {
-    return {
-      status: "error",
-      email: "",
-      message: "We couldn't find your account.",
-    };
-  }
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-  if (!user) {
-    return {
-      status: "error",
-      email: "",
-      message: "We couldn't find your account.",
-    };
-  }
-  if (!user.linusParticipantId) {
-    return {
-      status: "error",
-      email: user.email,
-      message: "You're not registered for any assessments yet.",
-    };
-  }
-
-  try {
-    const byCampaignId = new Map(
-      getCampaigns().map((campaign) => [campaign.campaignId, campaign]),
-    );
-    const stored = await db
-      .select()
-      .from(linusEnrollments)
-      .where(eq(linusEnrollments.userId, user.id));
-    const views: EnrollmentView[] = stored.map((enrollment) => {
-      const campaign = byCampaignId.get(enrollment.campaignId);
-      return {
-        key: campaign?.key ?? enrollment.campaignId,
-        name: campaign?.name ?? "Assessment",
-        campaignId: enrollment.campaignId,
-        redirect: enrollment.redirect,
-        description: campaign?.description,
-        duration: campaign?.duration,
-        infoUrl: campaign?.infoUrl,
-      };
-    });
-    return {
-      status: "success",
-      email: user.email,
-      firstName: user.firstName,
-      participantId: user.linusParticipantId,
-      enrollments: views,
-    };
-  } catch (err) {
-    return {
-      status: "error",
-      email: user.email,
-      message: describeError(err, "load assessments"),
-    };
-  }
-}

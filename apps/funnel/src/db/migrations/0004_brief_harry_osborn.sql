@@ -1,0 +1,1 @@
+DROP TABLE "linus_enrollments" CASCADE;

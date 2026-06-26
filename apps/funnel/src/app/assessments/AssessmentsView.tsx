@@ -101,15 +101,6 @@ export function AssessmentsView({
             <p className="font-headline text-2xl font-thin text-on-surface sm:text-[2rem]">
               {completed} / {total} assessments complete
             </p>
-            {/* Enabled once all assessments are complete — not tracked yet. */}
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="inline-flex h-[51px] cursor-not-allowed items-center justify-center rounded-full bg-surface-container px-6 font-body text-base font-bold text-outline"
-            >
-              View My Report
-            </button>
           </footer>
         </>
       )}
