@@ -23,6 +23,7 @@ export function LinusEnrollForm() {
     return (
       <AssessmentsView
         firstName={state.firstName}
+        participantId={state.participantId}
         enrollments={state.enrollments}
       />
     );
