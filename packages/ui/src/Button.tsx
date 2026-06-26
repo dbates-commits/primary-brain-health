@@ -8,6 +8,7 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement | HTMLAncho
   color?: "primary" | "secondary" | "white" | "dark";
   size?: "sm" | "md" | "lg";
   className?: string;
+  disabled?: boolean;
   onClick?: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   type?: "button" | "submit";
   "data-tina-field"?: string;
@@ -20,6 +21,7 @@ export function Button({
   color = "primary",
   size = "md",
   className,
+  disabled = false,
   onClick,
   type = "button",
   "data-tina-field": tinaField,
@@ -27,6 +29,11 @@ export function Button({
 }: ButtonProps) {
   const baseStyles =
     "inline-flex items-center justify-center font-body font-semibold rounded-full transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
+
+  // No `pointer-events-none` here: it would suppress the `cursor-not-allowed`
+  // hover cursor. Clicks are already blocked by the native `disabled` attribute.
+  const disabledStyles =
+    "opacity-50 cursor-not-allowed active:scale-100 hover:brightness-100";
 
   const sizeStyles = {
     sm: "px-4 py-2 text-sm",
@@ -64,10 +71,13 @@ export function Button({
     baseStyles,
     sizeStyles[size],
     variantColorStyles[variant][color],
+    disabled && disabledStyles,
     className
   );
 
-  if (href) {
+  // A disabled link is meaningless, so render a real <button disabled> even
+  // when an href is supplied.
+  if (href && !disabled) {
     return (
       <Link
         href={href}
@@ -82,7 +92,15 @@ export function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={styles} data-tina-field={tinaField} {...rest}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      aria-disabled={disabled || undefined}
+      className={styles}
+      data-tina-field={tinaField}
+      {...rest}
+    >
       {children}
     </button>
   );

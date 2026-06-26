@@ -1,0 +1,237 @@
+{
+  "info": {
+    "name": "Linus Health Public API",
+    "description": "Linus Health Public API — create subjects, enroll them in campaigns, and retrieve reports.\n\nUsage:\n1. Select the \"Linus Health — Sandbox\" environment and fill in `clientId` / `clientSecret`.\n2. Run any request — a collection-level pre-request script fetches and caches a Bearer token automatically (or run \"OAuth Token\" explicitly).\n3. \"Register Subject\" saves `participantId`; \"Enroll Subject\" saves `enrollmentId` and logs the `redirect` link.\n\nDocs: docs/linus/Linus Health Public API.pdf",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh the Bearer token for every request except the token call itself.",
+          "if (pm.info.requestName === 'OAuth Token') { return; }",
+          "",
+          "const token = pm.collectionVariables.get('bearerToken');",
+          "const expiresAt = Number(pm.collectionVariables.get('tokenExpiresAt') || 0);",
+          "// Reuse a cached token until 60s before expiry.",
+          "if (token && Date.now() < expiresAt - 60000) { return; }",
+          "",
+          "pm.sendRequest({",
+          "  url: pm.environment.get('tokenUrl'),",
+          "  method: 'POST',",
+          "  header: { 'Content-Type': 'application/x-www-form-urlencoded' },",
+          "  body: {",
+          "    mode: 'urlencoded',",
+          "    urlencoded: [",
+          "      { key: 'grant_type', value: 'client_credentials' },",
+          "      { key: 'client_id', value: pm.environment.get('clientId') },",
+          "      { key: 'client_secret', value: pm.environment.get('clientSecret') },",
+          "      { key: 'audience', value: pm.environment.get('audience') }",
+          "    ]",
+          "  }",
+          "}, (err, res) => {",
+          "  if (err || res.code !== 200) { console.error('[linus] token error', err || res.text()); return; }",
+          "  const data = res.json();",
+          "  pm.collectionVariables.set('bearerToken', data.access_token);",
+          "  pm.collectionVariables.set('tokenExpiresAt', String(Date.now() + (data.expires_in || 0) * 1000));",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "bearerToken", "value": "" },
+    { "key": "tokenExpiresAt", "value": "0" }
+  ],
+  "item": [
+    {
+      "name": "OAuth Token",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "grant_type", "value": "client_credentials" },
+            { "key": "client_id", "value": "{{clientId}}" },
+            { "key": "client_secret", "value": "{{clientSecret}}" },
+            { "key": "audience", "value": "{{audience}}" }
+          ]
+        },
+        "url": { "raw": "{{tokenUrl}}", "host": ["{{tokenUrl}}"] },
+        "description": "OAuth2 client-credentials grant. Returns a short-lived Bearer token. The test script caches it for the other requests."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const data = pm.response.json();",
+              "  pm.collectionVariables.set('bearerToken', data.access_token);",
+              "  pm.collectionVariables.set('tokenExpiresAt', String(Date.now() + (data.expires_in || 0) * 1000));",
+              "  console.log('[linus] token acquired, expires_in =', data.expires_in);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Campaigns",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/campaigns",
+          "host": ["{{baseUrl}}"],
+          "path": ["campaigns"]
+        },
+        "description": "GET /v1/campaigns — returns all available campaigns ({ items: [{ campaignId, name }] })."
+      }
+    },
+    {
+      "name": "Get Campaign by ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["campaigns", "{{campaignId}}"]
+        },
+        "description": "GET /v1/campaigns/{campaignId} — returns a single campaign ({ campaignId, name })."
+      }
+    },
+    {
+      "name": "Register Subject",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"Subject\",\n  \"email\": \"test.subject@example.com\",\n  \"sexAssignedAtBirth\": \"FEMALE\",\n  \"races\": [\"WHITE\"],\n  \"ethnicity\": \"NOT_HISPANIC_OR_LATINO\",\n  \"education\": \"ED_YEARS_16\",\n  \"ageIndicator\": { \"birthDate\": \"1970-01-01\" },\n  \"consent\": true\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/participants",
+          "host": ["{{baseUrl}}"],
+          "path": ["participants"]
+        },
+        "description": "POST /v1/participants — register a subject. Saves the returned `participantId` for the requests below.\n\n`sexAssignedAtBirth` (required): MALE | FEMALE | INTERSEX | OTHER. `ageIndicator` (required): one of { birthDate: \"YYYY-MM-DD\" } | { birthYear } | { yearsOld } (birthDate required for healthcare use). `races`, `ethnicity`, `education` (ED_YEARS_*), `externalId` are optional."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code >= 200 && pm.response.code < 300) {",
+              "  const data = pm.response.json();",
+              "  if (data.participantId) {",
+              "    pm.environment.set('participantId', data.participantId);",
+              "    console.log('[linus] participantId =', data.participantId);",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Subject by ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/participants/{{participantId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["participants", "{{participantId}}"]
+        },
+        "description": "GET /v1/participants/{participantId} — returns the details of a subject."
+      }
+    },
+    {
+      "name": "Enroll Subject",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"participantId\": \"{{participantId}}\",\n  \"campaignId\": \"{{campaignId}}\",\n  \"consent\": true\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/participants/{{participantId}}/enrollments",
+          "host": ["{{baseUrl}}"],
+          "path": ["participants", "{{participantId}}", "enrollments"]
+        },
+        "description": "POST /v1/participants/{id}/enrollments — enroll the subject in a campaign. Idempotent: only one enrollment per campaign can be active at a time; if one already exists, that active enrollment is returned. Saves `enrollmentId` and logs the subject `redirect` link.\n\nSet `campaignId` from a sandbox campaign (campaignId_LHQ / campaignId_ePSOM / campaignId_DAC are in the environment)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code >= 200 && pm.response.code < 300) {",
+              "  const data = pm.response.json();",
+              "  if (data.enrollmentId) { pm.environment.set('enrollmentId', data.enrollmentId); }",
+              "  if (data.redirect) { console.log('[linus] redirect =', data.redirect); }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Enrollments",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/participants/{{participantId}}/enrollments",
+          "host": ["{{baseUrl}}"],
+          "path": ["participants", "{{participantId}}", "enrollments"]
+        },
+        "description": "GET /v1/participants/{id}/enrollments — list the subject's active (not-yet-completed) enrollments and their redirect links. Read-only."
+      }
+    },
+    {
+      "name": "Get Report",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/participants/{{participantId}}/enrollments/{{enrollmentId}}/reports/{{reportType}}",
+          "host": ["{{baseUrl}}"],
+          "path": [
+            "participants",
+            "{{participantId}}",
+            "enrollments",
+            "{{enrollmentId}}",
+            "reports",
+            "{{reportType}}"
+          ]
+        },
+        "description": "GET /v1/participants/{id}/enrollments/{enrollmentId}/reports/{reportType} — retrieve a results report (base64-encoded/serialized PDF). `reportType` is patient-report | provider-report. Reports only exist once the subject finishes the assessment, and not all campaigns support all report types."
+      }
+    }
+  ]
+}
