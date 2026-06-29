@@ -1,8 +1,7 @@
 # Linus Health API integration
 
 How the **funnel** app integrates the [Linus Health Public API](./Linus%20Health%20Public%20API.pdf):
-what we call, what we persist, and when. For the call order at a glance, see the
-sequence diagram in [`funnel-integration.md`](./funnel-integration.md).
+what we call, what we persist, and when.
 
 ## Overview
 
@@ -16,6 +15,70 @@ The integration lives in:
 - `apps/funnel/src/lib/linus/` — the API client, env/config, and the register payload builder.
 - `apps/funnel/src/app/assessments/` — the page, server actions, the register/enroll engine, and the report route.
 - `apps/funnel/src/db/schema/` — the `users` and `linus_enrollments` tables.
+
+## Request flow
+
+When each Linus call happens, and the DB writes around it.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor B as Browser
+  participant A as Funnel app
+  participant DB as Postgres
+  participant L as Linus API
+
+  Note over B,L: ① Payment step — completeAssessmentSetup
+  B->>A: Submit payment (userId)
+  A->>L: POST /oauth/token
+  L-->>A: access_token (cached in-module)
+  opt no stored participantId
+    A->>L: POST /participants (registerSubject)
+    L-->>A: participantId
+    A->>DB: users.linus_participant_id = participantId
+  end
+  loop each campaign without a stored enrollment
+    A->>L: POST /participants/{id}/enrollments (enrollSubject)
+    L-->>A: enrollmentId + redirect
+    A->>DB: upsert linus_enrollments (enrollment_id, redirect)
+  end
+  A-->>B: Set pbh_assessment_uid cookie, redirect → /assessments
+
+  Note over B,L: ② Page load — resolveEnrollments, per campaign
+  B->>A: GET /assessments (cookie)
+  A->>DB: load linus_enrollments rows
+  alt has_report already set
+    Note right of A: report_ready — no Linus calls
+  else campaign produces a report
+    A->>L: GET .../enrollments/{enrollmentId}/reports/patient-report
+    alt report ready
+      L-->>A: report (PDF)
+      A->>DB: set has_report = true
+      Note right of A: report_ready
+    else not ready (400/404)
+      L-->>A: error
+      A->>L: GET /participants/{id}/enrollments (listEnrollments)
+      L-->>A: active enrollmentIds
+      Note right of A: active → available (serve stored link, no re-POST)<br/>finished → report_pending
+    end
+  else campaign produces no report
+    A->>L: GET /participants/{id}/enrollments (listEnrollments)
+    L-->>A: active enrollmentIds
+    Note right of A: active → available<br/>finished → completed
+  end
+  A-->>B: render cards
+
+  Note over B,L: ③ View Report — report route
+  B->>A: GET /assessments/report/{enrollmentId} (cookie)
+  A->>L: GET .../enrollments/{enrollmentId}/reports/patient-report
+  L-->>A: report (base64 PDF)
+  A-->>B: stream PDF inline
+```
+
+A note on ②: a fresh `enrollSubject` POST happens only the first time a campaign is
+seen (no stored row); on later loads we never re-POST an existing enrollment, and
+`listEnrollments` is fetched lazily (at most once per request) only when a stored
+enrollment still has no report. See [Per-card status resolution](#per-card-status-resolution).
 
 ## Configuration
 
