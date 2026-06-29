@@ -1,53 +1,76 @@
 /**
- * The configured assessment campaigns.
+ * The configured assessment campaigns — the single source of truth.
  *
- * This replaces the old `LINUS_CAMPAIGNS` env var so campaigns are edited in code
- * (typed and reviewable) instead of a JSON blob. Add or remove an assessment by
- * editing the lists below — no env change needed.
+ * Everything env-independent (display copy, ordering, whether a report is
+ * produced) lives once in `CAMPAIGNS`, keyed by `key`. The only thing that
+ * differs between the Linus sandbox and production is the `campaignId`, so those
+ * are kept in per-environment maps and joined on read by `getCampaigns()`, which
+ * selects by `VERCEL_ENV` (Production → prod IDs; Preview and local dev →
+ * sandbox). Add or edit an assessment here — no env var, no second file.
  *
- * Campaign IDs differ between the Linus sandbox and production, so we keep one
- * list per environment and select by `VERCEL_ENV` — mirroring how the Linus
- * credentials/URLs are already split per Vercel environment (Preview and local
- * dev → sandbox; Production → prod).
- *
- * Display copy (label / description / duration / order) lives in
- * `app/assessments/assessment-content.ts`, keyed by `key`; the `name` here is a
- * fallback only. `producesReport` defaults to `false` — set `true` for campaigns
- * Linus generates a patient report for (today only LHQ does); the rest settle
- * into "Completed" once finished instead of spinning on the report.
+ * Copy is verbatim from the Figma "Welcome Back" design (node 472-1102). `order`
+ * sorts the cards (lowest first; the first renders under "Start Here").
+ * `producesReport` defaults to `false` — set `true` only for campaigns Linus
+ * generates a patient report for (today: LHQ); the rest settle into "Completed"
+ * once finished instead of spinning on the report.
  */
 
 import type { LinusCampaign } from "./types";
 
-/** Linus sandbox (staging) — used by local dev and Vercel Preview. */
-const SANDBOX_CAMPAIGNS: LinusCampaign[] = [
-  {
+/** A campaign's env-independent attributes (everything but the campaignId). */
+type CampaignDef = Omit<LinusCampaign, "campaignId">;
+
+const CAMPAIGNS: Record<string, CampaignDef> = {
+  DAC: {
+    key: "DAC",
+    name: "DAC / Digital Assessment of Cognition",
+    description:
+      "This is the description of the text that is simple and easy to understand.",
+    duration: "less than 10 min",
+    order: 0,
+  },
+  LHQ: {
     key: "LHQ",
-    name: "LHQ",
-    campaignId: "9d4d1962-9913-4efd-8020-38b00db9d96b",
+    name: "LHQ / Lifestyle Health Questionnaire",
+    description:
+      "This is the description of the text that is simple and easy to understand.",
+    duration: "less than 2 min",
+    order: 1,
     producesReport: true,
   },
-  {
+  ePSOM: {
     key: "ePSOM",
-    name: "ePSOM",
-    campaignId: "f427c353-f1f0-48e8-bff2-24abbe50b63b",
+    name: "Personal Priorities Assessment",
+    description:
+      "Describe, in your own words, the aspects of your brain health that matter most to you—then see how they change over time.",
+    duration: "less than 2 min",
+    order: 2,
   },
-  {
-    key: "DAC",
-    name: "DAC",
-    campaignId: "b47446fa-594e-4df5-97e1-fbf39d830474",
-  },
-];
+};
+
+/** Linus sandbox (staging) campaign IDs, keyed by campaign `key`. */
+const SANDBOX_IDS: Record<string, string> = {
+  LHQ: "9d4d1962-9913-4efd-8020-38b00db9d96b",
+  ePSOM: "f427c353-f1f0-48e8-bff2-24abbe50b63b",
+  DAC: "b47446fa-594e-4df5-97e1-fbf39d830474",
+};
 
 /**
- * Linus production. TODO: fill in once the production campaign IDs are confirmed
- * (see PR #9). Until then a Production deploy renders the empty state.
+ * Linus production campaign IDs. TODO: fill in once confirmed (see PR #9). Until
+ * then a Production deploy has no campaigns and renders the empty state.
  */
-const PRODUCTION_CAMPAIGNS: LinusCampaign[] = [];
+const PRODUCTION_IDS: Record<string, string> = {};
 
-/** The campaigns for the current environment (prod on Production, else sandbox). */
+/**
+ * The campaigns for the current environment, sorted by `order`. A campaign with
+ * no id for the active environment is omitted (so Production stays empty until
+ * its IDs are added).
+ */
 export function getCampaigns(): LinusCampaign[] {
-  return process.env.VERCEL_ENV === "production"
-    ? PRODUCTION_CAMPAIGNS
-    : SANDBOX_CAMPAIGNS;
+  const ids =
+    process.env.VERCEL_ENV === "production" ? PRODUCTION_IDS : SANDBOX_IDS;
+  return Object.values(CAMPAIGNS)
+    .filter((c) => ids[c.key])
+    .sort((a, b) => a.order - b.order)
+    .map((c) => ({ ...c, campaignId: ids[c.key] }));
 }

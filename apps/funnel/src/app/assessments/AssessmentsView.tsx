@@ -1,16 +1,13 @@
 import { Card, Heading } from "@pbh/ui";
 import { AssessmentCard } from "./AssessmentCard";
-import {
-  ASSESSMENT_CONTENT,
-  ASSESSMENT_ORDER_FALLBACK,
-} from "./assessment-content";
 import type { EnrollmentView } from "./register-and-enroll";
 
 /**
  * The post-payment "Welcome Back" view from Figma: a welcome header, the first
  * assessment under "Start Here", any others under "Additional Assessments", and
  * a completion footer. Presentational — no hooks — so it renders from both the
- * server page and the client lookup form.
+ * server page and the client lookup form. Enrollments arrive already ordered and
+ * carry their display copy (from `lib/linus/campaigns.ts`).
  */
 export function AssessmentsView({
   firstName,
@@ -19,27 +16,8 @@ export function AssessmentsView({
   firstName?: string;
   enrollments: EnrollmentView[];
 }) {
-  // Apply the Figma copy by campaign key and sort into the design's order
-  // (DAC first → "Start Here"). Falls back to the env-configured fields for
-  // any campaign without a constants entry.
-  const ordered = enrollments
-    .map((enrollment) => {
-      const content = ASSESSMENT_CONTENT[enrollment.key];
-      return {
-        enrollment: {
-          ...enrollment,
-          name: content?.label ?? enrollment.name,
-          description: content?.description ?? enrollment.description,
-          duration: content?.duration ?? enrollment.duration,
-        },
-        order: content?.order ?? ASSESSMENT_ORDER_FALLBACK,
-      };
-    })
-    .sort((a, b) => a.order - b.order)
-    .map((item) => item.enrollment);
-
-  const [first, ...rest] = ordered;
-  const total = ordered.length;
+  const [first, ...rest] = enrollments;
+  const total = enrollments.length;
 
   return (
     <div className="mx-auto flex w-full max-w-[840px] flex-col gap-10 px-4 sm:px-6">

@@ -30,28 +30,29 @@ throws a single aggregated error listing any that are missing:
 | `LINUS_TOKEN_URL` | OAuth token endpoint (separate from the base URL) |
 | `LINUS_AUDIENCE` | OAuth audience |
 
-Campaigns live in **code**, in `lib/linus/campaigns.ts` (typed and reviewable —
-they used to be a `LINUS_CAMPAIGNS` JSON env var). Because **sandbox and production
-campaign IDs differ**, the file keeps one list per environment and `getCampaigns()`
-selects by `VERCEL_ENV` (`production` → prod list; Preview and local dev → sandbox
-list). Add or remove an assessment by editing the relevant list. Each entry is a
-`LinusCampaign`:
+Campaigns live in **code**, in `lib/linus/campaigns.ts` — the single source of
+truth (they used to be a `LINUS_CAMPAIGNS` JSON env var). Everything
+env-independent (display copy, ordering, `producesReport`) lives once in the
+`CAMPAIGNS` map, keyed by `key`. The only thing that differs between the Linus
+sandbox and production is the `campaignId`, kept in per-environment maps and
+joined on read by `getCampaigns()`, which selects by `VERCEL_ENV` (`production` →
+prod IDs; Preview and local dev → sandbox). Add or edit an assessment in one
+place. A `CAMPAIGNS` entry:
 
 ```ts
-{
-  key: "LHQ",                 // required: short internal label
-  name: "LHQ",                // required: display name (fallback; see below)
-  campaignId: "…uuid…",       // required: Linus campaign id (sandbox ≠ prod)
-  description: "…",           // optional
-  duration: "less than 10 min", // optional
-  infoUrl: "https://…",       // optional
+DAC: {
+  key: "DAC",                 // required: internal key (matches the id maps)
+  name: "DAC / Digital …",     // required: card title
+  description: "…",           // shown under the title
+  duration: "less than 10 min", // shown by the CTA
+  order: 0,                   // sort order; lowest first (first = "Start Here")
+  infoUrl: "https://…",       // optional "Assessment Information" link
   producesReport: true,       // optional, defaults false; true only for campaigns
 }                             //   Linus generates a patient report for (today: LHQ)
 ```
 
-Display copy (`label` / `description` / `duration` / `order`) is keyed by `key` in
-`app/assessments/assessment-content.ts` and takes precedence over `name`/etc. here.
-An empty list for the active environment → the page shows an empty state.
+A campaign with no id for the active environment is omitted; an empty set → the
+page shows an empty state.
 
 ## Endpoints we call
 

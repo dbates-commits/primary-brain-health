@@ -6,18 +6,20 @@
 
 /** One configured assessment battery, from `lib/linus/campaigns.ts`. */
 export interface LinusCampaign {
-  /** Short label we use internally (e.g. "LHQ", "ePSOM", "DAC"). */
+  /** Short key we use internally (e.g. "LHQ", "ePSOM", "DAC"). */
   key: string;
-  /** Display name shown on the page. */
+  /** Display title shown on the card (e.g. "DAC / Digital Assessment of Cognition"). */
   name: string;
   /** Linus campaign UUID — differs between sandbox and production. */
   campaignId: string;
-  /** Optional one-line description shown under the title on the card. */
+  /** One-line description shown under the title on the card. */
   description?: string;
-  /** Optional duration label, e.g. "less than 10 min". */
+  /** Duration label, e.g. "less than 10 min". */
   duration?: string;
   /** Optional link target for the "Assessment Information" card link. */
   infoUrl?: string;
+  /** Sort order; lowest first. The first card renders under "Start Here". */
+  order: number;
   /**
    * Whether this campaign generates a retrievable patient report. Defaults to
    * `false` (today only LHQ does). Set `true` for campaigns Linus produces a
