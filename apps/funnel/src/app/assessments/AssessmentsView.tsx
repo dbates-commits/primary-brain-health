@@ -40,10 +40,6 @@ export function AssessmentsView({
 
   const [first, ...rest] = ordered;
   const total = ordered.length;
-  // Completed = the assessment has been finished (report ready or generating).
-  const completed = ordered.filter(
-    (e) => e.status === "report_ready" || e.status === "report_pending",
-  ).length;
 
   return (
     <div className="mx-auto flex w-full max-w-[840px] flex-col gap-10 px-4 sm:px-6">
@@ -89,12 +85,6 @@ export function AssessmentsView({
               </div>
             </section>
           )}
-
-          <footer className="flex flex-col items-center justify-between gap-4 px-2 sm:flex-row sm:px-6">
-            <p className="font-headline text-2xl font-thin text-on-surface sm:text-[2rem]">
-              {completed} / {total} assessments complete
-            </p>
-          </footer>
         </>
       )}
     </div>
