@@ -14,11 +14,9 @@ import type { EnrollmentView } from "./register-and-enroll";
  */
 export function AssessmentsView({
   firstName,
-  participantId,
   enrollments,
 }: {
   firstName?: string;
-  participantId?: string;
   enrollments: EnrollmentView[];
 }) {
   // Apply the Figma copy by campaign key and sort into the design's order
@@ -56,12 +54,6 @@ export function AssessmentsView({
         <p className="text-xl font-normal text-on-surface-variant">
           Complete your preferred assessments and then view your report
         </p>
-        {participantId && (
-          <p className="text-xs text-on-surface-variant">
-            Participant ID:{" "}
-            <span className="font-mono break-all">{participantId}</span>
-          </p>
-        )}
       </header>
 
       {total === 0 ? (

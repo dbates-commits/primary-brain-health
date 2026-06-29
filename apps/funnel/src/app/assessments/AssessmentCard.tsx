@@ -17,16 +17,8 @@ export function AssessmentCard({
   enrollment: EnrollmentView;
   highlighted?: boolean;
 }) {
-  const {
-    name,
-    description,
-    duration,
-    infoUrl,
-    redirect,
-    campaignId,
-    reportUrl,
-    status,
-  } = enrollment;
+  const { name, description, duration, infoUrl, redirect, reportUrl, status } =
+    enrollment;
 
   return (
     <div
@@ -42,9 +34,6 @@ export function AssessmentCard({
           <h3 className="font-headline text-2xl font-thin text-on-surface sm:text-[2rem] sm:leading-tight">
             {name}
           </h3>
-          <p className="font-mono text-xs break-all text-on-surface-variant">
-            {campaignId}
-          </p>
           {description && (
             <p className="font-body text-lg font-light text-on-surface-variant">
               {description}

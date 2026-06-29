@@ -31,7 +31,6 @@ export default async function AssessmentsPage() {
         <Section className="py-16 sm:py-24">
           <AssessmentsView
             firstName={result.firstName}
-            participantId={result.participantId}
             enrollments={result.enrollments}
           />
         </Section>
