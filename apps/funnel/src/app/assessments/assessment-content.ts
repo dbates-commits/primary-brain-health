@@ -1,9 +1,9 @@
 /**
  * Display copy + ordering for each assessment, taken verbatim from the Figma
- * "Welcome Back" design (node 472-1102). Keyed by the `LINUS_CAMPAIGNS` key so
- * the page shows the Figma label/description/duration regardless of the name
- * configured in the env, and renders the cards in a fixed order (DAC first,
- * shown under "Start Here").
+ * "Welcome Back" design (node 472-1102). Keyed by the campaign `key` (from
+ * `lib/linus/campaigns.ts`) so the page shows the Figma label/description/
+ * duration regardless of the configured name, and renders the cards in a fixed
+ * order (DAC first, shown under "Start Here").
  */
 
 export interface AssessmentContent {
@@ -17,7 +17,7 @@ export interface AssessmentContent {
   order: number;
 }
 
-/** Keyed by the campaign `key` from `LINUS_CAMPAIGNS`. */
+/** Keyed by the campaign `key` from `lib/linus/campaigns.ts`. */
 export const ASSESSMENT_CONTENT: Record<string, AssessmentContent> = {
   DAC: {
     label: "DAC / Digital Assessment of Cognition",

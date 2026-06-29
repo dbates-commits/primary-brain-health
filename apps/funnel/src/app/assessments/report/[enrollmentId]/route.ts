@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { db } from "@/db/client";
 import { linusEnrollments, users } from "@/db/schema";
 import { extractReportData, getReport } from "@/lib/linus/client";
-import { getCampaigns } from "@/lib/linus/env";
+import { getCampaigns } from "@/lib/linus/campaigns";
 import { ASSESSMENT_UID_COOKIE } from "@/app/assessments/register-and-enroll";
 
 /** ASCII-safe, hyphenated slug for a Content-Disposition filename. */

@@ -21,7 +21,7 @@ import {
   listEnrollments,
   registerSubject,
 } from "@/lib/linus/client";
-import { getCampaigns } from "@/lib/linus/env";
+import { getCampaigns } from "@/lib/linus/campaigns";
 
 /** Cookie set on successful payment so `/assessments` knows whose links to show. */
 export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
@@ -31,8 +31,13 @@ export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
  * - `available`     — not started / in progress; show "Start Assessment" (`redirect`).
  * - `report_pending`— completed, but the report hasn't been generated yet.
  * - `report_ready`  — completed and the report is available (`reportUrl`).
+ * - `completed`     — finished, with no report expected (campaign `producesReport: false`).
  */
-export type EnrollmentStatus = "available" | "report_pending" | "report_ready";
+export type EnrollmentStatus =
+  | "available"
+  | "report_pending"
+  | "report_ready"
+  | "completed";
 
 export interface EnrollmentView {
   key: string;
@@ -218,8 +223,13 @@ export async function registerAndEnrollUser(
  *  2. else probe the stored enrollment's report → if ready, flag + show report.
  *  3. else, if the stored enrollment is still active → serve the stored link
  *     (no re-POST: it would mint a new enrollment for a *started* assessment).
- *     If it's no longer active (completed, report still generating) → don't POST.
+ *     If it's no longer active → "report_pending" (report still generating) or,
+ *     for a campaign that produces no report, "completed". Either way, don't POST.
  *  4. no stored row → POST and insert.
+ *
+ * Campaigns with `producesReport: false` skip the report steps (1, 2) entirely —
+ * their report endpoint 404s forever, so a completed enrollment settles into
+ * "completed" rather than spinning on "report_pending".
  */
 async function resolveEnrollments(
   userId: string,
@@ -250,9 +260,11 @@ async function resolveEnrollments(
       infoUrl: campaign.infoUrl,
     };
     const row = rows.get(campaign.campaignId);
+    // Defaults to false — only campaigns explicitly flagged `true` get a report.
+    const producesReport = campaign.producesReport ?? false;
 
     // (1) Already known complete with a report — never POST again.
-    if (row?.hasReport) {
+    if (producesReport && row?.hasReport) {
       enrollments.push({
         ...base,
         enrollmentId: row.enrollmentId,
@@ -264,30 +276,34 @@ async function resolveEnrollments(
     }
 
     if (row) {
-      // (2) Probe the stored (possibly just-completed) enrollment for a report.
-      const reportUrl = await getReportUrl(participantId, row.enrollmentId);
-      if (reportUrl) {
-        await markReportReady(userId, campaign.campaignId);
-        enrollments.push({
-          ...base,
-          enrollmentId: row.enrollmentId,
-          redirect: row.redirect,
-          status: "report_ready",
-          reportUrl,
-        });
-        continue;
+      // (2) Probe the stored (possibly just-completed) enrollment for a report —
+      // only for campaigns that actually produce one (others 404 forever).
+      if (producesReport) {
+        const reportUrl = await getReportUrl(participantId, row.enrollmentId);
+        if (reportUrl) {
+          await markReportReady(userId, campaign.campaignId);
+          enrollments.push({
+            ...base,
+            enrollmentId: row.enrollmentId,
+            redirect: row.redirect,
+            status: "report_ready",
+            reportUrl,
+          });
+          continue;
+        }
       }
 
-      // (3) No report yet. Is the stored enrollment still active?
+      // (3) No report (or none expected). Is the stored enrollment still active?
       const active = await getActiveIds();
       if (!active.has(row.enrollmentId)) {
-        // Completed, but the report hasn't generated yet. Do NOT re-POST — that
-        // would create a new active enrollment and orphan the pending report.
+        // Finished. Do NOT re-POST — that would create a new active enrollment
+        // and orphan the pending report. If the campaign produces a report it's
+        // still generating; otherwise the assessment is simply complete.
         enrollments.push({
           ...base,
           enrollmentId: row.enrollmentId,
           redirect: row.redirect,
-          status: "report_pending",
+          status: producesReport ? "report_pending" : "completed",
         });
         continue;
       }

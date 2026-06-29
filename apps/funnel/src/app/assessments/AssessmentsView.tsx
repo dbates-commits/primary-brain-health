@@ -55,8 +55,8 @@ export function AssessmentsView({
       {total === 0 ? (
         <Card variant="bordered">
           <p className="text-on-surface">
-            You&rsquo;re registered, but no assessments are configured yet. Set
-            the <code>LINUS_CAMPAIGNS</code> environment variable to add them.
+            You&rsquo;re registered, but no assessments are configured yet. Add
+            them in <code>lib/linus/campaigns.ts</code>.
           </p>
         </Card>
       ) : (

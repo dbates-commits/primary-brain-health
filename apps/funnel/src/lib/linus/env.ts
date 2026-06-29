@@ -7,8 +7,6 @@
  * `.env.local`.
  */
 
-import type { LinusCampaign } from "./types";
-
 export interface LinusConfig {
   clientId: string;
   clientSecret: string;
@@ -45,69 +43,4 @@ export function getLinusConfig(): LinusConfig {
   }
 
   return { clientId, clientSecret, baseUrl, tokenUrl, audience };
-}
-
-/**
- * The configured campaigns, parsed from `LINUS_CAMPAIGNS` (a JSON array of
- * `{ key, name, campaignId }`). This is the single place a campaign is wired
- * up — add or remove one by editing that env var, no code change. Returns an
- * empty list when unset (the page renders an empty state); throws if the value
- * is present but malformed, so a typo fails loudly rather than silently.
- */
-export function getCampaigns(): LinusCampaign[] {
-  const raw = process.env.LINUS_CAMPAIGNS;
-  if (!raw) {
-    return [];
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new Error(
-      "LINUS_CAMPAIGNS is not valid JSON. Expected an array of " +
-        '{ "key", "name", "campaignId" }.',
-    );
-  }
-  if (!Array.isArray(parsed)) {
-    throw new Error(
-      'LINUS_CAMPAIGNS must be a JSON array of { "key", "name", "campaignId" }.',
-    );
-  }
-
-  return parsed.map((entry, index) => {
-    const e = entry as Record<string, unknown>;
-    if (
-      typeof entry !== "object" ||
-      entry === null ||
-      typeof e.key !== "string" ||
-      typeof e.name !== "string" ||
-      typeof e.campaignId !== "string"
-    ) {
-      throw new Error(
-        `LINUS_CAMPAIGNS[${index}] must have string "key", "name", and "campaignId".`,
-      );
-    }
-    // Optional display fields — accept a string or treat as absent, but fail
-    // loudly on a wrong type so a typo doesn't silently disappear.
-    const optionalString = (field: string, value: unknown): string | undefined => {
-      if (value === undefined) {
-        return undefined;
-      }
-      if (typeof value !== "string") {
-        throw new Error(
-          `LINUS_CAMPAIGNS[${index}].${field} must be a string if present.`,
-        );
-      }
-      return value;
-    };
-    return {
-      key: e.key,
-      name: e.name,
-      campaignId: e.campaignId,
-      description: optionalString("description", e.description),
-      duration: optionalString("duration", e.duration),
-      infoUrl: optionalString("infoUrl", e.infoUrl),
-    };
-  });
 }

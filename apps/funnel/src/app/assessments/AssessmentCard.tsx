@@ -89,6 +89,12 @@ export function AssessmentCard({
             Report generating…
           </button>
         )}
+
+        {status === "completed" && (
+          <span className="inline-flex h-14 items-center justify-center rounded-full bg-secondary/10 px-6 font-body text-base font-bold text-secondary whitespace-nowrap">
+            Completed
+          </span>
+        )}
       </div>
     </div>
   );

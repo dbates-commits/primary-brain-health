@@ -4,7 +4,7 @@
  * subject/enrollment records than is typed here.
  */
 
-/** One configured assessment battery, from the `LINUS_CAMPAIGNS` env list. */
+/** One configured assessment battery, from `lib/linus/campaigns.ts`. */
 export interface LinusCampaign {
   /** Short label we use internally (e.g. "LHQ", "ePSOM", "DAC"). */
   key: string;
@@ -18,6 +18,13 @@ export interface LinusCampaign {
   duration?: string;
   /** Optional link target for the "Assessment Information" card link. */
   infoUrl?: string;
+  /**
+   * Whether this campaign generates a retrievable patient report. Defaults to
+   * `false` (today only LHQ does). Set `true` for campaigns Linus produces a
+   * report for; otherwise a completed card settles into "Completed" instead of
+   * spinning on "Report generating…" forever (the report probe would 404).
+   */
+  producesReport?: boolean;
 }
 
 /** Linus `sexAssignedAtBirth` enum (also the canonical `users.gender` values). */
