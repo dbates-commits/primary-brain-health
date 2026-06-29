@@ -42,9 +42,10 @@ export function AssessmentsView({
 
   const [first, ...rest] = ordered;
   const total = ordered.length;
-  // We don't track assessment completion yet, so this is always 0 for now.
-  // TODO(linus): derive from real completion status once we have it.
-  const completed = 0;
+  // Completed = the assessment has been finished (report ready or generating).
+  const completed = ordered.filter(
+    (e) => e.status === "report_ready" || e.status === "report_pending",
+  ).length;
 
   return (
     <div className="mx-auto flex w-full max-w-[840px] flex-col gap-10 px-4 sm:px-6">

@@ -25,6 +25,7 @@ export function AssessmentCard({
     redirect,
     campaignId,
     reportUrl,
+    status,
   } = enrollment;
 
   return (
@@ -63,36 +64,40 @@ export function AssessmentCard({
       </div>
 
       <div className="flex flex-col items-stretch justify-center gap-2.5 sm:shrink-0 sm:items-center">
-        {duration && (
+        {duration && status === "available" && (
           <p className="text-center text-sm font-light text-on-surface-variant whitespace-nowrap">
             {duration}
           </p>
         )}
-        <IframeModalButton
-          url={redirect}
-          label="Start Assessment"
-          title={name}
-          className={PRIMARY_MODAL_BUTTON_CLASS}
-        />
 
-        {reportUrl ? (
+        {status === "available" && (
+          <IframeModalButton
+            url={redirect}
+            label="Start Assessment"
+            title={name}
+            className={PRIMARY_MODAL_BUTTON_CLASS}
+          />
+        )}
+
+        {status === "report_ready" && reportUrl && (
           <a
             href={reportUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-primary px-6 font-body text-sm font-bold text-primary whitespace-nowrap transition-all duration-200 hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
+            className="inline-flex h-14 cursor-pointer items-center justify-center rounded-full bg-primary px-6 font-body text-base font-bold text-on-primary whitespace-nowrap transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
           >
             View Report
           </a>
-        ) : (
-          // Disabled until this assessment's report is ready.
+        )}
+
+        {status === "report_pending" && (
           <button
             type="button"
             disabled
             aria-disabled="true"
-            className="inline-flex h-11 cursor-not-allowed items-center justify-center rounded-full border border-outline-variant px-6 font-body text-sm font-bold text-outline whitespace-nowrap"
+            className="inline-flex h-14 cursor-not-allowed items-center justify-center rounded-full bg-surface-container px-6 font-body text-base font-bold text-outline whitespace-nowrap"
           >
-            View Report
+            Report generating…
           </button>
         )}
       </div>

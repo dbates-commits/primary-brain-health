@@ -1,7 +1,10 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { db } from "@/db/client";
+import { users } from "@/db/schema";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
@@ -9,12 +12,37 @@ import {
   type LinusState,
 } from "./register-and-enroll";
 
-/** Form action for the manual `/assessments` email form. */
+/** Short-lived cookie identifying whose assessments/reports to serve. */
+const ASSESSMENT_COOKIE_OPTS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 60 * 60,
+};
+
+/**
+ * Form action for the manual `/assessments` email form. On success we also drop
+ * the assessment cookie for that user so the report route (which auths via the
+ * cookie) works from this path too — not just after payment.
+ */
 export async function registerAndEnroll(
   _prev: LinusState,
   formData: FormData,
 ): Promise<LinusState> {
-  return runRegisterAndEnroll(String(formData.get("email") ?? ""));
+  const email = String(formData.get("email") ?? "");
+  const state = await runRegisterAndEnroll(email);
+  if (state.status === "success") {
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email.trim()))
+      .limit(1);
+    if (user) {
+      (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
+    }
+  }
+  return state;
 }
 
 /**
@@ -37,12 +65,6 @@ export async function completeAssessmentSetup(
     return state;
   }
 
-  (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60,
-  });
+  (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, ASSESSMENT_COOKIE_OPTS);
   redirect("/assessments");
 }

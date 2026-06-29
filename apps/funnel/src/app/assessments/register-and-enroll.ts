@@ -5,9 +5,9 @@
  * await it directly. Server-only (touches the DB and the Linus client).
  */
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { users, type User } from "@/db/schema";
+import { linusEnrollments, users, type User } from "@/db/schema";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import {
   buildRegisterInput,
@@ -18,6 +18,7 @@ import {
   extractReportData,
   getReport,
   LinusApiError,
+  listEnrollments,
   registerSubject,
 } from "@/lib/linus/client";
 import { getCampaigns } from "@/lib/linus/env";
@@ -25,17 +26,27 @@ import { getCampaigns } from "@/lib/linus/env";
 /** Cookie set on successful payment so `/assessments` knows whose links to show. */
 export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
 
+/**
+ * Per-card state:
+ * - `available`     — not started / in progress; show "Start Assessment" (`redirect`).
+ * - `report_pending`— completed, but the report hasn't been generated yet.
+ * - `report_ready`  — completed and the report is available (`reportUrl`).
+ */
+export type EnrollmentStatus = "available" | "report_pending" | "report_ready";
+
 export interface EnrollmentView {
   key: string;
   name: string;
   campaignId: string;
   enrollmentId: string;
+  /** Latest assessment link; only meaningful when `status === "available"`. */
   redirect: string;
+  status: EnrollmentStatus;
   /** Optional display fields, sourced from the campaign config. */
   description?: string;
   duration?: string;
   infoUrl?: string;
-  /** Per-enrollment report route URL when a report is ready; else undefined. */
+  /** Report route URL; set only when `status === "report_ready"`. */
   reportUrl?: string;
 }
 
@@ -80,16 +91,47 @@ async function getReportUrl(
   }
 }
 
-/** Set `reportUrl` on each view in parallel from its enrollment's report. */
-async function attachReportUrls(
-  participantId: string,
-  views: EnrollmentView[],
+/** Load the stored enrollment rows for a user, keyed by campaignId. */
+async function loadEnrollmentRows(
+  userId: string,
+): Promise<Map<string, typeof linusEnrollments.$inferSelect>> {
+  const rows = await db
+    .select()
+    .from(linusEnrollments)
+    .where(eq(linusEnrollments.userId, userId));
+  return new Map(rows.map((row) => [row.campaignId, row]));
+}
+
+/** Upsert the latest enrollmentId + redirect for a (user, campaign). */
+async function upsertEnrollmentRow(
+  userId: string,
+  campaignId: string,
+  enrollmentId: string,
+  redirect: string,
 ): Promise<void> {
-  await Promise.all(
-    views.map(async (view) => {
-      view.reportUrl = await getReportUrl(participantId, view.enrollmentId);
-    }),
-  );
+  await db
+    .insert(linusEnrollments)
+    .values({ userId, campaignId, enrollmentId, redirect })
+    .onConflictDoUpdate({
+      target: [linusEnrollments.userId, linusEnrollments.campaignId],
+      set: { enrollmentId, redirect },
+    });
+}
+
+/** Flag a (user, campaign) enrollment as having a report — we stop POSTing then. */
+async function markReportReady(
+  userId: string,
+  campaignId: string,
+): Promise<void> {
+  await db
+    .update(linusEnrollments)
+    .set({ hasReport: true })
+    .where(
+      and(
+        eq(linusEnrollments.userId, userId),
+        eq(linusEnrollments.campaignId, campaignId),
+      ),
+    );
 }
 
 /** Turn a Linus/config error into a user-facing message. */
@@ -163,26 +205,7 @@ export async function registerAndEnrollUser(
   }
 
   try {
-    const campaigns = getCampaigns();
-    const enrollments: EnrollmentView[] = [];
-    for (const campaign of campaigns) {
-      // Idempotent: re-POSTing returns the existing active enrollment's link if
-      // one is valid, or generates a fresh one — so we always get a usable
-      // redirect without persisting (and risking) a stale link. (Per Linus:
-      // GET .../enrollments does not return the redirect.)
-      const enrollment = await enrollSubject(participantId, campaign.campaignId);
-      enrollments.push({
-        key: campaign.key,
-        name: campaign.name,
-        campaignId: campaign.campaignId,
-        enrollmentId: enrollment.enrollmentId,
-        redirect: enrollment.redirect,
-        description: campaign.description,
-        duration: campaign.duration,
-        infoUrl: campaign.infoUrl,
-      });
-    }
-    await attachReportUrls(participantId, enrollments);
+    const enrollments = await resolveEnrollments(user.id, participantId);
     return {
       status: "success",
       email,
@@ -193,6 +216,123 @@ export async function registerAndEnrollUser(
   } catch (err) {
     return { status: "error", email, message: describeError(err, "enroll") };
   }
+}
+
+/**
+ * Resolve every configured campaign into an EnrollmentView, persisting state so
+ * we never re-POST a completed enrollment (which would mint a new one and orphan
+ * its report). Per campaign:
+ *  1. stored hasReport → show report, no POST / no GET list.
+ *  2. else probe the stored enrollment's report → if ready, flag + show report.
+ *  3. else, if the stored enrollment is still active → POST to refresh the link.
+ *     If it's no longer active (completed, report still generating) → don't POST.
+ *  4. no stored row → POST and insert.
+ */
+async function resolveEnrollments(
+  userId: string,
+  participantId: string,
+): Promise<EnrollmentView[]> {
+  const campaigns = getCampaigns();
+  const rows = await loadEnrollmentRows(userId);
+
+  // The active-enrollment set is only needed (and only fetched) when a stored
+  // enrollment has no report yet — fetched lazily, at most once per request.
+  let activeIds: Set<string> | null = null;
+  const getActiveIds = async (): Promise<Set<string>> => {
+    if (activeIds === null) {
+      const active = await listEnrollments(participantId);
+      activeIds = new Set(active.map((e) => e.enrollmentId));
+    }
+    return activeIds;
+  };
+
+  const enrollments: EnrollmentView[] = [];
+  for (const campaign of campaigns) {
+    const base = {
+      key: campaign.key,
+      name: campaign.name,
+      campaignId: campaign.campaignId,
+      description: campaign.description,
+      duration: campaign.duration,
+      infoUrl: campaign.infoUrl,
+    };
+    const row = rows.get(campaign.campaignId);
+
+    // (1) Already known complete with a report — never POST again.
+    if (row?.hasReport) {
+      enrollments.push({
+        ...base,
+        enrollmentId: row.enrollmentId,
+        redirect: row.redirect,
+        status: "report_ready",
+        reportUrl: `/assessments/report/${encodeURIComponent(row.enrollmentId)}`,
+      });
+      continue;
+    }
+
+    if (row) {
+      // (2) Probe the stored (possibly just-completed) enrollment for a report.
+      const reportUrl = await getReportUrl(participantId, row.enrollmentId);
+      if (reportUrl) {
+        await markReportReady(userId, campaign.campaignId);
+        enrollments.push({
+          ...base,
+          enrollmentId: row.enrollmentId,
+          redirect: row.redirect,
+          status: "report_ready",
+          reportUrl,
+        });
+        continue;
+      }
+
+      // (3) No report yet. Is the stored enrollment still active?
+      const active = await getActiveIds();
+      if (!active.has(row.enrollmentId)) {
+        // Completed, but the report hasn't generated yet. Do NOT re-POST — that
+        // would create a new active enrollment and orphan the pending report.
+        enrollments.push({
+          ...base,
+          enrollmentId: row.enrollmentId,
+          redirect: row.redirect,
+          status: "report_pending",
+        });
+        continue;
+      }
+      // Still active → refresh the link (idempotent: returns the same active
+      // enrollment with a fresh redirect).
+      const enrollment = await enrollSubject(participantId, campaign.campaignId);
+      await upsertEnrollmentRow(
+        userId,
+        campaign.campaignId,
+        enrollment.enrollmentId,
+        enrollment.redirect,
+      );
+      enrollments.push({
+        ...base,
+        enrollmentId: enrollment.enrollmentId,
+        redirect: enrollment.redirect,
+        status: "available",
+      });
+      continue;
+    }
+
+    // (4) First time for this campaign → enroll and store.
+    const enrollment = await enrollSubject(participantId, campaign.campaignId);
+    await upsertEnrollmentRow(
+      userId,
+      campaign.campaignId,
+      enrollment.enrollmentId,
+      enrollment.redirect,
+    );
+    enrollments.push({
+      ...base,
+      enrollmentId: enrollment.enrollmentId,
+      redirect: enrollment.redirect,
+      status: "available",
+    });
+  }
+
+  return enrollments;
 }
 
 /** Look up a user by email, then register + enroll (manual form path). */

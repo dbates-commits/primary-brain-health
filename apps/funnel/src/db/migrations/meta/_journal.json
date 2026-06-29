@@ -36,6 +36,13 @@
       "when": 1782500442406,
       "tag": "0004_brief_harry_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782504284201,
+      "tag": "0005_sharp_the_renegades",
+      "breakpoints": true
     }
   ]
 }

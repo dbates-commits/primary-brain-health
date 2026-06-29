@@ -165,10 +165,11 @@ export async function enrollSubject(
  *
  * IMPORTANT: despite what the Linus docs say, this endpoint does NOT currently
  * return the `redirect` link — only the `POST .../enrollments` response does
- * (confirmed by Linus; a GET fix is on their roadmap). So instead of calling
- * this, we re-POST `enrollSubject` (idempotent — it returns the existing valid
- * link or generates a new one) to get a fresh redirect on demand. This wrapper
- * is unused today; switch back if/when GET returns `redirect`.
+ * (confirmed by Linus; a GET fix is on their roadmap). We therefore use this
+ * only to read the set of *active* (not-yet-completed) `enrollmentId`s — to tell
+ * whether a stored enrollment is still active (so we should re-POST to refresh
+ * its link) or has completed (so we must stop POSTing and wait for its report).
+ * We never rely on `redirect` from this response.
  */
 export async function listEnrollments(
   participantId: string,
