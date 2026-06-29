@@ -73,20 +73,12 @@ async function getReportUrl(
 ): Promise<string | undefined> {
   try {
     const report = await getReport(participantId, enrollmentId, "patient-report");
-    // TODO(linus-debug): remove temporary report logging
-    console.log(
-      `[linus] report for enrollment ${enrollmentId}:`,
-      JSON.stringify(report),
-    );
     return extractReportData(report)
       ? `/assessments/report/${encodeURIComponent(enrollmentId)}`
       : undefined;
-  } catch (err) {
-    // TODO(linus-debug): remove temporary report logging
-    console.log(
-      `[linus] report for enrollment ${enrollmentId} unavailable:`,
-      err instanceof LinusApiError ? `${err.status} ${err.body}` : err,
-    );
+  } catch {
+    // A 400/404 here just means the report isn't ready yet (the assessment
+    // hasn't been completed) — expected, so swallow it and report "not ready".
     return undefined;
   }
 }
