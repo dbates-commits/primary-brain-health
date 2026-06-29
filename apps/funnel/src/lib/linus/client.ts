@@ -113,8 +113,13 @@ export async function registerSubject(
 
 /**
  * `POST /v1/participants/{id}/enrollments` — enroll a subject in a campaign.
- * Idempotent server-side: if an active enrollment already exists for the
- * campaign, Linus returns that existing enrollment instead of creating a new one.
+ *
+ * Only partially idempotent (confirmed by Linus): for an enrollment still in the
+ * *assigned* state this returns the existing enrollmentId + redirect, but for one
+ * already *started* it mints a brand-new enrollment (new id + link). Since the
+ * API doesn't expose which state an active enrollment is in, callers must only
+ * POST when there's no stored enrollment yet — re-POSTing a started enrollment
+ * would orphan the in-progress assessment and its eventual report.
  */
 export async function enrollSubject(
   participantId: string,
@@ -137,11 +142,11 @@ export async function enrollSubject(
  *
  * IMPORTANT: despite what the Linus docs say, this endpoint does NOT currently
  * return the `redirect` link — only the `POST .../enrollments` response does
- * (confirmed by Linus; a GET fix is on their roadmap). We therefore use this
- * only to read the set of *active* (not-yet-completed) `enrollmentId`s — to tell
- * whether a stored enrollment is still active (so we should re-POST to refresh
- * its link) or has completed (so we must stop POSTing and wait for its report).
- * We never rely on `redirect` from this response.
+ * (confirmed by Linus). We therefore use this only to read the set of *active*
+ * (assigned or started, not-yet-completed) `enrollmentId`s — to tell whether a
+ * stored enrollment is still active (so we serve its stored link) or has
+ * completed (so we stop POSTing and wait for its report). We never rely on
+ * `redirect` from this response.
  */
 export async function listEnrollments(
   participantId: string,

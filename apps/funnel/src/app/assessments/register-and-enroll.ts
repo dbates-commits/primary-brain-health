@@ -216,7 +216,8 @@ export async function registerAndEnrollUser(
  * its report). Per campaign:
  *  1. stored hasReport → show report, no POST / no GET list.
  *  2. else probe the stored enrollment's report → if ready, flag + show report.
- *  3. else, if the stored enrollment is still active → POST to refresh the link.
+ *  3. else, if the stored enrollment is still active → serve the stored link
+ *     (no re-POST: it would mint a new enrollment for a *started* assessment).
  *     If it's no longer active (completed, report still generating) → don't POST.
  *  4. no stored row → POST and insert.
  */
@@ -290,19 +291,16 @@ async function resolveEnrollments(
         });
         continue;
       }
-      // Still active → refresh the link (idempotent: returns the same active
-      // enrollment with a fresh redirect).
-      const enrollment = await enrollSubject(participantId, campaign.campaignId);
-      await upsertEnrollmentRow(
-        userId,
-        campaign.campaignId,
-        enrollment.enrollmentId,
-        enrollment.redirect,
-      );
+      // Still active (assigned or started). Serve the stored link as-is — do NOT
+      // re-POST. Linus confirmed enrollSubject is idempotent only for *assigned*
+      // enrollments; for a *started* one it mints a brand-new enrollment (new id
+      // + link), orphaning the in-progress assessment and its eventual report.
+      // The API exposes no status to tell the two apart, and the stored redirect
+      // stays valid for the life of the enrollment, so we just reuse it.
       enrollments.push({
         ...base,
-        enrollmentId: enrollment.enrollmentId,
-        redirect: enrollment.redirect,
+        enrollmentId: row.enrollmentId,
+        redirect: row.redirect,
         status: "available",
       });
       continue;
