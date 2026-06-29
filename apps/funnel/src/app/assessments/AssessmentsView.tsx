@@ -6,7 +6,7 @@ import type { EnrollmentView } from "./register-and-enroll";
  * The post-payment "Welcome Back" view from Figma: a welcome header, the first
  * assessment under "Start Here", any others under "Additional Assessments", and
  * a completion footer. Presentational — no hooks — so it renders from both the
- * server page and the client lookup form. Enrollments arrive already ordered and
+ * server page and the client login form. Enrollments arrive already ordered and
  * carry their display copy (from `lib/linus/campaigns.ts`).
  */
 export function AssessmentsView({

@@ -1,5 +1,5 @@
 /**
- * Core register / enroll / list logic, shared by the manual `/assessments` form
+ * Core register / enroll / list logic, shared by the `/login` sign-in form
  * action, the payment step's server action, and the `/assessments` page. Kept
  * out of the `"use server"` actions file so a Server Component can import and
  * await it directly. Server-only (touches the DB and the Linus client).
@@ -341,7 +341,7 @@ async function resolveEnrollments(
   return enrollments;
 }
 
-/** Look up a user by email, then register + enroll (manual form path). */
+/** Look up a user by email, then register + enroll (the /login form path). */
 export async function runRegisterAndEnroll(
   rawEmail: string,
 ): Promise<LinusState> {

@@ -166,7 +166,7 @@ id instead of failing.
 
 Read paths never register: the `/assessments` page calls
 `registerAndEnrollUserById(uid, { allowRegister: false })`, so loading the page
-can't create a subject. (The manual email-lookup form is a testing/admin path and
+can't create a subject. (The `/login` email sign-in is a testing/admin path and
 does allow registration.)
 
 ### `linus_enrollments` rows
@@ -184,7 +184,7 @@ We never re-POST an enrollment that already has a row (see limitations).
 ### `pbh_assessment_uid` cookie
 
 Identifies whose assessments/reports to serve. Set on **payment success** (and on
-the manual form's success) with `ASSESSMENT_COOKIE_OPTS`: `httpOnly`, `secure` in
+the `/login` sign-in) with `ASSESSMENT_COOKIE_OPTS`: `httpOnly`, `secure` in
 production, `sameSite: "lax"`, `path: "/"`, `maxAge` 1 hour. The value is the raw
 (unsigned) user id — acceptable only for this unauthenticated scaffold; it should
 move behind a real signed session once auth lands. Read by the `/assessments` page

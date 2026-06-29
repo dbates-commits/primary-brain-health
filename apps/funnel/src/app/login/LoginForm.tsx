@@ -4,13 +4,17 @@ import { useActionState } from "react";
 import { Button, Heading } from "@pbh/ui";
 import { Label } from "@/components/Label";
 import { fieldClass } from "@/components/form-constants";
-import { registerAndEnroll } from "./actions";
-import { AssessmentsView } from "./AssessmentsView";
-import type { LinusState } from "./register-and-enroll";
+import { registerAndEnroll } from "@/app/assessments/actions";
+import type { LinusState } from "@/app/assessments/register-and-enroll";
 
 const initialState: LinusState = { status: "idle" };
 
-export function LinusEnrollForm() {
+/**
+ * Temporary email sign-in: look up a registered user by email, drop the
+ * assessment session cookie, and forward to /assessments. This is a placeholder
+ * for proper auth — Clerk will own this flow in the future.
+ */
+export function LoginForm() {
   const [state, action, pending] = useActionState(
     registerAndEnroll,
     initialState,
@@ -18,25 +22,14 @@ export function LinusEnrollForm() {
   const errorMessage = state.status === "error" ? state.message : undefined;
   const lastEmail = state.status === "idle" ? "" : state.email;
 
-  // On success, replace the lookup form entirely with the assessments view.
-  if (state.status === "success") {
-    return (
-      <AssessmentsView
-        firstName={state.firstName}
-        enrollments={state.enrollments}
-      />
-    );
-  }
-
   return (
     <div className="flex flex-col gap-8">
       <div>
         <Heading as="h1" size="lg" className="mb-2">
-          Enroll a subject
+          Sign in
         </Heading>
         <p className="text-on-surface-variant">
-          Enter a registered user’s email to generate their assessment
-          enrollment links.
+          Enter your email to access your assessments.
         </p>
       </div>
 
@@ -47,7 +40,7 @@ export function LinusEnrollForm() {
           className="m-0 min-w-0 space-y-4 border-0 p-0 transition-opacity disabled:opacity-60"
         >
           <div>
-            <Label htmlFor="email">User email</Label>
+            <Label htmlFor="email">Email</Label>
             <input
               id="email"
               name="email"
@@ -77,7 +70,7 @@ export function LinusEnrollForm() {
             color="primary"
             className="h-14 w-full text-base"
           >
-            {pending ? "Registering…" : "Register & enroll"}
+            {pending ? "Signing in…" : "Continue"}
           </Button>
         </fieldset>
       </form>

@@ -22,9 +22,10 @@ const ASSESSMENT_COOKIE_OPTS = {
 };
 
 /**
- * Form action for the manual `/assessments` email form. On success we also drop
- * the assessment cookie for that user so the report route (which auths via the
- * cookie) works from this path too — not just after payment.
+ * Form action for the `/login` email sign-in. On success we drop the assessment
+ * session cookie for that user (so the page and report route, which auth via the
+ * cookie, work) and forward to /assessments. On failure we return the error
+ * state so the form can show it inline.
  */
 export async function registerAndEnroll(
   _prev: LinusState,
@@ -32,17 +33,19 @@ export async function registerAndEnroll(
 ): Promise<LinusState> {
   const email = String(formData.get("email") ?? "");
   const state = await runRegisterAndEnroll(email);
-  if (state.status === "success") {
-    const [user] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, email.trim()))
-      .limit(1);
-    if (user) {
-      (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
-    }
+  if (state.status !== "success") {
+    return state;
   }
-  return state;
+
+  const [user] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email.trim()))
+    .limit(1);
+  if (user) {
+    (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
+  }
+  redirect("/assessments");
 }
 
 /**
