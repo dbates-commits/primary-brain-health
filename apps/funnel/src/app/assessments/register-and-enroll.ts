@@ -159,6 +159,20 @@ export async function registerAndEnrollUser(
 ): Promise<LinusState> {
   const email = user.email;
 
+  // No campaigns configured for this environment (e.g. Production before its
+  // campaign IDs are wired) means there's nothing to enroll in — don't create a
+  // Linus subject just to land on an empty page. Surface the empty success state
+  // and let the view show its "nothing configured yet" copy.
+  if (getCampaigns().length === 0) {
+    return {
+      status: "success",
+      email,
+      firstName: user.firstName,
+      participantId: user.linusParticipantId ?? "",
+      enrollments: [],
+    };
+  }
+
   // Register once, then reuse the stored participant id on every later visit.
   let participantId = user.linusParticipantId;
   if (!participantId) {
@@ -186,9 +200,11 @@ export async function registerAndEnrollUser(
         .where(eq(users.id, user.id));
     } catch (err) {
       // Concurrent double-submit may have already stored an id. The column is
-      // unique, so re-read and keep going rather than failing the request.
+      // unique, so re-read and keep going rather than failing the request. Any
+      // other DB error comes back as an error state — this function's contract
+      // is "never throws", and the caller (a server action) relies on it.
       if (!isPgError(err, PgErrorCode.UniqueViolation)) {
-        throw err;
+        return { status: "error", email, message: describeError(err, "register") };
       }
       const [fresh] = await db
         .select({ linusParticipantId: users.linusParticipantId })
@@ -341,7 +357,12 @@ async function resolveEnrollments(
   return enrollments;
 }
 
-/** Look up a user by email, then register + enroll (the /login form path). */
+/**
+ * Look up a user by email, then enroll (the /login form path). Sign-in never
+ * creates a Linus subject — registration is gated to a successful payment — so
+ * we pass `allowRegister: false`. A user who hasn't paid gets the "not
+ * registered for any assessments yet" error rather than being registered.
+ */
 export async function runRegisterAndEnroll(
   rawEmail: string,
 ): Promise<LinusState> {
@@ -361,7 +382,7 @@ export async function runRegisterAndEnroll(
       message: "No account was found for that email address.",
     };
   }
-  return registerAndEnrollUser(user);
+  return registerAndEnrollUser(user, { allowRegister: false });
 }
 
 /**

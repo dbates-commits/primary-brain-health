@@ -56,32 +56,8 @@ export function ConsentForm({
     }
   }, [state, onComplete]);
 
-  // Gate the submit button until the user has scrolled to the bottom of the
-  // terms — they must see the whole agreement before they can continue.
-  const termsRef = useRef<HTMLDivElement>(null);
-  const [scrolledToEnd, setScrolledToEnd] = useState(false);
-
-  const checkScrolledToEnd = () => {
-    const el = termsRef.current;
-    if (!el) {
-      return;
-    }
-    // Allow a small slack so sub-pixel rounding doesn't strand the last pixel.
-    const reachedEnd =
-      el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
-    if (reachedEnd) {
-      setScrolledToEnd(true);
-    }
-  };
-
-  // If the terms fit without overflowing there's nothing to scroll, so enable
-  // immediately. Runs once on mount.
-  useEffect(() => {
-    const el = termsRef.current;
-    if (el && el.scrollHeight <= el.clientHeight) {
-      setScrolledToEnd(true);
-    }
-  }, []);
+  // Gate the submit button on the agreement checkbox alone.
+  const [agreed, setAgreed] = useState(false);
 
   return (
     <form
@@ -97,8 +73,6 @@ export function ConsentForm({
       />
 
       <div
-        ref={termsRef}
-        onScroll={checkScrolledToEnd}
         role="region"
         aria-label="Terms and conditions"
         tabIndex={0}
@@ -137,6 +111,8 @@ export function ConsentForm({
               id="agreed"
               type="checkbox"
               name="agreed"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
               required
               aria-required="true"
               aria-invalid={fieldErrors?.agreed ? true : undefined}
@@ -156,21 +132,14 @@ export function ConsentForm({
           </p>
         )}
 
-        <div className="flex flex-col gap-2">
-          <Button
-            type="submit"
-            color="primary"
-            disabled={!scrolledToEnd}
-            className="h-14 w-full text-base"
-          >
-            {pending ? "Saving…" : "Continue With Payment"}
-          </Button>
-          {!scrolledToEnd && (
-            <p className="text-center text-sm text-on-surface-variant">
-              Scroll to the end of the terms to continue.
-            </p>
-          )}
-        </div>
+        <Button
+          type="submit"
+          color="primary"
+          disabled={!agreed}
+          className="h-14 w-full text-base"
+        >
+          {pending ? "Saving…" : "Continue With Payment"}
+        </Button>
       </fieldset>
     </form>
   );
