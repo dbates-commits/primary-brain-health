@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
+import { extractReportData, getReport } from "@/lib/linus/client";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
@@ -70,4 +71,46 @@ export async function completeAssessmentSetup(
 
   (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, ASSESSMENT_COOKIE_OPTS);
   redirect("/assessments");
+}
+
+/** Result of an on-demand report fetch (see `getReportPdf`). */
+export type ReportResult =
+  | { status: "ready"; dataBase64: string }
+  | { status: "not_ready" }
+  | { status: "error"; message: string };
+
+/**
+ * Fetch a subject's report PDF on demand, returning its base64 bytes so the
+ * client can open it as a blob in a new tab — no server-rendered report route.
+ * Auth is the same short-lived cookie the page uses: the report is fetched under
+ * the cookie user's own participantId, so a user can only read their own report.
+ */
+export async function getReportPdf(enrollmentId: string): Promise<ReportResult> {
+  const uid = (await cookies()).get(ASSESSMENT_UID_COOKIE)?.value;
+  if (!uid) {
+    return { status: "error", message: "Your session has expired. Please sign in again." };
+  }
+
+  const [user] = await db
+    .select({ participantId: users.linusParticipantId })
+    .from(users)
+    .where(eq(users.id, uid))
+    .limit(1);
+  if (!user?.participantId) {
+    return { status: "error", message: "We couldn't find an assessment account for you yet." };
+  }
+
+  let report: unknown;
+  try {
+    report = await getReport(user.participantId, enrollmentId, "patient-report");
+  } catch {
+    // A non-2xx (commonly 400/404) just means the report isn't generated yet.
+    return { status: "not_ready" };
+  }
+
+  const dataBase64 = extractReportData(report);
+  if (!dataBase64) {
+    return { status: "not_ready" };
+  }
+  return { status: "ready", dataBase64 };
 }

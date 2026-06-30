@@ -3,6 +3,7 @@ import {
   IframeModalButton,
   PRIMARY_MODAL_BUTTON_CLASS,
 } from "./IframeModalButton";
+import { ViewReportButton } from "./ViewReportButton";
 import type { EnrollmentView } from "./register-and-enroll";
 
 /**
@@ -17,7 +18,7 @@ export function AssessmentCard({
   enrollment: EnrollmentView;
   highlighted?: boolean;
 }) {
-  const { name, description, duration, infoUrl, redirect, reportUrl, status } =
+  const { name, description, duration, infoUrl, redirect, enrollmentId, status } =
     enrollment;
 
   return (
@@ -68,15 +69,11 @@ export function AssessmentCard({
           />
         )}
 
-        {status === "report_ready" && reportUrl && (
-          <a
-            href={reportUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-14 cursor-pointer items-center justify-center rounded-full bg-primary px-6 font-body text-base font-bold text-on-primary whitespace-nowrap transition-all duration-200 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
-          >
-            View Report
-          </a>
+        {status === "report_ready" && (
+          <ViewReportButton
+            enrollmentId={enrollmentId}
+            className={PRIMARY_MODAL_BUTTON_CLASS}
+          />
         )}
 
         {status === "report_pending" && (

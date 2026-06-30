@@ -30,7 +30,7 @@ export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
  * Per-card state:
  * - `available`     — not started / in progress; show "Start Assessment" (`redirect`).
  * - `report_pending`— completed, but the report hasn't been generated yet.
- * - `report_ready`  — completed and the report is available (`reportUrl`).
+ * - `report_ready`  — completed and the report is available ("View Report").
  * - `completed`     — finished, with no report expected (campaign `producesReport: false`).
  */
 export type EnrollmentStatus =
@@ -51,8 +51,6 @@ export interface EnrollmentView {
   description?: string;
   duration?: string;
   infoUrl?: string;
-  /** Report route URL; set only when `status === "report_ready"`. */
-  reportUrl?: string;
 }
 
 export type LinusState =
@@ -67,24 +65,22 @@ export type LinusState =
   | { status: "error"; email: string; message: string };
 
 /**
- * Probe one enrollment's report. Returns a same-origin URL that streams the PDF
- * (so the card's "View Report" button can open it in a new tab) when a report is
- * ready, else undefined. Never throws — a missing report (404) or any error just
- * means "not available yet".
+ * Probe whether one enrollment's report is ready. The PDF itself is fetched on
+ * demand by the `getReportPdf` server action when the user clicks "View Report";
+ * here we only need a boolean to drive the card's status. Never throws — a
+ * missing report (404) or any error just means "not available yet".
  */
-async function getReportUrl(
+async function hasReadyReport(
   participantId: string,
   enrollmentId: string,
-): Promise<string | undefined> {
+): Promise<boolean> {
   try {
     const report = await getReport(participantId, enrollmentId, "patient-report");
-    return extractReportData(report)
-      ? `/assessments/report/${encodeURIComponent(enrollmentId)}`
-      : undefined;
+    return extractReportData(report) !== undefined;
   } catch {
     // A 400/404 here just means the report isn't ready yet (the assessment
     // hasn't been completed) — expected, so swallow it and report "not ready".
-    return undefined;
+    return false;
   }
 }
 
@@ -286,7 +282,6 @@ async function resolveEnrollments(
         enrollmentId: row.enrollmentId,
         redirect: row.redirect,
         status: "report_ready",
-        reportUrl: `/assessments/report/${encodeURIComponent(row.enrollmentId)}`,
       });
       continue;
     }
@@ -295,15 +290,13 @@ async function resolveEnrollments(
       // (2) Probe the stored (possibly just-completed) enrollment for a report —
       // only for campaigns that actually produce one (others 404 forever).
       if (producesReport) {
-        const reportUrl = await getReportUrl(participantId, row.enrollmentId);
-        if (reportUrl) {
+        if (await hasReadyReport(participantId, row.enrollmentId)) {
           await markReportReady(userId, campaign.campaignId);
           enrollments.push({
             ...base,
             enrollmentId: row.enrollmentId,
             redirect: row.redirect,
             status: "report_ready",
-            reportUrl,
           });
           continue;
         }

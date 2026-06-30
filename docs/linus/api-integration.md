@@ -13,7 +13,7 @@ and Bearer token); nothing touches the client bundle.
 The integration lives in:
 
 - `apps/funnel/src/lib/linus/` — the API client, env/config, and the register payload builder.
-- `apps/funnel/src/app/assessments/` — the page, server actions, the register/enroll engine, and the report route.
+- `apps/funnel/src/app/assessments/` — the page, server actions (including `getReportPdf`), the register/enroll engine, and the `ViewReportButton`.
 - `apps/funnel/src/db/schema/` — the `users` and `linus_enrollments` tables.
 
 ## Request flow
@@ -68,11 +68,11 @@ sequenceDiagram
   end
   A-->>B: render cards
 
-  Note over B,L: ③ View Report — report route
-  B->>A: GET /assessments/report/{enrollmentId} (cookie)
+  Note over B,L: ③ View Report — getReportPdf server action
+  B->>A: getReportPdf(enrollmentId) (cookie)
   A->>L: GET .../enrollments/{enrollmentId}/reports/patient-report
   L-->>A: report (base64 PDF)
-  A-->>B: stream PDF inline
+  A-->>B: base64 PDF → blob URL opened in a new tab
 ```
 
 A note on ②: a fresh `enrollSubject` POST happens only the first time a campaign is
@@ -188,7 +188,8 @@ the `/login` sign-in) with `ASSESSMENT_COOKIE_OPTS`: `httpOnly`, `secure` in
 production, `sameSite: "lax"`, `path: "/"`, `maxAge` 1 hour. The value is the raw
 (unsigned) user id — acceptable only for this unauthenticated scaffold; it should
 move behind a real signed session once auth lands. Read by the `/assessments` page
-and the report route (no cookie → redirect to `/assessments`).
+(no cookie → redirect to `/login`) and the `getReportPdf` server action (no cookie
+→ error result).
 
 ## Per-card status resolution
 
@@ -245,17 +246,17 @@ the production deploy**, not run manually.
 
 ## Report delivery
 
-`GET /assessments/report/[enrollmentId]` (`report/[enrollmentId]/route.ts`):
+`getReportPdf(enrollmentId)` server action (`actions.ts`), called by the client
+`ViewReportButton` when the user clicks **View Report** — there is no dedicated
+report route:
 
 - Authed via the `pbh_assessment_uid` cookie; the report is fetched server-side
   under that user's own `participantId`, so a user can only read their own reports.
-- On success, streams the PDF inline (`Content-Disposition: inline`) with a
-  descriptive filename built from the user's name + the campaign key (e.g.
-  `jane-doe-lhq-brain-health-report.pdf`).
-- Every other state renders a friendly self-contained HTML page instead of leaking
-  a raw upstream error: no/expired cookie → redirect to `/assessments`; unknown
-  user → "report unavailable"; report not ready (Linus 400/404, or no PDF data) →
-  "still generating".
+- Returns one of `{ status: "ready", dataBase64 }`, `{ status: "not_ready" }`, or
+  `{ status: "error", message }`. The button turns a `ready` payload into a
+  same-origin blob URL and opens it in a new tab (opening the blank tab inside the
+  click handler first, to dodge the popup blocker); `not_ready`/`error` show an
+  inline message instead.
 
 ## Known API limitations / open issues
 
