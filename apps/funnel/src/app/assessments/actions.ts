@@ -1,11 +1,12 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db/client";
-import { users } from "@/db/schema";
+import { linusEnrollments, users } from "@/db/schema";
 import { extractReportData, getReport } from "@/lib/linus/client";
+import { getCampaigns } from "@/lib/linus/campaigns";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
@@ -73,17 +74,28 @@ export async function completeAssessmentSetup(
   redirect("/assessments");
 }
 
+/** ASCII-safe, hyphenated slug for a download filename. */
+function slugify(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .toLowerCase();
+}
+
 /** Result of an on-demand report fetch (see `getReportPdf`). */
 export type ReportResult =
-  | { status: "ready"; dataBase64: string }
+  | { status: "ready"; dataBase64: string; filename: string }
   | { status: "not_ready" }
   | { status: "error"; message: string };
 
 /**
- * Fetch a subject's report PDF on demand, returning its base64 bytes so the
- * client can open it as a blob in a new tab — no server-rendered report route.
- * Auth is the same short-lived cookie the page uses: the report is fetched under
- * the cookie user's own participantId, so a user can only read their own report.
+ * Fetch a subject's report PDF on demand, returning its base64 bytes plus a
+ * descriptive filename so the client can download it — no server-rendered report
+ * route. Auth is the same short-lived cookie the page uses: the report is fetched
+ * under the cookie user's own participantId, so a user can only read their own
+ * report.
  */
 export async function getReportPdf(enrollmentId: string): Promise<ReportResult> {
   const uid = (await cookies()).get(ASSESSMENT_UID_COOKIE)?.value;
@@ -92,7 +104,11 @@ export async function getReportPdf(enrollmentId: string): Promise<ReportResult> 
   }
 
   const [user] = await db
-    .select({ participantId: users.linusParticipantId })
+    .select({
+      participantId: users.linusParticipantId,
+      firstName: users.firstName,
+      lastName: users.lastName,
+    })
     .from(users)
     .where(eq(users.id, uid))
     .limit(1);
@@ -112,5 +128,29 @@ export async function getReportPdf(enrollmentId: string): Promise<ReportResult> 
   if (!dataBase64) {
     return { status: "not_ready" };
   }
-  return { status: "ready", dataBase64 };
+
+  // Descriptive filename "<name>-<assessment>-brain-health-report.pdf"; the
+  // assessment label comes from the campaign behind this enrollment. Fall back
+  // gracefully if the row or campaign config is missing.
+  const [row] = await db
+    .select({ campaignId: linusEnrollments.campaignId })
+    .from(linusEnrollments)
+    .where(
+      and(
+        eq(linusEnrollments.userId, uid),
+        eq(linusEnrollments.enrollmentId, enrollmentId),
+      ),
+    )
+    .limit(1);
+  const campaignKey = getCampaigns().find(
+    (c) => c.campaignId === row?.campaignId,
+  )?.key;
+  const filename =
+    slugify(
+      [`${user.firstName} ${user.lastName}`, campaignKey, "brain health report"]
+        .filter(Boolean)
+        .join(" "),
+    ) + ".pdf";
+
+  return { status: "ready", dataBase64, filename };
 }

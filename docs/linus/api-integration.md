@@ -68,11 +68,11 @@ sequenceDiagram
   end
   A-->>B: render cards
 
-  Note over B,L: ③ View Report — getReportPdf server action
+  Note over B,L: ③ Download Report — getReportPdf server action
   B->>A: getReportPdf(enrollmentId) (cookie)
   A->>L: GET .../enrollments/{enrollmentId}/reports/patient-report
   L-->>A: report (base64 PDF)
-  A-->>B: base64 PDF → blob URL opened in a new tab
+  A-->>B: base64 PDF + filename → downloaded as a file
 ```
 
 A note on ②: a fresh `enrollSubject` POST happens only the first time a campaign is
@@ -247,16 +247,16 @@ the production deploy**, not run manually.
 ## Report delivery
 
 `getReportPdf(enrollmentId)` server action (`actions.ts`), called by the client
-`ViewReportButton` when the user clicks **View Report** — there is no dedicated
+`ViewReportButton` when the user clicks **Download Report** — there is no dedicated
 report route:
 
 - Authed via the `pbh_assessment_uid` cookie; the report is fetched server-side
   under that user's own `participantId`, so a user can only read their own reports.
-- Returns one of `{ status: "ready", dataBase64 }`, `{ status: "not_ready" }`, or
-  `{ status: "error", message }`. The button turns a `ready` payload into a
-  same-origin blob URL and opens it in a new tab (opening the blank tab inside the
-  click handler first, to dodge the popup blocker); `not_ready`/`error` show an
-  inline message instead.
+- Returns one of `{ status: "ready", dataBase64, filename }`, `{ status: "not_ready" }`,
+  or `{ status: "error", message }`. The button decodes a `ready` payload into a
+  same-origin blob and downloads it with a descriptive filename built from the
+  user's name + the campaign key (e.g. `jane-doe-lhq-brain-health-report.pdf`);
+  `not_ready`/`error` show an inline message instead.
 
 ## Known API limitations / open issues
 

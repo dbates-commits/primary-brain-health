@@ -4,10 +4,10 @@ import { useState } from "react";
 import { getReportPdf } from "./actions";
 
 /**
- * Opens a subject's report PDF in a new tab. The bytes are fetched on demand via
- * the `getReportPdf` server action and turned into a same-origin blob URL — there
- * is no server-rendered report route. To dodge the popup blocker we open the tab
- * synchronously inside the click handler, then navigate it once the PDF arrives.
+ * Downloads a subject's report PDF. The bytes are fetched on demand via the
+ * `getReportPdf` server action and saved as a file with a descriptive name —
+ * there is no server-rendered report route. Shows an inline message when the
+ * report isn't ready yet or the fetch fails.
  */
 export function ViewReportButton({
   enrollmentId,
@@ -22,33 +22,21 @@ export function ViewReportButton({
   async function handleClick() {
     setMessage(null);
     setPending(true);
-    // Open the blank tab now, while we still have the user gesture, so the
-    // browser doesn't block it during the async fetch below.
-    const tab = window.open("", "_blank");
     try {
       const result = await getReportPdf(enrollmentId);
       if (result.status === "ready") {
-        const url = blobUrlFromBase64(result.dataBase64, "application/pdf");
-        if (tab) {
-          tab.location.href = url;
-        } else {
-          // Popup blocked — fall back to navigating the current tab.
-          window.location.href = url;
-        }
-        // Release the object URL once the tab has had time to load it.
-        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        downloadBase64(result.dataBase64, result.filename, "application/pdf");
       } else if (result.status === "not_ready") {
-        tab?.close();
         setMessage(
           "Your report is still being generated. Please check back soon.",
         );
       } else {
-        tab?.close();
         setMessage(result.message);
       }
     } catch {
-      tab?.close();
-      setMessage("Something went wrong opening your report. Please try again.");
+      setMessage(
+        "Something went wrong downloading your report. Please try again.",
+      );
     } finally {
       setPending(false);
     }
@@ -62,7 +50,7 @@ export function ViewReportButton({
         disabled={pending}
         className={className}
       >
-        {pending ? "Opening…" : "View Report"}
+        {pending ? "Preparing…" : "Download Report"}
       </button>
       {message && (
         <p
@@ -76,12 +64,20 @@ export function ViewReportButton({
   );
 }
 
-/** Decode a base64 string into a same-origin blob URL of the given MIME type. */
-function blobUrlFromBase64(base64: string, type: string): string {
+/** Decode a base64 string and trigger a browser download of the given filename. */
+function downloadBase64(base64: string, filename: string, type: string): void {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
-  return URL.createObjectURL(new Blob([bytes], { type }));
+  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  // Release the object URL once the download has been kicked off.
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
