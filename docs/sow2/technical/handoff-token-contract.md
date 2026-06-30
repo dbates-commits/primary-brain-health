@@ -1,10 +1,11 @@
 # Signed-Token Handoff Contract
 
-**Status:** Draft — illustrative spec, to be finalized in Phase 1 discovery
-**Owners:** VisualBoston engineering (Mark Stenquist) + HIPAA/PCI specialist (TBD) on the funnel side; PBH product team + Linus Remote Assessments vendor (TBD) on the receiving side
-**Version:** 1.0-draft
+**Status:** v1.0 — ready for PBH product team review
+**Owners:** VisualBoston engineering (Mark Stenquist) + compliance specialist (Bill Laukaitis)
+**Version:** 1.0
+**Date:** June 26, 2026
 
-> This document governs the cryptographic handoff between PBH's marketing funnel (post-Stripe-payment) and the Linus Remote Assessments (post-payment assessment session). Both teams reference this doc; any change requires a version bump and sign-off from both sides.
+> This document governs the cryptographic handoff between PBH's marketing funnel (post-Stripe-payment) and Linus Remote Assessments (assessment session entry). It defines the funnel's issuance contract and the receiving platform's validation requirements. Changes require a version bump and written sign-off from VisualBoston and PBH before implementation.
 
 ---
 
@@ -236,7 +237,7 @@ Any change to this document — new claims, TTL adjustment, algorithm change, et
 
 1. Version bump (`contract_v` increments)
 2. Updated public key if signing keys change
-3. Written sign-off from both teams (funnel + Linus Remote Assessments)
+3. Written sign-off from both teams (VisualBoston + PBH product team)
 4. Coordinated rollout (overlap window like a key rotation)
 5. Audit-log row noting the change
 
@@ -244,13 +245,13 @@ Backward compatibility for at least one minor version is expected (i.e. v1.1 sho
 
 ---
 
-## 14. Open decisions (to confirm in Phase 1 discovery)
+## 14. Open decisions
 
-- **Linus Remote Assessments domain** — currently assumed `app.primarybrainhealth.com`; needs vendor confirmation
-- **Token transport** — query parameter `?token=...` (simplest) vs POST body (more secure but requires client to make a POST). Recommendation: query param with `Referrer-Policy: no-referrer` on the redirect to prevent leakage
-- **Vendor's session model** — does their session creation accept all our claims or do they need additional fields? Lock in discovery
-- **Key rotation cadence** — proposing 6 months; vendor may prefer different (quarterly is common)
-- **Multi-region considerations** — if Linus Remote Assessments is multi-region, all regions need synchronized `processed_tokens` (or accept reduced replay window per region)
+- **Linus Remote Assessments domain** — the receiving platform is Linus Remote Assessments (DAC → LHQ → Epsom sequence confirmed Jun 25). Exact domain/endpoint to be confirmed by PBH product team before implementation
+- **Token transport** — **locked: query parameter** `?token=...` with `Referrer-Policy: no-referrer` on the redirect. POST body rejected — adds round-trip complexity with no meaningful security gain over short-TTL query param + no-referrer policy
+- **Platform session model** — Linus Remote Assessments session creation requirements to be confirmed; this spec defines minimum required claims; additional claims can be added via minor version bump
+- **Key rotation cadence** — proposing 6 months; to be agreed with PBH product team at implementation kickoff
+- **Multi-region** — if Linus Remote Assessments is multi-region, all regions need synchronized `processed_tokens` (or accept per-region replay window); confirm with Linus engineering
 
 ---
 
@@ -258,7 +259,8 @@ Backward compatibility for at least one minor version is expected (i.e. v1.1 sho
 
 | Version | Date | Author | Notes |
 | :---- | :---- | :---- | :---- |
-| 1.0-draft | TBD | HIPAA/PCI specialist + Mark Stenquist | Initial draft. Awaits vendor identification + Phase 1 discovery review. |
+| 1.0-draft | — | Mark Stenquist | Initial draft. |
+| 1.0 | Jun 26, 2026 | Mark Stenquist | Finalized for PBH review. Removed Linus Remote Assessments vendor as co-signer; receiving-side requirements now stated as implementation requirements for Linus Remote Assessments. Token transport locked (query param). Open decisions updated to reflect Jun 25 call. |
 
 ---
 

@@ -1,10 +1,12 @@
-# Stripe Payment Architecture - Notes
+# Stripe Payment Architecture Spec
 
-Pre-implementation research and decision notes for the PBH Website v2 funnel ($149 → BHN → Linus Remote Assessments handoff). These notes feed into the **Payment architecture spec** that's a named deliverable of the Slice 1 discovery phase.
+**Status:** v1.0 — ready for PBH review
+**Owner:** VisualBoston engineering (Mark Stenquist) + compliance specialist (Bill Laukaitis)
+**Date:** June 26, 2026
 
-Status: notes / research. Not yet a spec.
+Payment architecture spec for the PBH Website v2 funnel ($149 assessment → BHN consult → Linus Remote Assessments handoff). Covers implementation choice, data flow, MCC/HSA-FSA, PCI SAQ-A posture, and cross-team seams to be locked before build.
 
-Related: [PROPOSAL.md](Primary%20Brain%20Health/phase-2/PROPOSAL_DRAFT.md), [PBH_Website_v2.1_RFP.docx](./PBH_Website_v2.1_RFP.docx).
+Related: [handoff-token-contract.md](./handoff-token-contract.md), [SOW2-Proposal.md](../proposal/SOW2-Proposal.md).
 
 ---
 
@@ -156,17 +158,18 @@ These need to be decided jointly with PBH's engineering pod before the Slice 1 b
 
 ---
 
+## Open items
+
+| Item | Status | Owner |
+| :---- | :---- | :---- |
+| MCC confirmation | David has set up Stripe account as "full clinical" — Bill Laukaitis to confirm the assigned MCC is correct for PBH's use case (8099 or equivalent) | Bill Laukaitis |
+| Stripe account structure | Single existing account (David's) confirmed Jun 25 — no split needed | Resolved |
+| Linus Remote Assessments downstream charge model | SetupIntent → off-session charge or subscription — confirm with Linus/Eisai engineering | PBH product team |
+| Sales tax | Stripe Tax handles automatically once MCC is set — verify expected treatment for assessment + consult in serviced jurisdictions | Bill Laukaitis |
+| Receipt template wording | Needs Nina's copy + PBH counsel sign-off for non-medical-evaluation language | Nina Zhang + PBH counsel |
+| LMN flow | Deferred past Phase 1 | Deferred |
+
 ## What this document is not
 
-- Not the final implementation spec - that's a discovery deliverable
-- Not a security audit - that's the SAQ-A documentation deliverable
-- Not a substitute for Stripe's own onboarding checklist for healthcare merchants
-
-## Open questions for the implementation spec
-
-- Exact MCC code Stripe assigns at onboarding - confirm with support
-- Whether PBH operates as a single legal entity for Stripe purposes or has separate entities for the wellness vs. medical sides
-- Whether the Linus Remote Assessments's downstream charge is a separate Customer-level transaction, a SetupIntent → off-session charge, or a subscription
-- Whether sales tax applies in any of PBH's serviced jurisdictions for this category of service (Stripe Tax handles automatically once MCC is set, but verify expected behavior)
-- Receipt template wording - needs Nina's copy + PBH counsel sign-off for non-medical-evaluation language
-- LMN flow - Slice 1 or deferred?
+- Not a security audit — that's the SAQ-A documentation deliverable (Bill Laukaitis, target Jul 22)
+- Not a substitute for Stripe's onboarding checklist for healthcare merchants
