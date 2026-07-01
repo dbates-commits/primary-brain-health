@@ -1,63 +1,100 @@
 "use client";
 
-import { useActionState } from "react";
-import { Button } from "@pbh/ui";
+import { useEffect, useRef, useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import type { Appearance } from "@stripe/stripe-js";
 import { StepHeader } from "@/components/StepHeader";
-import { completeAssessmentSetup } from "@/app/assessments/actions";
-import type { LinusState } from "@/app/assessments/register-and-enroll";
+import { ASSESSMENT_PRICE_CENTS, formatUsd } from "@/lib/stripe/pricing";
+import { CheckoutForm } from "./CheckoutForm";
+import { createAssessmentPaymentIntent } from "./actions";
 
-const initialState: LinusState = { status: "idle" };
+// Publishable key is inlined at build; safe to expose to the client. Missing key
+// (e.g. env not set) → we render a configuration notice instead of crashing.
+const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
+
+// Nudge the Payment Element toward the brand palette. The full brand token set
+// (Stripe Appearance API) is wired in pbh-bws.39.
+const appearance: Appearance = {
+  theme: "stripe",
+  variables: {
+    colorPrimary: "#041632",
+    colorText: "#041632",
+    fontFamily: "Inter, system-ui, sans-serif",
+    borderRadius: "12px",
+  },
+};
 
 /**
- * TEMP placeholder payment step. The real Stripe Payment Element ($149,
- * HSA/FSA, SAQ-A) lands in pbh-bws.22. For now, "paying" submits to a server
- * action that registers the user with Linus and forwards to /assessments — the
- * user id goes in the POST body, never the URL.
+ * Stripe Payment Element step (test mode). Fetches a PaymentIntent client secret
+ * for this user, mounts the Payment Element, and on successful confirmation
+ * hands off to `finalizeAssessmentPayment` (verify → persist → register/enroll →
+ * redirect to /assessments). No PII or card data ever touches our servers.
  */
 export function PaymentStep({ userId }: { userId: string }) {
-  const [state, action, pending] = useActionState(
-    completeAssessmentSetup,
-    initialState,
-  );
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    // Guard against React's double-invoke in dev so we mint one intent per mount.
+    if (started.current) {
+      return;
+    }
+    started.current = true;
+
+    createAssessmentPaymentIntent(userId).then((result) => {
+      if (result.status === "ready") {
+        setClientSecret(result.clientSecret);
+      } else {
+        setInitError(result.message);
+      }
+    });
+  }, [userId]);
 
   return (
     <div className="flex flex-col gap-8">
       <StepHeader title="Payment" />
 
-      <form action={action} className="space-y-5">
-        <input type="hidden" name="userId" value={userId} />
-
-        <div className="rounded-xl border border-outline/40 bg-surface p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-on-surface">Brain health assessment</span>
-            <span className="font-headline text-lg text-primary">$149.00</span>
-          </div>
-          <p className="mt-2 text-sm text-on-surface-variant">
-            Placeholder summary — the Stripe Payment Element (cards, Apple/Google
-            Pay, HSA/FSA) lands in a later task.
-          </p>
+      <div className="rounded-xl border border-outline/40 bg-surface p-5">
+        <div className="flex items-center justify-between">
+          <span className="text-on-surface">Brain health assessment</span>
+          <span className="font-headline text-lg text-primary">
+            {formatUsd(ASSESSMENT_PRICE_CENTS)}
+          </span>
         </div>
+        <p className="mt-2 text-sm text-on-surface-variant">
+          Cards (incl. HSA/FSA) and wallets. Test mode — use card{" "}
+          <code className="font-mono">4242 4242 4242 4242</code>, any future
+          expiry and CVC.
+        </p>
+      </div>
 
-        <fieldset
-          disabled={pending}
-          aria-busy={pending}
-          className="m-0 min-w-0 border-0 p-0 transition-opacity disabled:opacity-60"
+      {initError && (
+        <p role="alert" className="animate-error-in text-sm text-error">
+          {initError}
+        </p>
+      )}
+
+      {!stripePromise && !initError && (
+        <p role="alert" className="text-sm text-error">
+          Payments aren&apos;t configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.
+        </p>
+      )}
+
+      {stripePromise && clientSecret && (
+        <Elements
+          stripe={stripePromise}
+          options={{ clientSecret, appearance }}
         >
-          <Button
-            type="submit"
-            color="primary"
-            className="h-14 w-full text-base"
-          >
-            {pending ? "Setting up your assessment…" : "Pay $149 (placeholder)"}
-          </Button>
-        </fieldset>
+          <CheckoutForm userId={userId} />
+        </Elements>
+      )}
 
-        {state.status === "error" && (
-          <p role="alert" className="animate-error-in text-sm text-error">
-            {state.message}
-          </p>
-        )}
-      </form>
+      {stripePromise && !clientSecret && !initError && (
+        <p className="text-sm text-on-surface-variant">Loading payment…</p>
+      )}
     </div>
   );
 }
