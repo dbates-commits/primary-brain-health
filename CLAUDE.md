@@ -120,3 +120,5 @@ Cross-app shared code is imported from the `@pbh/*` workspace packages, not via 
     doThing();
   }
   ```
+
+- **One component per file.** Each React component lives in its own file, named after the component. Don't declare a second component (even a small helper/sub-component) in the same file — extract it into its own file and import it. This keeps files discoverable and matches the existing `src/components/**` layout (one component per directory + `index.ts`).
