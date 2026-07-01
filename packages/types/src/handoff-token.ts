@@ -3,7 +3,7 @@
  *
  * Source of truth: docs/sow2/technical/handoff-token-contract.md (v1.0-draft).
  * The funnel signs a short-lived RS256 JWT after a successful $149 payment and
- * redirects the user to the wellness app, which verifies and starts a session.
+ * redirects the user to Linus Remote Assessments, which verifies and starts a session.
  *
  * The token carries identifiers only — NO PHI, no payment amounts, no card data.
  */
@@ -15,13 +15,13 @@ export const HANDOFF_CONTRACT_VERSION = "1.0" as const;
 export const HANDOFF_TOKEN_TTL_SECONDS = 600 as const;
 
 /**
- * JWT payload (claims) for the funnel → wellness-app handoff.
+ * JWT payload (claims) for the funnel → Linus Remote Assessments handoff.
  * See handoff-token-contract.md §3.
  */
 export interface HandoffTokenPayload {
   /** Issuer — the funnel domain (e.g. "primarybrainhealth.com"). */
   iss: string;
-  /** Audience — the wellness-app domain (e.g. "app.primarybrainhealth.com"). */
+  /** Audience — the Linus Remote Assessments domain (e.g. "app.primarybrainhealth.com"). */
   aud: string;
   /** Subject — the PBH user ID (UUID). */
   sub: string;

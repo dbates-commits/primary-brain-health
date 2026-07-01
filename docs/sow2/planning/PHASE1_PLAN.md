@@ -25,7 +25,7 @@ This is the one piece of **development** work that is unblocked today. Everythin
 **What the agent should produce (acceptance):**
 1. **App architecture** - Next.js 16 App Router structure (single-app vs monorepo decision), rendering/data-fetching strategy, Vercel deployment shape.
 2. **Data model** - Drizzle schema draft for `account`, `consent` (versioned), `payment`, and `audit_log`. **No PHI on the web tier** - everything clinical sits behind the signed-token redirect.
-3. **Signed-token handoff seam contract** - the token format, claims, redirect endpoint, and the boundary VisualBoston owns vs. the wellness-app vendor. (Highest-stakes interface in the engagement.)
+3. **Signed-token handoff seam contract** - the token format, claims, redirect endpoint, and the boundary VisualBoston owns vs. the Linus Remote Assessments vendor. (Highest-stakes interface in the engagement.)
 4. **Stripe SAQ-A boundary** - exactly where cardholder data does/doesn't flow, to keep the funnel in SAQ-A scope. Feeds the compliance track.
 5. **Integration points** - GA4 events, HubSpot lifecycle, Resend transactional email - named and stubbed, not built.
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@pbh/ui";
 import { recordConsent, type ConsentState } from "./actions";
 import { FieldError } from "@/components/FieldError";
@@ -56,6 +56,9 @@ export function ConsentForm({
     }
   }, [state, onComplete]);
 
+  // Gate the submit button on the agreement checkbox alone.
+  const [agreed, setAgreed] = useState(false);
+
   return (
     <form
       action={action}
@@ -108,6 +111,8 @@ export function ConsentForm({
               id="agreed"
               type="checkbox"
               name="agreed"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
               required
               aria-required="true"
               aria-invalid={fieldErrors?.agreed ? true : undefined}
@@ -127,7 +132,12 @@ export function ConsentForm({
           </p>
         )}
 
-        <Button type="submit" color="primary" className="h-14 w-full text-base">
+        <Button
+          type="submit"
+          color="primary"
+          disabled={!agreed}
+          className="h-14 w-full text-base"
+        >
           {pending ? "Saving…" : "Continue With Payment"}
         </Button>
       </fieldset>

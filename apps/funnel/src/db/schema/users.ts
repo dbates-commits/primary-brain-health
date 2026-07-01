@@ -6,7 +6,7 @@ import { citext } from "./_types";
  * Account identity. PII; conservatively HIPAA-adjacent.
  *
  * No card data ever lives here (that stays at Stripe) and no clinical /
- * assessment data (owned by the wellness app). See
+ * assessment data (owned by Linus Remote Assessments). See
  * docs/sow2/technical/database-plan.md.
  */
 export const users = pgTable("users", {
@@ -28,6 +28,10 @@ export const users = pgTable("users", {
   patientIdentification: text("patient_identification"),
   message: text(),
   stripeCustomerId: text("stripe_customer_id").unique(),
+  // Linus Health subject id, set the first time we register this user as a
+  // subject. Persisted so we never re-register (which would create a duplicate
+  // Linus subject) — once set, we reuse it and skip straight to enrollment.
+  linusParticipantId: text("linus_participant_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

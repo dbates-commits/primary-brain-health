@@ -72,7 +72,7 @@ Internal reference. Every abbreviation, acronym, and project-specific term used 
 | **CMS** | Content Management System (TinaCMS in PBH's case) |
 | **API** | Application Programming Interface |
 | **SDK** | Software Development Kit |
-| **JWT** | JSON Web Token - signed token format; candidate for handoff token to wellness app |
+| **JWT** | JSON Web Token - signed token format; candidate for handoff token to Linus Remote Assessments |
 | **HMAC** | Hash-based Message Authentication Code - alternate signing scheme for handoff token |
 | **TTL** | Time To Live - token expiration window (handoff tokens are 5–15 min) |
 | **DSL** | Domain Specific Language - used for the screener branching rules schema |

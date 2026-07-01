@@ -1,22 +1,22 @@
 # Signed-Token Handoff Contract
 
 **Status:** Draft — illustrative spec, to be finalized in Phase 1 discovery
-**Owners:** VisualBoston engineering (Mark Stenquist) + HIPAA/PCI specialist (TBD) on the funnel side; PBH product team + wellness-app vendor (TBD) on the receiving side
+**Owners:** VisualBoston engineering (Mark Stenquist) + HIPAA/PCI specialist (TBD) on the funnel side; PBH product team + Linus Remote Assessments vendor (TBD) on the receiving side
 **Version:** 1.0-draft
 
-> This document governs the cryptographic handoff between PBH's marketing funnel (post-Stripe-payment) and the wellness app (post-payment assessment session). Both teams reference this doc; any change requires a version bump and sign-off from both sides.
+> This document governs the cryptographic handoff between PBH's marketing funnel (post-Stripe-payment) and the Linus Remote Assessments (post-payment assessment session). Both teams reference this doc; any change requires a version bump and sign-off from both sides.
 
 ---
 
 ## 1. Purpose
 
-After a user pays $149 via the funnel, the funnel must hand them off to the wellness app to begin the cognitive assessment. The handoff must:
+After a user pays $149 via the funnel, the funnel must hand them off to the Linus Remote Assessments to begin the cognitive assessment. The handoff must:
 
-- Prove to the wellness app that this user has paid (without re-checking with Stripe)
-- Carry identifiers the wellness app needs to start a session (Stripe Customer, PBH user ID, payment reference)
+- Prove to the Linus Remote Assessments that this user has paid (without re-checking with Stripe)
+- Carry identifiers the Linus Remote Assessments needs to start a session (Stripe Customer, PBH user ID, payment reference)
 - Be tamper-proof, short-lived, and replay-resistant
 - Contain no PHI or health data (those flow server-to-server post-handoff)
-- Survive cross-domain redirects (`primarybrainhealth.com` → wellness app domain)
+- Survive cross-domain redirects (`primarybrainhealth.com` → Linus Remote Assessments domain)
 
 A signed token (JWT, RS256) achieves all of these.
 
@@ -27,7 +27,7 @@ A signed token (JWT, RS256) achieves all of these.
 **JWT (RFC 7519)** signed with **RS256** (RSA + SHA-256, 2048-bit minimum).
 
 Why RS256 over HS256:
-- Asymmetric — private key stays on the funnel side, public key shared with the wellness-app vendor. Wellness-app vendor can verify without holding the signing secret. Lower coordination burden, lower blast radius on key compromise.
+- Asymmetric — private key stays on the funnel side, public key shared with the Linus Remote Assessments vendor. Linus Remote Assessments vendor can verify without holding the signing secret. Lower coordination burden, lower blast radius on key compromise.
 - Industry standard for cross-team / cross-vendor token exchange.
 
 ---
@@ -51,21 +51,21 @@ Why RS256 over HS256:
 
 | Claim | Type | Purpose |
 | :---- | :---- | :---- |
-| `iss` | string | Issuer (funnel domain). Wellness app validates this matches the expected issuer |
-| `aud` | string | Audience (wellness app domain). Prevents tokens issued for one app being replayed at another |
+| `iss` | string | Issuer (funnel domain). Linus Remote Assessments validates this matches the expected issuer |
+| `aud` | string | Audience (Linus Remote Assessments domain). Prevents tokens issued for one app being replayed at another |
 | `sub` | UUID | PBH user ID (subject of the handoff) |
 | `iat` | unix timestamp | Issued-at time |
 | `exp` | unix timestamp | Expiration time (`iat + 600`, i.e. 10 minutes) |
 | `jti` | UUIDv4 | Unique token ID — used for replay protection |
-| `cust_id` | string | Stripe Customer ID — lets wellness app re-use the saved payment method for any downstream charges |
+| `cust_id` | string | Stripe Customer ID — lets Linus Remote Assessments re-use the saved payment method for any downstream charges |
 | `pay_ref` | string | Stripe PaymentIntent ID — proof of which payment this handoff corresponds to |
 | `hsa_fsa` | boolean | Whether the payment was made with an HSA/FSA card (drives receipt formatting and downstream UX) |
-| `contract_v` | string | Contract version — wellness app can route differently if future versions add claims |
+| `contract_v` | string | Contract version — Linus Remote Assessments can route differently if future versions add claims |
 
 **What's NOT in the token:**
-- Name, email, DOB, address — wellness app fetches these from PBH's identity API using `sub`
+- Name, email, DOB, address — Linus Remote Assessments fetches these from PBH's identity API using `sub`
 - Any clinical or health data — none exists at this point in the flow anyway
-- Payment amount, card details — wellness app fetches from Stripe using `pay_ref` if needed
+- Payment amount, card details — Linus Remote Assessments fetches from Stripe using `pay_ref` if needed
 - Plaintext secrets of any kind
 
 ---
@@ -75,7 +75,7 @@ Why RS256 over HS256:
 `exp - iat = 600 seconds (10 minutes)`
 
 **Rationale:**
-- Long enough to handle: confirmation page render → user click → cross-domain redirect → wellness app session creation → potential retry on first load
+- Long enough to handle: confirmation page render → user click → cross-domain redirect → Linus Remote Assessments session creation → potential retry on first load
 - Short enough to limit the replay window for stolen/leaked tokens
 - 10 min is the industry sweet spot for redirect-handoff tokens (Auth0, Okta, Stripe Connect OAuth all use 5-15 min)
 
@@ -114,16 +114,16 @@ The browser then performs `window.location = redirect_url`.
 
 ---
 
-## 6. Validation flow (wellness app side)
+## 6. Validation flow (Linus Remote Assessments side)
 
-On receiving a token (query param or POST body — vendor's choice), the wellness app MUST:
+On receiving a token (query param or POST body — vendor's choice), the Linus Remote Assessments MUST:
 
 1. **Decode** the JWT header to get `kid` (key ID, e.g. `"v1"`)
-2. **Look up** the public key matching `kid` from the wellness app's key store
+2. **Look up** the public key matching `kid` from the Linus Remote Assessments's key store
 3. **Verify** the RS256 signature using that public key
 4. **Validate** standard JWT claims:
    - `iss` exactly equals `"primarybrainhealth.com"`
-   - `aud` exactly equals the wellness app's expected audience
+   - `aud` exactly equals the Linus Remote Assessments's expected audience
    - `exp` is in the future (UTC, with no clock-skew tolerance beyond 30 seconds)
    - `iat` is not in the future (sanity check)
 5. **Check replay:** look up `jti` in the `processed_tokens` table
@@ -131,7 +131,7 @@ On receiving a token (query param or POST body — vendor's choice), the wellnes
    - If not found → continue
 6. **Persist** `jti` to `processed_tokens` with `processed_at = now()` (TTL 24 hours)
 7. **Start session** for `sub` (user_id), referencing `cust_id` and `pay_ref` as needed
-8. **Audit log** on wellness-app side: `HANDOFF_TOKEN_VALIDATED` (jti, validation result, latency)
+8. **Audit log** on Linus Remote Assessments side: `HANDOFF_TOKEN_VALIDATED` (jti, validation result, latency)
 
 If any step fails, return `401 Unauthorized` and log the failure with the specific reason. Do not start the session.
 
@@ -140,7 +140,7 @@ If any step fails, return `401 Unauthorized` and log the failure with the specif
 ## 7. Replay protection
 
 - Every token has a `jti` (UUIDv4)
-- Wellness app maintains a `processed_tokens(jti, processed_at)` table
+- Linus Remote Assessments maintains a `processed_tokens(jti, processed_at)` table
 - `jti` is persisted for 24 hours after first use (well beyond the 10-min TTL — catches replays of already-expired tokens too)
 - Funnel never re-issues a token with the same `jti` (UUIDv4 collision probability is effectively zero)
 - Funnel's `/api/handoff/token` is idempotent on `payment_intent.id` — same payment can produce multiple tokens (new `jti` each time) but always points to the same paid session
@@ -151,27 +151,27 @@ If any step fails, return `401 Unauthorized` and log the failure with the specif
 
 **Key storage:**
 - **Signing key (private):** funnel side only. Stored as Vercel environment variable `HANDOFF_SIGNING_KEY` (2048-bit RSA PEM). Never logged, never exposed in API responses.
-- **Verification key (public):** shared with the wellness-app vendor via secure channel (signed PR into their repo, or 1Password vault share). Public — can be rotated openly.
-- **Key version envelope:** `HANDOFF_KEY_VERSION` env var (e.g. `"v1"`, `"v2"`) included in JWT header as `kid`. Lets wellness app hold multiple keys during rotation overlap.
+- **Verification key (public):** shared with the Linus Remote Assessments vendor via secure channel (signed PR into their repo, or 1Password vault share). Public — can be rotated openly.
+- **Key version envelope:** `HANDOFF_KEY_VERSION` env var (e.g. `"v1"`, `"v2"`) included in JWT header as `kid`. Lets Linus Remote Assessments hold multiple keys during rotation overlap.
 
 **Routine rotation:** every 6 months, or sooner on incident.
 
 **Rotation procedure (non-emergency):**
 
 1. **T+0** — Generate new RSA keypair (`v2`)
-2. **T+0** — Distribute `v2` public key to wellness-app vendor; they load it alongside `v1`
-3. **T+24h** — Confirm wellness app reports both keys loaded
+2. **T+0** — Distribute `v2` public key to Linus Remote Assessments vendor; they load it alongside `v1`
+3. **T+24h** — Confirm Linus Remote Assessments reports both keys loaded
 4. **T+24h** — Funnel switches `HANDOFF_KEY_VERSION` to `v2`. New tokens signed with v2, old in-flight tokens still verified against v1 (overlap)
 5. **T+72h** — Confirm no v1-signed tokens have been seen for >24h (TTL has fully expired)
-6. **T+72h** — Wellness app drops v1 public key. Funnel can scrub `v1` private key from env vars.
+6. **T+72h** — Linus Remote Assessments drops v1 public key. Funnel can scrub `v1` private key from env vars.
 
-**Emergency rotation:** if `v1` private key is compromised, skip the overlap. Wellness app drops `v1` public key immediately. Any in-flight v1-signed tokens will fail validation; users see "session expired" UX and can request a fresh token via the resume-link email flow.
+**Emergency rotation:** if `v1` private key is compromised, skip the overlap. Linus Remote Assessments drops `v1` public key immediately. Any in-flight v1-signed tokens will fail validation; users see "session expired" UX and can request a fresh token via the resume-link email flow.
 
 ---
 
 ## 9. Error handling
 
-| Failure mode | Wellness app response | User-facing UX | Severity |
+| Failure mode | Linus Remote Assessments response | User-facing UX | Severity |
 | :---- | :---- | :---- | :---- |
 | Invalid signature | 401 | "Session error — contact support" | Alert (potential attack or key drift) |
 | Expired (`exp < now`) | 401 | "Session expired — click here to resume" (re-fetches token) | Info (normal) |
@@ -190,7 +190,7 @@ If any step fails, return `401 Unauthorized` and log the failure with the specif
 - `HANDOFF_TOKEN_ISSUED` — actor=user_id, payload={ jti, payment_ref, exp, contract_v }
 - `HANDOFF_TOKEN_REQUEST_FAILED` — when /api/handoff/token returns non-200, with reason
 
-**Wellness app side** (vendor's audit log):
+**Linus Remote Assessments side** (vendor's audit log):
 
 - `HANDOFF_TOKEN_VALIDATED` — jti, validation result, latency, user_id (sub)
 - `HANDOFF_TOKEN_REJECTED` — jti, reject reason (signature / expired / replayed / etc.)
@@ -205,7 +205,7 @@ PBH should be able to correlate funnel-side `ISSUED` with wellness-side `VALIDAT
 
 **Explicitly NOT in scope:** name, email, DOB, address, payment amount, payment method last-4, any clinical/health data, any consent text.
 
-**Why:** the token may transit through the browser URL bar, be captured in browser history, or appear in webhook capture tools. Keep it identifier-only. Any data the wellness app needs beyond identifiers, it fetches server-to-server via PBH's identity API (authenticated separately, not via this token).
+**Why:** the token may transit through the browser URL bar, be captured in browser history, or appear in webhook capture tools. Keep it identifier-only. Any data the Linus Remote Assessments needs beyond identifiers, it fetches server-to-server via PBH's identity API (authenticated separately, not via this token).
 
 ---
 
@@ -218,12 +218,12 @@ PBH should be able to correlate funnel-side `ISSUED` with wellness-side `VALIDAT
 - ✅ **Replay** — `jti` + `processed_tokens` table
 - ✅ **Eavesdropping in transit** — TLS 1.2+ enforced on both domains (cookie-domain config plus HSTS)
 - ✅ **Stolen old signing key** — version envelope + rotation procedure
-- ✅ **Misdirection between apps** — `aud` claim ties token to specific wellness-app domain
+- ✅ **Misdirection between apps** — `aud` claim ties token to specific Linus Remote Assessments domain
 
 **NOT addressed (out of contract scope, handled elsewhere or accepted):**
 
 - ❌ User-side malware capturing the redirect URL → orthogonal to handoff design; mitigated by short TTL
-- ❌ Vulnerabilities in the wellness app itself → wellness-app vendor's responsibility
+- ❌ Vulnerabilities in the Linus Remote Assessments itself → Linus Remote Assessments vendor's responsibility
 - ❌ Stripe-side compromises → Stripe's responsibility (PCI DSS / SAQ-A)
 - ❌ Social engineering of PBH staff to leak the private key → operational security, not contract scope
 - ❌ Quantum attacks on RS256 → not a near-term threat; revisit at next major contract version
@@ -236,7 +236,7 @@ Any change to this document — new claims, TTL adjustment, algorithm change, et
 
 1. Version bump (`contract_v` increments)
 2. Updated public key if signing keys change
-3. Written sign-off from both teams (funnel + wellness app)
+3. Written sign-off from both teams (funnel + Linus Remote Assessments)
 4. Coordinated rollout (overlap window like a key rotation)
 5. Audit-log row noting the change
 
@@ -246,11 +246,11 @@ Backward compatibility for at least one minor version is expected (i.e. v1.1 sho
 
 ## 14. Open decisions (to confirm in Phase 1 discovery)
 
-- **Wellness app domain** — currently assumed `app.primarybrainhealth.com`; needs vendor confirmation
+- **Linus Remote Assessments domain** — currently assumed `app.primarybrainhealth.com`; needs vendor confirmation
 - **Token transport** — query parameter `?token=...` (simplest) vs POST body (more secure but requires client to make a POST). Recommendation: query param with `Referrer-Policy: no-referrer` on the redirect to prevent leakage
 - **Vendor's session model** — does their session creation accept all our claims or do they need additional fields? Lock in discovery
 - **Key rotation cadence** — proposing 6 months; vendor may prefer different (quarterly is common)
-- **Multi-region considerations** — if wellness app is multi-region, all regions need synchronized `processed_tokens` (or accept reduced replay window per region)
+- **Multi-region considerations** — if Linus Remote Assessments is multi-region, all regions need synchronized `processed_tokens` (or accept reduced replay window per region)
 
 ---
 
@@ -265,7 +265,7 @@ Backward compatibility for at least one minor version is expected (i.e. v1.1 sho
 ## Appendix A: Sample issuance + validation sequence
 
 ```
-Browser            Funnel (PBH)         Wellness App (vendor)        Audit
+Browser            Funnel (PBH)         Linus Remote Assessments (vendor)        Audit
    │                  │                       │                       │
    │  Click "Start"   │                       │                       │
    ├─────────────────►│                       │                       │
@@ -300,7 +300,7 @@ Browser            Funnel (PBH)         Wellness App (vendor)        Audit
 ## Appendix B: Sample failure (replayed token)
 
 ```
-Browser            Funnel               Wellness App                  Audit
+Browser            Funnel               Linus Remote Assessments                  Audit
    │                  │                       │                       │
    │  (attacker has captured a valid token from an earlier session)   │
    │                                          │                       │

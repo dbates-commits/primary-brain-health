@@ -15,6 +15,34 @@
       "when": 1782155388318,
       "tag": "0001_talented_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782311976094,
+      "tag": "0002_organic_lake",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782409013664,
+      "tag": "0003_equal_stark_industries",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782500442406,
+      "tag": "0004_brief_harry_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782504284201,
+      "tag": "0005_sharp_the_renegades",
+      "breakpoints": true
     }
   ]
 }

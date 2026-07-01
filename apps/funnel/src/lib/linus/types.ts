@@ -1,0 +1,78 @@
+/**
+ * Shapes for the Linus Health Public API (see docs/linus/Linus Health Public
+ * API.pdf). We only model the fields we send/read; the API returns more on the
+ * subject/enrollment records than is typed here.
+ */
+
+/** One configured assessment battery, from `lib/linus/campaigns.ts`. */
+export interface LinusCampaign {
+  /** Short key we use internally (e.g. "LHQ", "ePSOM", "DAC"). */
+  key: string;
+  /** Display title shown on the card (e.g. "DAC / Digital Assessment of Cognition"). */
+  name: string;
+  /** Linus campaign UUID — differs between sandbox and production. */
+  campaignId: string;
+  /** One-line description shown under the title on the card. */
+  description?: string;
+  /** Duration label, e.g. "less than 10 min". */
+  duration?: string;
+  /** Optional link target for the "Assessment Information" card link. */
+  infoUrl?: string;
+  /** Sort order; lowest first. The first card renders under "Start Here". */
+  order: number;
+  /**
+   * Whether this campaign generates a retrievable patient report. Defaults to
+   * `false` (today only LHQ does). Set `true` for campaigns Linus produces a
+   * report for; otherwise a completed card settles into "Completed" instead of
+   * spinning on "Report generating…" forever (the report probe would 404).
+   */
+  producesReport?: boolean;
+}
+
+/** Linus `sexAssignedAtBirth` enum (also the canonical `users.gender` values). */
+export type SexAssignedAtBirth = "MALE" | "FEMALE" | "INTERSEX" | "OTHER";
+
+/** For healthcare use cases Linus requires a birth date (`YYYY-MM-DD`). */
+export interface AgeIndicator {
+  birthDate: string;
+}
+
+/** Request body for `POST /v1/participants`. */
+export interface RegisterSubjectInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  sexAssignedAtBirth: SexAssignedAtBirth;
+  /** Linus `education` enum (`ED_YEARS_*`); omitted when we don't have it. */
+  education?: string;
+  ageIndicator: AgeIndicator;
+  consent: boolean;
+}
+
+/** Subset of the registered-subject record we rely on. */
+export interface Subject {
+  participantId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+/** Response from `POST /v1/participants/{id}/enrollments`. */
+export interface Enrollment {
+  enrollmentId: string;
+  participantId: string;
+  campaignId: string;
+  /** Link the subject uses to take the battery online. */
+  redirect: string;
+}
+
+export type ReportType = "patient-report" | "provider-report";
+
+/** One item from `GET .../reports/{reportType}` (the response is an array). */
+export interface ReportItem {
+  enrollmentId: string;
+  participantId: string;
+  reportType: ReportType;
+  /** Base64-encoded PDF. */
+  reportData: string;
+}
