@@ -37,6 +37,19 @@ function formatPhone(value: string): string {
   return `(${area}) ${prefix}-${line}`;
 }
 
+/**
+ * Date exactly 18 years ago today, as `YYYY-MM-DD`. Set as the date input's
+ * `max` so an empty picker opens at (current year − 18) instead of today —
+ * landing the user in the right decade for an adult birth year.
+ */
+function maxAdultBirthDate(): string {
+  const now = new Date();
+  const year = now.getFullYear() - 18;
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function DetailsForm({
   userId,
   name,
@@ -115,6 +128,7 @@ export function DetailsForm({
                 name="dateOfBirth"
                 type="date"
                 autoComplete="bday"
+                max={maxAdultBirthDate()}
                 required
                 aria-required="true"
                 aria-invalid={fieldErrors?.dateOfBirth ? true : undefined}
