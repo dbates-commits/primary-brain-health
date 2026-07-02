@@ -1,22 +1,14 @@
-import { Button, Container, Heading } from "@pbh/ui";
+import { StepFlow } from "./get-started/StepFlow";
 
-export default function FunnelHome() {
+/**
+ * Funnel home. The booking flow (account creation → details → consent → Stripe
+ * payment) is the landing experience and lives directly on `/`. Supporting
+ * modules stay colocated under `get-started/`, which is no longer a route.
+ */
+export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <Container size="narrow" className="py-24 text-center">
-        <Heading as="h1" size="xl" className="text-primary">
-          Primary Brain Health
-        </Heading>
-        <p className="mt-6 text-lg text-on-surface-variant">
-          The funnel app. Account creation, consent capture, Stripe payment, and
-          the signed-token handoff live here.
-        </p>
-        <div className="mt-10">
-          <Button href="/get-started" color="primary" size="lg">
-            Get started
-          </Button>
-        </div>
-      </Container>
+    <main>
+      <StepFlow />
     </main>
   );
 }

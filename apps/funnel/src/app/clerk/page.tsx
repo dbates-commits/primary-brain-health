@@ -31,7 +31,7 @@ export default async function ClerkPage() {
             <SignIn
               routing="hash"
               forceRedirectUrl="/clerk/complete"
-              signUpUrl="/sign-up"
+              signUpUrl="/"
             />
           </div>
         </Container>

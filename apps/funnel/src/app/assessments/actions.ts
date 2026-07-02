@@ -12,36 +12,8 @@ import { provisionClerkUserForPayingUser } from "@/lib/auth/clerk/provision";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
-  runRegisterAndEnroll,
   type LinusState,
 } from "./register-and-enroll";
-
-/**
- * Form action for the `/login` email sign-in. On success we drop the assessment
- * session cookie for that user (so the page and report route, which auth via the
- * cookie, work) and forward to /assessments. On failure we return the error
- * state so the form can show it inline.
- */
-export async function registerAndEnroll(
-  _prev: LinusState,
-  formData: FormData,
-): Promise<LinusState> {
-  const email = String(formData.get("email") ?? "");
-  const state = await runRegisterAndEnroll(email);
-  if (state.status !== "success") {
-    return state;
-  }
-
-  const [user] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, email.trim()))
-    .limit(1);
-  if (user) {
-    await establishAssessmentSession(user.id);
-  }
-  redirect("/assessments");
-}
 
 /**
  * Payment step submit: register + enroll the paying user server-side, drop a

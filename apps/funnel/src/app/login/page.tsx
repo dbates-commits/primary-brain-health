@@ -1,20 +1,31 @@
-import { Container, Section } from "@pbh/ui";
-import { LoginForm } from "./LoginForm";
+import { SignIn } from "@clerk/nextjs";
+import { Container, Heading, Section } from "@pbh/ui";
 
 export const metadata = {
   title: "Sign in",
 };
 
 /**
- * Temporary email sign-in page (placeholder for Clerk). On success the form sets
- * the assessment session cookie and redirects to /assessments.
+ * Sign in with Clerk (magic link). This is the canonical login route — the
+ * `/assessments` gate bounces here when there's no session. On success Clerk
+ * forwards to `/clerk/complete`, which maps the Clerk identity onto the shared
+ * assessment session cookie and lands the user on /assessments.
  */
 export default function LoginPage() {
   return (
     <main>
       <Section className="py-24">
         <Container size="narrow">
-          <LoginForm />
+          <Heading as="h1" size="lg" className="mb-8 text-center">
+            Sign in
+          </Heading>
+          <div className="flex justify-center">
+            <SignIn
+              routing="hash"
+              forceRedirectUrl="/clerk/complete"
+              signUpUrl="/"
+            />
+          </div>
         </Container>
       </Section>
     </main>

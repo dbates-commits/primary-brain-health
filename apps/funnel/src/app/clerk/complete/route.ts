@@ -13,14 +13,14 @@ import { completeProviderLogin } from "@/lib/auth/complete-login";
 export async function GET(request: Request): Promise<NextResponse> {
   const user = await currentUser();
   if (!user) {
-    return NextResponse.redirect(new URL("/clerk", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const email =
     user.primaryEmailAddress?.emailAddress ??
     user.emailAddresses[0]?.emailAddress;
   if (!email) {
-    return NextResponse.redirect(new URL("/clerk", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   await completeProviderLogin({
