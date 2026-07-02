@@ -1,3 +1,4 @@
+import {ClerkProvider} from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -21,7 +22,11 @@ export default function RootLayout({
         />
         <link rel="stylesheet" href="https://use.typekit.net/qrz4jhn.css" />
       </head>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <ClerkProvider>
+          {children}
+        </ClerkProvider>
+      </body>
     </html>
   );
 }

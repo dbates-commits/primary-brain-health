@@ -7,21 +7,13 @@ import { db } from "@/db/client";
 import { linusEnrollments, users } from "@/db/schema";
 import { extractReportData, getReport } from "@/lib/linus/client";
 import { getCampaigns } from "@/lib/linus/campaigns";
+import { establishAssessmentSession } from "@/lib/auth/session";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
   runRegisterAndEnroll,
   type LinusState,
 } from "./register-and-enroll";
-
-/** Short-lived cookie identifying whose assessments/reports to serve. */
-const ASSESSMENT_COOKIE_OPTS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  path: "/",
-  maxAge: 60 * 60,
-};
 
 /**
  * Form action for the `/login` email sign-in. On success we drop the assessment
@@ -45,7 +37,7 @@ export async function registerAndEnroll(
     .where(eq(users.email, email.trim()))
     .limit(1);
   if (user) {
-    (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
+    await establishAssessmentSession(user.id);
   }
   redirect("/assessments");
 }
@@ -70,7 +62,7 @@ export async function completeAssessmentSetup(
     return state;
   }
 
-  (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, ASSESSMENT_COOKIE_OPTS);
+  await establishAssessmentSession(userId);
   redirect("/assessments");
 }
 
