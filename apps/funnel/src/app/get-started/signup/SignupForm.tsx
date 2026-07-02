@@ -19,8 +19,11 @@ export type SignupResult = {
 
 export function SignupForm({
   onComplete,
+  variant = "default",
 }: {
   onComplete: (result: SignupResult) => void;
+  /** `hero` drops the step header and shows the marketing booking CTA. */
+  variant?: "default" | "hero";
 }) {
   const [state, action, pending] = useActionState(createAccount, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -43,7 +46,9 @@ export function SignupForm({
 
   return (
     <div className="flex flex-col gap-8">
-      <StepHeader title="Get started" subtitle="Create your account to begin." />
+      {variant === "default" ? (
+        <StepHeader title="Get started" subtitle="Create your account to begin." />
+      ) : null}
 
       <form action={action} noValidate>
         <fieldset
@@ -117,8 +122,20 @@ export function SignupForm({
             </p>
           )}
 
-          <Button type="submit" color="primary" className="h-14 w-full text-base">
-            {pending ? "Creating account…" : "Create account"}
+          <Button
+            type="submit"
+            color={variant === "hero" ? "white" : "primary"}
+            className={
+              variant === "hero"
+                ? "h-14 w-full text-base font-bold text-[#45474d] shadow-[0px_8px_12px_rgba(0,0,0,0.12)]"
+                : "h-14 w-full text-base"
+            }
+          >
+            {pending
+              ? "Creating account…"
+              : variant === "hero"
+                ? "Book Your Assessment and Consultation"
+                : "Create account"}
           </Button>
         </fieldset>
       </form>

@@ -5,13 +5,18 @@ import { SignupForm, type SignupResult } from "./signup";
 import { DetailsForm } from "./details";
 import { ConsentForm } from "./consent";
 import { PaymentStep } from "./payment";
+import { BookingHero } from "./BookingHero";
+import { ResumeBooking } from "./ResumeBooking";
+import { Modal } from "@/components/Modal";
 
 /**
- * Single-page stepper for the get-started funnel. State lives in client memory
- * for the session: `step` is the current index into STEPS, `context` is data
- * accumulated across steps (userId/email from signup, …).
+ * Booking flow for the get-started funnel. The first step (signup: name + email)
+ * renders inline in the marketing-style hero card; once the account exists the
+ * remaining steps (details → consent → payment) run inside a modal. State lives
+ * in client memory for the session: `stepIndex` is the current index into STEPS,
+ * `context` is data accumulated across steps, `modalOpen` gates the dialog.
  *
- * To add a step later: add an entry to STEPS and a case to renderStep — the
+ * To add a step later: add an entry to STEPS and a case to renderModalStep — the
  * advance/merge plumbing stays the same.
  */
 const STEPS = ["signup", "details", "consent", "payment", "done"] as const;
@@ -27,6 +32,7 @@ type FlowContext = {
 export function StepFlow() {
   const [stepIndex, setStepIndex] = useState(0);
   const [context, setContext] = useState<FlowContext>({});
+  const [modalOpen, setModalOpen] = useState(false);
 
   const advance = useCallback((partial: FlowContext = {}) => {
     setContext((prev) => ({ ...prev, ...partial }));
@@ -41,6 +47,8 @@ export function StepFlow() {
         firstName: result.firstName,
         lastName: result.lastName,
       });
+      // Account created — collect the rest in the modal.
+      setModalOpen(true);
     },
     [advance],
   );
@@ -50,47 +58,73 @@ export function StepFlow() {
   }, [advance]);
 
   const step: Step = STEPS[stepIndex];
+  const bookingStarted = Boolean(context.userId);
 
-  switch (step) {
-    case "signup":
-      return <SignupForm onComplete={handleSignupComplete} />;
+  function renderModalStep() {
+    switch (step) {
+      case "details":
+        // userId is guaranteed once we've advanced past signup.
+        return (
+          <DetailsForm
+            userId={context.userId ?? ""}
+            name={context.firstName ?? ""}
+            onComplete={handleStepComplete}
+          />
+        );
 
-    case "details":
-      // userId is guaranteed once we've advanced past signup.
-      return (
-        <DetailsForm
-          userId={context.userId ?? ""}
-          name={context.firstName ?? ""}
-          onComplete={handleStepComplete}
-        />
-      );
+      case "consent":
+        return (
+          <ConsentForm
+            userId={context.userId ?? ""}
+            onComplete={handleStepComplete}
+          />
+        );
 
-    case "consent":
-      // userId is guaranteed once we've advanced past signup.
-      return (
-        <ConsentForm
-          userId={context.userId ?? ""}
-          onComplete={handleStepComplete}
-        />
-      );
+      case "payment":
+        // Paying registers + enrolls server-side and forwards to /assessments,
+        // so this step navigates away rather than advancing the stepper.
+        return <PaymentStep userId={context.userId ?? ""} />;
 
-    case "payment":
-      // Paying registers + enrolls server-side and forwards to /assessments, so
-      // this step navigates away rather than advancing the in-page stepper.
-      return <PaymentStep userId={context.userId ?? ""} />;
+      case "done":
+        return (
+          <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-6">
+            <p className="font-headline text-lg text-primary">
+              You&apos;re all set 🎉
+            </p>
+            <p className="mt-2 text-on-surface-variant">
+              Welcome aboard — we&apos;ve created your account for{" "}
+              <strong>{context.email}</strong>, saved your consent, and taken
+              payment.
+            </p>
+          </div>
+        );
 
-    case "done":
-      return (
-        <div className="mt-8 rounded-xl border border-secondary/30 bg-secondary/5 p-6">
-          <p className="font-headline text-lg text-primary">
-            You&apos;re all set 🎉
-          </p>
-          <p className="mt-2 text-on-surface-variant">
-            Welcome aboard — we&apos;ve created your account for{" "}
-            <strong>{context.email}</strong>, saved your consent, and taken
-            payment.
-          </p>
-        </div>
-      );
+      // "signup" is never shown in the modal — it lives in the hero.
+      default:
+        return null;
+    }
   }
+
+  return (
+    <>
+      <BookingHero>
+        {bookingStarted ? (
+          <ResumeBooking
+            firstName={context.firstName}
+            onResume={() => setModalOpen(true)}
+          />
+        ) : (
+          <SignupForm variant="hero" onComplete={handleSignupComplete} />
+        )}
+      </BookingHero>
+
+      <Modal
+        open={modalOpen && bookingStarted}
+        onClose={() => setModalOpen(false)}
+        label="Complete your assessment booking"
+      >
+        {renderModalStep()}
+      </Modal>
+    </>
+  );
 }
