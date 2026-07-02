@@ -5,6 +5,7 @@ import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { Button } from "@pbh/ui";
 import { ASSESSMENT_PRICE_CENTS, formatUsd } from "@/lib/stripe/pricing";
 import { finalizeAssessmentPayment } from "./actions";
+import { PaymentSuccess } from "./PaymentSuccess";
 
 /**
  * The card form itself. Must be rendered inside <Elements> (see PaymentStep) so
@@ -15,6 +16,7 @@ export function CheckoutForm({ userId }: { userId: string }) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
+  const [succeeded, setSucceeded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -39,11 +41,14 @@ export function CheckoutForm({ userId }: { userId: string }) {
     }
 
     if (paymentIntent && paymentIntent.status === "succeeded") {
-      // On success this verifies + enrolls, then redirects — so control usually
-      // doesn't return here. If it does, it's an error state to surface.
+      // The card is charged — show the success state now, then finalize. Finalize
+      // verifies + enrolls, then redirects, so control usually doesn't return
+      // here; if it does with an error, surface it and drop back to the form.
+      setSucceeded(true);
       const result = await finalizeAssessmentPayment(userId, paymentIntent.id);
       if (result.status === "error") {
         setError(result.message);
+        setSucceeded(false);
         setSubmitting(false);
       }
       return;
@@ -51,6 +56,10 @@ export function CheckoutForm({ userId }: { userId: string }) {
 
     setError("Payment didn't complete. Please try again.");
     setSubmitting(false);
+  }
+
+  if (succeeded) {
+    return <PaymentSuccess />;
   }
 
   return (
