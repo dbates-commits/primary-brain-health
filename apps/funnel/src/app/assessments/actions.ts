@@ -8,6 +8,7 @@ import { linusEnrollments, users } from "@/db/schema";
 import { extractReportData, getReport } from "@/lib/linus/client";
 import { getCampaigns } from "@/lib/linus/campaigns";
 import { establishAssessmentSession } from "@/lib/auth/session";
+import { provisionClerkUserForPayingUser } from "@/lib/auth/clerk/provision";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
@@ -61,6 +62,10 @@ export async function completeAssessmentSetup(
   if (state.status !== "success") {
     return state;
   }
+
+  // Provision a Clerk account for the paying user so they can sign in later at
+  // /clerk if they need to return. Non-fatal — never blocks the handoff.
+  await provisionClerkUserForPayingUser(userId);
 
   await establishAssessmentSession(userId);
   redirect("/assessments");
