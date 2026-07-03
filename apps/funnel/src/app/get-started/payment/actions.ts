@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "@/db/client";
-import { payments, users } from "@/db/schema";
+import { users } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
 import { getClientIp, hashIp } from "@/lib/request-meta";
 import { getStripe } from "@/lib/stripe/server";
@@ -13,6 +13,7 @@ import {
 } from "@/lib/stripe/pricing";
 import { completeAssessmentSetup } from "@/app/assessments/actions";
 import type { LinusState } from "@/app/assessments/register-and-enroll";
+import { recordSucceededPayment } from "./fulfill";
 
 export type CreateIntentResult =
   | { status: "ready"; clientSecret: string }
@@ -101,15 +102,11 @@ export async function finalizeAssessmentPayment(
       expand: ["latest_charge"],
     });
 
-    const belongsToUser = intent.metadata?.userId === id;
-    const rightAmount =
-      intent.amount === ASSESSMENT_PRICE_CENTS &&
-      intent.currency === ASSESSMENT_CURRENCY;
-    if (
-      intent.status !== "succeeded" ||
-      !belongsToUser ||
-      !rightAmount
-    ) {
+    // Extra assurance beyond the shared record path: the confirmed intent must
+    // belong to the caller we were handed (guards against a client passing a
+    // mismatched userId). Amount/currency/status are re-checked inside
+    // `recordSucceededPayment`.
+    if (intent.metadata?.userId !== id) {
       return {
         status: "error",
         email: "",
@@ -117,34 +114,17 @@ export async function finalizeAssessmentPayment(
       };
     }
 
-    // Card brand/last4 come off the latest charge (expanded above). Never store
-    // more than these non-sensitive fields — the PAN/CVV stay with Stripe.
-    const charge =
-      intent.latest_charge && typeof intent.latest_charge !== "string"
-        ? intent.latest_charge
-        : null;
-    const card = charge?.payment_method_details?.card ?? null;
-
-    await db
-      .insert(payments)
-      .values({
-        userId: id,
-        stripePaymentIntentId: intent.id,
-        amountCents: intent.amount,
-        currency: intent.currency,
-        status: "succeeded",
-        cardBrand: card?.brand ?? null,
-        cardLast4: card?.last4 ?? null,
-        succeededAt: new Date(),
-      })
-      .onConflictDoNothing({ target: payments.stripePaymentIntentId });
-
-    await writeAuditLog({
-      eventType: "payment_succeeded",
-      userId: id,
-      metadata: { paymentIntentId: intent.id, amountCents: intent.amount },
+    // Idempotent persist + gated audit, shared with the webhook backstop.
+    const recorded = await recordSucceededPayment(intent, {
       ipHash: hashIp(getClientIp(await headers())),
     });
+    if (recorded.status === "rejected") {
+      return {
+        status: "error",
+        email: "",
+        message: "We couldn't verify your payment. Please try again.",
+      };
+    }
     succeeded = true;
   } catch (err) {
     console.error("finalizeAssessmentPayment failed:", err);

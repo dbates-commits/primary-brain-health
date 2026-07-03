@@ -15,3 +15,23 @@ export function getStripeSecretKey(): string {
   }
   return key;
 }
+
+/**
+ * Signing secret for the Stripe webhook endpoint, used to verify that inbound
+ * events genuinely came from Stripe. Distinct per endpoint: the local Stripe
+ * CLI (`stripe listen`) prints its own `whsec_…`, and each hosted endpoint in
+ * the Stripe dashboard has a different one — set the matching value per Vercel
+ * environment.
+ */
+export function getStripeWebhookSecret(): string {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error(
+      "Stripe webhooks are not configured. Missing STRIPE_WEBHOOK_SECRET. " +
+        "Locally, run `stripe listen --forward-to localhost:3001/api/stripe/webhook` " +
+        "and paste the printed whsec_… into .env.local. On Vercel, set it per " +
+        "environment from the endpoint's signing secret.",
+    );
+  }
+  return secret;
+}
