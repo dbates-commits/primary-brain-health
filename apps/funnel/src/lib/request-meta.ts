@@ -26,6 +26,23 @@ export function getClientIp(headers: Headers): string | null {
 }
 
 /**
+ * Absolute origin (scheme + host) of the current request, for building URLs we
+ * hand to third parties — e.g. Stripe Checkout `success_url` / `cancel_url`.
+ * Prefers `NEXT_PUBLIC_APP_URL` when set, otherwise derives from proxy headers
+ * (`x-forwarded-proto` + `host`), which are populated locally and on Vercel.
+ * Falls back to http/localhost so it never throws during local dev.
+ */
+export function getOrigin(headers: Headers): string {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, "");
+  }
+  const host = headers.get("host") ?? "localhost:3001";
+  const proto = headers.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${host}`;
+}
+
+/**
  * Deterministic SHA-256 hash of the IP (same IP → same hash, so we can spot
  * repeat sources without storing the raw address). Keyed with HMAC when
  * `IP_HASH_SECRET` is configured. A null IP hashes a sentinel so the NOT NULL
