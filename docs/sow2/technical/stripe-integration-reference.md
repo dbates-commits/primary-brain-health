@@ -169,7 +169,7 @@ sequenceDiagram
         W-->>S: 200 (done)
     else enrollment fails (e.g. Linus down)
         W-->>S: 500 → Stripe retries w/ backoff
-        Note over W,S: payment already recorded;<br/>retry re-attempts enroll (idempotent)
+        Note over W,S: payment already recorded —<br/>retry re-attempts enroll (idempotent)
     end
     Note over B: user returns later via /login →<br/>already registered, sees assessments
 ```
