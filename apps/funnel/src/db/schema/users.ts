@@ -32,6 +32,14 @@ export const users = pgTable("users", {
   // subject. Persisted so we never re-register (which would create a duplicate
   // Linus subject) — once set, we reuse it and skip straight to enrollment.
   linusParticipantId: text("linus_participant_id").unique(),
+  // Atomic claim used to elect a single registrar when the client action and the
+  // webhook race to register a first-time subject (they run in separate
+  // instances, so this DB claim — not an in-process lock — is what serializes
+  // them). Set the moment a caller wins the right to call Linus; a staleness
+  // window lets a crashed registrar's claim be retried. See registerAndEnrollUser.
+  linusRegistrationClaimedAt: timestamp("linus_registration_claimed_at", {
+    withTimezone: true,
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -114,7 +114,12 @@ async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
     return;
   }
 
-  const enrolled = await registerAndEnrollUserById(recorded.userId);
+  // retryOnContention: if the client action is mid-first-registration, fail so
+  // Stripe redelivers rather than skipping enrollment — the registration claim
+  // guarantees only one of us actually registers the subject.
+  const enrolled = await registerAndEnrollUserById(recorded.userId, {
+    retryOnContention: true,
+  });
   if (enrolled.status === "error") {
     // Payment is safely recorded; surface as a retryable failure so Stripe
     // redelivers and we re-attempt enrollment (idempotent).
