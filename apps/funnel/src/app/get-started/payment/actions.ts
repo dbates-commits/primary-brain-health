@@ -7,6 +7,7 @@ import { users } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
 import { getClientIp, hashIp } from "@/lib/request-meta";
 import { getStripe } from "@/lib/stripe/server";
+import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 import {
   ASSESSMENT_CURRENCY,
   ASSESSMENT_PRICE_CENTS,
@@ -39,7 +40,7 @@ export async function createAssessmentPaymentIntent(
   }
 
   const [user] = await db
-    .select({ id: users.id, email: users.email })
+    .select()
     .from(users)
     .where(eq(users.id, id))
     .limit(1);
@@ -49,9 +50,14 @@ export async function createAssessmentPaymentIntent(
 
   try {
     const stripe = getStripe();
+    // Mirror the billing identity we already hold (name, email, ZIP, state) onto
+    // a Stripe Customer and attach it, so the charge is grouped under a durable
+    // object (and the saved card can be reused downstream later).
+    const customerId = await getOrCreateStripeCustomer(user);
     const intent = await stripe.paymentIntents.create({
       amount: ASSESSMENT_PRICE_CENTS,
       currency: ASSESSMENT_CURRENCY,
+      customer: customerId,
       receipt_email: user.email,
       automatic_payment_methods: { enabled: true, allow_redirects: "never" },
       metadata: { userId: id, product: "brain-health-assessment" },
