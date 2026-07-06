@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
+import { CheckoutElementsProvider } from "@stripe/react-stripe-js/checkout";
 import type { Appearance } from "@stripe/stripe-js";
 import { StepHeader } from "@/components/StepHeader";
 import { ASSESSMENT_PRICE_CENTS, formatUsd } from "@/lib/stripe/pricing";
 import { CheckoutForm } from "./CheckoutForm";
-import { createAssessmentPaymentIntent } from "./actions";
+import { createAssessmentCheckoutSession } from "./actions";
 
 // Publishable key is inlined at build; safe to expose to the client. Missing key
 // (e.g. env not set) → we render a configuration notice instead of crashing.
@@ -27,11 +27,12 @@ const appearance: Appearance = {
 };
 
 /**
- * Stripe Payment Element step (test mode). Fetches a PaymentIntent client secret
- * for this user, mounts the Payment Element, and on successful confirmation
- * hands off to `finalizeAssessmentPayment` (verify → persist → register/enroll),
- * then calls `onComplete` to advance the stepper to the confirmation screen. No
- * PII or card data ever touches our servers.
+ * Stripe Payment Element step (test mode). Creates a Checkout Session
+ * (`ui_mode: "elements"`) for this user, initializes the Payment Element via
+ * `CheckoutElementsProvider` with the session `client_secret`, and on successful
+ * confirmation hands off to `finalizeCheckoutSession` (verify → persist →
+ * register/enroll), then calls `onComplete` to advance the stepper to the
+ * confirmation screen. No PII or card data ever touches our servers.
  */
 export function PaymentStep({
   userId,
@@ -45,13 +46,13 @@ export function PaymentStep({
   const started = useRef(false);
 
   useEffect(() => {
-    // Guard against React's double-invoke in dev so we mint one intent per mount.
+    // Guard against React's double-invoke in dev so we mint one session per mount.
     if (started.current) {
       return;
     }
     started.current = true;
 
-    createAssessmentPaymentIntent(userId).then((result) => {
+    createAssessmentCheckoutSession(userId).then((result) => {
       if (result.status === "ready") {
         setClientSecret(result.clientSecret);
       } else {
@@ -91,12 +92,12 @@ export function PaymentStep({
       )}
 
       {stripePromise && clientSecret && (
-        <Elements
+        <CheckoutElementsProvider
           stripe={stripePromise}
-          options={{ clientSecret, appearance }}
+          options={{ clientSecret, elementsOptions: { appearance } }}
         >
           <CheckoutForm userId={userId} onComplete={onComplete} />
-        </Elements>
+        </CheckoutElementsProvider>
       )}
 
       {stripePromise && !clientSecret && !initError && (
