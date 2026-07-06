@@ -85,7 +85,8 @@ export async function createAssessmentPaymentIntent(
  * from Stripe (never trusting the client's word that it succeeded), assert it
  * succeeded for the right user / amount / currency, persist a `payments` row +
  * audit entry, then hand off to the existing register-and-enroll flow (which
- * drops the assessment cookie and redirects to /assessments).
+ * drops the assessment cookie and returns the success state — the client then
+ * advances to the confirmation step and links to /assessments).
  *
  * The `payments` insert is idempotent on the unique payment-intent id, so a
  * double-submit or retry can't create duplicate rows. Enrollment failures after
@@ -141,8 +142,9 @@ export async function finalizeAssessmentPayment(
     };
   }
 
-  // Payment is recorded — hand off to the shared register + enroll + redirect
-  // path (out of the try/catch so its NEXT_REDIRECT isn't swallowed).
+  // Payment is recorded — hand off to the shared register + enroll path, which
+  // drops the assessment cookie and returns the success state (no redirect); the
+  // client uses it to advance to the confirmation step.
   if (succeeded) {
     const formData = new FormData();
     formData.set("userId", id);

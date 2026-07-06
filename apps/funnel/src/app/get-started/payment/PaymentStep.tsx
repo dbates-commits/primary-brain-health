@@ -29,10 +29,17 @@ const appearance: Appearance = {
 /**
  * Stripe Payment Element step (test mode). Fetches a PaymentIntent client secret
  * for this user, mounts the Payment Element, and on successful confirmation
- * hands off to `finalizeAssessmentPayment` (verify → persist → register/enroll →
- * redirect to /assessments). No PII or card data ever touches our servers.
+ * hands off to `finalizeAssessmentPayment` (verify → persist → register/enroll),
+ * then calls `onComplete` to advance the stepper to the confirmation screen. No
+ * PII or card data ever touches our servers.
  */
-export function PaymentStep({ userId }: { userId: string }) {
+export function PaymentStep({
+  userId,
+  onComplete,
+}: {
+  userId: string;
+  onComplete: () => void;
+}) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const started = useRef(false);
@@ -88,7 +95,7 @@ export function PaymentStep({ userId }: { userId: string }) {
           stripe={stripePromise}
           options={{ clientSecret, appearance }}
         >
-          <CheckoutForm userId={userId} />
+          <CheckoutForm userId={userId} onComplete={onComplete} />
         </Elements>
       )}
 

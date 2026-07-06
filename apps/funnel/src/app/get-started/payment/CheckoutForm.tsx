@@ -9,9 +9,16 @@ import { finalizeAssessmentPayment } from "./actions";
 /**
  * The card form itself. Must be rendered inside <Elements> (see PaymentStep) so
  * the Stripe hooks resolve. On successful confirmation it hands off to
- * `finalizeAssessmentPayment` (verify → persist → register/enroll → redirect).
+ * `finalizeAssessmentPayment` (verify → persist → register/enroll) and, on
+ * success, calls `onComplete` so the stepper advances to the confirmation step.
  */
-export function CheckoutForm({ userId }: { userId: string }) {
+export function CheckoutForm({
+  userId,
+  onComplete,
+}: {
+  userId: string;
+  onComplete: () => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
@@ -39,13 +46,16 @@ export function CheckoutForm({ userId }: { userId: string }) {
     }
 
     if (paymentIntent && paymentIntent.status === "succeeded") {
-      // On success this verifies + enrolls, then redirects — so control usually
-      // doesn't return here. If it does, it's an error state to surface.
+      // Verify + persist + enroll server-side. On success advance to the
+      // confirmation step (kept `submitting` so the button stays disabled as the
+      // stepper swaps this form out); on error surface it inline.
       const result = await finalizeAssessmentPayment(userId, paymentIntent.id);
       if (result.status === "error") {
         setError(result.message);
         setSubmitting(false);
+        return;
       }
+      onComplete();
       return;
     }
 

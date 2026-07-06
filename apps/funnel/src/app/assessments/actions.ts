@@ -51,10 +51,12 @@ export async function registerAndEnroll(
 }
 
 /**
- * Payment step submit: register + enroll the paying user server-side, drop a
- * short-lived cookie identifying them, then forward to /assessments — so no
- * email or PII ends up in the URL. On failure we return the error state so the
- * payment step can show it inline (no redirect).
+ * Payment step submit: register + enroll the paying user server-side and drop a
+ * short-lived cookie identifying them (so /assessments, which auths via the
+ * cookie, works — no email or PII in the URL). Returns the success state rather
+ * than redirecting, so the funnel can show the "You're all set" confirmation and
+ * let the user continue to /assessments themselves. On failure we return the
+ * error state so the payment step can show it inline.
  *
  * NOTE: the cookie is an unsigned user id — acceptable for this unauthenticated
  * scaffold (it mirrors the details step's client-trusted userId). Gate this
@@ -71,7 +73,7 @@ export async function completeAssessmentSetup(
   }
 
   (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, ASSESSMENT_COOKIE_OPTS);
-  redirect("/assessments");
+  return state;
 }
 
 /** ASCII-safe, hyphenated slug for a download filename. */
