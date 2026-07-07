@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
+import { isValidEmail, normalizeEmail } from "@/lib/email";
 
 /** Non-secret fields echoed back so the form can repopulate after a reset. */
 export type SignupValues = {
@@ -28,15 +29,13 @@ export type SignupState =
       values: SignupValues;
     };
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
 export async function createAccount(
   _prev: SignupState,
   formData: FormData,
 ): Promise<SignupState> {
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
 
   // Echoed back on error so the form keeps what the user typed.
   const values: SignupValues = { firstName, lastName, email };
@@ -48,7 +47,7 @@ export async function createAccount(
   if (!lastName) {
     fieldErrors.lastName = "Enter your last name.";
   }
-  if (!EMAIL_RE.test(email)) {
+  if (!isValidEmail(email)) {
     fieldErrors.email = "Enter a valid email address.";
   }
 

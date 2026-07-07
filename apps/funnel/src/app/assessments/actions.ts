@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { linusEnrollments, users } from "@/db/schema";
 import { extractReportData, getReport } from "@/lib/linus/client";
 import { getCampaigns } from "@/lib/linus/campaigns";
+import { isValidEmail, normalizeEmail } from "@/lib/email";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
@@ -33,7 +34,10 @@ export async function registerAndEnroll(
   _prev: LinusState,
   formData: FormData,
 ): Promise<LinusState> {
-  const email = String(formData.get("email") ?? "");
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+  if (!isValidEmail(email)) {
+    return { status: "error", email, message: "Enter a valid email address." };
+  }
   const state = await runRegisterAndEnroll(email);
   if (state.status !== "success") {
     return state;
@@ -42,7 +46,7 @@ export async function registerAndEnroll(
   const [user] = await db
     .select({ id: users.id })
     .from(users)
-    .where(eq(users.email, email.trim()))
+    .where(eq(users.email, email))
     .limit(1);
   if (user) {
     (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
