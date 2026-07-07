@@ -80,6 +80,7 @@ export async function createAssessmentCheckoutSession(
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
       redirect_on_completion: "never",
+      locale: "en",
       mode: "payment",
       customer_email: user.email,
       payment_method_types: ["card"],
