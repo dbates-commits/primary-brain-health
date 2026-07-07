@@ -7,7 +7,6 @@ import { users } from "@/db/schema";
 import { writeAuditLog } from "@/db/audit";
 import { getClientIp, hashIp } from "@/lib/request-meta";
 import { getStripe } from "@/lib/stripe/server";
-import { getOrCreateStripeCustomer } from "@/lib/stripe/customer";
 import {
   ASSESSMENT_CURRENCY,
   ASSESSMENT_PRICE_CENTS,
@@ -73,15 +72,13 @@ export async function createAssessmentCheckoutSession(
 
   try {
     const stripe = getStripe();
-    // Mirror the billing identity we already hold (name, email, ZIP, state) onto
-    // a Stripe Customer and attach it, so the charge is grouped under a durable
-    // object (and the saved card can be reused downstream later).
-    const customerId = await getOrCreateStripeCustomer(user);
+    // One-time guest checkout — no Stripe Customer. We don't save cards for
+    // off-session reuse, so a durable Customer object buys nothing here; the
+    // receipt goes to `receipt_email` and the user is tracked via metadata.
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
       redirect_on_completion: "never",
       mode: "payment",
-      customer: customerId,
       payment_method_types: ["card"],
       line_items: [
         {

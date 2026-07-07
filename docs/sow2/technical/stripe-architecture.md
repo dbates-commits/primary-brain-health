@@ -60,9 +60,12 @@ Three SAQ-A-compatible flavors:
 > SAQ-A, cards + wallets + Link), so there's less UI to build and maintain while
 > the customer stays on-site; `redirect_on_completion: "never"` keeps them on the
 > page for the confirmation step. Branding moved from code (`appearance` tokens)
-> to the Stripe Dashboard. GA4/HubSpot/Resend receipt side effects and
-> `setup_future_usage` card-on-file remain deferred. See
-> [stripe-integration-reference.md](./stripe-integration-reference.md) for the
+> to the Stripe Dashboard. **No card-on-file:** the assessment is a one-time
+> **guest** charge — we create **no Stripe `Customer`** and set no
+> `setup_future_usage`, so the "Card on file" requirement row above, the
+> `Customer`/`PaymentMethod` handoff to Linus, and the `users.stripe_customer_id`
+> column no longer apply. GA4/HubSpot/Resend receipt side effects remain deferred.
+> See [stripe-integration-reference.md](./stripe-integration-reference.md) for the
 > as-built wiring.
 
 ---
