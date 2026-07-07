@@ -5,8 +5,9 @@ what keys are required, what endpoints exist, and how a payment moves through th
 system. For design rationale and the SAQ-A / HSA-FSA notes, see
 [stripe-architecture.md](./stripe-architecture.md); this doc is the "wiring".
 
-Scope: `apps/funnel`. Card data never touches PBH servers (Stripe-hosted Payment
-Element); the backend only handles Stripe objects.
+Scope: `apps/funnel`. Card data never touches PBH servers (Stripe-hosted
+**Embedded Checkout** — `ui_mode: "embedded_page"`); the backend only handles
+Stripe objects.
 
 ---
 
@@ -17,8 +18,8 @@ Vercel Production). Use **test** keys everywhere except Production.
 
 | Key | Where it lives | Exposure | What it's for |
 | :---- | :---- | :---- | :---- |
-| `STRIPE_SECRET_KEY` | server only | **secret** — never ship to client | Server-side Stripe SDK: create/retrieve PaymentIntents, verify webhook signatures |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | browser bundle | public (safe) | Loads Stripe.js + mounts the Payment Element in the browser |
+| `STRIPE_SECRET_KEY` | server only | **secret** — never ship to client | Server-side Stripe SDK: create/retrieve Checkout Sessions, verify webhook signatures |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | browser bundle | public (safe) | Loads Stripe.js + mounts Embedded Checkout in the browser |
 | `STRIPE_WEBHOOK_SECRET` | server only | **secret** | Verifies inbound webhook events actually came from Stripe |
 
 Key facts that trip people up:
@@ -49,15 +50,16 @@ Accessors: `getStripeSecretKey()` / `getStripeWebhookSecret()` in
 
 | Action | File | Purpose |
 | :---- | :---- | :---- |
-| `createAssessmentPaymentIntent(userId)` | `src/app/get-started/payment/actions.ts` | Creates the PaymentIntent, returns its `client_secret` to the Payment Element |
-| `finalizeAssessmentPayment(userId, intentId)` | same | Client fast path after confirm: re-verify → record → enroll → redirect |
+| `createAssessmentCheckoutSession(userId)` | `src/app/get-started/payment/actions.ts` | Creates the Checkout Session (`ui_mode: "embedded_page"`), returns its `client_secret` + `sessionId` to mount Embedded Checkout |
+| `finalizeCheckoutSession(userId, checkoutSessionId)` | same | Client fast path, called from Embedded Checkout's `onComplete`: re-verify → record → enroll → return success state to the stepper |
 
 ### Outbound (calls we make to Stripe)
 
 | Call | When |
 | :---- | :---- |
-| `paymentIntents.create(...)` | On reaching the payment step |
-| `paymentIntents.retrieve(id, { expand: ['latest_charge'] })` | On client finalize + inside the webhook (re-verify + capture brand/last4) |
+| `checkout.sessions.create(...)` | On reaching the payment step |
+| `checkout.sessions.retrieve(id, { expand: ['payment_intent.latest_charge'] })` | On client finalize (re-verify the Session's PaymentIntent + capture brand/last4) |
+| `paymentIntents.retrieve(id, { expand: ['latest_charge'] })` | Inside the webhook (re-verify + capture brand/last4) |
 | `webhooks.constructEvent(rawBody, sig, secret)` | Every inbound webhook (signature verification) |
 
 ### Stripe → us: subscribed events
@@ -74,7 +76,7 @@ Register these on the Dashboard endpoint (and they're what `route.ts` switches o
 
 | Host | Role |
 | :---- | :---- |
-| `js.stripe.com` | Stripe.js + Payment Element iframe (loaded in the browser) |
+| `js.stripe.com` | Stripe.js + Embedded Checkout iframe (loaded in the browser) |
 | `api.stripe.com` | Server-side SDK calls |
 | `<your-domain>/api/stripe/webhook` | Where Stripe POSTs events |
 
@@ -87,7 +89,7 @@ Register these on the Dashboard endpoint (and they're what `route.ts` switches o
 ```mermaid
 flowchart LR
     subgraph Browser
-        PE[Payment Element<br/>Stripe-hosted iframe]
+        PE[Embedded Checkout<br/>Stripe-hosted iframe]
     end
     subgraph Funnel[Funnel on Vercel]
         SA[Server actions<br/>create / finalize]
@@ -105,7 +107,7 @@ flowchart LR
     WH --> DB
     SA --> LN
     WH --> LN
-    PE -.client_secret.-> SA
+    PE -.client_secret + sessionId.-> SA
 ```
 
 ### 3.2 Happy path (client stays on the page)
@@ -116,26 +118,26 @@ overlap safe. The webhook typically lands a second or two after the client.
 ```mermaid
 sequenceDiagram
     autonumber
-    participant B as Browser (Payment Element)
+    participant B as Browser (Embedded Checkout)
     participant A as Server action
     participant S as Stripe
     participant W as Webhook route
     participant D as DB (payments/audit)
     participant L as Linus
 
-    B->>A: createAssessmentPaymentIntent(userId)
-    A->>S: paymentIntents.create (amount, metadata.userId)
-    S-->>A: client_secret
-    A-->>B: client_secret
-    B->>S: confirmPayment() (card entered in iframe)
-    S-->>B: succeeded
+    B->>A: createAssessmentCheckoutSession(userId)
+    A->>S: checkout.sessions.create (embedded_page, amount, metadata.userId)
+    S-->>A: client_secret + sessionId
+    A-->>B: client_secret + sessionId
+    B->>S: pay in Embedded Checkout form (card in iframe)
+    S-->>B: succeeded → onComplete (stays on page)
 
     par Client fast path
-        B->>A: finalizeAssessmentPayment(userId, intentId)
-        A->>S: retrieve intent (verify amount/user/status)
+        B->>A: finalizeCheckoutSession(userId, sessionId)
+        A->>S: retrieve session → PaymentIntent (verify amount/user/status)
         A->>D: upsert payments=succeeded + audit (once)
         A->>L: register + enroll
-        A-->>B: set cookie, redirect to /assessments
+        A-->>B: set cookie + return success state → stepper shows "You're all set" → user clicks Continue → /assessments
     and Webhook backstop
         S->>W: payment_intent.succeeded (signed)
         W->>W: verify signature (webhook secret)
@@ -160,8 +162,8 @@ sequenceDiagram
     participant D as DB
     participant L as Linus
 
-    B->>S: confirmPayment() succeeded
-    Note over B: tab closed / connection lost —<br/>finalize never runs
+    B->>S: pay in Embedded Checkout — succeeded
+    Note over B: tab closed / connection lost before<br/>onComplete — finalize never runs
     S->>W: payment_intent.succeeded (signed)
     W->>D: record payments=succeeded + audit
     W->>L: register + enroll
@@ -219,6 +221,10 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook   # prints whsec_�
    reach them — use `stripe listen` locally or a stable preview alias.
 4. **Keep the route public** — if middleware (e.g. Clerk) is added, exclude
    `/api/stripe/webhook`.
+5. **Branding is Dashboard-side.** Embedded Checkout renders Stripe's prebuilt
+   form, so brand colors/logo/fonts are set under **Stripe Dashboard → Settings →
+   Branding**, not via code (the old Elements `appearance` tokens are gone). Set
+   this per mode (test vs live) so Preview and Production match.
 
 No code changes are needed to deploy: the route is already serverless-ready
 (`runtime = 'nodejs'`, raw-body read, `force-dynamic`).
