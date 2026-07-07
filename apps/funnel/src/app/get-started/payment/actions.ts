@@ -17,32 +17,44 @@ import type { LinusState } from "@/app/assessments/register-and-enroll";
 import { recordSucceededPayment } from "./fulfill";
 
 export type CreateCheckoutResult =
-  | { status: "ready"; clientSecret: string }
+  | { status: "ready"; clientSecret: string; sessionId: string }
   | { status: "error"; message: string };
+
+// User-facing failure copy. Kept deliberately vague — the real cause goes to the
+// server logs, never to the customer.
+const ACCOUNT_NOT_FOUND = "We couldn't find your account.";
+const CHECKOUT_START_FAILED = "Couldn't start payment. Please try again.";
+const PAYMENT_UNCONFIRMED = "We couldn't confirm your payment.";
+const PAYMENT_UNVERIFIED = "We couldn't verify your payment. Please try again.";
+
+function checkoutError(message: string): CreateCheckoutResult {
+  return { status: "error", message };
+}
+
+function paymentError(message: string): LinusState {
+  return { status: "error", email: "", message };
+}
 
 /**
  * Start payment for the paying user: create a Stripe **Checkout Session**
- * (`ui_mode: "elements"`) for the fixed assessment price and hand its
- * `client_secret` back to the client, which initializes the Payment Element via
- * `CheckoutElementsProvider` and confirms with `checkout.confirm`. Stripe now
+ * (`ui_mode: "embedded_page"`) for the fixed assessment price and hand its
+ * `client_secret` back to the client, which mounts Stripe's full **Embedded
+ * Checkout** form via `EmbeddedCheckoutProvider`/`EmbeddedCheckout`. Stripe now
  * recommends the Checkout Sessions API over raw PaymentIntents; the Session
  * carries the line item, Customer, and metadata in one object.
  *
- * We pin the user id in `payment_intent_data.metadata` (which carries onto the
- * PaymentIntent the Session creates) so both `finalizeCheckoutSession` and the
- * webhook backstop can verify server-side that the payment belongs to this user.
- *
- * `payment_method_types: ["card"]` keeps the demo to inline (no-redirect) card
- * methods — incl. HSA/FSA — so the customer never actually leaves the page. The
- * client still passes a `returnUrl` to `checkout.confirm` (the SDK requires one),
- * but it's only used as a fallback if a redirect-based method is ever enabled.
+ * `redirect_on_completion: "never"` keeps the customer on our page after paying:
+ * Embedded Checkout fires its `onComplete` callback instead of redirecting, and
+ * the client then calls `finalizeCheckoutSession` with the returned `sessionId`
+ * (embedded `onComplete` passes no session object of its own). `payment_method_types:
+ * ["card"]` keeps the demo to inline (no-redirect) card methods — incl. HSA/FSA.
  */
 export async function createAssessmentCheckoutSession(
   userId: string,
 ): Promise<CreateCheckoutResult> {
   const id = userId.trim();
   if (!id) {
-    return { status: "error", message: "We couldn't find your account." };
+    return checkoutError(ACCOUNT_NOT_FOUND);
   }
 
   const [user] = await db
@@ -51,8 +63,13 @@ export async function createAssessmentCheckoutSession(
     .where(eq(users.id, id))
     .limit(1);
   if (!user) {
-    return { status: "error", message: "We couldn't find your account." };
+    return checkoutError(ACCOUNT_NOT_FOUND);
   }
+
+  // Pinned onto both the Session and the PaymentIntent it creates, so that
+  // `finalizeCheckoutSession` and the webhook backstop can each confirm
+  // server-side that the payment belongs to this user.
+  const metadata = { userId: id, product: "brain-health-assessment" };
 
   try {
     const stripe = getStripe();
@@ -61,7 +78,8 @@ export async function createAssessmentCheckoutSession(
     // object (and the saved card can be reused downstream later).
     const customerId = await getOrCreateStripeCustomer(user);
     const session = await stripe.checkout.sessions.create({
-      ui_mode: "elements",
+      ui_mode: "embedded_page",
+      redirect_on_completion: "never",
       mode: "payment",
       customer: customerId,
       payment_method_types: ["card"],
@@ -75,11 +93,8 @@ export async function createAssessmentCheckoutSession(
           },
         },
       ],
-      payment_intent_data: {
-        receipt_email: user.email,
-        metadata: { userId: id, product: "brain-health-assessment" },
-      },
-      metadata: { userId: id, product: "brain-health-assessment" },
+      payment_intent_data: { receipt_email: user.email, metadata },
+      metadata,
     });
 
     await writeAuditLog({
@@ -93,29 +108,63 @@ export async function createAssessmentCheckoutSession(
     });
 
     if (!session.client_secret) {
-      return { status: "error", message: "Couldn't start payment. Please try again." };
+      return checkoutError(CHECKOUT_START_FAILED);
     }
-    return { status: "ready", clientSecret: session.client_secret };
+    return {
+      status: "ready",
+      clientSecret: session.client_secret,
+      sessionId: session.id,
+    };
   } catch (err) {
     console.error("createAssessmentCheckoutSession failed:", err);
-    return { status: "error", message: "Couldn't start payment. Please try again." };
+    return checkoutError(CHECKOUT_START_FAILED);
   }
 }
 
 /**
- * Called after the client confirms the Payment Element (`checkout.confirm`). We
- * re-fetch the Checkout Session from Stripe (never trusting the client's word
- * that it succeeded), resolve its PaymentIntent, assert it succeeded for the
- * right user / amount / currency, persist a `payments` row + audit entry, then
- * hand off to the existing register-and-enroll flow (which drops the assessment
- * cookie and returns the success state — the client then advances to the
- * confirmation step and links to /assessments).
+ * Re-fetch the Checkout Session from Stripe (never trusting the client's word
+ * that it succeeded), resolve its PaymentIntent, confirm the charge belongs to
+ * `userId`, and persist it. Returns `true` once the payment is verified and
+ * recorded, `false` if anything about it can't be trusted. Amount, currency and
+ * status are re-checked inside `recordSucceededPayment`; the insert is idempotent
+ * on the payment-intent id, so a double-submit or retry can't duplicate rows.
+ */
+async function verifyAndRecordPayment(
+  userId: string,
+  sessionId: string,
+): Promise<boolean> {
+  const stripe = getStripe();
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ["payment_intent.latest_charge"],
+  });
+
+  const intent = session.payment_intent;
+  if (!intent || typeof intent === "string") {
+    return false;
+  }
+
+  // The confirmed intent must belong to the caller we were handed — guards
+  // against a client passing a mismatched userId.
+  if (intent.metadata?.userId !== userId) {
+    return false;
+  }
+
+  const recorded = await recordSucceededPayment(intent, {
+    ipHash: hashIp(getClientIp(await headers())),
+  });
+  return recorded.status !== "rejected";
+}
+
+/**
+ * Called from Embedded Checkout's `onComplete` (once the payment finishes and
+ * the customer stays on our page). Runs in two phases:
  *
- * The user id is read from the intent metadata and cross-checked against the
- * caller we were handed. The `payments` insert is idempotent on the unique
- * payment-intent id, so a double-submit or retry can't create duplicate rows.
- * Enrollment failures after a successful charge come back as an error state —
- * the charge stands and the webhook backstop (pbh-bws.28) retries enrollment.
+ *  1. Verify + record the payment (`verifyAndRecordPayment`). Any failure here —
+ *     network, a missing/mismatched intent, a rejected record — is a payment
+ *     problem, so we bail before touching enrollment.
+ *  2. Hand off to the shared register + enroll flow, which drops the assessment
+ *     cookie and returns the success state the client uses to advance to the
+ *     confirmation step and link to /assessments.
  */
 export async function finalizeCheckoutSession(
   userId: string,
@@ -124,68 +173,24 @@ export async function finalizeCheckoutSession(
   const id = userId.trim();
   const sessionId = checkoutSessionId.trim();
   if (!id || !sessionId) {
-    return { status: "error", email: "", message: "We couldn't confirm your payment." };
+    return paymentError(PAYMENT_UNCONFIRMED);
   }
 
-  let succeeded = false;
+  let verified: boolean;
   try {
-    const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["payment_intent.latest_charge"],
-    });
-
-    const intent =
-      session.payment_intent && typeof session.payment_intent !== "string"
-        ? session.payment_intent
-        : null;
-    if (!intent) {
-      return {
-        status: "error",
-        email: "",
-        message: "We couldn't verify your payment. Please try again.",
-      };
-    }
-
-    // Extra assurance beyond the shared record path: the confirmed intent must
-    // belong to the caller we were handed (guards against a client passing a
-    // mismatched userId). Amount/currency/status are re-checked inside
-    // `recordSucceededPayment`.
-    if (intent.metadata?.userId !== id) {
-      return {
-        status: "error",
-        email: "",
-        message: "We couldn't verify your payment. Please try again.",
-      };
-    }
-
-    // Idempotent persist + gated audit, shared with the webhook backstop.
-    const recorded = await recordSucceededPayment(intent, {
-      ipHash: hashIp(getClientIp(await headers())),
-    });
-    if (recorded.status === "rejected") {
-      return {
-        status: "error",
-        email: "",
-        message: "We couldn't verify your payment. Please try again.",
-      };
-    }
-    succeeded = true;
+    verified = await verifyAndRecordPayment(id, sessionId);
   } catch (err) {
     console.error("finalizeCheckoutSession failed:", err);
-    return {
-      status: "error",
-      email: "",
-      message: "We couldn't verify your payment. Please try again.",
-    };
+    return paymentError(PAYMENT_UNVERIFIED);
+  }
+  if (!verified) {
+    return paymentError(PAYMENT_UNVERIFIED);
   }
 
-  // Payment is recorded — hand off to the shared register + enroll path, which
-  // drops the assessment cookie and returns the success state (no redirect); the
-  // client uses it to advance to the confirmation step.
-  if (succeeded) {
-    const formData = new FormData();
-    formData.set("userId", id);
-    return completeAssessmentSetup({ status: "idle" }, formData);
-  }
-  return { status: "error", email: "", message: "We couldn't verify your payment. Please try again." };
+  // Deliberately outside the try above so an enrollment failure surfaces as its
+  // own state, not a payment error: the charge stands and the webhook backstop
+  // retries enrollment.
+  const formData = new FormData();
+  formData.set("userId", id);
+  return completeAssessmentSetup({ status: "idle" }, formData);
 }

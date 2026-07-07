@@ -1,38 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { CheckoutElementsProvider } from "@stripe/react-stripe-js/checkout";
-import type { Appearance } from "@stripe/stripe-js";
+import {
+  EmbeddedCheckout,
+  EmbeddedCheckoutProvider,
+} from "@stripe/react-stripe-js";
 import { StepHeader } from "@/components/StepHeader";
-import { ASSESSMENT_PRICE_CENTS, formatUsd } from "@/lib/stripe/pricing";
-import { CheckoutForm } from "./CheckoutForm";
-import { createAssessmentCheckoutSession } from "./actions";
+import {
+  createAssessmentCheckoutSession,
+  finalizeCheckoutSession,
+} from "./actions";
 
 // Publishable key is inlined at build; safe to expose to the client. Missing key
 // (e.g. env not set) → we render a configuration notice instead of crashing.
 const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
-// Nudge the Payment Element toward the brand palette. The full brand token set
-// (Stripe Appearance API) is wired in pbh-bws.39.
-const appearance: Appearance = {
-  theme: "stripe",
-  variables: {
-    colorPrimary: "#041632",
-    colorText: "#041632",
-    fontFamily: "Inter, system-ui, sans-serif",
-    borderRadius: "12px",
-  },
-};
-
 /**
- * Stripe Payment Element step (test mode). Creates a Checkout Session
- * (`ui_mode: "elements"`) for this user, initializes the Payment Element via
- * `CheckoutElementsProvider` with the session `client_secret`, and on successful
- * confirmation hands off to `finalizeCheckoutSession` (verify → persist →
- * register/enroll), then calls `onComplete` to advance the stepper to the
- * confirmation screen. No PII or card data ever touches our servers.
+ * Stripe Embedded Checkout step (test mode). Creates a Checkout Session
+ * (`ui_mode: "embedded_page"`, `redirect_on_completion: "never"`) for this user and
+ * mounts Stripe's full prebuilt payment form via `EmbeddedCheckoutProvider` /
+ * `EmbeddedCheckout` with the session `client_secret`. When the customer pays,
+ * Stripe fires `onComplete` (no redirect); we then hand off to
+ * `finalizeCheckoutSession` (verify → persist → register/enroll) and, on success,
+ * call `onComplete` to advance the stepper to the confirmation screen. No PII or
+ * card data ever touches our servers; Checkout branding is set in the Stripe
+ * Dashboard (Settings → Branding).
  */
 export function PaymentStep({
   userId,
@@ -42,7 +36,9 @@ export function PaymentStep({
   onComplete: () => void;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
+  const [completeError, setCompleteError] = useState<string | null>(null);
   const started = useRef(false);
 
   useEffect(() => {
@@ -55,29 +51,39 @@ export function PaymentStep({
     createAssessmentCheckoutSession(userId).then((result) => {
       if (result.status === "ready") {
         setClientSecret(result.clientSecret);
+        setSessionId(result.sessionId);
       } else {
         setInitError(result.message);
       }
     });
   }, [userId]);
 
+  // Fired once Embedded Checkout finishes the payment (the customer stays on the
+  // page). Verify + persist + enroll server-side (re-fetches the session from
+  // Stripe; never trusts the client), then advance the stepper. On error the
+  // charge stands and the webhook backstop retries enrollment, so we just surface
+  // it inline rather than crash.
+  const handleComplete = useCallback(async () => {
+    if (!sessionId) {
+      return;
+    }
+    setCompleteError(null);
+    try {
+      const finalized = await finalizeCheckoutSession(userId, sessionId);
+      if (finalized.status === "error") {
+        setCompleteError(finalized.message);
+        return;
+      }
+      onComplete();
+    } catch (err) {
+      console.error("finalizeCheckoutSession failed:", err);
+      setCompleteError("We couldn't confirm your payment. Please try again.");
+    }
+  }, [userId, sessionId, onComplete]);
+
   return (
     <div className="flex flex-col gap-8">
       <StepHeader title="Payment" />
-
-      <div className="rounded-xl border border-outline/40 bg-surface p-5">
-        <div className="flex items-center justify-between">
-          <span className="text-on-surface">Brain health assessment</span>
-          <span className="font-headline text-lg text-primary">
-            {formatUsd(ASSESSMENT_PRICE_CENTS)}
-          </span>
-        </div>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          Cards (incl. HSA/FSA) and wallets. Test mode — use card{" "}
-          <code className="font-mono">4242 4242 4242 4242</code>, any future
-          expiry and CVC.
-        </p>
-      </div>
 
       {initError && (
         <p role="alert" className="animate-error-in text-sm text-error">
@@ -92,12 +98,18 @@ export function PaymentStep({
       )}
 
       {stripePromise && clientSecret && (
-        <CheckoutElementsProvider
+        <EmbeddedCheckoutProvider
           stripe={stripePromise}
-          options={{ clientSecret, elementsOptions: { appearance } }}
+          options={{ clientSecret, onComplete: handleComplete }}
         >
-          <CheckoutForm userId={userId} onComplete={onComplete} />
-        </CheckoutElementsProvider>
+          <EmbeddedCheckout />
+        </EmbeddedCheckoutProvider>
+      )}
+
+      {completeError && (
+        <p role="alert" className="animate-error-in text-sm text-error">
+          {completeError}
+        </p>
       )}
 
       {stripePromise && !clientSecret && !initError && (
