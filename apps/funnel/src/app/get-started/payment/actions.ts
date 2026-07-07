@@ -75,10 +75,13 @@ export async function createAssessmentCheckoutSession(
     // One-time guest checkout — no Stripe Customer. We don't save cards for
     // off-session reuse, so a durable Customer object buys nothing here; the
     // receipt goes to `receipt_email` and the user is tracked via metadata.
+    // `customer_email` prefills the email field in Embedded Checkout from the
+    // account we already have (it doesn't create a Customer).
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
       redirect_on_completion: "never",
       mode: "payment",
+      customer_email: user.email,
       payment_method_types: ["card"],
       line_items: [
         {
