@@ -48,14 +48,22 @@ export function PaymentStep({
     }
     started.current = true;
 
-    createAssessmentCheckoutSession(userId).then((result) => {
-      if (result.status === "ready") {
-        setClientSecret(result.clientSecret);
-        setSessionId(result.sessionId);
-      } else {
-        setInitError(result.message);
-      }
-    });
+    createAssessmentCheckoutSession(userId)
+      .then((result) => {
+        if (result.status === "ready") {
+          setClientSecret(result.clientSecret);
+          setSessionId(result.sessionId);
+        } else {
+          setInitError(result.message);
+        }
+      })
+      .catch((err) => {
+        // The action itself returns an error result rather than throwing, so this
+        // only fires on a transport-level failure (network drop, serialization).
+        // Without it the promise rejects unhandled and the UI hangs on "Loading".
+        console.error("createAssessmentCheckoutSession failed:", err);
+        setInitError("Couldn't start payment. Please try again.");
+      });
   }, [userId]);
 
   // Fired once Embedded Checkout finishes the payment (the customer stays on the

@@ -130,8 +130,10 @@ export async function recordFailedPayment(
       currency: intent.currency,
       status: "failed",
     })
-    // Only an existing NON-failed, non-terminal row should flip to failed; a row
-    // that's already failed/succeeded/refunded stays as-is (no-op, no audit).
+    // No `pending` row is ever written (session creation only audit-logs), so
+    // any existing row here is already terminal (succeeded/failed/refunded).
+    // Gating on `status = 'pending'` therefore makes every conflict a no-op — we
+    // never clobber a terminal row, and a redelivered failed event never re-audits.
     .onConflictDoUpdate({
       target: payments.stripePaymentIntentId,
       set: { status: "failed" },

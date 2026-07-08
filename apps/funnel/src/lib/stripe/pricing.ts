@@ -5,11 +5,3 @@
  */
 export const ASSESSMENT_PRICE_CENTS = 14900;
 export const ASSESSMENT_CURRENCY = "usd";
-
-/** Format integer cents as USD, e.g. 14900 → "$149.00". */
-export function formatUsd(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
-}
