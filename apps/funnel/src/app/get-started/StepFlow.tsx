@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { Button } from "@pbh/ui";
 import { SignupForm, type SignupResult } from "./signup";
 import { DetailsForm } from "./details";
 import { ConsentForm } from "./consent";
@@ -75,9 +76,15 @@ export function StepFlow() {
       );
 
     case "payment":
-      // Paying registers + enrolls server-side and forwards to /assessments, so
-      // this step navigates away rather than advancing the in-page stepper.
-      return <PaymentStep userId={context.userId ?? ""} />;
+      // Paying registers + enrolls server-side and drops the assessment cookie;
+      // on success we advance to the confirmation step (below), which links to
+      // /assessments — the cookie is already set so that page authorizes.
+      return (
+        <PaymentStep
+          userId={context.userId ?? ""}
+          onComplete={handleStepComplete}
+        />
+      );
 
     case "done":
       return (
@@ -90,6 +97,9 @@ export function StepFlow() {
             <strong>{context.email}</strong>, saved your consent, and taken
             payment.
           </p>
+          <Button href="/assessments" color="primary" className="mt-6">
+            Continue to your assessments
+          </Button>
         </div>
       );
   }

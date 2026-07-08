@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { linusEnrollments, users } from "@/db/schema";
 import { extractReportData, getReport } from "@/lib/linus/client";
 import { getCampaigns } from "@/lib/linus/campaigns";
+import { isValidEmail, normalizeEmail } from "@/lib/email";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
@@ -33,7 +34,10 @@ export async function registerAndEnroll(
   _prev: LinusState,
   formData: FormData,
 ): Promise<LinusState> {
-  const email = String(formData.get("email") ?? "");
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+  if (!isValidEmail(email)) {
+    return { status: "error", email, message: "Enter a valid email address." };
+  }
   const state = await runRegisterAndEnroll(email);
   if (state.status !== "success") {
     return state;
@@ -42,7 +46,7 @@ export async function registerAndEnroll(
   const [user] = await db
     .select({ id: users.id })
     .from(users)
-    .where(eq(users.email, email.trim()))
+    .where(eq(users.email, email))
     .limit(1);
   if (user) {
     (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
@@ -51,10 +55,12 @@ export async function registerAndEnroll(
 }
 
 /**
- * Payment step submit: register + enroll the paying user server-side, drop a
- * short-lived cookie identifying them, then forward to /assessments — so no
- * email or PII ends up in the URL. On failure we return the error state so the
- * payment step can show it inline (no redirect).
+ * Payment step submit: register + enroll the paying user server-side and drop a
+ * short-lived cookie identifying them (so /assessments, which auths via the
+ * cookie, works — no email or PII in the URL). Returns the success state rather
+ * than redirecting, so the funnel can show the "You're all set" confirmation and
+ * let the user continue to /assessments themselves. On failure we return the
+ * error state so the payment step can show it inline.
  *
  * NOTE: the cookie is an unsigned user id — acceptable for this unauthenticated
  * scaffold (it mirrors the details step's client-trusted userId). Gate this
@@ -71,7 +77,7 @@ export async function completeAssessmentSetup(
   }
 
   (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, ASSESSMENT_COOKIE_OPTS);
-  redirect("/assessments");
+  return state;
 }
 
 /** ASCII-safe, hyphenated slug for a download filename. */

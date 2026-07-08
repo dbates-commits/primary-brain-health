@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "linus_registration_claimed_at" timestamp with time zone;

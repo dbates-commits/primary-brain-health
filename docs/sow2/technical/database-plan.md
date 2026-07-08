@@ -69,7 +69,6 @@ create table users (
   date_of_birth date not null,
   zip text not null,
   state_of_residence char(2) not null,
-  stripe_customer_id text unique,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

@@ -18,10 +18,13 @@
     "@pbh/tokens": "workspace:*",
     "@pbh/types": "workspace:*",
     "@pbh/ui": "workspace:*",
+    "@stripe/react-stripe-js": "^6.6.0",
+    "@stripe/stripe-js": "^9.8.0",
     "drizzle-orm": "^0.44.6",
     "next": "16.1.4",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "stripe": "^22.3.0"
   },
   "devDependencies": {
     "@pbh/config": "workspace:*",

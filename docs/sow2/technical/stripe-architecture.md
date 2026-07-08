@@ -54,6 +54,22 @@ Three SAQ-A-compatible flavors:
 
 **Recommendation: Payment Element.**
 
+> **As-built update (Phase 1).** These are the original research notes; the
+> recommendation above is superseded. Phase 1 shipped on **Stripe Embedded
+> Checkout** (option 1's sibling — the "Full Embedded Page", `ui_mode:
+> "embedded_page"`) via the **Checkout Sessions API**, not a hand-rolled Payment
+> Element. Stripe renders its entire prebuilt form in an on-domain iframe (still
+> SAQ-A, cards + wallets + Link), so there's less UI to build and maintain while
+> the customer stays on-site; `redirect_on_completion: "never"` keeps them on the
+> page for the confirmation step. Branding moved from code (`appearance` tokens)
+> to the Stripe Dashboard. **No card-on-file:** the assessment is a one-time
+> **guest** charge — we create **no Stripe `Customer`** and set no
+> `setup_future_usage`, so the "Card on file" requirement row above, the
+> `Customer`/`PaymentMethod` handoff to Linus, and the `users.stripe_customer_id`
+> column no longer apply. GA4/HubSpot/Resend receipt side effects remain deferred.
+> See [stripe-integration-reference.md](./stripe-integration-reference.md) for the
+> as-built wiring.
+
 ---
 
 ## Data flow (high level)

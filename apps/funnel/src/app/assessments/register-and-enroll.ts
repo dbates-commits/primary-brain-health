@@ -5,7 +5,7 @@
  * await it directly. Server-only (touches the DB and the Linus client).
  */
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { linusEnrollments, users, type User } from "@/db/schema";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
@@ -140,6 +140,157 @@ function describeError(err: unknown, action: string): string {
 }
 
 /**
+ * How long a registration claim is honored before it's considered stale and can
+ * be re-claimed. Bounds recovery if a winner crashes after claiming but before
+ * it stores the participant id — the next attempt re-claims and registers.
+ */
+const REGISTRATION_CLAIM_STALE = "30 seconds";
+
+/**
+ * Atomically elect a single registrar for a first-time subject. The client
+ * action and the webhook run in separate instances, so an in-process lock can't
+ * serialize them — this single-statement compare-and-set in Postgres does (which
+ * the neon-http driver supports; only *cross-statement* locks are unavailable).
+ *
+ * Returns true iff this caller won the right to call Linus. The claim only
+ * applies while `linus_participant_id IS NULL`, so once anyone registers no one
+ * re-claims; the staleness window lets a crashed winner's claim be retried.
+ */
+async function claimLinusRegistration(userId: string): Promise<boolean> {
+  const [row] = await db
+    .update(users)
+    .set({ linusRegistrationClaimedAt: sql`now()` })
+    .where(
+      and(
+        eq(users.id, userId),
+        isNull(users.linusParticipantId),
+        or(
+          isNull(users.linusRegistrationClaimedAt),
+          lt(
+            users.linusRegistrationClaimedAt,
+            sql`now() - interval '${sql.raw(REGISTRATION_CLAIM_STALE)}'`,
+          ),
+        ),
+      ),
+    )
+    .returning({ id: users.id });
+  return Boolean(row);
+}
+
+/**
+ * Release a registration claim (only while still unregistered) so a retry can
+ * re-claim immediately instead of waiting out the staleness window. Called when
+ * the Linus register call itself fails.
+ */
+async function releaseLinusRegistrationClaim(userId: string): Promise<void> {
+  await db
+    .update(users)
+    .set({ linusRegistrationClaimedAt: null })
+    .where(and(eq(users.id, userId), isNull(users.linusParticipantId)));
+}
+
+/** Read the currently-stored Linus participant id for a user (or null). */
+async function readParticipantId(userId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ linusParticipantId: users.linusParticipantId })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  return row?.linusParticipantId ?? null;
+}
+
+/**
+ * Persist the participant id, returning the id now in effect. The registration
+ * claim already makes us the only registrar, so a unique violation shouldn't
+ * happen; if it somehow does, fall back to whatever id is already stored. Any
+ * other DB error is thrown for the caller to turn into an error state.
+ */
+async function storeParticipantId(
+  userId: string,
+  participantId: string,
+): Promise<string> {
+  try {
+    await db
+      .update(users)
+      .set({ linusParticipantId: participantId })
+      .where(eq(users.id, userId));
+    return participantId;
+  } catch (err) {
+    if (!isPgError(err, PgErrorCode.UniqueViolation)) {
+      throw err;
+    }
+    return (await readParticipantId(userId)) ?? participantId;
+  }
+}
+
+/**
+ * Outcome of ensuring a first-time user is registered as a Linus subject:
+ * - `registered` — a participant id is available (we registered, or a concurrent
+ *   winner already stored one).
+ * - `deferred`   — a concurrent winner is still registering and the caller chose
+ *   not to retry; enrollment should be deferred (see `retryOnContention`).
+ * - `error`      — registration failed (or the caller chose to retry on
+ *   contention, so the webhook redelivers).
+ */
+type RegistrationOutcome =
+  | { type: "registered"; participantId: string }
+  | { type: "deferred" }
+  | { type: "error"; message: string };
+
+/**
+ * Register a first-time user as a Linus subject exactly once, even when the
+ * client action and the webhook race (they run in separate instances). We elect
+ * one registrar with an atomic DB claim; only the winner calls Linus.
+ *
+ * `retryOnContention` decides what a loser does while the winner is still
+ * in flight: the webhook passes `true` (return an error → Stripe redelivers and
+ * retries until the id lands), the client passes `false` (defer — see the
+ * `deferred` outcome — so a charge that actually went through never shows an
+ * error).
+ */
+async function ensureRegistered(
+  user: User,
+  retryOnContention: boolean,
+): Promise<RegistrationOutcome> {
+  // Losers don't call Linus. If the winner already stored an id, reuse it;
+  // otherwise it's still in flight.
+  if (!(await claimLinusRegistration(user.id))) {
+    const existing = await readParticipantId(user.id);
+    if (existing) {
+      return { type: "registered", participantId: existing };
+    }
+    return retryOnContention
+      ? { type: "error", message: "Registration is already in progress; will retry." }
+      : { type: "deferred" };
+  }
+
+  // We won the claim — register the subject, then store its id.
+  let participantId: string;
+  try {
+    const subject = await registerSubject(buildRegisterInput(user));
+    participantId = subject.participantId;
+  } catch (err) {
+    // Free the claim so a retry can re-register immediately, not after the
+    // staleness window.
+    await releaseLinusRegistrationClaim(user.id).catch(() => {});
+    const message =
+      err instanceof MissingDateOfBirthError
+        ? err.message
+        : describeError(err, "register");
+    return { type: "error", message };
+  }
+
+  try {
+    return {
+      type: "registered",
+      participantId: await storeParticipantId(user.id, participantId),
+    };
+  } catch (err) {
+    return { type: "error", message: describeError(err, "register") };
+  }
+}
+
+/**
  * Register a known user as a Linus subject if we haven't already, then enroll
  * them in every configured campaign and return the enrollment redirect links.
  * Never throws — failures come back as an error state.
@@ -148,10 +299,16 @@ function describeError(err: unknown, action: string): string {
  * passes it (true) so registration happens exactly once, on successful payment;
  * read paths (e.g. the /assessments load) pass false so they never create a
  * subject — if there's no stored participantId they just surface an error.
+ *
+ * `retryOnContention` is forwarded to `ensureRegistered` to pick the loser
+ * behavior when two callers race on a first-time registration.
  */
 export async function registerAndEnrollUser(
   user: User,
-  { allowRegister = true }: { allowRegister?: boolean } = {},
+  {
+    allowRegister = true,
+    retryOnContention = false,
+  }: { allowRegister?: boolean; retryOnContention?: boolean } = {},
 ): Promise<LinusState> {
   const email = user.email;
 
@@ -169,7 +326,7 @@ export async function registerAndEnrollUser(
     };
   }
 
-  // Register once, then reuse the stored participant id on every later visit.
+  // Register once (the first visit), then reuse the stored id on every later one.
   let participantId = user.linusParticipantId;
   if (!participantId) {
     if (!allowRegister) {
@@ -179,38 +336,23 @@ export async function registerAndEnrollUser(
         message: "You're not registered for any assessments yet.",
       };
     }
-    try {
-      const subject = await registerSubject(buildRegisterInput(user));
-      participantId = subject.participantId;
-    } catch (err) {
-      if (err instanceof MissingDateOfBirthError) {
-        return { status: "error", email, message: err.message };
-      }
-      return { status: "error", email, message: describeError(err, "register") };
-    }
 
-    try {
-      await db
-        .update(users)
-        .set({ linusParticipantId: participantId })
-        .where(eq(users.id, user.id));
-    } catch (err) {
-      // Concurrent double-submit may have already stored an id. The column is
-      // unique, so re-read and keep going rather than failing the request. Any
-      // other DB error comes back as an error state — this function's contract
-      // is "never throws", and the caller (a server action) relies on it.
-      if (!isPgError(err, PgErrorCode.UniqueViolation)) {
-        return { status: "error", email, message: describeError(err, "register") };
-      }
-      const [fresh] = await db
-        .select({ linusParticipantId: users.linusParticipantId })
-        .from(users)
-        .where(eq(users.id, user.id))
-        .limit(1);
-      if (fresh?.linusParticipantId) {
-        participantId = fresh.linusParticipantId;
-      }
+    const outcome = await ensureRegistered(user, retryOnContention);
+    if (outcome.type === "error") {
+      return { status: "error", email, message: outcome.message };
     }
+    if (outcome.type === "deferred") {
+      // The charge succeeded but a concurrent caller is still registering. Return
+      // success now (no payment error); /assessments enrolls once the id lands.
+      return {
+        status: "success",
+        email,
+        firstName: user.firstName,
+        participantId: "",
+        enrollments: [],
+      };
+    }
+    participantId = outcome.participantId;
   }
 
   try {
@@ -386,7 +528,7 @@ export async function runRegisterAndEnroll(
  */
 export async function registerAndEnrollUserById(
   userId: string,
-  options: { allowRegister?: boolean } = {},
+  options: { allowRegister?: boolean; retryOnContention?: boolean } = {},
 ): Promise<LinusState> {
   if (!userId) {
     return {

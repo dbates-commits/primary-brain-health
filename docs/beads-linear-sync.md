@@ -233,6 +233,56 @@ by default. Override with `--prefer-local` or `--prefer-linear`.
 
 ---
 
+## Policy: a closed bead must be "Done" in Linear
+
+**Decision:** when an issue is closed in beads, its Linear counterpart is set to **Done**. A
+closed bead sitting next to an "In Progress" / "Todo" Linear card for the same work is drift we
+don't accept — reconcile it as part of the sync.
+
+How much work that takes depends on whether the Linear issue already existed:
+
+- **Brand-new issues** (created by `bd linear sync --push --create-only`): a bead that is
+  already closed is created in Linear **directly as Done** — no extra step. (Verified: pushing
+  eight closed beads created eight `Done` Linear issues.)
+- **Issues already in Linear** whose bead you close *after* it was first synced: a `--push`
+  does **not** propagate the status change (beads
+  [#2046](https://github.com/steveyegge/beads/issues/2046)), so the Linear card keeps its old
+  state. **You must move it to Done yourself**, via the Linear API below.
+
+### Reconcile existing issues → Done (Linear GraphQL API)
+
+`bd` can't transition an existing Linear issue's state, so use Linear's API. Find the closed
+beads whose Linear card isn't Done, then update each.
+
+```bash
+set -a; . ./.env; set +a     # LINEAR_API_KEY + LINEAR_TEAM_ID
+
+# 1. Map closed beads → their Linear ids (external_ref):
+bd list --status closed --json | \
+  node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>JSON.parse(s).forEach(i=>console.log(i.id,i.external_ref||"(none)")))'
+
+# 2. Find the team's "Done" (type: completed) workflow-state id — query it, don't hard-code
+#    (ids differ per team and can change; the PBH "Done" id is currently b4e406a8-…):
+curl -s https://api.linear.app/graphql -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"query\":\"query{team(id:\\\"$LINEAR_TEAM_ID\\\"){states{nodes{id name type}}}}\"}"
+
+# 3. For each stale issue, set its state to Done:
+#    mutation { issueUpdate(id:"<issue UUID>", input:{ stateId:"<Done state id>" }){ success } }
+```
+
+A ready-to-run reconciler lives at
+[`docs/scripts/linear-mark-done.mjs`](./scripts/linear-mark-done.mjs) — it resolves the "Done"
+state dynamically, skips issues already `completed`, and updates the rest. Pass the closed
+beads' Linear identifiers:
+
+```bash
+set -a; . ./.env; set +a
+node docs/scripts/linear-mark-done.mjs PBH-83 PBH-90     # or pipe them in — see the script header
+```
+
+---
+
 ## Recovery: cleaning up duplicates
 
 If a push already created duplicate issues in Linear, clean up like this. beads will **not**
@@ -288,7 +338,8 @@ auto-merge duplicates — the dedup itself is a manual step in the Linear UI.
 - Parent/child issues push to Linear as **flat, independent issues**, not sub-issues
   ([beads #1528](https://github.com/steveyegge/beads/issues/1528)).
 - A `--push` may **not propagate status changes** (e.g. local `close` → Linear "Done") in
-  current versions ([beads #2046](https://github.com/steveyegge/beads/issues/2046)).
+  current versions ([beads #2046](https://github.com/steveyegge/beads/issues/2046)). Reconcile
+  those by hand — see [Policy: a closed bead must be "Done" in Linear](#policy-a-closed-bead-must-be-done-in-linear).
 - Linear does not store the beads ID back, so the link is one-way
   ([beads #1192](https://github.com/steveyegge/beads/issues/1192)).
 
