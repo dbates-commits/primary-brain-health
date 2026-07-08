@@ -1,0 +1,21 @@
+{
+  "name": "@pbh/payments",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo \"(no lint)\" && exit 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "stripe": "^22.3.0"
+  },
+  "devDependencies": {
+    "@pbh/config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}

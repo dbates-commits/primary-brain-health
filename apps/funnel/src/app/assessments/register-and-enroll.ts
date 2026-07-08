@@ -6,22 +6,19 @@
  */
 
 import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
-import { db } from "@/db/client";
-import { linusEnrollments, users, type User } from "@/db/schema";
+import { db, linusEnrollments, users, type User } from "@pbh/db";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import {
   buildRegisterInput,
-  MissingDateOfBirthError,
-} from "@/lib/linus/build-register-input";
-import {
   enrollSubject,
   extractReportData,
+  getCampaigns,
   getReport,
   LinusApiError,
   listEnrollments,
+  MissingDateOfBirthError,
   registerSubject,
-} from "@/lib/linus/client";
-import { getCampaigns } from "@/lib/linus/campaigns";
+} from "@pbh/linus";
 
 /** Cookie set on successful payment so `/assessments` knows whose links to show. */
 export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";

@@ -1,0 +1,21 @@
+{
+  "name": "@pbh/linus",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo \"(no lint)\" && exit 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pbh/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@pbh/config": "workspace:*",
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}

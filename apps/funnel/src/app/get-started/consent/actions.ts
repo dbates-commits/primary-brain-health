@@ -1,9 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { db } from "@/db/client";
-import { consents } from "@/db/schema";
-import { writeAuditLog } from "@/db/audit";
+import { consents, db, writeAuditLog } from "@pbh/db";
 import { CONSENT_VERSION } from "@/lib/consent";
 import { getClientIp, hashIp } from "@/lib/request-meta";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
