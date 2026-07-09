@@ -4,7 +4,7 @@
  * Linus enum values, so this is mostly pass-through.
  */
 
-import type { User } from "@/db/schema";
+import type { User } from "@pbh/db";
 import type { RegisterSubjectInput, SexAssignedAtBirth } from "./types";
 
 /** Thrown when a user has no DOB, which Linus requires (healthcare use case). */

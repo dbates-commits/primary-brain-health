@@ -1,8 +1,6 @@
 "use server";
 
-import { db } from "@/db/client";
-import { users } from "@/db/schema";
-import { writeAuditLog } from "@/db/audit";
+import { db, users, writeAuditLog } from "@pbh/db";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
 

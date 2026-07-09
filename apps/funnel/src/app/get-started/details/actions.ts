@@ -1,8 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { db } from "@/db/client";
-import { users } from "@/db/schema";
+import { db, users } from "@pbh/db";
 import { US_STATE_CODES } from "./us-states";
 import {
   EDUCATION_LEVEL_VALUES,

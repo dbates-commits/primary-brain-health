@@ -1,6 +1,5 @@
 import type Stripe from "stripe";
-import { getStripe } from "@/lib/stripe/server";
-import { getStripeWebhookSecret } from "@/lib/stripe/env";
+import { getStripe, getStripeWebhookSecret } from "@pbh/payments";
 import { registerAndEnrollUserById } from "@/app/assessments/register-and-enroll";
 import {
   recordFailedPayment,

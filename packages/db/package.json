@@ -1,0 +1,27 @@
+{
+  "name": "@pbh/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo \"(no lint)\" && exit 0",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "drizzle-orm": "^0.44.6"
+  },
+  "devDependencies": {
+    "@pbh/config": "workspace:*",
+    "@types/node": "^20",
+    "drizzle-kit": "^0.31.6",
+    "typescript": "^5"
+  }
+}

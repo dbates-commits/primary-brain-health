@@ -14,13 +14,8 @@
 
 import { and, eq, ne } from "drizzle-orm";
 import type Stripe from "stripe";
-import { db } from "@/db/client";
-import { payments } from "@/db/schema";
-import { writeAuditLog } from "@/db/audit";
-import {
-  ASSESSMENT_CURRENCY,
-  ASSESSMENT_PRICE_CENTS,
-} from "@/lib/stripe/pricing";
+import { db, payments, writeAuditLog } from "@pbh/db";
+import { ASSESSMENT_CURRENCY, ASSESSMENT_PRICE_CENTS } from "@pbh/payments";
 
 export type RecordResult =
   | { status: "recorded"; userId: string; firstWrite: boolean }

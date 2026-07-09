@@ -20,6 +20,15 @@ importers:
       '@neondatabase/serverless':
         specifier: ^1.0.1
         version: 1.1.0
+      '@pbh/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@pbh/linus':
+        specifier: workspace:*
+        version: link:../../packages/linus
+      '@pbh/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
       '@pbh/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -66,9 +75,6 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.17)
-      drizzle-kit:
-        specifier: ^0.31.6
-        version: 0.31.10
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.7.0)
@@ -187,6 +193,60 @@ importers:
       eslint-config-next:
         specifier: 16.1.4
         version: 16.1.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+
+  packages/db:
+    dependencies:
+      '@neondatabase/serverless':
+        specifier: ^1.0.1
+        version: 1.1.0
+      drizzle-orm:
+        specifier: ^0.44.6
+        version: 0.44.7(@neondatabase/serverless@1.1.0)(better-sqlite3@12.10.1)
+    devDependencies:
+      '@pbh/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
+      drizzle-kit:
+        specifier: ^0.31.6
+        version: 0.31.10
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/linus:
+    dependencies:
+      '@pbh/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@pbh/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/payments:
+    dependencies:
+      stripe:
+        specifier: ^22.3.0
+        version: 22.3.0(@types/node@20.19.43)
+    devDependencies:
+      '@pbh/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
+      typescript:
+        specifier: ^5
+        version: 5.9.3
 
   packages/tokens: {}
 
@@ -1306,11 +1366,11 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@graphql-codegen/plugin-helpers@7.0.1':
-    resolution: {integrity: sha512-S2X0YT3XQbP2haqhIeku8GOXo2j8QuBu7BrLsOEHz4UeMu78y3rja1Q4ri3oJ0jq4dMgaQlazoVHI/A+FAKMGw==}
+  '@graphql-codegen/plugin-helpers@7.1.0':
+    resolution: {integrity: sha512-ieJH7kZ5oSZKBPJs7CvHMrFY/CLYLklqv74ir93qMwRna6geZsbIMoJzTDBXohxcQTITiProiYSGrEtZjIpYGg==}
     engines: {node: '>=16'}
     peerDependencies:
-      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
   '@graphql-codegen/schema-ast@4.1.0':
     resolution: {integrity: sha512-kZVn0z+th9SvqxfKYgztA6PM7mhnSZaj4fiuBWvMTqA+QqQ9BBed6Pz41KuD/jr0gJtnlr2A4++/0VlpVbCTmQ==}
@@ -1400,6 +1460,12 @@ packages:
 
   '@graphql-tools/utils@11.1.0':
     resolution: {integrity: sha512-PtFVG4r8Z2LEBSaPYQMusBiB3o6kjLVJyjCLbnWem/SpSuM21v6LTmgpkXfYU1qpBV2UGsFyuEnSJInl8fR1Ag==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
+  '@graphql-tools/utils@11.2.0':
+    resolution: {integrity: sha512-eu9h1R3j/wWc4rvmYJF5AKtlwniDzstrZ/c6KSz+HdI+n7I7iog9xyKmBfpUwSbG1TqPNZBzWjFMkzdYOKq6Bg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -8783,9 +8849,9 @@ snapshots:
       lodash: 4.17.23
       tslib: 2.6.3
 
-  '@graphql-codegen/plugin-helpers@7.0.1(graphql@15.8.0)':
+  '@graphql-codegen/plugin-helpers@7.1.0(graphql@15.8.0)':
     dependencies:
-      '@graphql-tools/utils': 11.1.0(graphql@15.8.0)
+      '@graphql-tools/utils': 11.2.0(graphql@15.8.0)
       change-case-all: 2.1.0
       common-tags: 1.8.2
       graphql: 15.8.0
@@ -8918,6 +8984,14 @@ snapshots:
       tslib: 2.8.1
 
   '@graphql-tools/utils@11.1.0(graphql@15.8.0)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@15.8.0)
+      '@whatwg-node/promise-helpers': 1.3.2
+      cross-inspect: 1.0.1
+      graphql: 15.8.0
+      tslib: 2.8.1
+
+  '@graphql-tools/utils@11.2.0(graphql@15.8.0)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@15.8.0)
       '@whatwg-node/promise-helpers': 1.3.2
@@ -10349,7 +10423,7 @@ snapshots:
   '@tinacms/cli@2.5.0(@codemirror/language@6.0.0)(@types/node@20.19.43)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(abstract-level@1.0.4)(immer@10.2.0)(lightningcss@1.32.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rollup@3.30.0)(scheduler@0.27.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(tsx@4.22.4)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.9.0)':
     dependencies:
       '@graphql-codegen/core': 2.6.8(graphql@15.8.0)
-      '@graphql-codegen/plugin-helpers': 7.0.1(graphql@15.8.0)
+      '@graphql-codegen/plugin-helpers': 7.1.0(graphql@15.8.0)
       '@graphql-codegen/typescript': 4.1.6(graphql@15.8.0)
       '@graphql-codegen/typescript-operations': 4.6.1(graphql@15.8.0)
       '@graphql-codegen/visitor-plugin-common': 4.1.2(graphql@15.8.0)

@@ -2,15 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { db } from "@/db/client";
-import { users } from "@/db/schema";
-import { writeAuditLog } from "@/db/audit";
+import { db, users, writeAuditLog } from "@pbh/db";
 import { getClientIp, hashIp } from "@/lib/request-meta";
-import { getStripe } from "@/lib/stripe/server";
 import {
   ASSESSMENT_CURRENCY,
   ASSESSMENT_PRICE_CENTS,
-} from "@/lib/stripe/pricing";
+  getStripe,
+} from "@pbh/payments";
 import { completeAssessmentSetup } from "@/app/assessments/actions";
 import type { LinusState } from "@/app/assessments/register-and-enroll";
 import { recordSucceededPayment } from "./fulfill";
