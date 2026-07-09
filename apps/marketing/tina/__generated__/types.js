@@ -327,10 +327,6 @@ export const PagePartsFragmentDoc = gql`
       buttonTextMobile
       showIncludes
     }
-    ... on PageBlocksBookingStepFlow {
-      headline
-      subheadline
-    }
     ... on PageBlocksScrollReveal {
       label
       headline

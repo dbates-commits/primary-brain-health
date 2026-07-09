@@ -319,10 +319,6 @@ fragment PageParts on Page {
       buttonTextMobile
       showIncludes
     }
-    ... on PageBlocksBookingStepFlow {
-      headline
-      subheadline
-    }
     ... on PageBlocksScrollReveal {
       label
       headline

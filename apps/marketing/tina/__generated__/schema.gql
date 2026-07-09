@@ -320,11 +320,6 @@ type PageBlocksIntakeForm {
   showIncludes: Boolean
 }
 
-type PageBlocksBookingStepFlow {
-  headline: String
-  subheadline: String
-}
-
 type PageBlocksScrollReveal {
   label: String
   headline: String
@@ -380,7 +375,7 @@ type PageBlocksContactForm {
   buttonText: String
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksBookingStepFlow | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksVideoSpotlight | PageBlocksContactForm
+union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksVideoSpotlight | PageBlocksContactForm
 
 type Page implements Node & Document {
   title: String!
@@ -647,11 +642,6 @@ input PageBlocksIntakeFormFilter {
   showIncludes: BooleanFilter
 }
 
-input PageBlocksBookingStepFlowFilter {
-  headline: StringFilter
-  subheadline: StringFilter
-}
-
 input PageBlocksScrollRevealFilter {
   label: StringFilter
   headline: StringFilter
@@ -720,7 +710,6 @@ input PageBlocksFilter {
   stats: PageBlocksStatsFilter
   logoCloud: PageBlocksLogoCloudFilter
   intakeForm: PageBlocksIntakeFormFilter
-  bookingStepFlow: PageBlocksBookingStepFlowFilter
   scrollReveal: PageBlocksScrollRevealFilter
   scrollFillLogo: PageBlocksScrollFillLogoFilter
   stackSections: PageBlocksStackSectionsFilter
@@ -1487,11 +1476,6 @@ input PageBlocksIntakeFormMutation {
   showIncludes: Boolean
 }
 
-input PageBlocksBookingStepFlowMutation {
-  headline: String
-  subheadline: String
-}
-
 input PageBlocksScrollRevealMutation {
   label: String
   headline: String
@@ -1560,7 +1544,6 @@ input PageBlocksMutation {
   stats: PageBlocksStatsMutation
   logoCloud: PageBlocksLogoCloudMutation
   intakeForm: PageBlocksIntakeFormMutation
-  bookingStepFlow: PageBlocksBookingStepFlowMutation
   scrollReveal: PageBlocksScrollRevealMutation
   scrollFillLogo: PageBlocksScrollFillLogoMutation
   stackSections: PageBlocksStackSectionsMutation

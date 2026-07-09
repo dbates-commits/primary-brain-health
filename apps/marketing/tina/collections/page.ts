@@ -11,7 +11,6 @@ import { teamBlock } from "../blocks/team";
 import { statsBlock } from "../blocks/stats";
 import { logoCloudBlock } from "../blocks/logoCloud";
 import { intakeFormBlock } from "../blocks/intakeForm";
-import { bookingStepFlowBlock } from "../blocks/bookingStepFlow";
 import { scrollRevealBlock } from "../blocks/scrollReveal";
 import { scrollFillLogoBlock } from "../blocks/scrollFillLogo";
 import { stackSectionsBlock } from "../blocks/stackSections";
@@ -75,7 +74,6 @@ export const pageCollection: Collection = {
         statsBlock,
         logoCloudBlock,
         intakeFormBlock,
-        bookingStepFlowBlock,
         scrollRevealBlock,
         scrollFillLogoBlock,
         stackSectionsBlock,
