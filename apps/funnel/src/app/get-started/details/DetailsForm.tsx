@@ -7,12 +7,15 @@ import {
   useRef,
   useState,
 } from "react";
-import { Button } from "@pbh/ui";
+import {
+  Button,
+  FieldError,
+  Label,
+  StepHeader,
+  fieldClass,
+  textareaClass,
+} from "@pbh/ui";
 import { completeProfile, type DetailsState } from "./actions";
-import { FieldError } from "@/components/FieldError";
-import { Label } from "@/components/Label";
-import { StepHeader } from "@/components/StepHeader";
-import { fieldClass, textareaClass } from "@/components/form-constants";
 import { US_STATES } from "./us-states";
 import {
   EDUCATION_LEVELS,

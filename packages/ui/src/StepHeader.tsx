@@ -1,7 +1,7 @@
 /**
- * Title + subtitle shown at the top of each funnel step. Uses an `h1` because
- * the page no longer carries its own heading — each step owns its title. The
- * title renders in Larken Thin (`font-thin`) to match the designs.
+ * Title + subtitle shown at the top of a form flow / step (funnel get-started,
+ * the marketing booking modal). Uses an `h1` because each step owns its title;
+ * the title renders in Larken Thin (`font-thin`) to match the designs.
  */
 export function StepHeader({
   title,

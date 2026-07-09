@@ -1,12 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { Button } from "@pbh/ui";
+import { Button, FieldError, Label, StepHeader, fieldClass } from "@pbh/ui";
 import { createAccount, type SignupState } from "./actions";
-import { FieldError } from "@/components/FieldError";
-import { Label } from "@/components/Label";
-import { StepHeader } from "@/components/StepHeader";
-import { fieldClass } from "@/components/form-constants";
 
 const initialState: SignupState = { status: "idle" };
 
