@@ -6,7 +6,7 @@ import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
-import { StepHeader } from "@/components/StepHeader";
+import { StepHeader } from "@pbh/ui";
 import {
   createAssessmentCheckoutSession,
   finalizeCheckoutSession,

@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Button } from "@pbh/ui";
+import { Button, FieldError, StepHeader } from "@pbh/ui";
 import { recordConsent, type ConsentState } from "./actions";
-import { FieldError } from "@/components/FieldError";
-import { StepHeader } from "@/components/StepHeader";
 
 const initialState: ConsentState = { status: "idle" };
 

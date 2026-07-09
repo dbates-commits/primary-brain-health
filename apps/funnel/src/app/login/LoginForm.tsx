@@ -1,9 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button, Heading } from "@pbh/ui";
-import { Label } from "@/components/Label";
-import { fieldClass } from "@/components/form-constants";
+import { Button, Heading, Label, fieldClass } from "@pbh/ui";
 import { registerAndEnroll } from "@/app/assessments/actions";
 import type { LinusState } from "@/app/assessments/register-and-enroll";
 

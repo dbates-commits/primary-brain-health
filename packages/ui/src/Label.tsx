@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "@pbh/ui";
+import { cn } from "./utils";
 
 /** Field label: 12px semibold, muted on-surface. */
 const labelClass = "block text-xs font-semibold text-on-surface-variant";
