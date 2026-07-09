@@ -3,29 +3,7 @@
 import { db, users, writeAuditLog } from "@pbh/db";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
-
-/** Non-secret fields echoed back so the form can repopulate after a reset. */
-export type SignupValues = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
-
-export type SignupState =
-  | { status: "idle" }
-  | {
-      status: "success";
-      userId: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-    }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
-      values: SignupValues;
-    };
+import type { SignupState, SignupValues } from "@pbh/booking";
 
 export async function createAccount(
   _prev: SignupState,

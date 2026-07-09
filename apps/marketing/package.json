@@ -12,6 +12,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@pbh/booking": "workspace:*",
     "@pbh/tokens": "workspace:*",
     "@pbh/types": "workspace:*",
     "@pbh/ui": "workspace:*",

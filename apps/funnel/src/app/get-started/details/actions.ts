@@ -2,34 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { db, users } from "@pbh/db";
-import { US_STATE_CODES } from "./us-states";
 import {
   EDUCATION_LEVEL_VALUES,
   GENDER_VALUES,
   PATIENT_IDENTIFICATION_VALUES,
-} from "./field-options";
-
-/** Non-secret fields echoed back so the form can repopulate after a reset. */
-export type DetailsValues = {
-  dateOfBirth: string;
-  zip: string;
-  stateOfResidence: string;
-  phone: string;
-  gender: string;
-  educationLevel: string;
-  patientIdentification: string;
-  message: string;
-};
-
-export type DetailsState =
-  | { status: "idle" }
-  | { status: "success" }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
-      values: DetailsValues;
-    };
+  US_STATE_CODES,
+} from "@pbh/booking";
+import type { DetailsState, DetailsValues } from "@pbh/booking";
 
 const ZIP_RE = /^\d{5}$/;
 

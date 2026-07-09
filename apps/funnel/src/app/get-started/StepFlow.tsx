@@ -2,10 +2,16 @@
 
 import { useCallback, useState } from "react";
 import { Button } from "@pbh/ui";
-import { SignupForm, type SignupResult } from "./signup";
-import { DetailsForm } from "./details";
-import { ConsentForm } from "./consent";
+import {
+  SignupForm,
+  DetailsForm,
+  ConsentForm,
+  type SignupResult,
+} from "@pbh/booking";
 import { PaymentStep } from "./payment";
+import { createAccount } from "./signup/actions";
+import { completeProfile } from "./details/actions";
+import { recordConsent } from "./consent/actions";
 
 /**
  * Single-page stepper for the get-started funnel. State lives in client memory
@@ -54,12 +60,15 @@ export function StepFlow() {
 
   switch (step) {
     case "signup":
-      return <SignupForm onComplete={handleSignupComplete} />;
+      return (
+        <SignupForm action={createAccount} onComplete={handleSignupComplete} />
+      );
 
     case "details":
       // userId is guaranteed once we've advanced past signup.
       return (
         <DetailsForm
+          action={completeProfile}
           userId={context.userId ?? ""}
           name={context.firstName ?? ""}
           onComplete={handleStepComplete}
@@ -70,6 +79,7 @@ export function StepFlow() {
       // userId is guaranteed once we've advanced past signup.
       return (
         <ConsentForm
+          action={recordConsent}
           userId={context.userId ?? ""}
           onComplete={handleStepComplete}
         />

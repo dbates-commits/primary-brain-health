@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, FieldError, StepHeader } from "@pbh/ui";
-import { recordConsent, type ConsentState } from "./actions";
+import type { ConsentAction, ConsentState } from "./types";
 
 const initialState: ConsentState = { status: "idle" };
 
@@ -36,14 +36,21 @@ const LEGAL_SECTIONS = [
 
 const TERMS_UPDATED = "Last updated: October 24, 2023";
 
+/**
+ * Consent step, shared by the funnel and the marketing modal. The per-step
+ * action is injected via `action`; submission is gated on the agreement
+ * checkbox (`agreed`).
+ */
 export function ConsentForm({
+  action,
   userId,
   onComplete,
 }: {
+  action: ConsentAction;
   userId: string;
   onComplete: () => void;
 }) {
-  const [state, action, pending] = useActionState(recordConsent, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
 
   const advanced = useRef(false);
@@ -59,7 +66,7 @@ export function ConsentForm({
 
   return (
     <form
-      action={action}
+      action={formAction}
       noValidate
       className="flex flex-col items-center gap-8 bg-surface"
     >

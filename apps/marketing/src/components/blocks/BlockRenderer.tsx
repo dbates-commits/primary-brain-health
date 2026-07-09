@@ -14,6 +14,7 @@ import { ContentSection } from "@/components/blocks/ContentSection";
 import { Testimonials } from "@/components/blocks/Testimonials";
 import { LogoCloud } from "@/components/blocks/LogoCloud";
 import { IntakeForm } from "@/components/blocks/IntakeForm";
+import { BookingStepFlow } from "@/components/booking";
 import { ScrollReveal } from "@/components/blocks/ScrollReveal";
 import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
@@ -27,7 +28,9 @@ type Block = any;
 type PageData = any;
 
 function slugify(text?: string): string | undefined {
-  if (!text) return undefined;
+  if (!text) {
+    return undefined;
+  }
   return text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -41,7 +44,9 @@ export function BlockRenderer({
   blocks: Block[] | null | undefined;
   data?: PageData;
 }) {
-  if (!blocks) return null;
+  if (!blocks) {
+    return null;
+  }
 
   const getFieldPath = (index: number, field: string) => {
     return data?.blocks?.[index]
@@ -348,6 +353,15 @@ export function BlockRenderer({
                   headline: getFieldPath(index, "headline"),
                   subheadline: getFieldPath(index, "subheadline"),
                 }}
+              />
+            );
+            break;
+
+          case "PageBlocksBookingStepFlow":
+            content = (
+              <BookingStepFlow
+                headline={block.headline ?? undefined}
+                subheadline={block.subheadline ?? undefined}
               />
             );
             break;

@@ -5,15 +5,7 @@ import { consents, db, writeAuditLog } from "@pbh/db";
 import { CONSENT_VERSION } from "@/lib/consent";
 import { getClientIp, hashIp } from "@/lib/request-meta";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
-
-export type ConsentState =
-  | { status: "idle" }
-  | { status: "success" }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
-    };
+import type { ConsentState } from "@pbh/booking";
 
 /**
  * Record the user's acknowledgment of the wellness + HIPAA NPP terms. Writes one

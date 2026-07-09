@@ -15,7 +15,7 @@ import {
   fieldClass,
   textareaClass,
 } from "@pbh/ui";
-import { completeProfile, type DetailsState } from "./actions";
+import type { DetailsAction, DetailsState } from "./types";
 import { US_STATES } from "./us-states";
 import {
   EDUCATION_LEVELS,
@@ -41,15 +41,17 @@ function formatPhone(value: string): string {
 }
 
 export function DetailsForm({
+  action,
   userId,
   name,
   onComplete,
 }: {
+  action: DetailsAction;
   userId: string;
   name: string;
   onComplete: () => void;
 }) {
-  const [state, action, pending] = useActionState(completeProfile, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
 
@@ -102,7 +104,7 @@ export function DetailsForm({
         subtitle="We still need some extra information to proceed with your assessment. Please complete this form."
       />
 
-      <form action={action} noValidate>
+      <form action={formAction} noValidate>
         <input type="hidden" name="userId" value={userId} />
 
         <fieldset

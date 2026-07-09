@@ -1,0 +1,97 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { DetailsForm, ConsentForm, type SignupResult } from "@pbh/booking";
+import { Modal } from "./Modal";
+import { BookingSection } from "./BookingSection";
+import { PaymentStep } from "./PaymentStep";
+import { DoneStep } from "./DoneStep";
+import { signupStub, detailsStub, consentStub } from "./stub-actions";
+
+/**
+ * Modal steps that run after the inline signup. `signup` itself is the inline
+ * form on the page (not a modal step) — submitting it opens the modal at
+ * `details`.
+ */
+const MODAL_STEPS = ["details", "consent", "payment", "done"] as const;
+type ModalStep = (typeof MODAL_STEPS)[number];
+
+const STEP_LABEL: Record<ModalStep, string> = {
+  details: "Complete your details",
+  consent: "Review terms and consent",
+  payment: "Payment",
+  done: "Confirmation",
+};
+
+type FlowContext = { userId: string; firstName: string; email: string };
+
+/**
+ * Client orchestrator for the booking flow. Renders the inline `BookingSection`
+ * (shared `SignupForm`); on submit it opens the modal and steps through the
+ * shared `DetailsForm` → `ConsentForm` → payment shell → done. Per-step actions
+ * are stubs for now (`.5` injects the real server actions). State is in-memory
+ * for the session, modeled on the funnel's `get-started/StepFlow`.
+ */
+export function BookingStepFlow({
+  headline,
+  subheadline,
+}: {
+  headline?: string;
+  subheadline?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [context, setContext] = useState<FlowContext>({
+    userId: "",
+    firstName: "",
+    email: "",
+  });
+
+  const start = useCallback((result: SignupResult) => {
+    setContext({
+      userId: result.userId,
+      firstName: result.firstName,
+      email: result.email,
+    });
+    setStepIndex(0);
+    setOpen(true);
+  }, []);
+
+  const advance = useCallback(() => {
+    setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
+  }, []);
+
+  const close = useCallback(() => setOpen(false), []);
+
+  const step = MODAL_STEPS[stepIndex];
+
+  return (
+    <>
+      <BookingSection
+        headline={headline}
+        subheadline={subheadline}
+        signupAction={signupStub}
+        onStart={start}
+      />
+      <Modal open={open} onClose={close} label={STEP_LABEL[step]}>
+        {step === "details" && (
+          <DetailsForm
+            action={detailsStub}
+            userId={context.userId}
+            name={context.firstName}
+            onComplete={advance}
+          />
+        )}
+        {step === "consent" && (
+          <ConsentForm
+            action={consentStub}
+            userId={context.userId}
+            onComplete={advance}
+          />
+        )}
+        {step === "payment" && <PaymentStep onComplete={advance} />}
+        {step === "done" && <DoneStep email={context.email} onClose={close} />}
+      </Modal>
+    </>
+  );
+}
