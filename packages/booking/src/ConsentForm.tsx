@@ -41,14 +41,27 @@ const TERMS_UPDATED = "Last updated: October 24, 2023";
  * action is injected via `action`; submission is gated on the agreement
  * checkbox (`agreed`).
  */
+/**
+ * Header copy for the consent step, exported so a host that renders the header
+ * itself (e.g. the marketing modal, which pins it above the scroll area) uses the
+ * same title/subtitle as the inline funnel step.
+ */
+export const CONSENT_HEADER = {
+  title: "Almost there!",
+  subtitle:
+    "Please, read carefully the following form to know what the terms of the assessments and consultation.",
+} as const;
+
 export function ConsentForm({
   action,
   userId,
   onComplete,
+  showHeader = true,
 }: {
   action: ConsentAction;
   userId: string;
   onComplete: () => void;
+  showHeader?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -72,10 +85,7 @@ export function ConsentForm({
     >
       <input type="hidden" name="userId" value={userId} />
 
-      <StepHeader
-        title="Almost there!"
-        subtitle="Please, read carefully the following form to know what the terms of the assessments and consultation."
-      />
+      {showHeader ? <StepHeader {...CONSENT_HEADER} /> : null}
 
       <div
         role="region"

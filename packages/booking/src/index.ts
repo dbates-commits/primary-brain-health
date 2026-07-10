@@ -6,9 +6,9 @@
  * too so the injected actions can validate against the same canonical values.
  */
 export { SignupForm } from "./SignupForm";
-export { DetailsForm } from "./DetailsForm";
-export { ConsentForm } from "./ConsentForm";
-export { PaymentStep } from "./PaymentStep";
+export { DetailsForm, detailsHeader } from "./DetailsForm";
+export { ConsentForm, CONSENT_HEADER } from "./ConsentForm";
+export { PaymentStep, PAYMENT_HEADER } from "./PaymentStep";
 export * from "./types";
 export * from "./field-options";
 export * from "./us-states";

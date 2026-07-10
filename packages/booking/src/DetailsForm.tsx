@@ -40,16 +40,31 @@ function formatPhone(value: string): string {
   return `(${area}) ${prefix}-${line}`;
 }
 
+/**
+ * Header copy for the details step, exported so a host that renders the header
+ * itself (e.g. the marketing modal, which pins it above the scroll area) uses the
+ * same title/subtitle as the inline funnel step.
+ */
+export function detailsHeader(name: string) {
+  return {
+    title: name ? `Welcome, ${name}!` : "Welcome!",
+    subtitle:
+      "We still need some extra information to proceed with your assessment. Please complete this form.",
+  };
+}
+
 export function DetailsForm({
   action,
   userId,
   name,
   onComplete,
+  showHeader = true,
 }: {
   action: DetailsAction;
   userId: string;
   name: string;
   onComplete: () => void;
+  showHeader?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -99,10 +114,7 @@ export function DetailsForm({
 
   return (
     <div className="flex flex-col gap-8">
-      <StepHeader
-        title={name ? `Welcome, ${name}!` : "Welcome!"}
-        subtitle="We still need some extra information to proceed with your assessment. Please complete this form."
-      />
+      {showHeader ? <StepHeader {...detailsHeader(name)} /> : null}
 
       <form action={formAction} noValidate>
         <input type="hidden" name="userId" value={userId} />

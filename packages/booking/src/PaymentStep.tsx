@@ -28,16 +28,25 @@ const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
  * card data ever touches our servers; Checkout branding is set in the Stripe
  * Dashboard (Settings → Branding).
  */
+/**
+ * Header copy for the payment step, exported so a host that renders the header
+ * itself (e.g. the marketing modal, which pins it above the scroll area) matches
+ * the inline funnel step.
+ */
+export const PAYMENT_HEADER = { title: "Payment" } as const;
+
 export function PaymentStep({
   userId,
   createSession,
   finalize,
   onComplete,
+  showHeader = true,
 }: {
   userId: string;
   createSession: CreateCheckoutAction;
   finalize: PaymentFinalizeAction;
   onComplete: () => void;
+  showHeader?: boolean;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -95,7 +104,7 @@ export function PaymentStep({
 
   return (
     <div className="flex flex-col gap-8">
-      <StepHeader title="Payment" />
+      {showHeader ? <StepHeader {...PAYMENT_HEADER} /> : null}
 
       {initError && (
         <p role="alert" className="animate-error-in text-sm text-error">

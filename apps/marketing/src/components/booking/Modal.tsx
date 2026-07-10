@@ -2,12 +2,19 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@pbh/ui";
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   /** Accessible name for the dialog (announced by screen readers). */
   label: string;
+  /**
+   * Optional fixed header, pinned above the scrollable body so only the body
+   * (and its scrollbar) scrolls. Steps that render their own header can omit this
+   * and pass it as `children` instead.
+   */
+  header?: ReactNode;
   children: ReactNode;
 }
 
@@ -23,7 +30,7 @@ const FOCUSABLE =
  * Portal-safe for SSR: it renders `null` until `open` flips true (a client-only
  * event), so `document` is always defined when the portal mounts.
  */
-export function Modal({ open, onClose, label, children }: ModalProps) {
+export function Modal({ open, onClose, label, header, children }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
@@ -79,7 +86,7 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-on-surface/50 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-on-surface/50 p-4"
       onMouseDown={onClose}
     >
       <div
@@ -88,14 +95,14 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="relative my-8 w-full max-w-xl rounded-3xl bg-surface p-6 shadow-2xl focus:outline-none sm:p-10"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl focus:outline-none"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="absolute right-4 top-4 z-20 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <svg
             aria-hidden="true"
@@ -108,7 +115,24 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
             <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        {children}
+        {/* Fixed header region (title + description) — stays put while only the
+            body below scrolls, so the scrollbar spans the content, not the whole
+            modal. `pr-14` keeps the title clear of the close button. */}
+        {header ? (
+          <div className="shrink-0 px-6 pb-4 pr-14 pt-6 sm:px-10 sm:pt-10">
+            {header}
+          </div>
+        ) : null}
+        <div
+          className={cn(
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 sm:px-10 sm:pb-10",
+            // No fixed header → the body owns the top padding (and clears the
+            // close button on the right).
+            header ? "" : "pr-14 pt-6 sm:pt-10",
+          )}
+        >
+          {children}
+        </div>
       </div>
     </div>,
     document.body,
