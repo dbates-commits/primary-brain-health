@@ -1,7 +1,9 @@
+import "server-only";
+
 /**
  * Shared, idempotent write path for the Stripe payment lifecycle. Called from
- * BOTH the client-confirm server action (`finalizeAssessmentPayment`, the fast
- * path) and the webhook route (`/api/stripe/webhook`, the source-of-truth
+ * BOTH the client-confirm server action (the fast path, in each app's payment
+ * action) and the webhook route (`/api/stripe/webhook`, the source-of-truth
  * backstop). Every function here is safe to run more than once for the same
  * PaymentIntent — Stripe redelivers events and the two paths routinely race —
  * so each write is guarded to be a no-op after the first effective one.
@@ -9,7 +11,7 @@
  * These functions ONLY touch the `payments` mirror + `audit_log`. Enrollment
  * (the Linus register/enroll handoff) is deliberately left to the callers so it
  * runs exactly once per path (the client action delegates to
- * `completeAssessmentSetup`; the webhook calls `registerAndEnrollUserById`).
+ * `registerAndEnrollUserById`; the webhook calls it too).
  */
 
 import { and, eq, ne } from "drizzle-orm";

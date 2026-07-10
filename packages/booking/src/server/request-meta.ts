@@ -1,9 +1,15 @@
+import "server-only";
+
 import { createHash, createHmac } from "node:crypto";
 
 /**
  * Request-metadata helpers for compliance records (consent, audit log). We store
  * a *hash* of the client IP, never the raw address. Uses Node's built-in crypto
- * (Server Actions run in the Node.js runtime, like `password.ts`).
+ * (Server Actions run in the Node.js runtime).
+ *
+ * `getClientIp` takes a standard `Headers` object, so it's framework-agnostic —
+ * each app reads its own request headers (e.g. `await headers()` in Next) and
+ * passes them in.
  */
 
 /**

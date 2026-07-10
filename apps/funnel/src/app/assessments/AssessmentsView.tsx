@@ -1,6 +1,6 @@
 import { Card, Heading } from "@pbh/ui";
 import { AssessmentCard } from "./AssessmentCard";
-import type { EnrollmentView } from "./register-and-enroll";
+import type { EnrollmentView } from "@pbh/booking/server";
 
 /**
  * The post-payment "Welcome Back" view from Figma: a welcome header, the first

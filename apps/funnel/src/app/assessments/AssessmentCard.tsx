@@ -4,7 +4,7 @@ import {
   PRIMARY_MODAL_BUTTON_CLASS,
 } from "./IframeModalButton";
 import { ViewReportButton } from "./ViewReportButton";
-import type { EnrollmentView } from "./register-and-enroll";
+import type { EnrollmentView } from "@pbh/booking/server";
 
 /**
  * A single assessment row from the Figma "Welcome Back" design: title +

@@ -4,14 +4,24 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts"
   },
   "scripts": {
     "lint": "echo \"(no lint)\" && exit 0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pbh/ui": "workspace:*"
+    "@neondatabase/serverless": "^1.0.1",
+    "@pbh/db": "workspace:*",
+    "@pbh/linus": "workspace:*",
+    "@pbh/payments": "workspace:*",
+    "@pbh/ui": "workspace:*",
+    "@stripe/react-stripe-js": "^6.6.0",
+    "@stripe/stripe-js": "^9.8.0",
+    "drizzle-orm": "^0.44.6",
+    "server-only": "^0.0.1",
+    "stripe": "^22.3.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

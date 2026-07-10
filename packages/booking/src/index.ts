@@ -8,6 +8,7 @@
 export { SignupForm } from "./SignupForm";
 export { DetailsForm } from "./DetailsForm";
 export { ConsentForm } from "./ConsentForm";
+export { PaymentStep } from "./PaymentStep";
 export * from "./types";
 export * from "./field-options";
 export * from "./us-states";

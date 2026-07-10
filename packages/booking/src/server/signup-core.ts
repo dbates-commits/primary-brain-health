@@ -1,0 +1,81 @@
+import "server-only";
+
+import { db, users, writeAuditLog } from "@pbh/db";
+import type { SignupState, SignupValues } from "../types";
+import { isPgError, PgErrorCode } from "./db-errors";
+import { isValidEmail, normalizeEmail } from "./email";
+
+/**
+ * Create the partial account at signup: validate the first/last/email, insert a
+ * `users` row, and write a `signup` audit entry. Framework-agnostic — each app's
+ * `"use server"` wrapper passes the submitted `FormData` and its own audit
+ * `source` label. Returns the shared `SignupState` the form renders.
+ */
+export async function createAccountCore(
+  formData: FormData,
+  opts: { source: string },
+): Promise<SignupState> {
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+
+  // Echoed back on error so the form keeps what the user typed.
+  const values: SignupValues = { firstName, lastName, email };
+
+  const fieldErrors: Record<string, string> = {};
+  if (!firstName) {
+    fieldErrors.firstName = "Enter your first name.";
+  }
+  if (!lastName) {
+    fieldErrors.lastName = "Enter your last name.";
+  }
+  if (!isValidEmail(email)) {
+    fieldErrors.email = "Enter a valid email address.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      status: "error",
+      message: "Please fix the fields below.",
+      fieldErrors,
+      values,
+    };
+  }
+
+  try {
+    const [created] = await db
+      .insert(users)
+      .values({
+        email,
+        firstName,
+        lastName,
+      })
+      .returning({ id: users.id });
+
+    await writeAuditLog({
+      eventType: "signup",
+      userId: created.id,
+      metadata: { source: opts.source },
+    });
+
+    return { status: "success", userId: created.id, email, firstName, lastName };
+  } catch (err) {
+    if (isPgError(err, PgErrorCode.UniqueViolation, "users_email_unique")) {
+      return {
+        status: "error",
+        message: "Please fix the fields below.",
+        fieldErrors: {
+          email:
+            "An account with this email already exists. Try signing in instead.",
+        },
+        values,
+      };
+    }
+    console.error("createAccountCore failed:", err);
+    return {
+      status: "error",
+      message: "Something went wrong creating your account. Please try again.",
+      values,
+    };
+  }
+}

@@ -1,3 +1,5 @@
+import "server-only";
+
 // RFC 5321 size caps: the whole address is ≤ 254 chars, the local-part ≤ 64,
 // and the domain ≤ 255.
 const MAX_EMAIL_LENGTH = 254;

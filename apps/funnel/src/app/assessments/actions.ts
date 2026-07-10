@@ -5,13 +5,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db, linusEnrollments, users } from "@pbh/db";
 import { extractReportData, getCampaigns, getReport } from "@pbh/linus";
-import { isValidEmail, normalizeEmail } from "@/lib/email";
 import {
   ASSESSMENT_UID_COOKIE,
+  isValidEmail,
+  normalizeEmail,
   registerAndEnrollUserById,
   runRegisterAndEnroll,
   type LinusState,
-} from "./register-and-enroll";
+} from "@pbh/booking/server";
 
 /** Short-lived cookie identifying whose assessments/reports to serve. */
 const ASSESSMENT_COOKIE_OPTS = {

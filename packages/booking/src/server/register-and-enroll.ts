@@ -1,13 +1,13 @@
+import "server-only";
+
 /**
- * Core register / enroll / list logic, shared by the `/login` sign-in form
- * action, the payment step's server action, and the `/assessments` page. Kept
- * out of the `"use server"` actions file so a Server Component can import and
- * await it directly. Server-only (touches the DB and the Linus client).
+ * Core register / enroll / list logic, shared by the funnel `/login` sign-in
+ * action, both apps' payment step actions, and the `/assessments` page. Server-
+ * only (touches the DB and the Linus client).
  */
 
 import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { db, linusEnrollments, users, type User } from "@pbh/db";
-import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import {
   buildRegisterInput,
   enrollSubject,
@@ -19,6 +19,7 @@ import {
   MissingDateOfBirthError,
   registerSubject,
 } from "@pbh/linus";
+import { isPgError, PgErrorCode } from "./db-errors";
 
 /** Cookie set on successful payment so `/assessments` knows whose links to show. */
 export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
@@ -548,4 +549,3 @@ export async function registerAndEnrollUserById(
   }
   return registerAndEnrollUser(user, options);
 }
-

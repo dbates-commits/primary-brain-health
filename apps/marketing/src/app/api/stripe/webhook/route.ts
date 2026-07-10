@@ -6,9 +6,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Stripe webhook — the authoritative fulfillment path. The handler is shared
- * (`@pbh/booking/server`) so the funnel and marketing endpoints behave
- * identically: verify signature → record payment → register/enroll (idempotent).
+ * Stripe webhook for payments started from the marketing booking modal — the
+ * authoritative fulfillment backstop. Shares the exact handler with the funnel
+ * (`@pbh/booking/server`): verify signature → record payment → register/enroll
+ * (idempotent). Register this endpoint's URL in Stripe with its own signing
+ * secret (`STRIPE_WEBHOOK_SECRET`).
  */
 export function POST(req: Request): Promise<Response> {
   return handleStripeWebhook(req);

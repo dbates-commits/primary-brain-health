@@ -5,11 +5,11 @@ import {
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
+  registerAndEnrollUserById,
   verifyAndRecordCheckout,
   type LinusState,
 } from "@pbh/booking/server";
 import type { CreateCheckoutResult } from "@pbh/booking";
-import { completeAssessmentSetup } from "@/app/assessments/actions";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
@@ -33,15 +33,14 @@ export async function createAssessmentCheckoutSession(
 }
 
 /**
- * Called from Embedded Checkout's `onComplete`. Runs in two phases:
+ * Called from Embedded Checkout's `onComplete`. Verify + record the payment
+ * (shared), then register + enroll the user in Linus. Unlike the funnel, the
+ * marketing app sets no session cookie — the paid + enrolled user is handed to
+ * the funnel's `/login` (see `DoneStep`), which drops the assessment cookie and
+ * lands on `/assessments`. That `/login` is the seam Clerk replaces later.
  *
- *  1. Verify + record the payment (shared `verifyAndRecordCheckout`). Any failure
- *     here — network, a missing/mismatched intent, a rejected record — is a
- *     payment problem, so we bail before touching enrollment.
- *  2. Hand off to `completeAssessmentSetup`, which registers + enrolls the user,
- *     drops the funnel's assessment cookie, and returns the success state the
- *     client uses to advance to the confirmation step and link to /assessments.
- *     This step is funnel-specific (cookie) and stays in the app.
+ * A `success` state advances the modal to the confirmation step; enrollment
+ * failures surface inline (the charge stands and the webhook backstop retries).
  */
 export async function finalizeCheckoutSession(
   userId: string,
@@ -68,7 +67,5 @@ export async function finalizeCheckoutSession(
   // Deliberately outside the try above so an enrollment failure surfaces as its
   // own state, not a payment error: the charge stands and the webhook backstop
   // retries enrollment.
-  const formData = new FormData();
-  formData.set("userId", id);
-  return completeAssessmentSetup({ status: "idle" }, formData);
+  return registerAndEnrollUserById(id);
 }

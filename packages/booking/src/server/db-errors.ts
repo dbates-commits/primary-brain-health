@@ -1,3 +1,5 @@
+import "server-only";
+
 import { NeonDbError } from "@neondatabase/serverless";
 
 /**

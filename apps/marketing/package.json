@@ -12,15 +12,23 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
     "@pbh/booking": "workspace:*",
+    "@pbh/db": "workspace:*",
+    "@pbh/linus": "workspace:*",
+    "@pbh/payments": "workspace:*",
     "@pbh/tokens": "workspace:*",
     "@pbh/types": "workspace:*",
     "@pbh/ui": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",
+    "@stripe/react-stripe-js": "^6.6.0",
+    "@stripe/stripe-js": "^9.8.0",
     "@tinacms/cli": "^2.1.1",
+    "drizzle-orm": "^0.44.6",
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "stripe": "^22.3.0",
     "tinacms": "^3.3.1"
   },
   "devDependencies": {

@@ -1,12 +1,20 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { DetailsForm, ConsentForm, type SignupResult } from "@pbh/booking";
+import {
+  DetailsForm,
+  ConsentForm,
+  PaymentStep,
+  type SignupResult,
+} from "@pbh/booking";
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
-import { PaymentStep } from "./PaymentStep";
 import { DoneStep } from "./DoneStep";
-import { signupStub, detailsStub, consentStub } from "./stub-actions";
+import { signupAction, detailsAction, consentAction } from "./actions";
+import {
+  createAssessmentCheckoutSession,
+  finalizeCheckoutSession,
+} from "./payment/actions";
 
 /**
  * Modal steps that run after the inline signup. `signup` itself is the inline
@@ -28,9 +36,10 @@ type FlowContext = { userId: string; firstName: string; email: string };
 /**
  * Client orchestrator for the booking flow. Renders the inline `BookingSection`
  * (shared `SignupForm`); on submit it opens the modal and steps through the
- * shared `DetailsForm` → `ConsentForm` → payment shell → done. Per-step actions
- * are stubs for now (`.5` injects the real server actions). State is in-memory
- * for the session, modeled on the funnel's `get-started/StepFlow`.
+ * shared `DetailsForm` → `ConsentForm` → `PaymentStep` (Stripe Embedded Checkout)
+ * → done. Every step calls a real `@pbh/booking/server`-backed action injected
+ * here (pbh-ggr.5). State is in-memory for the session, modeled on the funnel's
+ * `get-started/StepFlow`.
  */
 export function BookingStepFlow({
   headline,
@@ -70,13 +79,13 @@ export function BookingStepFlow({
       <BookingSection
         headline={headline}
         subheadline={subheadline}
-        signupAction={signupStub}
+        signupAction={signupAction}
         onStart={start}
       />
       <Modal open={open} onClose={close} label={STEP_LABEL[step]}>
         {step === "details" && (
           <DetailsForm
-            action={detailsStub}
+            action={detailsAction}
             userId={context.userId}
             name={context.firstName}
             onComplete={advance}
@@ -84,12 +93,19 @@ export function BookingStepFlow({
         )}
         {step === "consent" && (
           <ConsentForm
-            action={consentStub}
+            action={consentAction}
             userId={context.userId}
             onComplete={advance}
           />
         )}
-        {step === "payment" && <PaymentStep onComplete={advance} />}
+        {step === "payment" && (
+          <PaymentStep
+            userId={context.userId}
+            createSession={createAssessmentCheckoutSession}
+            finalize={finalizeCheckoutSession}
+            onComplete={advance}
+          />
+        )}
         {step === "done" && <DoneStep email={context.email} onClose={close} />}
       </Modal>
     </>

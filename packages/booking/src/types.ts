@@ -81,3 +81,27 @@ export type ConsentAction = (
   prev: ConsentState,
   formData: FormData,
 ) => Promise<ConsentState>;
+
+/**
+ * Payment-step contracts. The step component is presentation only (mounts Stripe
+ * Embedded Checkout); each app injects a `createSession` action that mints a
+ * Checkout Session and a `finalize` action that verifies + records the payment
+ * and enrolls the user. Kept here so the component and both apps' actions agree.
+ */
+export type CreateCheckoutResult =
+  | { status: "ready"; clientSecret: string; sessionId: string }
+  | { status: "error"; message: string };
+
+export type CreateCheckoutAction = (
+  userId: string,
+) => Promise<CreateCheckoutResult>;
+
+/** Minimal shape the payment step reads from an app's finalize action. */
+export type PaymentFinalizeResult =
+  | { status: "error"; message: string }
+  | { status: "idle" | "success" };
+
+export type PaymentFinalizeAction = (
+  userId: string,
+  sessionId: string,
+) => Promise<PaymentFinalizeResult>;
