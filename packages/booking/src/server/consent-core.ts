@@ -1,7 +1,7 @@
 import "server-only";
 
 import { consents, db, writeAuditLog } from "@pbh/db";
-import type { ConsentState } from "../types";
+import { CONSENT_REQUIRED_ERROR, type ConsentState } from "../types";
 import { CONSENT_VERSION } from "./consent";
 import { isPgError, PgErrorCode } from "./db-errors";
 
@@ -35,7 +35,7 @@ export async function recordConsentCore({
     return {
       status: "error",
       message: "Please confirm before continuing.",
-      fieldErrors: { agreed: "You must agree to the terms to continue." },
+      fieldErrors: { agreed: CONSENT_REQUIRED_ERROR },
     };
   }
 

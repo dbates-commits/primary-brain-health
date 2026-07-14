@@ -1,9 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { Button, FieldError, StepHeader } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
-import type { ConsentAction, ConsentState } from "./types";
+import {
+  CONSENT_REQUIRED_ERROR,
+  type ConsentAction,
+  type ConsentState,
+} from "./types";
 
 const initialState: ConsentState = { status: "idle" };
 
@@ -75,12 +79,36 @@ export function ConsentForm({
     }
   }, [state, onComplete]);
 
-  // Gate the submit button on the agreement checkbox alone.
   const [agreed, setAgreed] = useState(false);
+
+  // The submit button stays enabled even before the box is ticked (a disabled
+  // button gives no feedback about *why* it can't be used). Clicking without
+  // agreeing surfaces the error instead. Guarding here keeps that instant rather
+  // than round-tripping to learn what we already know; `recordConsentCore`
+  // re-checks regardless, so the client is never the only line of defence.
+  const [agreeError, setAgreeError] = useState<string | null>(null);
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    if (!agreed) {
+      e.preventDefault();
+      setAgreeError(CONSENT_REQUIRED_ERROR);
+    }
+  }
+
+  function handleAgreedChange(checked: boolean) {
+    setAgreed(checked);
+    if (checked) {
+      setAgreeError(null);
+    }
+  }
+
+  // Same message whichever side produced it, so the two can't disagree.
+  const agreedError = fieldErrors?.agreed ?? agreeError ?? undefined;
 
   return (
     <form
       action={formAction}
+      onSubmit={handleSubmit}
       noValidate
       className="flex flex-col items-center gap-8 bg-surface"
     >
@@ -136,20 +164,18 @@ export function ConsentForm({
                 type="checkbox"
                 name="agreed"
                 checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
+                onChange={(e) => handleAgreedChange(e.target.checked)}
                 required
                 aria-required="true"
-                aria-invalid={fieldErrors?.agreed ? true : undefined}
-                aria-describedby={
-                  fieldErrors?.agreed ? "agreed-error" : undefined
-                }
+                aria-invalid={agreedError ? true : undefined}
+                aria-describedby={agreedError ? "agreed-error" : undefined}
                 className="size-6 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
               />
               <span className="text-lg text-on-surface">
                 I have read and agree with consent form.
               </span>
             </label>
-            <FieldError id="agreed-error" message={fieldErrors?.agreed} />
+            <FieldError id="agreed-error" message={agreedError} />
           </div>
 
           {state.status === "error" && !fieldErrors && (
@@ -158,12 +184,7 @@ export function ConsentForm({
             </p>
           )}
 
-          <Button
-            type="submit"
-            color="primary"
-            disabled={!agreed}
-            className="h-14 w-full text-base"
-          >
+          <Button type="submit" color="primary" className="h-14 w-full text-base">
             {pending ? "Saving…" : "Continue With Payment"}
           </Button>
         </StickyActions>
