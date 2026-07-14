@@ -36,6 +36,12 @@ function slugify(text?: string): string | undefined {
     .replace(/(^-|-$)/g, "");
 }
 
+// Every "Book a Consultation" CTA (hero, header, footer, global CTAs) targets
+// `#intake`, and the Header resolves it with getElementById. So the booking
+// block's anchor has to stay put even when an editor rewrites its headline —
+// hence a fixed id here rather than one slugified from the copy.
+const BOOKING_ANCHOR_ID = "intake";
+
 export function BlockRenderer({
   blocks,
   data,
@@ -56,7 +62,10 @@ export function BlockRenderer({
   return (
     <>
       {blocks.map((block: Block, index: number) => {
-        const sectionId = slugify(block.headline);
+        const sectionId =
+          block.__typename === "PageBlocksIntakeForm"
+            ? BOOKING_ANCHOR_ID
+            : slugify(block.headline);
 
         let content: React.ReactNode = null;
 
