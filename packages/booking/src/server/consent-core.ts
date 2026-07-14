@@ -1,35 +1,29 @@
-"use server";
+import "server-only";
 
-import { headers } from "next/headers";
 import { consents, db, writeAuditLog } from "@pbh/db";
-import { CONSENT_VERSION } from "@/lib/consent";
-import { getClientIp, hashIp } from "@/lib/request-meta";
-import { isPgError, PgErrorCode } from "@/lib/db-errors";
-
-export type ConsentState =
-  | { status: "idle" }
-  | { status: "success" }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
-    };
+import type { ConsentState } from "../types";
+import { CONSENT_VERSION } from "./consent";
+import { isPgError, PgErrorCode } from "./db-errors";
 
 /**
  * Record the user's acknowledgment of the wellness + HIPAA NPP terms. Writes one
  * append-only row per consent type plus a `consent` audit entry.
  *
- * NOTE: `userId` arrives from a hidden form field, i.e. it's client-trusted.
- * That's acceptable for this scaffold; once auth/session lands, derive the user
- * server-side instead of trusting the field.
+ * `userId` is resolved by the app wrapper (via the identity seam), not trusted
+ * from the form. Request metadata (`ipHash`, `userAgent`) is read by the app and
+ * passed in, keeping this core framework-agnostic.
  */
-export async function recordConsent(
-  _prev: ConsentState,
-  formData: FormData,
-): Promise<ConsentState> {
-  const userId = String(formData.get("userId") ?? "").trim();
-  const agreed = formData.get("agreed") === "on";
-
+export async function recordConsentCore({
+  userId,
+  agreed,
+  ipHash,
+  userAgent,
+}: {
+  userId: string;
+  agreed: boolean;
+  ipHash: string;
+  userAgent: string | null;
+}): Promise<ConsentState> {
   if (!userId) {
     return {
       status: "error",
@@ -44,10 +38,6 @@ export async function recordConsent(
       fieldErrors: { agreed: "You must agree to the terms to continue." },
     };
   }
-
-  const requestHeaders = await headers();
-  const ipHash = hashIp(getClientIp(requestHeaders));
-  const userAgent = requestHeaders.get("user-agent");
 
   try {
     await db.insert(consents).values([
@@ -79,8 +69,8 @@ export async function recordConsent(
 
     return { status: "success" };
   } catch (err) {
-    // userId came from a (client-trusted) hidden field; a bad/stale value
-    // trips the FK to users.id rather than being a transient failure.
+    // userId came from the flow; a bad/stale value trips the FK to users.id
+    // rather than being a transient failure.
     if (isPgError(err, PgErrorCode.ForeignKeyViolation)) {
       return {
         status: "error",
@@ -88,7 +78,7 @@ export async function recordConsent(
           "We couldn't find your account. Please restart and create your account again.",
       };
     }
-    console.error("recordConsent failed:", err);
+    console.error("recordConsentCore failed:", err);
     return {
       status: "error",
       message: "Something went wrong saving your consent. Please try again.",

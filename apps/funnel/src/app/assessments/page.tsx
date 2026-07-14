@@ -5,7 +5,7 @@ import { AssessmentsView } from "./AssessmentsView";
 import {
   ASSESSMENT_UID_COOKIE,
   registerAndEnrollUserById,
-} from "./register-and-enroll";
+} from "@pbh/booking/server";
 
 export const metadata = {
   title: "Assessments",

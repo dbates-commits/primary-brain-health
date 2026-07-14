@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, FieldError, StepHeader } from "@pbh/ui";
-import { recordConsent, type ConsentState } from "./actions";
+import type { ConsentAction, ConsentState } from "./types";
 
 const initialState: ConsentState = { status: "idle" };
 
@@ -36,14 +36,34 @@ const LEGAL_SECTIONS = [
 
 const TERMS_UPDATED = "Last updated: October 24, 2023";
 
+/**
+ * Consent step, shared by the funnel and the marketing modal. The per-step
+ * action is injected via `action`; submission is gated on the agreement
+ * checkbox (`agreed`).
+ */
+/**
+ * Header copy for the consent step, exported so a host that renders the header
+ * itself (e.g. the marketing modal, which pins it above the scroll area) uses the
+ * same title/subtitle as the inline funnel step.
+ */
+export const CONSENT_HEADER = {
+  title: "Almost there!",
+  subtitle:
+    "Please, read carefully the following form to know what the terms of the assessments and consultation.",
+} as const;
+
 export function ConsentForm({
+  action,
   userId,
   onComplete,
+  showHeader = true,
 }: {
+  action: ConsentAction;
   userId: string;
   onComplete: () => void;
+  showHeader?: boolean;
 }) {
-  const [state, action, pending] = useActionState(recordConsent, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
 
   const advanced = useRef(false);
@@ -59,16 +79,13 @@ export function ConsentForm({
 
   return (
     <form
-      action={action}
+      action={formAction}
       noValidate
       className="flex flex-col items-center gap-8 bg-surface"
     >
       <input type="hidden" name="userId" value={userId} />
 
-      <StepHeader
-        title="Almost there!"
-        subtitle="Please, read carefully the following form to know what the terms of the assessments and consultation."
-      />
+      {showHeader ? <StepHeader {...CONSENT_HEADER} /> : null}
 
       <div
         role="region"

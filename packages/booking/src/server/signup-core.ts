@@ -1,35 +1,19 @@
-"use server";
+import "server-only";
 
 import { db, users, writeAuditLog } from "@pbh/db";
-import { isPgError, PgErrorCode } from "@/lib/db-errors";
-import { isValidEmail, normalizeEmail } from "@/lib/email";
+import type { SignupState, SignupValues } from "../types";
+import { isPgError, PgErrorCode } from "./db-errors";
+import { isValidEmail, normalizeEmail } from "./email";
 
-/** Non-secret fields echoed back so the form can repopulate after a reset. */
-export type SignupValues = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
-
-export type SignupState =
-  | { status: "idle" }
-  | {
-      status: "success";
-      userId: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-    }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
-      values: SignupValues;
-    };
-
-export async function createAccount(
-  _prev: SignupState,
+/**
+ * Create the partial account at signup: validate the first/last/email, insert a
+ * `users` row, and write a `signup` audit entry. Framework-agnostic — each app's
+ * `"use server"` wrapper passes the submitted `FormData` and its own audit
+ * `source` label. Returns the shared `SignupState` the form renders.
+ */
+export async function createAccountCore(
   formData: FormData,
+  opts: { source: string },
 ): Promise<SignupState> {
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
@@ -71,7 +55,7 @@ export async function createAccount(
     await writeAuditLog({
       eventType: "signup",
       userId: created.id,
-      metadata: { source: "get-started" },
+      metadata: { source: opts.source },
     });
 
     return { status: "success", userId: created.id, email, firstName, lastName };
@@ -87,7 +71,7 @@ export async function createAccount(
         values,
       };
     }
-    console.error("createAccount failed:", err);
+    console.error("createAccountCore failed:", err);
     return {
       status: "error",
       message: "Something went wrong creating your account. Please try again.",

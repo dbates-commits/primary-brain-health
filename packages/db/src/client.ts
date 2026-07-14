@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
 import { getDatabaseUrl } from "./env";
 import * as schema from "./schema";
 
@@ -9,8 +9,35 @@ import * as schema from "./schema";
  * need interactive multi-statement transactions (e.g. payment + audit_log in
  * one atomic unit), swap to the WebSocket `Pool` driver (`drizzle-orm/neon-serverless`).
  */
-const sql = neon(getDatabaseUrl());
+type Schema = typeof schema;
+type Db = NeonHttpDatabase<Schema>;
 
-export const db = drizzle({ client: sql, schema });
+// Lazily construct the client on first use, NOT at module load. `getDatabaseUrl`
+// throws when `DATABASE_URL` is unset, and importing this module happens during
+// `next build`'s page-data collection (which evaluates every route module) — so
+// an eager client would make the build require a runtime secret it doesn't
+// actually need. Deferring to first query keeps the build DB-free while runtime
+// still fails loudly if the URL is missing.
+let instance: Db | null = null;
+
+function getDb(): Db {
+  if (!instance) {
+    instance = drizzle({ client: neon(getDatabaseUrl()), schema });
+  }
+  return instance;
+}
+
+/**
+ * The shared Drizzle client. A thin Proxy so `db.select()`, `db.insert()`, … work
+ * exactly as before while the underlying connection is created on first access.
+ * Methods are bound to the real instance so drizzle's internal `this` is intact.
+ */
+export const db = new Proxy({} as Db, {
+  get(_target, prop) {
+    const real = getDb();
+    const value = Reflect.get(real, prop, real);
+    return typeof value === "function" ? value.bind(real) : value;
+  },
+}) as Db;
 
 export { schema };

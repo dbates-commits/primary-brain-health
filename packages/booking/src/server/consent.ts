@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Single source of truth for consent versions + types. Bump CONSENT_VERSION
  * whenever the wellness or HIPAA NPP copy changes — existing rows stay pinned to

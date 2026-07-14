@@ -2,23 +2,32 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Button, FieldError, Label, StepHeader, fieldClass } from "@pbh/ui";
-import { createAccount, type SignupState } from "./actions";
+import type { SignupAction, SignupResult, SignupState } from "./types";
 
 const initialState: SignupState = { status: "idle" };
 
-export type SignupResult = {
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-};
-
+/**
+ * First/last/email account form. The per-step action is injected via `action`,
+ * so the same component serves the funnel (its `createAccount`) and the marketing
+ * modal. `showHeader`/`title`/`subtitle`/`submitLabel` let the marketing landing
+ * render it inline under the section heading with its own CTA copy.
+ */
 export function SignupForm({
+  action,
   onComplete,
+  showHeader = true,
+  title = "Get started",
+  subtitle = "Create your account to begin.",
+  submitLabel = "Create account",
 }: {
+  action: SignupAction;
   onComplete: (result: SignupResult) => void;
+  showHeader?: boolean;
+  title?: string;
+  subtitle?: string;
+  submitLabel?: string;
 }) {
-  const [state, action, pending] = useActionState(createAccount, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
 
@@ -39,9 +48,9 @@ export function SignupForm({
 
   return (
     <div className="flex flex-col gap-8">
-      <StepHeader title="Get started" subtitle="Create your account to begin." />
+      {showHeader ? <StepHeader title={title} subtitle={subtitle} /> : null}
 
-      <form action={action} noValidate>
+      <form action={formAction} noValidate>
         <fieldset
           disabled={pending}
           aria-busy={pending}
@@ -64,10 +73,7 @@ export function SignupForm({
                 defaultValue={values?.firstName ?? ""}
                 className={fieldClass}
               />
-              <FieldError
-                id="firstName-error"
-                message={fieldErrors?.firstName}
-              />
+              <FieldError id="firstName-error" message={fieldErrors?.firstName} />
             </div>
 
             <div>
@@ -114,7 +120,7 @@ export function SignupForm({
           )}
 
           <Button type="submit" color="primary" className="h-14 w-full text-base">
-            {pending ? "Creating account…" : "Create account"}
+            {pending ? "Creating account…" : submitLabel}
           </Button>
         </fieldset>
       </form>

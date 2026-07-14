@@ -1,35 +1,14 @@
-"use server";
+import "server-only";
 
 import { eq } from "drizzle-orm";
 import { db, users } from "@pbh/db";
-import { US_STATE_CODES } from "./us-states";
 import {
   EDUCATION_LEVEL_VALUES,
   GENDER_VALUES,
   PATIENT_IDENTIFICATION_VALUES,
-} from "./field-options";
-
-/** Non-secret fields echoed back so the form can repopulate after a reset. */
-export type DetailsValues = {
-  dateOfBirth: string;
-  zip: string;
-  stateOfResidence: string;
-  phone: string;
-  gender: string;
-  educationLevel: string;
-  patientIdentification: string;
-  message: string;
-};
-
-export type DetailsState =
-  | { status: "idle" }
-  | { status: "success" }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
-      values: DetailsValues;
-    };
+} from "../field-options";
+import { US_STATE_CODES } from "../us-states";
+import type { DetailsState, DetailsValues } from "../types";
 
 const ZIP_RE = /^\d{5}$/;
 
@@ -43,14 +22,13 @@ function phoneDigits(value: string): string {
  * fields (DOB, ZIP, state of residence, plus the intake details) on the
  * existing `users` row. Password collection is deferred for now.
  *
- * NOTE: `userId` arrives from a (client-trusted) hidden field — fine for this
- * scaffold; derive it from the session once auth lands.
+ * `userId` is resolved by the app wrapper (via the identity seam), not trusted
+ * from the form — see `resolveBookingUserId`.
  */
-export async function completeProfile(
-  _prev: DetailsState,
+export async function completeProfileCore(
+  userId: string,
   formData: FormData,
 ): Promise<DetailsState> {
-  const userId = String(formData.get("userId") ?? "").trim();
   const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
   const zip = String(formData.get("zip") ?? "").trim();
   const stateOfResidence = String(formData.get("stateOfResidence") ?? "").trim();
@@ -147,7 +125,7 @@ export async function completeProfile(
 
     return { status: "success" };
   } catch (err) {
-    console.error("completeProfile failed:", err);
+    console.error("completeProfileCore failed:", err);
     return {
       status: "error",
       message: "Something went wrong saving your details. Please try again.",

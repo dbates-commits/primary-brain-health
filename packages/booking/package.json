@@ -1,40 +1,38 @@
 {
-  "name": "funnel",
-  "version": "0.1.0",
+  "name": "@pbh/booking",
+  "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts"
+  },
   "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
-    "start": "next start -p 3001",
-    "lint": "eslint",
+    "lint": "echo \"(no lint)\" && exit 0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
-    "@pbh/booking": "workspace:*",
     "@pbh/db": "workspace:*",
     "@pbh/linus": "workspace:*",
     "@pbh/payments": "workspace:*",
-    "@pbh/tokens": "workspace:*",
-    "@pbh/types": "workspace:*",
     "@pbh/ui": "workspace:*",
     "@stripe/react-stripe-js": "^6.6.0",
     "@stripe/stripe-js": "^9.8.0",
     "drizzle-orm": "^0.44.6",
-    "next": "16.1.4",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "server-only": "^0.0.1",
     "stripe": "^22.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@pbh/config": "workspace:*",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.4",
-    "tailwindcss": "^4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "typescript": "^5"
   }
 }

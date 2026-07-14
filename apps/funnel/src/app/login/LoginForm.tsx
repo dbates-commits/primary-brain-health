@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Button, Heading, Label, fieldClass } from "@pbh/ui";
 import { registerAndEnroll } from "@/app/assessments/actions";
-import type { LinusState } from "@/app/assessments/register-and-enroll";
+import type { LinusState } from "@pbh/booking/server";
 
 const initialState: LinusState = { status: "idle" };
 
@@ -11,14 +11,18 @@ const initialState: LinusState = { status: "idle" };
  * Temporary email sign-in: look up a registered user by email, drop the
  * assessment session cookie, and forward to /assessments. This is a placeholder
  * for proper auth — Clerk will own this flow in the future.
+ *
+ * `initialEmail` prefills the field — the marketing booking flow hands paid users
+ * here with `?email=…` after they've already paid + enrolled, so they only need
+ * to confirm to land on /assessments.
  */
-export function LoginForm() {
+export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
   const [state, action, pending] = useActionState(
     registerAndEnroll,
     initialState,
   );
   const errorMessage = state.status === "error" ? state.message : undefined;
-  const lastEmail = state.status === "idle" ? "" : state.email;
+  const lastEmail = state.status === "idle" ? initialEmail : state.email;
 
   return (
     <div className="flex flex-col gap-8">

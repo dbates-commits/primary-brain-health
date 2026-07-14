@@ -1,70 +1,57 @@
-"use server";
+import "server-only";
 
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { db, users, writeAuditLog } from "@pbh/db";
-import { getClientIp, hashIp } from "@/lib/request-meta";
 import {
   ASSESSMENT_CURRENCY,
   ASSESSMENT_PRICE_CENTS,
   getStripe,
 } from "@pbh/payments";
-import { completeAssessmentSetup } from "@/app/assessments/actions";
-import type { LinusState } from "@/app/assessments/register-and-enroll";
+import type { CreateCheckoutResult } from "../types";
 import { recordSucceededPayment } from "./fulfill";
-
-export type CreateCheckoutResult =
-  | { status: "ready"; clientSecret: string; sessionId: string }
-  | { status: "error"; message: string };
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
 const ACCOUNT_NOT_FOUND = "We couldn't find your account.";
 const CHECKOUT_START_FAILED = "Couldn't start payment. Please try again.";
-const PAYMENT_UNCONFIRMED = "We couldn't confirm your payment.";
-const PAYMENT_UNVERIFIED = "We couldn't verify your payment. Please try again.";
 
 function checkoutError(message: string): CreateCheckoutResult {
   return { status: "error", message };
-}
-
-function paymentError(message: string): LinusState {
-  return { status: "error", email: "", message };
 }
 
 /**
  * Start payment for the paying user: create a Stripe **Checkout Session**
  * (`ui_mode: "embedded_page"`) for the fixed assessment price and hand its
  * `client_secret` back to the client, which mounts Stripe's full **Embedded
- * Checkout** form via `EmbeddedCheckoutProvider`/`EmbeddedCheckout`. Stripe now
- * recommends the Checkout Sessions API over raw PaymentIntents; the Session
- * carries the line item, Customer, and metadata in one object.
+ * Checkout** form. Stripe now recommends the Checkout Sessions API over raw
+ * PaymentIntents; the Session carries the line item, Customer, and metadata in
+ * one object.
  *
  * `redirect_on_completion: "never"` keeps the customer on our page after paying:
  * Embedded Checkout fires its `onComplete` callback instead of redirecting, and
- * the client then calls `finalizeCheckoutSession` with the returned `sessionId`
- * (embedded `onComplete` passes no session object of its own). `payment_method_types:
- * ["card"]` keeps the demo to inline (no-redirect) card methods — incl. HSA/FSA.
+ * the client then calls `verifyAndRecordCheckout` (via the app's finalize action)
+ * with the returned `sessionId`. `payment_method_types: ["card"]` keeps this to
+ * inline (no-redirect) card methods — incl. HSA/FSA.
+ *
+ * `ipHash` is supplied by the caller (the app reads request headers); this core
+ * stays framework-agnostic.
  */
-export async function createAssessmentCheckoutSession(
+export async function createCheckoutSessionCore(
   userId: string,
+  opts: { ipHash: string },
 ): Promise<CreateCheckoutResult> {
   const id = userId.trim();
   if (!id) {
     return checkoutError(ACCOUNT_NOT_FOUND);
   }
 
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, id))
-    .limit(1);
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
   if (!user) {
     return checkoutError(ACCOUNT_NOT_FOUND);
   }
 
   // Pinned onto both the Session and the PaymentIntent it creates, so that
-  // `finalizeCheckoutSession` and the webhook backstop can each confirm
+  // `verifyAndRecordCheckout` and the webhook backstop can each confirm
   // server-side that the payment belongs to this user.
   const metadata = { userId: id, product: "brain-health-assessment" };
 
@@ -103,7 +90,7 @@ export async function createAssessmentCheckoutSession(
         checkoutSessionId: session.id,
         amountCents: ASSESSMENT_PRICE_CENTS,
       },
-      ipHash: hashIp(getClientIp(await headers())),
+      ipHash: opts.ipHash,
     });
 
     if (!session.client_secret) {
@@ -115,7 +102,7 @@ export async function createAssessmentCheckoutSession(
       sessionId: session.id,
     };
   } catch (err) {
-    console.error("createAssessmentCheckoutSession failed:", err);
+    console.error("createCheckoutSessionCore failed:", err);
     return checkoutError(CHECKOUT_START_FAILED);
   }
 }
@@ -128,9 +115,10 @@ export async function createAssessmentCheckoutSession(
  * status are re-checked inside `recordSucceededPayment`; the insert is idempotent
  * on the payment-intent id, so a double-submit or retry can't duplicate rows.
  */
-async function verifyAndRecordPayment(
+export async function verifyAndRecordCheckout(
   userId: string,
   sessionId: string,
+  opts: { ipHash: string },
 ): Promise<boolean> {
   const stripe = getStripe();
   const session = await stripe.checkout.sessions.retrieve(sessionId, {
@@ -148,48 +136,6 @@ async function verifyAndRecordPayment(
     return false;
   }
 
-  const recorded = await recordSucceededPayment(intent, {
-    ipHash: hashIp(getClientIp(await headers())),
-  });
+  const recorded = await recordSucceededPayment(intent, { ipHash: opts.ipHash });
   return recorded.status !== "rejected";
-}
-
-/**
- * Called from Embedded Checkout's `onComplete` (once the payment finishes and
- * the customer stays on our page). Runs in two phases:
- *
- *  1. Verify + record the payment (`verifyAndRecordPayment`). Any failure here —
- *     network, a missing/mismatched intent, a rejected record — is a payment
- *     problem, so we bail before touching enrollment.
- *  2. Hand off to the shared register + enroll flow, which drops the assessment
- *     cookie and returns the success state the client uses to advance to the
- *     confirmation step and link to /assessments.
- */
-export async function finalizeCheckoutSession(
-  userId: string,
-  checkoutSessionId: string,
-): Promise<LinusState> {
-  const id = userId.trim();
-  const sessionId = checkoutSessionId.trim();
-  if (!id || !sessionId) {
-    return paymentError(PAYMENT_UNCONFIRMED);
-  }
-
-  let verified: boolean;
-  try {
-    verified = await verifyAndRecordPayment(id, sessionId);
-  } catch (err) {
-    console.error("finalizeCheckoutSession failed:", err);
-    return paymentError(PAYMENT_UNVERIFIED);
-  }
-  if (!verified) {
-    return paymentError(PAYMENT_UNVERIFIED);
-  }
-
-  // Deliberately outside the try above so an enrollment failure surfaces as its
-  // own state, not a payment error: the charge stands and the webhook backstop
-  // retries enrollment.
-  const formData = new FormData();
-  formData.set("userId", id);
-  return completeAssessmentSetup({ status: "idle" }, formData);
 }

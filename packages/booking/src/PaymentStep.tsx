@@ -7,10 +7,7 @@ import {
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
 import { StepHeader } from "@pbh/ui";
-import {
-  createAssessmentCheckoutSession,
-  finalizeCheckoutSession,
-} from "./actions";
+import type { CreateCheckoutAction, PaymentFinalizeAction } from "./types";
 
 // Publishable key is inlined at build; safe to expose to the client. Missing key
 // (e.g. env not set) → we render a configuration notice instead of crashing.
@@ -18,22 +15,38 @@ const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 /**
- * Stripe Embedded Checkout step (test mode). Creates a Checkout Session
- * (`ui_mode: "embedded_page"`, `redirect_on_completion: "never"`) for this user and
- * mounts Stripe's full prebuilt payment form via `EmbeddedCheckoutProvider` /
- * `EmbeddedCheckout` with the session `client_secret`. When the customer pays,
- * Stripe fires `onComplete` (no redirect); we then hand off to
- * `finalizeCheckoutSession` (verify → persist → register/enroll) and, on success,
- * call `onComplete` to advance the stepper to the confirmation screen. No PII or
+ * Shared Stripe Embedded Checkout step (test mode), used by the marketing
+ * booking modal. Presentation + Stripe wiring only; the consuming app injects its
+ * own `createSession` (mint a Checkout Session) and `finalize` (verify → persist
+ * → register/enroll) server actions.
+ *
+ * Creates a Checkout Session (`ui_mode: "embedded_page"`,
+ * `redirect_on_completion: "never"`) for this user and mounts Stripe's full
+ * prebuilt form via `EmbeddedCheckoutProvider` / `EmbeddedCheckout`. When the
+ * customer pays, Stripe fires `onComplete` (no redirect); we hand off to
+ * `finalize` and, on success, call `onComplete` to advance the stepper. No PII or
  * card data ever touches our servers; Checkout branding is set in the Stripe
  * Dashboard (Settings → Branding).
  */
+/**
+ * Header copy for the payment step, exported so a host that renders the header
+ * itself (e.g. the marketing modal, which pins it above the scroll area) matches
+ * the inline funnel step.
+ */
+export const PAYMENT_HEADER = { title: "Payment" } as const;
+
 export function PaymentStep({
   userId,
+  createSession,
+  finalize,
   onComplete,
+  showHeader = true,
 }: {
   userId: string;
+  createSession: CreateCheckoutAction;
+  finalize: PaymentFinalizeAction;
   onComplete: () => void;
+  showHeader?: boolean;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -48,7 +61,7 @@ export function PaymentStep({
     }
     started.current = true;
 
-    createAssessmentCheckoutSession(userId)
+    createSession(userId)
       .then((result) => {
         if (result.status === "ready") {
           setClientSecret(result.clientSecret);
@@ -61,10 +74,10 @@ export function PaymentStep({
         // The action itself returns an error result rather than throwing, so this
         // only fires on a transport-level failure (network drop, serialization).
         // Without it the promise rejects unhandled and the UI hangs on "Loading".
-        console.error("createAssessmentCheckoutSession failed:", err);
+        console.error("createSession failed:", err);
         setInitError("Couldn't start payment. Please try again.");
       });
-  }, [userId]);
+  }, [userId, createSession]);
 
   // Fired once Embedded Checkout finishes the payment (the customer stays on the
   // page). Verify + persist + enroll server-side (re-fetches the session from
@@ -77,21 +90,21 @@ export function PaymentStep({
     }
     setCompleteError(null);
     try {
-      const finalized = await finalizeCheckoutSession(userId, sessionId);
+      const finalized = await finalize(userId, sessionId);
       if (finalized.status === "error") {
         setCompleteError(finalized.message);
         return;
       }
       onComplete();
     } catch (err) {
-      console.error("finalizeCheckoutSession failed:", err);
+      console.error("finalize failed:", err);
       setCompleteError("We couldn't confirm your payment. Please try again.");
     }
-  }, [userId, sessionId, onComplete]);
+  }, [userId, sessionId, finalize, onComplete]);
 
   return (
     <div className="flex flex-col gap-8">
-      <StepHeader title="Payment" />
+      {showHeader ? <StepHeader {...PAYMENT_HEADER} /> : null}
 
       {initError && (
         <p role="alert" className="animate-error-in text-sm text-error">

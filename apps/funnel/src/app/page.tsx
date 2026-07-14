@@ -8,12 +8,12 @@ export default function FunnelHome() {
           Primary Brain Health
         </Heading>
         <p className="mt-6 text-lg text-on-surface-variant">
-          The funnel app. Account creation, consent capture, Stripe payment, and
-          the signed-token handoff live here.
+          The funnel app. Sign in to view your assessments and download your
+          reports. Booking and payment live on the marketing site.
         </p>
         <div className="mt-10">
-          <Button href="/get-started" color="primary" size="lg">
-            Get started
+          <Button href="/login" color="primary" size="lg">
+            Sign in
           </Button>
         </div>
       </Container>
