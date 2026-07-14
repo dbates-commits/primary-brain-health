@@ -125,7 +125,13 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
         ) : null}
         <div
           className={cn(
-            "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 sm:px-10 sm:pb-10",
+            // No bottom padding here on purpose: a padding-bottom on the scroll
+            // container insets where a `sticky bottom-0` child pins, leaving the
+            // step's action bar short of the edge with content scrolling beneath
+            // it. Each step supplies its own bottom padding instead — via
+            // `StickyActions` on the steps that pin their actions, and directly
+            // on the ones that don't (payment, done).
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-10",
             // No fixed header → the body owns the top padding (and clears the
             // close button on the right).
             header ? "" : "pr-14 pt-6 sm:pt-10",

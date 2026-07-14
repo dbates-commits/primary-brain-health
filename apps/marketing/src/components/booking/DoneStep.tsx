@@ -24,7 +24,7 @@ export function DoneStep({
   }`;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-6 sm:pb-10">
       <StepHeader
         title="You're all set 🎉"
         subtitle={

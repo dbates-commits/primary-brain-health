@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button, FieldError, StepHeader } from "@pbh/ui";
+import { StickyActions } from "./StickyActions";
 import type { ConsentAction, ConsentState } from "./types";
 
 const initialState: ConsentState = { status: "idle" };
@@ -147,14 +148,16 @@ export function ConsentForm({
           </p>
         )}
 
-        <Button
-          type="submit"
-          color="primary"
-          disabled={!agreed}
-          className="h-14 w-full text-base"
-        >
-          {pending ? "Saving…" : "Continue With Payment"}
-        </Button>
+        <StickyActions>
+          <Button
+            type="submit"
+            color="primary"
+            disabled={!agreed}
+            className="h-14 w-full text-base"
+          >
+            {pending ? "Saving…" : "Continue With Payment"}
+          </Button>
+        </StickyActions>
       </fieldset>
     </form>
   );
