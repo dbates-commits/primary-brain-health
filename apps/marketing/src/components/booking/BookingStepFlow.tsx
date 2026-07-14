@@ -42,8 +42,7 @@ type FlowContext = { userId: string; firstName: string; email: string };
  * (shared `SignupForm`); on submit it opens the modal and steps through the
  * shared `DetailsForm` → `ConsentForm` → `PaymentStep` (Stripe Embedded Checkout)
  * → done. Every step calls a real `@pbh/booking/server`-backed action injected
- * here (pbh-ggr.5). State is in-memory for the session, modeled on the funnel's
- * `get-started/StepFlow`.
+ * here (pbh-ggr.5). State is in-memory for the session.
  */
 export function BookingStepFlow({
   headline,

@@ -15,10 +15,10 @@ const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 /**
- * Shared Stripe Embedded Checkout step (test mode), used by BOTH the funnel
- * `/get-started` flow and the marketing booking modal. Presentation + Stripe
- * wiring only; each app injects its own `createSession` (mint a Checkout Session)
- * and `finalize` (verify → persist → register/enroll) server actions.
+ * Shared Stripe Embedded Checkout step (test mode), used by the marketing
+ * booking modal. Presentation + Stripe wiring only; the consuming app injects its
+ * own `createSession` (mint a Checkout Session) and `finalize` (verify → persist
+ * → register/enroll) server actions.
  *
  * Creates a Checkout Session (`ui_mode: "embedded_page"`,
  * `redirect_on_completion: "never"`) for this user and mounts Stripe's full

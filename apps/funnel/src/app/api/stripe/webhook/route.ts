@@ -6,9 +6,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Stripe webhook — the authoritative fulfillment path. The handler is shared
- * (`@pbh/booking/server`) so the funnel and marketing endpoints behave
- * identically: verify signature → record payment → register/enroll (idempotent).
+ * Stripe webhook — the authoritative fulfillment path, and the ONLY endpoint:
+ * verify signature → record payment → register/enroll (idempotent). Stripe
+ * endpoints are account-scoped, so this receives events for payments started on
+ * the marketing site too. Do not add a second endpoint in another app — Stripe
+ * fans every event out to all of them, and each delivery would be processed twice.
  */
 export function POST(req: Request): Promise<Response> {
   return handleStripeWebhook(req);

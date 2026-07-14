@@ -9,12 +9,16 @@ import {
   ASSESSMENT_UID_COOKIE,
   isValidEmail,
   normalizeEmail,
-  registerAndEnrollUserById,
   runRegisterAndEnroll,
   type LinusState,
 } from "@pbh/booking/server";
 
-/** Short-lived cookie identifying whose assessments/reports to serve. */
+/**
+ * Short-lived cookie identifying whose assessments/reports to serve.
+ *
+ * NOTE: the value is an unsigned user id — acceptable for this unauthenticated
+ * scaffold. Gate this behind a real signed session once auth lands.
+ */
 const ASSESSMENT_COOKIE_OPTS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -51,32 +55,6 @@ export async function registerAndEnroll(
     (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
   }
   redirect("/assessments");
-}
-
-/**
- * Payment step submit: register + enroll the paying user server-side and drop a
- * short-lived cookie identifying them (so /assessments, which auths via the
- * cookie, works — no email or PII in the URL). Returns the success state rather
- * than redirecting, so the funnel can show the "You're all set" confirmation and
- * let the user continue to /assessments themselves. On failure we return the
- * error state so the payment step can show it inline.
- *
- * NOTE: the cookie is an unsigned user id — acceptable for this unauthenticated
- * scaffold (it mirrors the details step's client-trusted userId). Gate this
- * behind a real signed session once auth lands.
- */
-export async function completeAssessmentSetup(
-  _prev: LinusState,
-  formData: FormData,
-): Promise<LinusState> {
-  const userId = String(formData.get("userId") ?? "").trim();
-  const state = await registerAndEnrollUserById(userId);
-  if (state.status !== "success") {
-    return state;
-  }
-
-  (await cookies()).set(ASSESSMENT_UID_COOKIE, userId, ASSESSMENT_COOKIE_OPTS);
-  return state;
 }
 
 /** ASCII-safe, hyphenated slug for a download filename. */

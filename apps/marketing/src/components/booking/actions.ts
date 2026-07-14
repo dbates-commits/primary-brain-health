@@ -14,9 +14,8 @@ import type { ConsentState, DetailsState, SignupState } from "@pbh/booking";
 /**
  * Real per-step server actions for the marketing booking modal (pbh-ggr.5),
  * replacing the `.3` stubs. Each is a thin `"use server"` wrapper over the shared
- * `@pbh/booking/server` cores — the same implementation the funnel `/get-started`
- * flow uses — reading request metadata and the current user (identity seam) here
- * and delegating the DB writes to the package.
+ * `@pbh/booking/server` cores, reading request metadata and the current user
+ * (identity seam) here and delegating the DB writes to the package.
  */
 
 export async function signupAction(

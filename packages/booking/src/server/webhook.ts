@@ -10,12 +10,16 @@ import {
 import { registerAndEnrollUserById } from "./register-and-enroll";
 
 /**
- * Shared Stripe webhook handler — the authoritative fulfillment path, used by
- * both apps' `/api/stripe/webhook` routes. The client-confirm action (each app's
- * finalize) is the fast path for the happy case; this is the backstop that still
- * records the payment and enrolls the user when the browser never makes it back
- * (tab closed, connection dropped), and the only path that reacts to async
- * lifecycle events (failures, refunds).
+ * Stripe webhook handler — the authoritative fulfillment path, mounted once, at
+ * the funnel's `/api/stripe/webhook`. Stripe endpoints are account-scoped, so
+ * that single endpoint receives events for payments started anywhere, including
+ * the marketing booking modal; fulfillment resolves the user from
+ * `intent.metadata.userId`, so it doesn't matter which app minted the intent.
+ *
+ * The client-confirm action (the booking flow's finalize) is the fast path for
+ * the happy case; this is the backstop that still records the payment and enrolls
+ * the user when the browser never makes it back (tab closed, connection dropped),
+ * and the only path that reacts to async lifecycle events (failures, refunds).
  *
  * Response contract Stripe relies on:
  *  - 400 → bad/again-unverifiable signature. Stripe does NOT retry (correct: a
