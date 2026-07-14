@@ -101,6 +101,11 @@
 {"issue_id":"pbh-bws.41","label":"funnel"}
 {"issue_id":"pbh-bws.41","label":"linus"}
 {"issue_id":"pbh-bws.41","label":"phase-1"}
+{"issue_id":"pbh-bws.42","label":"phase-1"}
+{"issue_id":"pbh-bws.42","label":"track:qa"}
+{"issue_id":"pbh-bws.43","label":"phase-1"}
+{"issue_id":"pbh-bws.43","label":"track:build-integrations"}
+{"issue_id":"pbh-bws.43","label":"track:qa"}
 {"issue_id":"pbh-bws.5","label":"agentic"}
 {"issue_id":"pbh-bws.5","label":"phase-1"}
 {"issue_id":"pbh-bws.5","label":"track:foundation"}
