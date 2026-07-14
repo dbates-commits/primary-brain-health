@@ -56,61 +56,72 @@ export function SignupForm({
           aria-busy={pending}
           className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="firstName">First name</Label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                autoComplete="given-name"
-                required
-                aria-required="true"
-                aria-invalid={fieldErrors?.firstName ? true : undefined}
-                aria-describedby={
-                  fieldErrors?.firstName ? "firstName-error" : undefined
-                }
-                defaultValue={values?.firstName ?? ""}
-                className={fieldClass}
-              />
-              <FieldError id="firstName-error" message={fieldErrors?.firstName} />
+          {/* Field rows sit 16px apart, while the fieldset's own 24px separates
+              the whole group from the submit button — the two gaps the design
+              distinguishes (form-field/row-gap vs form-card/gap). */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="firstName">First name</Label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  aria-required="true"
+                  aria-invalid={fieldErrors?.firstName ? true : undefined}
+                  aria-describedby={
+                    fieldErrors?.firstName ? "firstName-error" : undefined
+                  }
+                  defaultValue={values?.firstName ?? ""}
+                  className={fieldClass}
+                />
+                <FieldError
+                  id="firstName-error"
+                  message={fieldErrors?.firstName}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="lastName">Last name</Label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  aria-required="true"
+                  aria-invalid={fieldErrors?.lastName ? true : undefined}
+                  aria-describedby={
+                    fieldErrors?.lastName ? "lastName-error" : undefined
+                  }
+                  defaultValue={values?.lastName ?? ""}
+                  className={fieldClass}
+                />
+                <FieldError
+                  id="lastName-error"
+                  message={fieldErrors?.lastName}
+                />
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="lastName">Last name</Label>
+              <Label htmlFor="email">Email</Label>
               <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                autoComplete="family-name"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
                 required
                 aria-required="true"
-                aria-invalid={fieldErrors?.lastName ? true : undefined}
-                aria-describedby={
-                  fieldErrors?.lastName ? "lastName-error" : undefined
-                }
-                defaultValue={values?.lastName ?? ""}
+                aria-invalid={fieldErrors?.email ? true : undefined}
+                aria-describedby={fieldErrors?.email ? "email-error" : undefined}
+                defaultValue={values?.email ?? ""}
                 className={fieldClass}
               />
-              <FieldError id="lastName-error" message={fieldErrors?.lastName} />
+              <FieldError id="email-error" message={fieldErrors?.email} />
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              aria-required="true"
-              aria-invalid={fieldErrors?.email ? true : undefined}
-              aria-describedby={fieldErrors?.email ? "email-error" : undefined}
-              defaultValue={values?.email ?? ""}
-              className={fieldClass}
-            />
-            <FieldError id="email-error" message={fieldErrors?.email} />
           </div>
 
           {state.status === "error" && !fieldErrors && (
