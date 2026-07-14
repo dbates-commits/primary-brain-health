@@ -102,8 +102,10 @@ export function PaymentStep({
     }
   }, [userId, sessionId, finalize, onComplete]);
 
+  // Owns its bottom padding: the modal body leaves it to the step (see
+  // Modal.tsx), and this step has no `StickyActions` bar to supply it.
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-6 sm:pb-10">
       {showHeader ? <StepHeader {...PAYMENT_HEADER} /> : null}
 
       {initError && (

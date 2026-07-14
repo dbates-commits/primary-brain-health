@@ -15,6 +15,7 @@ import {
   fieldClass,
   textareaClass,
 } from "@pbh/ui";
+import { StickyActions } from "./StickyActions";
 import type { DetailsAction, DetailsState } from "./types";
 import { US_STATES } from "./us-states";
 import {
@@ -343,9 +344,15 @@ export function DetailsForm({
             </p>
           )}
 
-          <Button type="submit" color="primary" className="h-14 w-full text-base">
-            {pending ? "Saving…" : "Submit"}
-          </Button>
+          <StickyActions>
+            <Button
+              type="submit"
+              color="primary"
+              className="h-14 w-full text-base"
+            >
+              {pending ? "Saving…" : "Submit"}
+            </Button>
+          </StickyActions>
         </fieldset>
       </form>
     </div>

@@ -68,6 +68,15 @@ export type DetailsAction = (
   formData: FormData,
 ) => Promise<DetailsState>;
 
+/**
+ * Shown when the agreement box isn't ticked. The submit button stays enabled, so
+ * the form surfaces this on click; the server re-checks and returns the same
+ * message, so both paths read identically. Defined here because the client guard
+ * and the server core both need it.
+ */
+export const CONSENT_REQUIRED_ERROR =
+  "You must agree to the terms to continue.";
+
 export type ConsentState =
   | { status: "idle" }
   | { status: "success" }

@@ -13,14 +13,18 @@
    classes (`bg-primary`, `text-on-surface`, …) rather than raw hex.
    ============================================================= */
 
-/* Register the shared design-system component source so Tailwind 4
-   generates the utility classes used *inside* @pbh/ui (Button, Card,
-   …). Automatic content detection skips node_modules, where pnpm
-   symlinks workspace packages — without this, those classes are only
-   emitted by accident when an app's own source happens to use them
-   (which is why funnel rendered @pbh/ui unstyled). Path is relative to
-   this file; every app inherits it by importing @pbh/tokens/theme.css. */
+/* Register the shared design-system component sources so Tailwind 4
+   generates the utility classes used *inside* them (@pbh/ui: Button,
+   Card, …; @pbh/booking: the step forms). Automatic content detection
+   skips node_modules, where pnpm symlinks workspace packages — without
+   this, those classes are only emitted by accident when an app's own
+   source happens to use them (which is why funnel rendered @pbh/ui
+   unstyled, and why the booking fieldsets lost their `space-y-6`). Any
+   new @pbh/* package that ships className strings must be added here.
+   Paths are relative to this file; every app inherits them by importing
+   @pbh/tokens/theme.css. */
 @source "../ui/src";
+@source "../booking/src";
 
 :root {
   /* Primary palette — Dark Teal per identity guide */

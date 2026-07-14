@@ -1,8 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { Button, FieldError, StepHeader } from "@pbh/ui";
-import type { ConsentAction, ConsentState } from "./types";
+import { StickyActions } from "./StickyActions";
+import {
+  CONSENT_REQUIRED_ERROR,
+  type ConsentAction,
+  type ConsentState,
+} from "./types";
 
 const initialState: ConsentState = { status: "idle" };
 
@@ -74,12 +79,36 @@ export function ConsentForm({
     }
   }, [state, onComplete]);
 
-  // Gate the submit button on the agreement checkbox alone.
   const [agreed, setAgreed] = useState(false);
+
+  // The submit button stays enabled even before the box is ticked (a disabled
+  // button gives no feedback about *why* it can't be used). Clicking without
+  // agreeing surfaces the error instead. Guarding here keeps that instant rather
+  // than round-tripping to learn what we already know; `recordConsentCore`
+  // re-checks regardless, so the client is never the only line of defence.
+  const [agreeError, setAgreeError] = useState<string | null>(null);
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    if (!agreed) {
+      e.preventDefault();
+      setAgreeError(CONSENT_REQUIRED_ERROR);
+    }
+  }
+
+  function handleAgreedChange(checked: boolean) {
+    setAgreed(checked);
+    if (checked) {
+      setAgreeError(null);
+    }
+  }
+
+  // Same message whichever side produced it, so the two can't disagree.
+  const agreedError = fieldErrors?.agreed ?? agreeError ?? undefined;
 
   return (
     <form
       action={formAction}
+      onSubmit={handleSubmit}
       noValidate
       className="flex flex-col items-center gap-8 bg-surface"
     >
@@ -87,74 +116,78 @@ export function ConsentForm({
 
       {showHeader ? <StepHeader {...CONSENT_HEADER} /> : null}
 
-      <div
-        role="region"
-        aria-label="Terms and conditions"
-        tabIndex={0}
-        className="h-[337px] w-full overflow-y-auto rounded-md border border-outline-variant bg-surface-container py-6 pl-6 pr-10 focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        <div className="flex flex-col gap-6">
-          <p className="text-sm leading-relaxed text-on-surface-variant">
-            {TERMS_INTRO}
-          </p>
-
-          {LEGAL_SECTIONS.map((section) => (
-            <div key={section.title} className="flex flex-col gap-2">
-              <p className="text-sm font-bold text-on-surface">
-                {section.title}
-              </p>
-              <p className="text-sm leading-relaxed text-on-surface-variant">
-                {section.body}
-              </p>
-            </div>
-          ))}
-
-          <p className="text-[13px] italic text-on-surface-variant/70">
-            {TERMS_UPDATED}
-          </p>
-        </div>
-      </div>
-
+      {/* The terms live inside the fieldset so the fieldset spans the scrollable
+          content. A `sticky` child can only travel within its containing block —
+          were the action bar the fieldset's only child, the two would be the same
+          height and it could never pin. */}
       <fieldset
         disabled={pending}
         aria-busy={pending}
         className="m-0 flex w-full min-w-0 flex-col gap-8 border-0 p-0 transition-opacity disabled:opacity-60"
       >
-        <div>
-          <label htmlFor="agreed" className="flex items-center gap-2">
-            <input
-              id="agreed"
-              type="checkbox"
-              name="agreed"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              required
-              aria-required="true"
-              aria-invalid={fieldErrors?.agreed ? true : undefined}
-              aria-describedby={fieldErrors?.agreed ? "agreed-error" : undefined}
-              className="size-6 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
-            />
-            <span className="text-lg text-on-surface">
-              I have read and agree with consent form.
-            </span>
-          </label>
-          <FieldError id="agreed-error" message={fieldErrors?.agreed} />
+        <div
+          role="region"
+          aria-label="Terms and conditions"
+          tabIndex={0}
+          className="h-[337px] w-full overflow-y-auto rounded-md border border-outline-variant bg-surface-container py-6 pl-6 pr-10 focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <div className="flex flex-col gap-6">
+            <p className="text-sm leading-relaxed text-on-surface-variant">
+              {TERMS_INTRO}
+            </p>
+
+            {LEGAL_SECTIONS.map((section) => (
+              <div key={section.title} className="flex flex-col gap-2">
+                <p className="text-sm font-bold text-on-surface">
+                  {section.title}
+                </p>
+                <p className="text-sm leading-relaxed text-on-surface-variant">
+                  {section.body}
+                </p>
+              </div>
+            ))}
+
+            <p className="text-[13px] italic text-on-surface-variant/70">
+              {TERMS_UPDATED}
+            </p>
+          </div>
         </div>
 
-        {state.status === "error" && !fieldErrors && (
-          <p role="alert" className="animate-error-in text-sm text-error">
-            {state.message}
-          </p>
-        )}
+        {/* The checkbox is pinned with the button, not just next to it: it gates
+            the submit, so scrolling it out of view would leave a disabled button
+            with no visible way to enable it. Only the terms scroll. */}
+        <StickyActions className="flex flex-col gap-6">
+          <div>
+            <label htmlFor="agreed" className="flex items-center gap-2">
+              <input
+                id="agreed"
+                type="checkbox"
+                name="agreed"
+                checked={agreed}
+                onChange={(e) => handleAgreedChange(e.target.checked)}
+                required
+                aria-required="true"
+                aria-invalid={agreedError ? true : undefined}
+                aria-describedby={agreedError ? "agreed-error" : undefined}
+                className="size-6 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
+              />
+              <span className="text-lg text-on-surface">
+                I have read and agree with consent form.
+              </span>
+            </label>
+            <FieldError id="agreed-error" message={agreedError} />
+          </div>
 
-        <Button
-          type="submit"
-          color="primary"
-          disabled={!agreed}
-          className="h-14 w-full text-base"
-        >
-          {pending ? "Saving…" : "Continue With Payment"}
-        </Button>
+          {state.status === "error" && !fieldErrors && (
+            <p role="alert" className="animate-error-in text-sm text-error">
+              {state.message}
+            </p>
+          )}
+
+          <Button type="submit" color="primary" className="h-14 w-full text-base">
+            {pending ? "Saving…" : "Continue With Payment"}
+          </Button>
+        </StickyActions>
       </fieldset>
     </form>
   );
