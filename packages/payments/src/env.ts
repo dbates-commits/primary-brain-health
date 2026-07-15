@@ -17,6 +17,26 @@ export function getStripeSecretKey(): string {
 }
 
 /**
+ * Catalog Price ID for the brain-health assessment, charged at checkout. The
+ * amount and currency live on the Stripe Price object (the single source of
+ * truth), so this ID — not a hardcoded cents value — is what varies between
+ * environments: the sandbox test price locally/on Preview, the live
+ * `clinical_assessment` price in Production. Set it per Vercel environment.
+ */
+export function getStripeAssessmentPriceId(): string {
+  const priceId = process.env.STRIPE_ASSESSMENT_PRICE_ID;
+  if (!priceId) {
+    throw new Error(
+      "Stripe checkout is not configured. Missing STRIPE_ASSESSMENT_PRICE_ID. " +
+        "Locally, copy .env.example to .env.local and paste a test-mode Price " +
+        "ID from the same Stripe account as your secret key. On Vercel, set it " +
+        "per environment (sandbox price on Preview, live price in Production).",
+    );
+  }
+  return priceId;
+}
+
+/**
  * Signing secret for the Stripe webhook endpoint, used to verify that inbound
  * events genuinely came from Stripe. Distinct per endpoint: the local Stripe
  * CLI (`stripe listen`) prints its own `whsec_…`, and each hosted endpoint in
