@@ -2,11 +2,7 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 import { db, users, writeAuditLog } from "@pbh/db";
-import {
-  ASSESSMENT_CURRENCY,
-  ASSESSMENT_PRICE_CENTS,
-  getStripe,
-} from "@pbh/payments";
+import { getAssessmentCatalogEntry, getStripe } from "@pbh/payments";
 import type { CreateCheckoutResult } from "../types";
 import { recordSucceededPayment } from "./fulfill";
 
@@ -57,6 +53,9 @@ export async function createCheckoutSessionCore(
 
   try {
     const stripe = getStripe();
+    // Catalog entry is the source of truth for amount/currency/name; we only
+    // pass its price ID as the line item and let Stripe render the rest.
+    const catalog = await getAssessmentCatalogEntry();
     // One-time guest checkout — no Stripe Customer. We don't save cards for
     // off-session reuse, so a durable Customer object buys nothing here; the
     // receipt goes to `receipt_email` and the user is tracked via metadata.
@@ -69,16 +68,7 @@ export async function createCheckoutSessionCore(
       mode: "payment",
       customer_email: user.email,
       payment_method_types: ["card"],
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: ASSESSMENT_CURRENCY,
-            unit_amount: ASSESSMENT_PRICE_CENTS,
-            product_data: { name: "Brain health assessment" },
-          },
-        },
-      ],
+      line_items: [{ quantity: 1, price: catalog.priceId }],
       payment_intent_data: { receipt_email: user.email, metadata },
       metadata,
     });
@@ -88,7 +78,8 @@ export async function createCheckoutSessionCore(
       userId: id,
       metadata: {
         checkoutSessionId: session.id,
-        amountCents: ASSESSMENT_PRICE_CENTS,
+        amountCents: catalog.amountCents,
+        productName: catalog.productName,
       },
       ipHash: opts.ipHash,
     });

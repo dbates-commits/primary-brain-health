@@ -17,7 +17,7 @@ import "server-only";
 import { and, eq, ne } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db, payments, writeAuditLog } from "@pbh/db";
-import { ASSESSMENT_CURRENCY, ASSESSMENT_PRICE_CENTS } from "@pbh/payments";
+import { getAssessmentCatalogEntry } from "@pbh/payments";
 
 export type RecordResult =
   | { status: "recorded"; userId: string; firstWrite: boolean }
@@ -55,9 +55,10 @@ export async function recordSucceededPayment(
   if (intent.status !== "succeeded") {
     return { status: "rejected", reason: `intent status is ${intent.status}` };
   }
+  const catalog = await getAssessmentCatalogEntry();
   if (
-    intent.amount !== ASSESSMENT_PRICE_CENTS ||
-    intent.currency !== ASSESSMENT_CURRENCY
+    intent.amount !== catalog.amountCents ||
+    intent.currency !== catalog.currency
   ) {
     return { status: "rejected", reason: "amount/currency mismatch" };
   }
