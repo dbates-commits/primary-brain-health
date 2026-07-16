@@ -23,6 +23,7 @@ sample data.
 | `AssessmentReadyEmail` | Linus enrollment lands (`register-and-enroll.ts`) |
 | `ReportReadyEmail` | A report becomes available (`report_ready`) |
 | `PaymentRefundedEmail` | Refund recorded (`recordRefundedPayment`) |
+| `AccountDeactivatedEmail` | Account deactivation processed (flow not built yet; copy pending Linus-attorney approval) |
 
 ## Usage (the later hook-up branch)
 

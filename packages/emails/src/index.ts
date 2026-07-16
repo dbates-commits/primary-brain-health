@@ -17,3 +17,7 @@ export {
   PaymentRefundedEmail,
   type PaymentRefundedEmailProps,
 } from "./emails/PaymentRefundedEmail";
+export {
+  AccountDeactivatedEmail,
+  type AccountDeactivatedEmailProps,
+} from "./emails/AccountDeactivatedEmail";
