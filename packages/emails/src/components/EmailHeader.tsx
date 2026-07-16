@@ -1,15 +1,22 @@
-import { Section, Text } from "react-email";
-import { emailColors, emailFontStack } from "../theme";
+import { Img, Section } from "react-email";
+import { emailLogoUrl } from "../theme";
 
 /**
- * Text wordmark header. Deliberately image-free so emails render fully with
- * remote images blocked; swap in a hosted logo `<Img>` once a public asset
- * URL exists.
+ * Brand logo header. The source PNG is 1500×632; rendered at 180×76 (same
+ * ratio) with explicit dimensions so image-blocking clients reserve the
+ * space. The alt text doubles as the wordmark fallback when images are
+ * blocked.
  */
 export function EmailHeader() {
   return (
     <Section style={sectionStyle}>
-      <Text style={wordmarkStyle}>Primary Brain Health</Text>
+      <Img
+        src={emailLogoUrl()}
+        alt="Primary Brain Health"
+        width="180"
+        height="76"
+        style={logoStyle}
+      />
     </Section>
   );
 }
@@ -18,11 +25,6 @@ const sectionStyle: React.CSSProperties = {
   padding: "28px 40px 0",
 };
 
-const wordmarkStyle: React.CSSProperties = {
-  margin: 0,
-  fontFamily: emailFontStack,
-  fontSize: "18px",
-  fontWeight: 700,
-  letterSpacing: "0.02em",
-  color: emailColors.primaryContainer,
+const logoStyle: React.CSSProperties = {
+  display: "block",
 };

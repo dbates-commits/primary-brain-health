@@ -38,3 +38,18 @@ export const emailColors = {
  */
 export const emailFontStack =
   "Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif";
+
+/**
+ * Absolute URL for the header logo — email clients need a hosted image, not
+ * a relative path or data URI (Gmail blocks the latter). Resolved at render
+ * time: EMAIL_LOGO_URL wins (set it once a stable production/CDN URL exists),
+ * otherwise the file the funnel serves from public/email-assets/ under
+ * APP_BASE_URL.
+ */
+export function emailLogoUrl(): string {
+  if (process.env.EMAIL_LOGO_URL) {
+    return process.env.EMAIL_LOGO_URL;
+  }
+  const base = process.env.APP_BASE_URL ?? "http://localhost:3001";
+  return `${base}/email-assets/pbh-logo.png`;
+}
