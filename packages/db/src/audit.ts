@@ -12,7 +12,8 @@ export type AuditEventType =
   | "payment_succeeded"
   | "payment_failed"
   | "payment_refunded"
-  | "token_issued";
+  | "token_issued"
+  | "email_sent";
 
 export interface AuditEntry {
   eventType: AuditEventType;

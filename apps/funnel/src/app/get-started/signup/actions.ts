@@ -3,6 +3,7 @@
 import { db, users, writeAuditLog } from "@pbh/db";
 import { isPgError, PgErrorCode } from "@/lib/db-errors";
 import { isValidEmail, normalizeEmail } from "@/lib/email";
+import { sendWelcomeEmail } from "@/lib/send-email";
 
 /** Non-secret fields echoed back so the form can repopulate after a reset. */
 export type SignupValues = {
@@ -73,6 +74,9 @@ export async function createAccount(
       userId: created.id,
       metadata: { source: "get-started" },
     });
+
+    // Best-effort (never throws): a failed welcome email must not fail signup.
+    await sendWelcomeEmail(created.id);
 
     return { status: "success", userId: created.id, email, firstName, lastName };
   } catch (err) {
