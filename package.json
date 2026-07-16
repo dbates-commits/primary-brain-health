@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "email": "pnpm --filter @pbh/emails dev",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",
