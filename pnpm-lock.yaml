@@ -24,7 +24,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/db
       '@pbh/emails':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/emails
       '@pbh/linus':
         specifier: workspace:*
