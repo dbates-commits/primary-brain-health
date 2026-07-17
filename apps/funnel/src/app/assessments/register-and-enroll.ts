@@ -19,6 +19,10 @@ import {
   MissingDateOfBirthError,
   registerSubject,
 } from "@pbh/linus";
+import {
+  sendAssessmentReadyEmail,
+  sendReportReadyEmail,
+} from "@/lib/send-email";
 
 /** Cookie set on successful payment so `/assessments` knows whose links to show. */
 export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
@@ -353,7 +357,20 @@ export async function registerAndEnrollUser(
   }
 
   try {
-    const enrollments = await resolveEnrollments(user.id, participantId);
+    const { enrollments, firstResolution } = await resolveEnrollments(
+      user.id,
+      participantId,
+    );
+    if (firstResolution && enrollments.length > 0) {
+      // First time this user's enrollments ever resolved → "ready to start".
+      // Both racing paths (client action + webhook) can reach here in the same
+      // instant and each see firstResolution — a duplicate email in that narrow
+      // window is accepted (low harm; a DB send-guard isn't warranted yet).
+      await sendAssessmentReadyEmail(
+        user.id,
+        enrollments.map((e) => ({ name: e.name, duration: e.duration })),
+      );
+    }
     return {
       status: "success",
       email,
@@ -381,13 +398,18 @@ export async function registerAndEnrollUser(
  * Campaigns with `producesReport: false` skip the report steps (1, 2) entirely —
  * their report endpoint 404s forever, so a completed enrollment settles into
  * "completed" rather than spinning on "report_pending".
+ *
+ * `firstResolution` is true when the user had no stored enrollment rows at all
+ * before this call — the once-per-user signal the caller uses to send the
+ * "assessment ready" email.
  */
 async function resolveEnrollments(
   userId: string,
   participantId: string,
-): Promise<EnrollmentView[]> {
+): Promise<{ enrollments: EnrollmentView[]; firstResolution: boolean }> {
   const campaigns = getCampaigns();
   const rows = await loadEnrollmentRows(userId);
+  const firstResolution = rows.size === 0;
 
   // The active-enrollment set is only needed (and only fetched) when a stored
   // enrollment has no report yet — fetched lazily, at most once per request.
@@ -431,6 +453,11 @@ async function resolveEnrollments(
       if (producesReport) {
         if (await hasReadyReport(participantId, row.enrollmentId)) {
           await markReportReady(userId, campaign.campaignId);
+          // The hasReport flip above is once-only per (user, campaign), so this
+          // sends exactly once. Today the transition is only ever detected
+          // during an /assessments load (the user is already on the page); a
+          // background poller should own this send when one exists.
+          await sendReportReadyEmail(userId, campaign.name);
           enrollments.push({
             ...base,
             enrollmentId: row.enrollmentId,
@@ -486,7 +513,7 @@ async function resolveEnrollments(
     });
   }
 
-  return enrollments;
+  return { enrollments, firstResolution };
 }
 
 /**
