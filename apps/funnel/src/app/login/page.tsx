@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { Container, Section } from "@pbh/ui";
+import { auth } from "@/auth";
 import { LoginForm } from "./LoginForm";
 
 export const metadata = {
@@ -6,10 +8,15 @@ export const metadata = {
 };
 
 /**
- * Temporary email sign-in page (placeholder for Clerk). On success the form sets
- * the assessment session cookie and redirects to /assessments.
+ * Passwordless sign-in page. Already-authenticated users skip straight to their
+ * assessments; everyone else gets the magic-link request form.
  */
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth();
+  if (session?.user?.id) {
+    redirect("/assessments");
+  }
+
   return (
     <main>
       <Section className="py-24">

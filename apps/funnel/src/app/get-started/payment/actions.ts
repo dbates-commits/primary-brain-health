@@ -11,6 +11,7 @@ import {
 } from "@pbh/payments";
 import { completeAssessmentSetup } from "@/app/assessments/actions";
 import type { LinusState } from "@/app/assessments/register-and-enroll";
+import { createSessionForUser } from "@/lib/auth-session";
 import { recordSucceededPayment } from "./fulfill";
 
 export type CreateCheckoutResult =
@@ -161,9 +162,11 @@ async function verifyAndRecordPayment(
  *  1. Verify + record the payment (`verifyAndRecordPayment`). Any failure here —
  *     network, a missing/mismatched intent, a rejected record — is a payment
  *     problem, so we bail before touching enrollment.
- *  2. Hand off to the shared register + enroll flow, which drops the assessment
- *     cookie and returns the success state the client uses to advance to the
- *     confirmation step and link to /assessments.
+ *  2. Hand off to the shared register + enroll flow, then — because the payment
+ *     is now server-verified to belong to this user — sign them in by minting a
+ *     real Auth.js session, so they land on /assessments already authenticated
+ *     without a magic-link round-trip. Returns the success state the client uses
+ *     to advance to the confirmation step and link to /assessments.
  */
 export async function finalizeCheckoutSession(
   userId: string,
@@ -191,5 +194,18 @@ export async function finalizeCheckoutSession(
   // retries enrollment.
   const formData = new FormData();
   formData.set("userId", id);
-  return completeAssessmentSetup({ status: "idle" }, formData);
+  const state = await completeAssessmentSetup({ status: "idle" }, formData);
+
+  // Payment is verified to belong to `id`, so it's safe to sign them in here.
+  // Best-effort: a session-mint failure must not turn a paid, enrolled user into
+  // an error — they can still sign in via a magic link from /assessments.
+  if (state.status === "success") {
+    try {
+      await createSessionForUser(id);
+    } catch (err) {
+      console.error("finalizeCheckoutSession: session mint failed:", err);
+    }
+  }
+
+  return state;
 }

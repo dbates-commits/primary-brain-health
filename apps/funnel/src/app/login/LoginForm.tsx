@@ -2,23 +2,23 @@
 
 import { useActionState } from "react";
 import { Button, Heading, Label, fieldClass } from "@pbh/ui";
-import { registerAndEnroll } from "@/app/assessments/actions";
-import type { LinusState } from "@/app/assessments/register-and-enroll";
+import { requestMagicLink, type LoginState } from "./actions";
 
-const initialState: LinusState = { status: "idle" };
+const initialState: LoginState = { status: "idle" };
 
 /**
- * Temporary email sign-in: look up a registered user by email, drop the
- * assessment session cookie, and forward to /assessments. This is a placeholder
- * for proper auth — Clerk will own this flow in the future.
+ * Passwordless sign-in: enter your email, we send a one-time magic link. No
+ * password, no account created here — the link authenticates an existing
+ * account (created in the get-started flow). On submit we forward to
+ * /login/check-email whether or not the address is registered.
  */
 export function LoginForm() {
   const [state, action, pending] = useActionState(
-    registerAndEnroll,
+    requestMagicLink,
     initialState,
   );
   const errorMessage = state.status === "error" ? state.message : undefined;
-  const lastEmail = state.status === "idle" ? "" : state.email;
+  const lastEmail = state.status === "error" ? state.email : "";
 
   return (
     <div className="flex flex-col gap-8">
@@ -27,7 +27,7 @@ export function LoginForm() {
           Sign in
         </Heading>
         <p className="text-on-surface-variant">
-          Enter your email to access your assessments.
+          Enter your email and we&rsquo;ll send you a secure sign-in link.
         </p>
       </div>
 
@@ -68,7 +68,7 @@ export function LoginForm() {
             color="primary"
             className="h-14 w-full text-base"
           >
-            {pending ? "Signing in…" : "Continue"}
+            {pending ? "Sending link…" : "Email me a sign-in link"}
           </Button>
         </fieldset>
       </form>
