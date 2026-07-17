@@ -71,6 +71,13 @@
       "when": 1784645485406,
       "tag": "0009_yellow_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784723582282,
+      "tag": "0010_cooing_namora",
+      "breakpoints": true
     }
   ]
 }

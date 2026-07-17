@@ -2,23 +2,23 @@
 
 import { useActionState } from "react";
 import { Button, Heading, Label, fieldClass } from "@pbh/ui";
-import { registerAndEnroll } from "@/app/assessments/actions";
-import type { LinusState } from "@pbh/booking/server";
+import { requestMagicLink, type LoginState } from "./actions";
 
-const initialState: LinusState = { status: "idle" };
+const initialState: LoginState = { status: "idle" };
 
 /**
- * Temporary email sign-in: look up a registered user by email, drop the
- * assessment session cookie, and forward to /assessments. This is a placeholder
- * for proper auth — Clerk will own this flow in the future.
+ * Passwordless sign-in: enter your email, we send a one-time magic link. No
+ * password, no account created here — the link authenticates an existing
+ * account (created in the booking flow). On submit we forward to
+ * /login/check-email whether or not the address is registered.
  *
  * `initialEmail` prefills the field — the marketing booking flow hands paid users
  * here with `?email=…` after they've already paid + enrolled, so they only need
- * to confirm to land on /assessments.
+ * to confirm to get their sign-in link.
  */
 export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
   const [state, action, pending] = useActionState(
-    registerAndEnroll,
+    requestMagicLink,
     initialState,
   );
   const errorMessage = state.status === "error" ? state.message : undefined;
@@ -31,7 +31,7 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
           Sign in
         </Heading>
         <p className="text-on-surface-variant">
-          Enter your email to access your assessments.
+          Enter your email and we&rsquo;ll send you a secure sign-in link.
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
             color="primary"
             className="h-14 w-full text-base"
           >
-            {pending ? "Signing in…" : "Continue"}
+            {pending ? "Sending link…" : "Email me a sign-in link"}
           </Button>
         </fieldset>
       </form>
