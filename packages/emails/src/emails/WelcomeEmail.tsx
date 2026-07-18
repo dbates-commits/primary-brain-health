@@ -1,7 +1,7 @@
-import { Heading, Section, Text } from "react-email";
+import { Section, Text } from "react-email";
 import { EmailButton } from "../components/EmailButton";
 import { EmailLayout } from "../components/EmailLayout";
-import { ctaSectionStyle, headingStyle, mutedStyle, paragraphStyle } from "../styles";
+import { ctaSectionStyle, mutedStyle, paragraphStyle } from "../styles";
 
 export interface WelcomeEmailProps {
   firstName: string;
@@ -12,8 +12,10 @@ export interface WelcomeEmailProps {
 /** Sent right after signup: the account exists, here's how to get back in. */
 export function WelcomeEmail({ firstName, loginUrl }: WelcomeEmailProps) {
   return (
-    <EmailLayout previewText="Your Primary Brain Health account is ready.">
-      <Heading style={headingStyle}>Welcome, {firstName}</Heading>
+    <EmailLayout
+      previewText="Your Primary Brain Health account is ready."
+      heading={`Welcome, ${firstName}`}
+    >
       <Text style={paragraphStyle}>
         Your Primary Brain Health account has been created. You&apos;re one
         step closer to a clearer picture of your cognitive health.

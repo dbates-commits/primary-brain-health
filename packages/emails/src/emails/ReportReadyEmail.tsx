@@ -1,7 +1,7 @@
-import { Heading, Section, Text } from "react-email";
+import { Section, Text } from "react-email";
 import { EmailButton } from "../components/EmailButton";
 import { EmailLayout } from "../components/EmailLayout";
-import { ctaSectionStyle, headingStyle, mutedStyle, paragraphStyle } from "../styles";
+import { ctaSectionStyle, mutedStyle, paragraphStyle } from "../styles";
 
 export interface ReportReadyEmailProps {
   firstName: string;
@@ -18,8 +18,10 @@ export function ReportReadyEmail({
   assessmentsUrl,
 }: ReportReadyEmailProps) {
   return (
-    <EmailLayout previewText="Your assessment report is ready to view.">
-      <Heading style={headingStyle}>Your report is ready, {firstName}</Heading>
+    <EmailLayout
+      previewText="Your assessment report is ready to view."
+      heading={`Your report is ready, ${firstName}`}
+    >
       <Text style={paragraphStyle}>
         The results from your {assessmentName} have been reviewed and your
         report is now available.

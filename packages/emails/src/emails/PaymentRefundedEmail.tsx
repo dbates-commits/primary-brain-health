@@ -1,7 +1,7 @@
-import { Heading, Text } from "react-email";
+import { Text } from "react-email";
 import { EmailLayout } from "../components/EmailLayout";
 import { formatAmount, formatCard } from "../format";
-import { headingStyle, mutedStyle, paragraphStyle } from "../styles";
+import { mutedStyle, paragraphStyle } from "../styles";
 
 export interface PaymentRefundedEmailProps {
   firstName: string;
@@ -23,8 +23,10 @@ export function PaymentRefundedEmail({
 }: PaymentRefundedEmailProps) {
   const card = formatCard(cardBrand, cardLast4);
   return (
-    <EmailLayout previewText="Your refund has been issued.">
-      <Heading style={headingStyle}>Your refund is on its way, {firstName}</Heading>
+    <EmailLayout
+      previewText="Your refund has been issued."
+      heading={`Your refund is on its way, ${firstName}`}
+    >
       <Text style={paragraphStyle}>
         We&apos;ve issued a refund of {formatAmount(amountCents, currency)}
         {card ? ` to your ${card}` : ""}. Depending on your bank, it can take

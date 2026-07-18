@@ -1,6 +1,6 @@
-import { Heading, Text } from "react-email";
+import { Text } from "react-email";
 import { EmailLayout } from "../components/EmailLayout";
-import { headingStyle, mutedStyle, paragraphStyle } from "../styles";
+import { mutedStyle, paragraphStyle } from "../styles";
 
 export interface AccountDeactivatedEmailProps {
   firstName: string;
@@ -20,8 +20,10 @@ export function AccountDeactivatedEmail({
   firstName,
 }: AccountDeactivatedEmailProps) {
   return (
-    <EmailLayout previewText="Your account has been deactivated.">
-      <Heading style={headingStyle}>Your account has been deactivated, {firstName}</Heading>
+    <EmailLayout
+      previewText="Your account has been deactivated."
+      heading={`Your account has been deactivated, ${firstName}`}
+    >
       <Text style={paragraphStyle}>
         We&apos;ve processed your request to deactivate your Primary Brain
         Health account.

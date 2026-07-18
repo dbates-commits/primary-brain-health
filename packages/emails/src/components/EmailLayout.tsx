@@ -2,18 +2,28 @@ import { Body, Container, Head, Html, Preview, Section } from "react-email";
 import { emailColors } from "../theme";
 import { EmailFooter } from "./EmailFooter";
 import { EmailHeader } from "./EmailHeader";
+import { EmailHero } from "./EmailHero";
 
 interface EmailLayoutProps {
   /** Inbox preview snippet (the grey text after the subject line). */
   previewText: string;
+  /** Heading rendered in the white-on-teal hero band. */
+  heading: React.ReactNode;
+  /** Optional white sub-headline under the hero heading. */
+  subhead?: React.ReactNode;
   children: React.ReactNode;
 }
 
 /**
- * Shared chrome for every PBH email: brand header, white card on the warm
- * off-white page background, and the standard footer.
+ * Shared chrome for every PBH email: brand header, teal hero band, white card
+ * on the warm off-white page background, and the standard footer.
  */
-export function EmailLayout({ previewText, children }: EmailLayoutProps) {
+export function EmailLayout({
+  previewText,
+  heading,
+  subhead,
+  children,
+}: EmailLayoutProps) {
   return (
     <Html lang="en">
       <Head />
@@ -21,6 +31,7 @@ export function EmailLayout({ previewText, children }: EmailLayoutProps) {
       <Body style={bodyStyle}>
         <Container style={cardStyle}>
           <EmailHeader />
+          <EmailHero heading={heading} subhead={subhead} />
           <Section style={contentStyle}>{children}</Section>
           <EmailFooter />
         </Container>

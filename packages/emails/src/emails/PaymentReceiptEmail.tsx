@@ -1,8 +1,8 @@
-import { Column, Heading, Row, Section, Text } from "react-email";
+import { Column, Row, Section, Text } from "react-email";
 import { EmailButton } from "../components/EmailButton";
 import { EmailLayout } from "../components/EmailLayout";
 import { formatAmount, formatCard } from "../format";
-import { ctaSectionStyle, headingStyle, mutedStyle, paragraphStyle } from "../styles";
+import { ctaSectionStyle, mutedStyle, paragraphStyle } from "../styles";
 import { emailColors, emailFontStack } from "../theme";
 
 export interface PaymentReceiptEmailProps {
@@ -31,8 +31,10 @@ export function PaymentReceiptEmail({
 }: PaymentReceiptEmailProps) {
   const card = formatCard(cardBrand, cardLast4);
   return (
-    <EmailLayout previewText="Your payment was received — your assessment is ready.">
-      <Heading style={headingStyle}>Thanks for your payment, {firstName}</Heading>
+    <EmailLayout
+      previewText="Your payment was received — your assessment is ready."
+      heading={`Thanks for your payment, ${firstName}`}
+    >
       <Text style={paragraphStyle}>
         We&apos;ve received your payment for the Primary Brain Health cognitive
         assessment. Here&apos;s your receipt:

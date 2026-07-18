@@ -1,7 +1,7 @@
-import { Heading, Section, Text } from "react-email";
+import { Section, Text } from "react-email";
 import { EmailButton } from "../components/EmailButton";
 import { EmailLayout } from "../components/EmailLayout";
-import { ctaSectionStyle, headingStyle, mutedStyle, paragraphStyle } from "../styles";
+import { ctaSectionStyle, mutedStyle, paragraphStyle } from "../styles";
 import { emailColors, emailFontStack } from "../theme";
 
 export interface AssessmentReadyEmailProps {
@@ -19,8 +19,10 @@ export function AssessmentReadyEmail({
   assessmentsUrl,
 }: AssessmentReadyEmailProps) {
   return (
-    <EmailLayout previewText="Your cognitive assessment is ready to begin.">
-      <Heading style={headingStyle}>You&apos;re all set, {firstName}</Heading>
+    <EmailLayout
+      previewText="Your cognitive assessment is ready to begin."
+      heading={`You're all set, ${firstName}`}
+    >
       <Text style={paragraphStyle}>
         Your enrollment is complete and your assessment
         {assessments.length === 1 ? " is" : "s are"} ready whenever you are:

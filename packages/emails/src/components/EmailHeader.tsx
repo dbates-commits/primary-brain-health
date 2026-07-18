@@ -2,10 +2,11 @@ import { Img, Section } from "react-email";
 import { emailLogoUrl } from "../theme";
 
 /**
- * Brand logo header. The source PNG is 1500×632; rendered at 180×76 (same
+ * Brand logo header. The source PNG is 1500×632; rendered at 95×40 (same
  * ratio) with explicit dimensions so image-blocking clients reserve the
- * space. The alt text doubles as the wordmark fallback when images are
- * blocked.
+ * space. 95px wide is about the floor where the stacked three-line wordmark
+ * stays legible. The alt text doubles as the wordmark fallback when images
+ * are blocked.
  */
 export function EmailHeader() {
   return (
@@ -13,8 +14,8 @@ export function EmailHeader() {
       <Img
         src={emailLogoUrl()}
         alt="Primary Brain Health"
-        width="180"
-        height="76"
+        width="95"
+        height="40"
         style={logoStyle}
       />
     </Section>
@@ -22,7 +23,7 @@ export function EmailHeader() {
 }
 
 const sectionStyle: React.CSSProperties = {
-  padding: "28px 40px 0",
+  padding: "28px 40px 24px",
 };
 
 const logoStyle: React.CSSProperties = {
