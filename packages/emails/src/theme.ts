@@ -36,8 +36,7 @@ export const emailColors = {
  * with Inter (body), but Larken isn't web-font-servable to email clients, so
  * emails standardize on the Inter stack with system fallbacks.
  */
-export const emailFontStack =
-  "Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif";
+export const emailFontStack = "Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif";
 
 /**
  * Absolute URL for the header logo — email clients need a hosted image, not
@@ -48,8 +47,22 @@ export const emailFontStack =
  */
 export function emailLogoUrl(): string {
   if (process.env.EMAIL_LOGO_URL) {
-    return process.env.EMAIL_LOGO_URL;
+    return ensureSecureUrl(process.env.EMAIL_LOGO_URL);
   }
   const base = process.env.APP_BASE_URL ?? "http://localhost:3001";
-  return `${base}/email-assets/pbh-logo.png`;
+  return ensureSecureUrl(`${base}/email-assets/pbh-logo.png`);
+}
+
+/**
+ * Emails must reference assets over HTTPS — mail clients block or flag
+ * mixed-content/insecure image URLs. Loopback hosts are left on http (the
+ * local dev server has no TLS, and localhost is already a secure context);
+ * any other http URL is upgraded to https so a real send can never ship an
+ * insecure image reference.
+ */
+function ensureSecureUrl(url: string): string {
+  if (/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(url)) {
+    return url;
+  }
+  return url.replace(/^http:\/\//i, "https://");
 }
