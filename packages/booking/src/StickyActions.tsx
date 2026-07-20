@@ -27,7 +27,9 @@ export function StickyActions({
         // padding-bottom on the scroll container insets where `bottom-0` pins,
         // so the bar would stop short and content would scroll visibly beneath
         // it. Modal.tsx therefore leaves its body's bottom padding to the step.
-        "sticky bottom-0 z-10 pb-6 pt-4 sm:pb-10",
+        // Panel→actions gap is owned by the step's own layout gap (32px), so the
+        // bar adds no top padding; bottom padding matches the modal's 32px inset.
+        "sticky bottom-0 z-10 pb-6 pt-0 sm:pb-8",
         "bg-surface/80 backdrop-blur-md",
         // Fade the scrolling content into the bar instead of cutting it off.
         "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8",
