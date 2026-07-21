@@ -91,6 +91,9 @@ export async function getReportPdf(enrollmentId: string): Promise<ReportResult> 
       participantId: users.linusParticipantId,
       firstName: users.firstName,
       lastName: users.lastName,
+      patientIdentification: users.patientIdentification,
+      patientFirstName: users.patientFirstName,
+      patientLastName: users.patientLastName,
     })
     .from(users)
     .where(eq(users.id, uid))
@@ -128,12 +131,19 @@ export async function getReportPdf(enrollmentId: string): Promise<ReportResult> 
   const campaignKey = getCampaigns().find(
     (c) => c.campaignId === row?.campaignId,
   )?.key;
+  // Name the file after whoever the report is about, which is not always the
+  // person downloading it. On a "Someone else" booking Linus registered the
+  // patient as the subject (see buildRegisterInput), so the buyer's name here
+  // would put the wrong person on a clinical PDF.
+  const isForSomeoneElse = user.patientIdentification === "Someone else";
+  const subjectName =
+    isForSomeoneElse && user.patientFirstName && user.patientLastName
+      ? `${user.patientFirstName} ${user.patientLastName}`
+      : `${user.firstName} ${user.lastName}`;
   const filename =
-    slugify(
-      [`${user.firstName} ${user.lastName}`, campaignKey, "brain health report"]
-        .filter(Boolean)
-        .join(" "),
-    ) + ".pdf";
+    slugify([subjectName, campaignKey, "brain health report"]
+      .filter(Boolean)
+      .join(" ")) + ".pdf";
 
   return { status: "ready", dataBase64, filename };
 }
