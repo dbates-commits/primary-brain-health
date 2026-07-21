@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
-import { Button, FieldError, StepHeader } from "@pbh/ui";
+import { Button, Checkbox, FieldError, StepHeader } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
 import {
   CONSENT_REQUIRED_ERROR,
@@ -159,34 +159,16 @@ export function ConsentForm({
         <StickyActions className="flex flex-col gap-8">
           <div>
             <label htmlFor="agreed" className="flex items-center gap-2">
-              <span className="relative inline-flex size-6 shrink-0">
-                <input
-                  id="agreed"
-                  type="checkbox"
-                  name="agreed"
-                  checked={agreed}
-                  onChange={(e) => handleAgreedChange(e.target.checked)}
-                  required
-                  aria-required="true"
-                  aria-invalid={agreedError ? true : undefined}
-                  aria-describedby={agreedError ? "agreed-error" : undefined}
-                  className="peer size-6 appearance-none rounded-[4px] border border-outline bg-surface transition-colors checked:border-primary checked:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2"
-                />
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="pointer-events-none absolute inset-0 hidden size-6 p-1 text-on-primary peer-checked:block"
-                >
-                  <path
-                    d="M13 4.5 6.5 11 3 7.5"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
+              <Checkbox
+                id="agreed"
+                name="agreed"
+                checked={agreed}
+                onChange={(e) => handleAgreedChange(e.target.checked)}
+                required
+                aria-required="true"
+                aria-invalid={agreedError ? true : undefined}
+                aria-describedby={agreedError ? "agreed-error" : undefined}
+              />
               <span className="text-base text-on-surface">
                 I&rsquo;ve read and agree to the consent form.
               </span>
