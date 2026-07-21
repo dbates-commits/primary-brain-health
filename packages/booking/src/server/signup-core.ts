@@ -2,6 +2,7 @@ import "server-only";
 
 import { db, users, writeAuditLog } from "@pbh/db";
 import type { SignupState, SignupValues } from "../types";
+import { PATIENT_IDENTIFICATION_VALUES } from "../field-options";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
 
@@ -18,9 +19,17 @@ export async function createAccountCore(
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
   const email = normalizeEmail(String(formData.get("email") ?? ""));
+  const patientIdentification = String(
+    formData.get("patientIdentification") ?? "",
+  ).trim();
 
   // Echoed back on error so the form keeps what the user typed.
-  const values: SignupValues = { firstName, lastName, email };
+  const values: SignupValues = {
+    firstName,
+    lastName,
+    email,
+    patientIdentification,
+  };
 
   const fieldErrors: Record<string, string> = {};
   if (!firstName) {
@@ -31,6 +40,11 @@ export async function createAccountCore(
   }
   if (!isValidEmail(email)) {
     fieldErrors.email = "Enter a valid email address.";
+  }
+  // Asked here rather than on the details step because it decides what every
+  // later question means — see SignupResult.patientIdentification.
+  if (!PATIENT_IDENTIFICATION_VALUES.has(patientIdentification)) {
+    fieldErrors.patientIdentification = "Select who this consultation is for.";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -49,6 +63,7 @@ export async function createAccountCore(
         email,
         firstName,
         lastName,
+        patientIdentification,
       })
       .returning({ id: users.id });
 
@@ -58,7 +73,14 @@ export async function createAccountCore(
       metadata: { source: opts.source },
     });
 
-    return { status: "success", userId: created.id, email, firstName, lastName };
+    return {
+      status: "success",
+      userId: created.id,
+      email,
+      firstName,
+      lastName,
+      patientIdentification,
+    };
   } catch (err) {
     if (isPgError(err, PgErrorCode.UniqueViolation, "users_email_unique")) {
       return {

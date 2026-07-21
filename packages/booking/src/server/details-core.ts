@@ -2,11 +2,7 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 import { db, users } from "@pbh/db";
-import {
-  EDUCATION_LEVEL_VALUES,
-  GENDER_VALUES,
-  PATIENT_IDENTIFICATION_VALUES,
-} from "../field-options";
+import { EDUCATION_LEVEL_VALUES, GENDER_VALUES } from "../field-options";
 import { US_STATE_CODES } from "../us-states";
 import type { DetailsState, DetailsValues } from "../types";
 
@@ -35,17 +31,20 @@ export async function completeProfileCore(
   const phone = String(formData.get("phone") ?? "").trim();
   const gender = String(formData.get("gender") ?? "").trim();
   const educationLevel = String(formData.get("educationLevel") ?? "").trim();
-  const patientIdentification = String(
-    formData.get("patientIdentification") ?? "",
+  const patientFirstName = String(
+    formData.get("patientFirstName") ?? "",
   ).trim();
+  const patientLastName = String(formData.get("patientLastName") ?? "").trim();
+
   const values: DetailsValues = {
+    patientFirstName,
+    patientLastName,
     dateOfBirth,
     zip,
     stateOfResidence,
     phone,
     gender,
     educationLevel,
-    patientIdentification,
   };
 
   if (!userId) {
@@ -82,8 +81,30 @@ export async function completeProfileCore(
   if (!EDUCATION_LEVEL_VALUES.has(educationLevel)) {
     fieldErrors.educationLevel = "Select your highest level of education.";
   }
-  if (!PATIENT_IDENTIFICATION_VALUES.has(patientIdentification)) {
-    fieldErrors.patientIdentification = "Select who this assessment is for.";
+  // Whose details these are was answered at signup, so it's read from the row
+  // rather than trusted from this form — the client never re-submits it, and it
+  // decides whether the patient-name fields are required at all.
+  const [existing] = await db
+    .select({ patientIdentification: users.patientIdentification })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (!existing) {
+    return {
+      status: "error",
+      message:
+        "We couldn't find your account. Please restart and create your account again.",
+      values,
+    };
+  }
+  const isForSomeoneElse = existing.patientIdentification === "Someone else";
+  if (isForSomeoneElse) {
+    if (!patientFirstName) {
+      fieldErrors.patientFirstName = "Enter the patient's first name.";
+    }
+    if (!patientLastName) {
+      fieldErrors.patientLastName = "Enter the patient's last name.";
+    }
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -105,7 +126,10 @@ export async function completeProfileCore(
         phone,
         gender,
         educationLevel,
-        patientIdentification,
+        // Cleared on a self booking so a buyer who switches back can't leave a
+        // stale patient name attached to their own assessment.
+        patientFirstName: isForSomeoneElse ? patientFirstName : null,
+        patientLastName: isForSomeoneElse ? patientLastName : null,
       })
       .where(eq(users.id, userId))
       .returning({ id: users.id });

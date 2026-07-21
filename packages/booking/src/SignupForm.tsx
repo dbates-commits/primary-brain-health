@@ -1,7 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import { Button, FieldError, Label, StepHeader, fieldClass } from "@pbh/ui";
+import { useActionState, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Button,
+  FieldError,
+  Label,
+  SegmentedControl,
+  StepHeader,
+  fieldClass,
+  labelClass,
+} from "@pbh/ui";
+import { PATIENT_IDENTIFICATION_OPTIONS } from "./field-options";
 import type { SignupAction, SignupResult, SignupState } from "./types";
 
 const initialState: SignupState = { status: "idle" };
@@ -18,7 +27,7 @@ export function SignupForm({
   showHeader = true,
   title = "Get started",
   subtitle = "Create your account to begin.",
-  submitLabel = "Create account",
+  submitLabel = "Continue",
 }: {
   action: SignupAction;
   onComplete: (result: SignupResult) => void;
@@ -31,6 +40,34 @@ export function SignupForm({
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
 
+  // Defaults to "Self": every design renders one pill selected, and a segmented
+  // control has no empty-state affordance, so leaving it unset reads as broken
+  // rather than as a question awaiting an answer.
+  const [patientIdentification, setPatientIdentification] = useState(
+    values?.patientIdentification || "Self",
+  );
+  const patientGroupRef = useRef<HTMLDivElement>(null);
+
+  // React 19 auto-resets the <form> after a server action (requestFormReset),
+  // which clears the radio group. The controlled value is unchanged across the
+  // error re-render, so React won't re-assert it — restore `checked` from state
+  // here, after the commit/reset, to keep the user's answer.
+  useLayoutEffect(() => {
+    const group = patientGroupRef.current;
+    if (!group) {
+      return;
+    }
+    const radios = group.querySelectorAll<HTMLInputElement>(
+      'input[type="radio"]',
+    );
+    for (const radio of radios) {
+      const shouldBeChecked = radio.value === patientIdentification;
+      if (radio.checked !== shouldBeChecked) {
+        radio.checked = shouldBeChecked;
+      }
+    }
+  });
+
   // Advance the flow once the account exists. Guard against re-firing if this
   // component re-renders while still on the success state.
   const advanced = useRef(false);
@@ -42,6 +79,7 @@ export function SignupForm({
         email: state.email,
         firstName: state.firstName,
         lastName: state.lastName,
+        patientIdentification: state.patientIdentification,
       });
     }
   }, [state, onComplete]);
@@ -60,6 +98,25 @@ export function SignupForm({
               the whole group from the submit button — the two gaps the design
               distinguishes (form-field/row-gap vs form-card/gap). */}
           <div className="space-y-4">
+            {/* Asked before the name fields because it decides whose details the
+                next step collects — and therefore how that step is worded. */}
+            <div>
+              <span className={labelClass}>Who is this consultation for?</span>
+              <div ref={patientGroupRef} className="mt-2">
+                <SegmentedControl
+                  name="patientIdentification"
+                  aria-label="Who is this consultation for?"
+                  options={[...PATIENT_IDENTIFICATION_OPTIONS]}
+                  value={patientIdentification}
+                  onChange={(e) => setPatientIdentification(e.target.value)}
+                />
+              </div>
+              <FieldError
+                id="patientIdentification-error"
+                message={fieldErrors?.patientIdentification}
+              />
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="firstName">First name</Label>

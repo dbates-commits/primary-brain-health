@@ -31,7 +31,16 @@ export const users = pgTable("users", {
   phone: text(),
   gender: text(),
   educationLevel: text("education_level"),
+  // "Self" | "Someone else" — captured at signup, because it decides what every
+  // later question means.
   patientIdentification: text("patient_identification"),
+  // The person being assessed, set only when patientIdentification is
+  // "Someone else". Read this together with the flag above: when it is set, the
+  // demographic columns (dateOfBirth, gender, zip, phone, educationLevel)
+  // describe THIS person, not the account holder named by first_name/last_name.
+  // `buildRegisterInput` relies on that to register the right Linus subject.
+  patientFirstName: text("patient_first_name"),
+  patientLastName: text("patient_last_name"),
   // Linus Health subject id, set the first time we register this user as a
   // subject. Persisted so we never re-register (which would create a duplicate
   // Linus subject) — once set, we reuse it and skip straight to enrollment.
