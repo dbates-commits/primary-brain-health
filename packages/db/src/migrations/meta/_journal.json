@@ -57,6 +57,13 @@
       "when": 1783431464865,
       "tag": "0007_clumsy_talisman",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784642010965,
+      "tag": "0008_lethal_titanium_man",
+      "breakpoints": true
     }
   ]
 }
