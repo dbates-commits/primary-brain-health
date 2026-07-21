@@ -50,7 +50,6 @@ export type DetailsValues = {
   gender: string;
   educationLevel: string;
   patientIdentification: string;
-  message: string;
 };
 
 export type DetailsState =

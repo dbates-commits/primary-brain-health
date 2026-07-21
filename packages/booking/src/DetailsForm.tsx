@@ -13,7 +13,6 @@ import {
   Label,
   StepHeader,
   fieldClass,
-  textareaClass,
 } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
 import type { DetailsAction, DetailsState } from "./types";
@@ -319,23 +318,6 @@ export function DetailsForm({
               id="patientIdentification-error"
               message={fieldErrors?.patientIdentification}
             />
-          </div>
-
-          <div>
-            <Label htmlFor="message">Message (optional)</Label>
-            <textarea
-              id="message"
-              name="message"
-              rows={4}
-              placeholder="Tell us more about your concerns…"
-              aria-invalid={fieldErrors?.message ? true : undefined}
-              aria-describedby={
-                fieldErrors?.message ? "message-error" : undefined
-              }
-              defaultValue={values?.message ?? ""}
-              className={textareaClass}
-            />
-            <FieldError id="message-error" message={fieldErrors?.message} />
           </div>
 
           {state.status === "error" && !fieldErrors && (

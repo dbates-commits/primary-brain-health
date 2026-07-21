@@ -22,11 +22,16 @@ export const users = pgTable("users", {
   stateOfResidence: char("state_of_residence", { length: 2 }),
   // Intake-form fields (marketing consultation form). Nullable: the funnel
   // signup flow does not collect these.
+  //
+  // Deliberately no free-text field here. An open-text "concerns" box was
+  // removed (and its column dropped) because customers could type symptoms,
+  // diagnoses, or treatment history into it — PHI that would breach the
+  // data-minimisation boundary this schema exists to hold. Clinical narrative
+  // belongs in Linus, never here.
   phone: text(),
   gender: text(),
   educationLevel: text("education_level"),
   patientIdentification: text("patient_identification"),
-  message: text(),
   // Linus Health subject id, set the first time we register this user as a
   // subject. Persisted so we never re-register (which would create a duplicate
   // Linus subject) — once set, we reuse it and skip straight to enrollment.

@@ -38,8 +38,6 @@ export async function completeProfileCore(
   const patientIdentification = String(
     formData.get("patientIdentification") ?? "",
   ).trim();
-  const message = String(formData.get("message") ?? "").trim();
-
   const values: DetailsValues = {
     dateOfBirth,
     zip,
@@ -48,7 +46,6 @@ export async function completeProfileCore(
     gender,
     educationLevel,
     patientIdentification,
-    message,
   };
 
   if (!userId) {
@@ -109,7 +106,6 @@ export async function completeProfileCore(
         gender,
         educationLevel,
         patientIdentification,
-        message: message || null,
       })
       .where(eq(users.id, userId))
       .returning({ id: users.id });
