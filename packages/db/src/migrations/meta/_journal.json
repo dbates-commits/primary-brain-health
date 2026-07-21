@@ -64,6 +64,13 @@
       "when": 1784642010965,
       "tag": "0008_lethal_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784645485406,
+      "tag": "0009_yellow_sunspot",
+      "breakpoints": true
     }
   ]
 }
