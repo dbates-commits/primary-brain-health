@@ -17,11 +17,7 @@ import {
 import { StickyActions } from "./StickyActions";
 import type { DetailsAction, DetailsState } from "./types";
 import { US_STATES } from "./us-states";
-import {
-  EDUCATION_LEVELS,
-  GENDER_OPTIONS,
-  PATIENT_IDENTIFICATION_OPTIONS,
-} from "./field-options";
+import { EDUCATION_LEVELS, GENDER_OPTIONS } from "./field-options";
 
 const initialState: DetailsState = { status: "idle" };
 
@@ -45,11 +41,15 @@ function formatPhone(value: string): string {
  * itself (e.g. the marketing modal, which pins it above the scroll area) uses the
  * same title/subtitle as the inline funnel step.
  */
-export function detailsHeader(name: string) {
+export function detailsHeader(name: string, isForSomeoneElse = false) {
   return {
-    title: name ? `Welcome, ${name}!` : "Welcome!",
-    subtitle:
-      "We still need some extra information to proceed with your assessment. Please complete this form.",
+    title: name ? `Welcome, ${name}` : "Welcome",
+    // The subcopy carries the whole self/someone-else distinction. Every field
+    // below asks about the person being assessed, so this one line is what tells
+    // the buyer whose birthday and ZIP the form wants.
+    subtitle: isForSomeoneElse
+      ? "We need further information about the person receiving care. This all will help us interpret the results accurately."
+      : "We need further information about yourself. This all will help us interpret the results accurately.",
   };
 }
 
@@ -57,12 +57,15 @@ export function DetailsForm({
   action,
   userId,
   name,
+  patientIdentification,
   onComplete,
   showHeader = true,
 }: {
   action: DetailsAction;
   userId: string;
   name: string;
+  /** "Self" | "Someone else", answered at signup. */
+  patientIdentification: string;
   onComplete: () => void;
   showHeader?: boolean;
 }) {
@@ -70,17 +73,17 @@ export function DetailsForm({
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
 
+  const isForSomeoneElse = patientIdentification === "Someone else";
+
   const [stateOfResidence, setStateOfResidence] = useState("");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
-  const [patientIdentification, setPatientIdentification] = useState("");
 
   const stateRef = useRef<HTMLSelectElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
   const educationRef = useRef<HTMLSelectElement>(null);
-  const patientRef = useRef<HTMLSelectElement>(null);
 
   // React 19 auto-resets the <form> after a server action (requestFormReset),
   // which yanks controlled <select>s back to their first option and clears the
@@ -94,7 +97,6 @@ export function DetailsForm({
         [phoneRef, phone],
         [genderRef, gender],
         [educationRef, educationLevel],
-        [patientRef, patientIdentification],
       ];
     for (const [ref, value] of fields) {
       const el = ref.current;
@@ -102,6 +104,7 @@ export function DetailsForm({
         el.value = value;
       }
     }
+
   });
 
   const advanced = useRef(false);
@@ -114,7 +117,9 @@ export function DetailsForm({
 
   return (
     <div className="flex flex-col gap-8">
-      {showHeader ? <StepHeader {...detailsHeader(name)} /> : null}
+      {showHeader ? (
+        <StepHeader {...detailsHeader(name, isForSomeoneElse)} />
+      ) : null}
 
       <form action={formAction} noValidate>
         <input type="hidden" name="userId" value={userId} />
@@ -124,6 +129,63 @@ export function DetailsForm({
           aria-busy={pending}
           className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
         >
+          {/* Only for someone-else bookings: the account holder is named at
+              signup, so this row names the person actually being assessed. It
+              leads the form because everything below describes that person. */}
+          {isForSomeoneElse && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="patientFirstName">First name</Label>
+                <input
+                  id="patientFirstName"
+                  name="patientFirstName"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="Jane"
+                  required
+                  aria-required="true"
+                  aria-invalid={fieldErrors?.patientFirstName ? true : undefined}
+                  aria-describedby={
+                    fieldErrors?.patientFirstName
+                      ? "patientFirstName-error"
+                      : undefined
+                  }
+                  defaultValue={values?.patientFirstName ?? ""}
+                  className={fieldClass}
+                />
+                <FieldError
+                  id="patientFirstName-error"
+                  message={fieldErrors?.patientFirstName}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="patientLastName">Last name</Label>
+                <input
+                  id="patientLastName"
+                  name="patientLastName"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="Doe"
+                  required
+                  aria-required="true"
+                  aria-invalid={fieldErrors?.patientLastName ? true : undefined}
+                  aria-describedby={
+                    fieldErrors?.patientLastName
+                      ? "patientLastName-error"
+                      : undefined
+                  }
+                  defaultValue={values?.patientLastName ?? ""}
+                  className={fieldClass}
+                />
+                <FieldError
+                  id="patientLastName-error"
+                  message={fieldErrors?.patientLastName}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="dateOfBirth">Date of birth</Label>
@@ -197,6 +259,34 @@ export function DetailsForm({
             </div>
 
             <div>
+              <Label htmlFor="phone">Phone number</Label>
+              <input
+                ref={phoneRef}
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="(555) 000-0000"
+                required
+                aria-required="true"
+                aria-invalid={fieldErrors?.phone ? true : undefined}
+                aria-describedby={fieldErrors?.phone ? "phone-error" : undefined}
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                className={fieldClass}
+              />
+              <FieldError id="phone-error" message={fieldErrors?.phone} />
+            </div>
+          </div>
+
+          {/* State of residence is absent from the Figma frame, but the RFP
+              requires it for the primary-care handoff and the intake gate's
+              eligibility check, so it stays. Pairing it with education keeps the
+              two-up rhythm instead of leaving a stray full-width row — the one
+              deliberate layout divergence from the design. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
               <Label htmlFor="stateOfResidence">State of residence</Label>
               <select
                 ref={stateRef}
@@ -229,95 +319,39 @@ export function DetailsForm({
                 message={fieldErrors?.stateOfResidence}
               />
             </div>
-          </div>
 
-          <div>
-            <Label htmlFor="phone">Phone number</Label>
-            <input
-              ref={phoneRef}
-              id="phone"
-              name="phone"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder="(555) 000-0000"
-              required
-              aria-required="true"
-              aria-invalid={fieldErrors?.phone ? true : undefined}
-              aria-describedby={fieldErrors?.phone ? "phone-error" : undefined}
-              value={phone}
-              onChange={(e) => setPhone(formatPhone(e.target.value))}
-              className={fieldClass}
-            />
-            <FieldError id="phone-error" message={fieldErrors?.phone} />
-          </div>
-
-          <div>
-            <Label htmlFor="educationLevel">Highest level of education</Label>
-            <select
-              ref={educationRef}
-              id="educationLevel"
-              name="educationLevel"
-              required
-              aria-required="true"
-              aria-invalid={fieldErrors?.educationLevel ? true : undefined}
-              aria-describedby={
-                fieldErrors?.educationLevel ? "educationLevel-error" : undefined
-              }
-              value={educationLevel}
-              onChange={(e) => setEducationLevel(e.target.value)}
-              className={fieldClass}
-            >
-              <option value="" disabled>
-                Select
-              </option>
-              {EDUCATION_LEVELS.map((level) => (
-                <option key={level.value} value={level.value}>
-                  {level.label}
+            <div>
+              <Label htmlFor="educationLevel">Highest level of education</Label>
+              <select
+                ref={educationRef}
+                id="educationLevel"
+                name="educationLevel"
+                required
+                aria-required="true"
+                aria-invalid={fieldErrors?.educationLevel ? true : undefined}
+                aria-describedby={
+                  fieldErrors?.educationLevel
+                    ? "educationLevel-error"
+                    : undefined
+                }
+                value={educationLevel}
+                onChange={(e) => setEducationLevel(e.target.value)}
+                className={fieldClass}
+              >
+                <option value="" disabled>
+                  Select
                 </option>
-              ))}
-            </select>
-            <FieldError
-              id="educationLevel-error"
-              message={fieldErrors?.educationLevel}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="patientIdentification">
-              Who is this assessment for?
-            </Label>
-            <select
-              ref={patientRef}
-              id="patientIdentification"
-              name="patientIdentification"
-              required
-              aria-required="true"
-              aria-invalid={
-                fieldErrors?.patientIdentification ? true : undefined
-              }
-              aria-describedby={
-                fieldErrors?.patientIdentification
-                  ? "patientIdentification-error"
-                  : undefined
-              }
-              value={patientIdentification}
-              onChange={(e) => setPatientIdentification(e.target.value)}
-              className={fieldClass}
-            >
-              <option value="" disabled>
-                Select
-              </option>
-              {PATIENT_IDENTIFICATION_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <FieldError
-              id="patientIdentification-error"
-              message={fieldErrors?.patientIdentification}
-            />
+                {EDUCATION_LEVELS.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
+              <FieldError
+                id="educationLevel-error"
+                message={fieldErrors?.educationLevel}
+              />
+            </div>
           </div>
 
           {state.status === "error" && !fieldErrors && (

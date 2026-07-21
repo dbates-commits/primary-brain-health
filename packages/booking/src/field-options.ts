@@ -29,9 +29,14 @@ export const EDUCATION_LEVELS = [
   { value: "ED_YEARS_20", label: "Doctorate (8+ years)" },
 ] as const;
 
+/**
+ * Rendered as a segmented toggle on the details step. The stored `value`s are
+ * unchanged from the original select — only the visible labels track the design
+ * — so this carries no data-migration impact.
+ */
 export const PATIENT_IDENTIFICATION_OPTIONS = [
   { value: "Self", label: "Myself" },
-  { value: "Someone else", label: "Someone else" },
+  { value: "Someone else", label: "Someone Else" },
 ] as const;
 
 export const GENDER_VALUES = new Set<string>(

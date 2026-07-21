@@ -35,7 +35,13 @@ const STEP_LABEL: Record<ModalStep, string> = {
   done: "Confirmation",
 };
 
-type FlowContext = { userId: string; firstName: string; email: string };
+type FlowContext = {
+  userId: string;
+  firstName: string;
+  email: string;
+  /** Answered at signup; decides how the details step is worded and what it asks. */
+  patientIdentification: string;
+};
 
 /**
  * Client orchestrator for the booking flow. Renders the inline `BookingSection`
@@ -57,6 +63,7 @@ export function BookingStepFlow({
     userId: "",
     firstName: "",
     email: "",
+    patientIdentification: "",
   });
 
   const start = useCallback((result: SignupResult) => {
@@ -64,6 +71,7 @@ export function BookingStepFlow({
       userId: result.userId,
       firstName: result.firstName,
       email: result.email,
+      patientIdentification: result.patientIdentification,
     });
     setStepIndex(0);
     setOpen(true);
@@ -82,7 +90,12 @@ export function BookingStepFlow({
   // `done` renders its own header (it never scrolls).
   const stepHeader =
     step === "details" ? (
-      <StepHeader {...detailsHeader(context.firstName)} />
+      <StepHeader
+        {...detailsHeader(
+          context.firstName,
+          context.patientIdentification === "Someone else",
+        )}
+      />
     ) : step === "consent" ? (
       <StepHeader {...CONSENT_HEADER} />
     ) : step === "payment" ? (
@@ -108,6 +121,7 @@ export function BookingStepFlow({
             action={detailsAction}
             userId={context.userId}
             name={context.firstName}
+            patientIdentification={context.patientIdentification}
             onComplete={advance}
             showHeader={false}
           />
