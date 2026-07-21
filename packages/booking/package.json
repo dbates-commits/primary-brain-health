@@ -14,12 +14,14 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "@pbh/db": "workspace:*",
+    "@pbh/emails": "workspace:*",
     "@pbh/linus": "workspace:*",
     "@pbh/payments": "workspace:*",
     "@pbh/ui": "workspace:*",
     "@stripe/react-stripe-js": "^6.6.0",
     "@stripe/stripe-js": "^9.8.0",
     "drizzle-orm": "^0.44.6",
+    "resend": "^6.1.2",
     "server-only": "^0.0.1",
     "stripe": "^22.3.0"
   },

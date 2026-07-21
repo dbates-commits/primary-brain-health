@@ -5,6 +5,7 @@ import type { SignupState, SignupValues } from "../types";
 import { PATIENT_IDENTIFICATION_VALUES } from "../field-options";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
+import { sendWelcomeEmail } from "./send-email";
 
 /**
  * Create the partial account at signup: validate the first/last/email, insert a
@@ -72,6 +73,9 @@ export async function createAccountCore(
       userId: created.id,
       metadata: { source: opts.source },
     });
+
+    // Best-effort (never throws): a failed welcome email must not fail signup.
+    await sendWelcomeEmail(created.id);
 
     return {
       status: "success",
