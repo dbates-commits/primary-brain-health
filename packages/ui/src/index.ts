@@ -1,5 +1,7 @@
 export * from "./Button";
 export * from "./Card";
+export * from "./CheckIcon";
+export * from "./Checkbox";
 export * from "./Container";
 export * from "./Eyebrow";
 export * from "./FieldError";

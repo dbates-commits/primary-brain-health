@@ -61,6 +61,18 @@
   --color-outline: #75777e;
   --color-outline-variant: #c5c6ce;
 
+  /* Neutral grey ramp — cool/neutral greys from the Figma form designs
+     (terms panels, form inputs). Intentionally cooler than the warm
+     `surface` hierarchy above; use where a surface must match the
+     design's neutral greys rather than the brand's warm off-whites. */
+  --color-neutral-50: #f6f6f6;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #dfdfdf;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-600: #4b5563;
+  --color-neutral-900: #111827;
+
   /* Error */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
@@ -112,6 +124,13 @@
   --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);
   --color-outline-variant: var(--color-outline-variant);
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-900: var(--color-neutral-900);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);

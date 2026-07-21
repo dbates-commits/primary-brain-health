@@ -95,7 +95,7 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl focus:outline-none"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl focus:outline-none"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button
@@ -106,7 +106,7 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
         >
           <svg
             aria-hidden="true"
-            className="h-5 w-5"
+            className="h-6 w-6"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -119,7 +119,7 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
             body below scrolls, so the scrollbar spans the content, not the whole
             modal. `pr-14` keeps the title clear of the close button. */}
         {header ? (
-          <div className="shrink-0 px-6 pb-4 pr-14 pt-6 sm:px-10 sm:pt-10">
+          <div className="shrink-0 px-6 pb-4 pr-14 pt-6 sm:px-8 sm:pb-8 sm:pt-8">
             {header}
           </div>
         ) : null}
@@ -131,10 +131,10 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
             // it. Each step supplies its own bottom padding instead — via
             // `StickyActions` on the steps that pin their actions, and directly
             // on the ones that don't (payment, done).
-            "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-10",
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8",
             // No fixed header → the body owns the top padding (and clears the
             // close button on the right).
-            header ? "" : "pr-14 pt-6 sm:pt-10",
+            header ? "" : "pr-14 pt-6 sm:pt-8",
           )}
         >
           {children}

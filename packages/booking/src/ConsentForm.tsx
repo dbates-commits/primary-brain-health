@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
-import { Button, FieldError, StepHeader } from "@pbh/ui";
+import { Button, Checkbox, FieldError, StepHeader } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
 import {
   CONSENT_REQUIRED_ERROR,
@@ -129,25 +129,25 @@ export function ConsentForm({
           role="region"
           aria-label="Terms and conditions"
           tabIndex={0}
-          className="h-[337px] w-full overflow-y-auto rounded-md border border-outline-variant bg-surface-container py-6 pl-6 pr-10 focus:outline-none focus:ring-1 focus:ring-primary"
+          className="h-[337px] w-full overflow-y-auto rounded-md border border-neutral-200 bg-neutral-50 py-6 pl-6 pr-10 [scrollbar-color:var(--color-neutral-300)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-primary [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300"
         >
           <div className="flex flex-col gap-6">
-            <p className="text-sm leading-relaxed text-on-surface-variant">
+            <p className="text-sm leading-normal text-neutral-600">
               {TERMS_INTRO}
             </p>
 
             {LEGAL_SECTIONS.map((section) => (
               <div key={section.title} className="flex flex-col gap-2">
-                <p className="text-sm font-bold text-on-surface">
+                <p className="text-sm font-bold text-neutral-900">
                   {section.title}
                 </p>
-                <p className="text-sm leading-relaxed text-on-surface-variant">
+                <p className="text-sm leading-normal text-neutral-600">
                   {section.body}
                 </p>
               </div>
             ))}
 
-            <p className="text-[13px] italic text-on-surface-variant/70">
+            <p className="text-[13px] italic text-neutral-400">
               {TERMS_UPDATED}
             </p>
           </div>
@@ -156,12 +156,11 @@ export function ConsentForm({
         {/* The checkbox is pinned with the button, not just next to it: it gates
             the submit, so scrolling it out of view would leave a disabled button
             with no visible way to enable it. Only the terms scroll. */}
-        <StickyActions className="flex flex-col gap-6">
+        <StickyActions className="flex flex-col gap-8">
           <div>
             <label htmlFor="agreed" className="flex items-center gap-2">
-              <input
+              <Checkbox
                 id="agreed"
-                type="checkbox"
                 name="agreed"
                 checked={agreed}
                 onChange={(e) => handleAgreedChange(e.target.checked)}
@@ -169,10 +168,9 @@ export function ConsentForm({
                 aria-required="true"
                 aria-invalid={agreedError ? true : undefined}
                 aria-describedby={agreedError ? "agreed-error" : undefined}
-                className="size-6 shrink-0 rounded border-outline/60 text-primary focus:ring-primary"
               />
-              <span className="text-lg text-on-surface">
-                I have read and agree with consent form.
+              <span className="text-base text-on-surface">
+                I&rsquo;ve read and agree to the consent form.
               </span>
             </label>
             <FieldError id="agreed-error" message={agreedError} />
