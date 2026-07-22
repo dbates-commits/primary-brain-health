@@ -14,14 +14,21 @@ const FUNNEL_URL = process.env.NEXT_PUBLIC_FUNNEL_URL ?? "";
  */
 export function DoneStep({
   email,
+  handoffUrl,
   onClose,
 }: {
   email: string;
+  /**
+   * Single-use sign-in link that lands them on /assessments already
+   * authenticated. Null when it couldn't be minted — we then fall back to
+   * /login, which always works.
+   */
+  handoffUrl?: string | null;
   onClose: () => void;
 }) {
-  const assessmentsHref = `${FUNNEL_URL}/login${
-    email ? `?email=${encodeURIComponent(email)}` : ""
-  }`;
+  const assessmentsHref =
+    handoffUrl ??
+    `${FUNNEL_URL}/login${email ? `?email=${encodeURIComponent(email)}` : ""}`;
 
   return (
     <div className="flex flex-col gap-8 pb-6 sm:pb-10">

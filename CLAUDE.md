@@ -96,6 +96,14 @@ Cross-app shared code is imported from the `@pbh/*` workspace packages, not via 
 
 `src/app/api/intake/route.ts` handles consultation form POST submissions. HubSpot integration is planned but not yet implemented.
 
+### Booking flow
+
+The booking flow spans both apps: marketing owns the modal and Stripe checkout,
+the funnel owns the session, `/assessments`, and the only Stripe webhook. See
+[`docs/booking-flow.md`](docs/booking-flow.md) for the sequence, the resume state
+machine, what each step writes, and the four different tokens involved. Read it
+before changing anything in `packages/booking/src/server/`.
+
 ## Key Conventions
 
 - Tina field paths use `tinaField()` from `tinacms/dist/react` to enable click-to-edit in the CMS admin

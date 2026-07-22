@@ -3,6 +3,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { db, users, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry, getStripe } from "@pbh/payments";
+import { getPackage, resolvePackageKey } from "../packages";
 import type { CreateCheckoutResult } from "../types";
 import { recordSucceededPayment } from "./fulfill";
 
@@ -34,7 +35,7 @@ function checkoutError(message: string): CreateCheckoutResult {
  */
 export async function createCheckoutSessionCore(
   userId: string,
-  opts: { ipHash: string },
+  opts: { ipHash: string; packageKey?: string },
 ): Promise<CreateCheckoutResult> {
   const id = userId.trim();
   if (!id) {
@@ -46,16 +47,32 @@ export async function createCheckoutSessionCore(
     return checkoutError(ACCOUNT_NOT_FOUND);
   }
 
+  // The package stored on the account at signup wins. The client also sends a
+  // key, but only as a fallback for accounts created before this was recorded:
+  // trusting it would let someone drive the $449 flow in the UI while quietly
+  // checking out at the $149 price. Either way the value is re-resolved
+  // server-side, so an unknown or unpurchasable key can't start a checkout we
+  // can't fulfil.
+  const pkg = getPackage(
+    resolvePackageKey(user.selectedPackageKey ?? opts.packageKey),
+  )!;
+
   // Pinned onto both the Session and the PaymentIntent it creates, so that
   // `verifyAndRecordCheckout` and the webhook backstop can each confirm
-  // server-side that the payment belongs to this user.
-  const metadata = { userId: id, product: "brain-health-assessment" };
+  // server-side that the payment belongs to this user. `packageKey` rides along
+  // so fulfillment records what was bought from the *verified* charge rather
+  // than from anything the client sends a second time.
+  const metadata = {
+    userId: id,
+    product: "brain-health-assessment",
+    packageKey: pkg.key,
+  };
 
   try {
     const stripe = getStripe();
     // Catalog entry is the source of truth for amount/currency/name; we only
     // pass its price ID as the line item and let Stripe render the rest.
-    const catalog = await getAssessmentCatalogEntry();
+    const catalog = await getAssessmentCatalogEntry(pkg.priceEnvVar);
     // One-time guest checkout — no Stripe Customer. We don't save cards for
     // off-session reuse, so a durable Customer object buys nothing here; the
     // receipt goes to `receipt_email` and the user is tracked via metadata.

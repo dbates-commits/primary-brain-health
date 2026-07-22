@@ -18,7 +18,12 @@ export type AuditEventType =
   // post-payment login, sign-out) — access events a HIPAA audit expects.
   | "magic_link_sent"
   | "login"
-  | "logout";
+  | "logout"
+  // Booking email confirmation: the link sent at signup, and its redemption.
+  // `email_verified` is the record that this address was proven to be reachable
+  // by the person who booked.
+  | "email_verification_sent"
+  | "email_verified";
 
 export interface AuditEntry {
   eventType: AuditEventType;

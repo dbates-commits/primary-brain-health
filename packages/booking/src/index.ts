@@ -5,11 +5,12 @@
  * `gate` behavior). Option lists + US states live here too so the injected
  * actions can validate against the same canonical values.
  */
-export { SignupForm } from "./SignupForm";
+export { SignupForm, SIGNUP_HEADER } from "./SignupForm";
 export { DetailsForm, detailsHeader } from "./DetailsForm";
 export { ConsentForm, CONSENT_HEADER } from "./ConsentForm";
 export { PaymentStep, PAYMENT_HEADER } from "./PaymentStep";
 export { StickyActions } from "./StickyActions";
 export * from "./types";
 export * from "./field-options";
+export * from "./packages";
 export * from "./us-states";
