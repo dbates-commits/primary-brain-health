@@ -70,6 +70,13 @@ export const users = pgTable("users", {
   linusRegistrationClaimedAt: timestamp("linus_registration_claimed_at", {
     withTimezone: true,
   }),
+  // First-login gate for the "Choose How to Start" welcome screen. Null until the
+  // user leaves that screen (via either CTA); once stamped, later logins skip
+  // straight to /assessments. The DB is the only store for this "have they seen
+  // it" flag.
+  welcomeSeenAt: timestamp("welcome_seen_at", {
+    withTimezone: true,
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

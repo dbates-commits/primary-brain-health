@@ -1,0 +1,11 @@
+-- IF NOT EXISTS is hand-added to drizzle's generated DDL, deliberately —
+-- same reasoning as 0009.
+--
+-- This column already exists on the shared dev branch: it was applied there by
+-- `db:push` while the welcome screen was being built, which changes the schema
+-- without recording a migration. `db:migrate` therefore tries to add a column
+-- that is already present and aborts, blocking every later migration behind it.
+--
+-- Written to survive being applied to a database that already has the column,
+-- so the same file works on dev (present) and production (absent).
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "welcome_seen_at" timestamp with time zone;

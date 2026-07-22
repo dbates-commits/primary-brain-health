@@ -30,10 +30,12 @@ export async function requestMagicLink(
   try {
     // `redirectTo` is where the magic link lands once redeemed. Without it
     // Auth.js falls back to the Referer header, which only works by accident.
+    // /welcome is the first-login gate: it stamps `welcomeSeenAt` and forwards
+    // to /assessments, and self-redirects there for anyone who has seen it.
     await signIn("magic-link", {
       email,
       redirect: false,
-      redirectTo: "/assessments",
+      redirectTo: "/welcome",
     });
   } catch (err) {
     // AccessDenied is our own login-only rejection from the `signIn` callback

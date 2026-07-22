@@ -21,7 +21,12 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token") ?? "";
-  const assessments = new URL("/assessments", req.nextUrl.origin);
+  // /welcome, not /assessments: a paying customer's first ever sign-in is this
+  // handoff, so sending them straight to /assessments would skip the first-login
+  // screen for exactly the people it addresses ("you've already made an
+  // important decision…"). /welcome stamps `welcomeSeenAt` and forwards, and
+  // self-redirects for anyone who has seen it, so this is safe on every visit.
+  const landing = new URL("/welcome", req.nextUrl.origin);
   const login = new URL("/login", req.nextUrl.origin);
 
   let result;
@@ -48,7 +53,7 @@ export async function GET(req: NextRequest) {
       protocol: req.nextUrl.protocol,
       method: "post-payment-handoff",
     });
-    const res = NextResponse.redirect(assessments);
+    const res = NextResponse.redirect(landing);
     res.cookies.set(cookie.name, cookie.value, cookie.options);
     return res;
   } catch (err) {
