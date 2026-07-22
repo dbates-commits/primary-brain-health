@@ -5,7 +5,8 @@ import type { SignupState, SignupValues } from "../types";
 import { PATIENT_IDENTIFICATION_VALUES } from "../field-options";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
-import { sendWelcomeEmail } from "./send-email";
+import { resolvePackageKey } from "../packages";
+import { sendBookingConfirmation } from "./email-verification";
 
 /**
  * Create the partial account at signup: validate the first/last/email, insert a
@@ -65,6 +66,9 @@ export async function createAccountCore(
         firstName,
         lastName,
         patientIdentification,
+        // Captured now so it survives the email-confirmation round-trip; the
+        // client's in-memory choice is gone by the time they return.
+        selectedPackageKey: resolvePackageKey(formData.get("packageKey")),
       })
       .returning({ id: users.id });
 
@@ -74,8 +78,12 @@ export async function createAccountCore(
       metadata: { source: opts.source },
     });
 
-    // Best-effort (never throws): a failed welcome email must not fail signup.
-    await sendWelcomeEmail(created.id);
+    // Best-effort (never throws): a failed send must not fail signup — they can
+    // re-send from the confirmation step. The welcome email deliberately does
+    // NOT go out here: the flow is now blocked until this link is clicked, and
+    // two emails arriving together buries the one they have to act on. Welcome
+    // is sent on successful confirmation instead.
+    await sendBookingConfirmation(created.id);
 
     return {
       status: "success",

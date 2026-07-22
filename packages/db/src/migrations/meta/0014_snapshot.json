@@ -1,6 +1,6 @@
 {
-  "id": "34099059-3ad0-44e5-a0e2-635de60cd6eb",
-  "prevId": "e6683198-209f-41eb-9830-ae37e188d4f2",
+  "id": "d3abab29-fc37-41a2-829d-135f9349de3d",
+  "prevId": "772cedf8-0aae-458e-93ba-dd8fb242aef7",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -309,6 +309,95 @@
         }
       },
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.booking_email_verifications": {
+      "name": "booking_email_verifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumed_at": {
+          "name": "consumed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "booking_email_verifications_user_id_idx": {
+          "name": "booking_email_verifications_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "booking_email_verifications_user_id_users_id_fk": {
+          "name": "booking_email_verifications_user_id_users_id_fk",
+          "tableFrom": "booking_email_verifications",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "booking_email_verifications_token_hash_unique": {
+          "name": "booking_email_verifications_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -626,6 +715,12 @@
         },
         "succeeded_at": {
           "name": "succeeded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "handoff_consumed_at": {
+          "name": "handoff_consumed_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false

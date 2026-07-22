@@ -23,6 +23,14 @@ export const users = pgTable("users", {
   name: text("name"),
   image: text("image"),
   emailVerified: timestamp("email_verified", { withTimezone: true, mode: "date" }),
+  // Which assessment package this person chose on the landing card, captured at
+  // signup. Persisted because the booking is no longer a single sitting: the
+  // email-confirmation gate sends them away and they come back to a fresh page,
+  // so in-memory state is gone by the time they reach payment. This is also the
+  // authoritative value at checkout — the client re-sends a key, but it is only
+  // a hint, or someone could show themselves the $449 flow and pay the $149
+  // price. See ASSESSMENT_PACKAGES in @pbh/booking.
+  selectedPackageKey: text("selected_package_key"),
   // Collected in step 2 of signup, so nullable until that step completes.
   passwordHash: text("password_hash"),
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.

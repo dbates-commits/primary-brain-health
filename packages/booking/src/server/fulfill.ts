@@ -18,6 +18,7 @@ import { and, eq, ne } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db, payments, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry } from "@pbh/payments";
+import { getPackage, resolvePackageKey } from "../packages";
 import {
   sendPaymentReceiptEmail,
   sendPaymentRefundedEmail,
@@ -59,7 +60,15 @@ export async function recordSucceededPayment(
   if (intent.status !== "succeeded") {
     return { status: "rejected", reason: `intent status is ${intent.status}` };
   }
-  const catalog = await getAssessmentCatalogEntry();
+  // Which package this charge was for, taken from the intent's own metadata —
+  // set server-side when the Session was created, so it arrives back signed by
+  // Stripe rather than re-supplied by a client. An intent predating packages
+  // (or carrying an unknown key) resolves to the default, which is the price
+  // those charges were made against.
+  const packageKey = resolvePackageKey(intent.metadata?.packageKey);
+  const pkg = getPackage(packageKey)!;
+
+  const catalog = await getAssessmentCatalogEntry(pkg.priceEnvVar);
   if (
     intent.amount !== catalog.amountCents ||
     intent.currency !== catalog.currency
@@ -76,6 +85,7 @@ export async function recordSucceededPayment(
       stripePaymentIntentId: intent.id,
       amountCents: intent.amount,
       currency: intent.currency,
+      packageKey,
       status: "succeeded",
       cardBrand: card?.brand ?? null,
       cardLast4: card?.last4 ?? null,
@@ -87,6 +97,7 @@ export async function recordSucceededPayment(
         status: "succeeded",
         amountCents: intent.amount,
         currency: intent.currency,
+        packageKey,
         cardBrand: card?.brand ?? null,
         cardLast4: card?.last4 ?? null,
         succeededAt: new Date(),
