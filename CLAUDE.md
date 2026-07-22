@@ -8,12 +8,12 @@ This is a **pnpm + Turborepo monorepo**. Run these from the repo root:
 
 ```bash
 pnpm install                     # install all workspaces
-pnpm dev                         # all apps in parallel (marketing :3000, funnel :3001)
+pnpm dev                         # all apps in parallel (marketing :3000, app :3001)
 pnpm build                       # build everything (Turborepo cached)
 pnpm lint                        # eslint across the workspace
 pnpm typecheck                   # tsc --noEmit across the workspace
-pnpm --filter marketing dev      # run a single app/package (marketing | funnel | @pbh/ui …)
-pnpm --filter funnel build
+pnpm --filter marketing dev      # run a single app/package (marketing | app | @pbh/ui …)
+pnpm --filter app build
 ```
 
 Marketing's Tina admin is at `/admin/index.html` during development. Note: the
@@ -23,7 +23,8 @@ local mode); plain `next build` works without them.
 ## Workspace layout
 
 - `apps/marketing/` — the Next.js + TinaCMS marketing site (formerly the repo root)
-- `apps/funnel/` — the funnel app (auth + Stripe + signed-token handoff), `:3001`
+- `apps/app/` — the signed-in app: session, `/welcome`, `/assessments`, reports,
+  and the Stripe webhook, `:3001`
 - `packages/ui/` (`@pbh/ui`) — shared design-system primitives + `cn()`; consumed via `transpilePackages`
 - `packages/tokens/` (`@pbh/tokens`) — Tailwind 4 theme + CSS variables (`theme.css`)
 - `packages/types/` (`@pbh/types`) — shared TS types (signed-token handoff payload, …)
@@ -99,7 +100,7 @@ Cross-app shared code is imported from the `@pbh/*` workspace packages, not via 
 ### Booking flow
 
 The booking flow spans both apps: marketing owns the modal and Stripe checkout,
-the funnel owns the session, `/assessments`, and the only Stripe webhook. See
+the app owns the session, `/assessments`, and the only Stripe webhook. See
 [`docs/booking-flow.md`](docs/booking-flow.md) for the sequence, the resume state
 machine, what each step writes, and the four different tokens involved. Read it
 before changing anything in `packages/booking/src/server/`.

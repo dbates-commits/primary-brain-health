@@ -15,7 +15,7 @@ importers:
         specifier: ^2.9.18
         version: 2.9.18
 
-  apps/funnel:
+  apps/app:
     dependencies:
       '@auth/drizzle-adapter':
         specifier: ^1.11.2

@@ -1,7 +1,7 @@
-# Booking flow: marketing → funnel
+# Booking flow: marketing → app
 
 How a customer goes from a package card on the marketing site to a signed-in
-assessments page on the funnel, and what is written along the way.
+assessments page in the app, and what is written along the way.
 
 Kept next to the code on purpose: when the flow changes this should change in the
 same PR, and it should be obvious when it hasn't.
@@ -13,13 +13,13 @@ same PR, and it should be obvious when it hasn't.
 | | Owns |
 |---|---|
 | **Marketing** — `primarybrainhealth.com` (`apps/marketing`) | The booking section, the whole booking modal, and Stripe Checkout |
-| **Funnel** — `app.primarybrainhealth.com` (`apps/funnel`) | The Auth.js session, `/assessments`, report downloads, and the **only** Stripe webhook endpoint |
+| **App** — `app.primarybrainhealth.com` (`apps/app`) | The Auth.js session, `/assessments`, report downloads, and the **only** Stripe webhook endpoint |
 
 They share `@pbh/db` (one Neon database), `@pbh/booking/server` (every write
 path), `@pbh/emails`, `@pbh/linus` and `@pbh/payments`.
 
 One fact explains most of the design: **they are different origins, so marketing
-cannot set the funnel's session cookie.** That is why there is a signed handoff
+cannot set the app's session cookie.** That is why there is a signed handoff
 token, why the resume cookie exists, and why `createSessionForUser` returns a
 cookie descriptor instead of setting one.
 
@@ -35,7 +35,7 @@ sequenceDiagram
     participant DB as Neon
     participant R as Resend
     participant S as Stripe
-    participant F as Funnel
+    participant F as App
     participant L as Linus
 
     C->>M: Click "Book … Assessment"
@@ -141,7 +141,7 @@ Two paths race after a successful payment, and either may win:
 
 - **Client path** — Embedded Checkout's `onComplete` → `finalizeCheckoutSession`.
   Fast, gives the customer immediate feedback.
-- **Webhook path** — Stripe → `POST /api/stripe/webhook` on the **funnel** →
+- **Webhook path** — Stripe → `POST /api/stripe/webhook` in the **app** →
   `handleStripeWebhook`. The source of truth; survives a browser that closed
   mid-flow.
 
@@ -150,11 +150,11 @@ the exactly-once signal that gates the audit row, the receipt email, and
 enrollment — so a redelivered event doesn't double-charge the audit log or email
 the customer twice.
 
-> The webhook is deliberately the **only** endpoint, and it lives in the funnel
+> The webhook is deliberately the **only** endpoint, and it lives in the app
 > even though checkout happens in marketing. Stripe endpoints are account-scoped
 > and Stripe fans every event out to all of them, so a second endpoint would
 > process every payment twice. See the comment in
-> `apps/funnel/src/app/api/stripe/webhook/route.ts`.
+> `apps/app/src/app/api/stripe/webhook/route.ts`.
 
 ---
 
@@ -172,7 +172,7 @@ Emails carry links only — never assessment results or report content.
 | Assessment ready | `register-and-enroll.ts` | first enrollment resolution |
 | Report ready | `register-and-enroll.ts` | a report becomes available |
 | Payment refunded | `fulfill.ts` | `charge.refunded` |
-| Magic link | `apps/funnel/src/auth.ts` | `/login` request |
+| Magic link | `apps/app/src/auth.ts` | `/login` request |
 
 Welcome deliberately fires on **confirmation**, not signup: the flow is blocked on
 the confirmation link, and two emails arriving together buries the one the
@@ -187,10 +187,10 @@ customer has to act on.
 | Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` | no |
 | Resume cookie | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry | no |
 | Payment handoff | `AUTH_HANDOFF_SECRET` | 10 min | `payments.handoff_consumed_at` | **yes** |
-| Magic link | `AUTH_SECRET` (Auth.js) | 30 min | `verification_tokens` | funnel only |
+| Magic link | `AUTH_SECRET` (Auth.js) | 30 min | `verification_tokens` | app only |
 
 `AUTH_HANDOFF_SECRET` must hold the **same value in both apps** — marketing signs,
-the funnel verifies.
+the app verifies.
 
 The handoff token is a login credential travelling in a URL, so it lands in
 browser history and referrers. Three things make that acceptable: the short TTL,
@@ -201,7 +201,7 @@ payment — a valid signature alone grants nothing.
 
 ## Alternative entry: magic link
 
-Independent of booking. `/login` on the funnel → `requestMagicLink` → Auth.js.
+Independent of booking. `/login` in the app → `requestMagicLink` → Auth.js.
 The `signIn` callback rejects addresses with no account (login-only, and it stops
 a `verification_tokens` row being minted for a stranger); `requestMagicLink`
 swallows the resulting `AccessDenied` so the response is identical either way and
