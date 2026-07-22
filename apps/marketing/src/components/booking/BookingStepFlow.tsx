@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StepHeader } from "@pbh/ui";
 import {
   SignupForm,
@@ -19,7 +19,13 @@ import {
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
 import { DoneStep } from "./DoneStep";
-import { signupAction, detailsAction, consentAction } from "./actions";
+import { EmailConfirmationStep } from "./EmailConfirmationStep";
+import {
+  signupAction,
+  detailsAction,
+  consentAction,
+  getBookingResumeState,
+} from "./actions";
 import {
   createAssessmentCheckoutSession,
   finalizeCheckoutSession,
@@ -29,11 +35,19 @@ import {
  * The whole booking flow now runs in the modal, signup included — the landing
  * section is two package cards, and a card's CTA opens the modal at `signup`.
  */
-const MODAL_STEPS = ["signup", "details", "consent", "payment", "done"] as const;
+const MODAL_STEPS = [
+  "signup",
+  "confirm",
+  "details",
+  "consent",
+  "payment",
+  "done",
+] as const;
 type ModalStep = (typeof MODAL_STEPS)[number];
 
 const STEP_LABEL: Record<ModalStep, string> = {
   signup: "Create your account",
+  confirm: "Confirm your email",
   details: "Complete your details",
   consent: "Review terms and consent",
   payment: "Payment",
@@ -73,6 +87,7 @@ export function BookingStepFlow({
   const [stepIndex, setStepIndex] = useState(0);
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
   const [context, setContext] = useState<FlowContext>(EMPTY_CONTEXT);
+  const [expiredLink, setExpiredLink] = useState(false);
 
   const advance = useCallback(() => {
     setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
@@ -85,6 +100,7 @@ export function BookingStepFlow({
   const selectPackage = useCallback((pkg: AssessmentPackage) => {
     setPackageKey(pkg.key);
     setContext(EMPTY_CONTEXT);
+    setExpiredLink(false);
     setStepIndex(0);
     setOpen(true);
   }, []);
@@ -105,6 +121,43 @@ export function BookingStepFlow({
   const close = useCallback(() => setOpen(false), []);
 
   /**
+   * Reopen the flow for someone returning from a confirmation link.
+   *
+   * The confirm route redirects here with `?booking=resume` (or `expired`) and a
+   * signed httpOnly cookie; the marker in the URL carries no identity of its own.
+   * Resolving the step through a server action rather than in the page keeps the
+   * home page statically rendered — only a returning customer pays the
+   * round-trip. Runs once on mount.
+   */
+  useEffect(() => {
+    const marker = new URLSearchParams(window.location.search).get("booking");
+    if (marker !== "resume" && marker !== "expired") {
+      return;
+    }
+    let cancelled = false;
+    void getBookingResumeState().then((resumed) => {
+      if (cancelled || !resumed) {
+        return;
+      }
+      setContext({
+        userId: resumed.userId,
+        firstName: resumed.firstName,
+        email: "",
+        patientIdentification: resumed.patientIdentification,
+      });
+      // An expired link lands on the confirmation step whatever else is done,
+      // since the address still isn't proven.
+      const target = marker === "expired" ? "confirm" : resumed.step;
+      setStepIndex(MODAL_STEPS.indexOf(target));
+      setExpiredLink(marker === "expired");
+      setOpen(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
    * Bind the chosen package to the checkout action. Memoised deliberately:
    * `PaymentStep` mints its Session from a `useEffect` keyed on this function,
    * so a new identity each render would create a fresh Stripe Session every
@@ -123,6 +176,8 @@ export function BookingStepFlow({
   const stepHeader =
     step === "signup" ? (
       <StepHeader {...SIGNUP_HEADER} />
+    ) : step === "confirm" ? (
+      <StepHeader title="Email Confirmation" />
     ) : step === "details" ? (
       <StepHeader
         {...detailsHeader(
@@ -154,6 +209,12 @@ export function BookingStepFlow({
             action={signupAction}
             onComplete={completeSignup}
             showHeader={false}
+          />
+        )}
+        {step === "confirm" && (
+          <EmailConfirmationStep
+            userId={context.userId}
+            expired={expiredLink}
           />
         )}
         {step === "details" && (

@@ -6,6 +6,10 @@ export {
   type MagicLinkEmailProps,
 } from "./emails/MagicLinkEmail";
 export {
+  ConfirmEmailEmail,
+  type ConfirmEmailEmailProps,
+} from "./emails/ConfirmEmailEmail";
+export {
   PaymentReceiptEmail,
   type PaymentReceiptEmailProps,
 } from "./emails/PaymentReceiptEmail";

@@ -17,6 +17,7 @@ import { Resend } from "resend";
 import { db, users, writeAuditLog } from "@pbh/db";
 import {
   AssessmentReadyEmail,
+  ConfirmEmailEmail,
   PaymentReceiptEmail,
   PaymentRefundedEmail,
   renderEmail,
@@ -31,9 +32,19 @@ import {
  */
 const DEFAULT_FROM = "Primary Brain Health <onboarding@resend.dev>";
 
-/** Base for the links inside emails (login, assessments). */
+/** Base for the links inside emails (login, assessments) — the funnel app. */
 function appBaseUrl(): string {
   return process.env.APP_BASE_URL ?? "http://localhost:3001";
+}
+
+/**
+ * Base for links back into the booking flow — the MARKETING app, which is where
+ * the booking modal lives. Distinct from `appBaseUrl()`: the two run on separate
+ * origins, and a confirmation link pointed at the funnel would land on a page
+ * that has no booking flow to resume.
+ */
+function bookingBaseUrl(): string {
+  return process.env.BOOKING_BASE_URL ?? "http://localhost:3000";
 }
 
 export type SendEmailResult =
@@ -119,7 +130,37 @@ async function loadRecipient(userId: string): Promise<Recipient | null> {
   return user;
 }
 
-/** Signup completed → welcome + how to get back in. */
+/**
+ * Signup completed → confirm the address before the flow can continue.
+ *
+ * Builds the link from the raw token (the DB stores only its hash) and, when
+ * Resend is unconfigured, logs the URL so local dev can still complete the flow
+ * — the same affordance the funnel's magic link has. That log is the only place
+ * the raw token appears outside the recipient's inbox.
+ */
+export async function sendConfirmEmail(
+  userId: string,
+  rawToken: string,
+): Promise<SendEmailResult> {
+  const confirmUrl = `${bookingBaseUrl()}/booking/confirm?token=${encodeURIComponent(rawToken)}`;
+
+  if (!process.env.RESEND_API_KEY) {
+    console.log(
+      `[email] RESEND_API_KEY not set — confirmation email skipped.\n` +
+        `[email] Dev confirmation URL for user ${userId}:\n${confirmUrl}`,
+    );
+    return { sent: false, reason: "not-configured" };
+  }
+
+  return sendTemplate(
+    "confirm-email",
+    userId,
+    "Confirm your email to continue",
+    () => ConfirmEmailEmail({ confirmUrl }),
+  );
+}
+
+/** Email confirmed → welcome + how to get back in. */
 export async function sendWelcomeEmail(userId: string): Promise<SendEmailResult> {
   return sendTemplate(
     "welcome",
