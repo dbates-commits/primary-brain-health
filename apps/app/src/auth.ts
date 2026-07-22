@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import type { Adapter } from "next-auth/adapters";
 import Resend from "next-auth/providers/resend";
@@ -14,18 +15,36 @@ import {
 import { sendMagicLinkEmail } from "@/lib/auth-email";
 import { findAuthUserByEmail } from "@/lib/auth-user";
 
-/** How long a magic link stays valid, in seconds (30 minutes). */
-export const MAGIC_LINK_TTL_SECONDS = 60 * 30;
+/**
+ * Session and link lifetimes, set from PBH's security review (Bill, 2026-07-22).
+ *
+ * HIPAA prescribes no specific duration — it requires an automatic logoff
+ * control proportionate to the risk. The signed-in area reaches the Linus
+ * report, so these are deliberately short.
+ */
+
+/** Magic link validity. Single-use as well: Auth.js deletes the token on redeem. */
+export const MAGIC_LINK_TTL_SECONDS = 60 * 15;
+
+/** Inactivity timeout. Idle this long and the next request is unauthenticated. */
+export const IDLE_SESSION_MAX_SECONDS = 60 * 15;
 
 /**
- * Auth.js (NextAuth v5) — passwordless magic-link sign-in for the funnel.
+ * Absolute cap on a session's total age, however active it has been. Auth.js
+ * only implements a sliding window, so this is enforced by hand in
+ * `getSessionAndUser` below.
+ */
+export const ABSOLUTE_SESSION_MAX_SECONDS = 60 * 60 * 8;
+
+/**
+ * Auth.js (NextAuth v5) — passwordless magic-link sign-in for the app.
  *
  * Design decisions (see the auth scaffolding PR):
  *  - **Database sessions**, not JWT: revocable, supports "sign out everywhere"
  *    and automatic-logoff, and pairs with the audit_log — the defensible choice
  *    for a HIPAA-adjacent posture. Neon's HTTP driver keeps the per-request
  *    lookup cheap.
- *  - **Login-only**: accounts are created in the paid get-started flow. A magic
+ *  - **Login-only**: accounts are created in the marketing booking flow. A magic
  *    link authenticates an existing account and never creates one — enforced in
  *    two places (see `adapter.createUser` below and `sendMagicLinkEmail`, which
  *    never emails an address without an account, avoiding enumeration).
@@ -63,6 +82,42 @@ function buildAdapter(): Adapter {
     // created if a token for an unknown email were somehow redeemed.
     createUser: async () => {
       throw new Error("SIGNUP_VIA_MAGIC_LINK_DISABLED");
+    },
+
+    /**
+     * Enforce the absolute session cap on top of Auth.js's sliding window.
+     *
+     * `session.maxAge` only ever moves `expires` forward, so a session kept
+     * warm by activity would never end. Here we also reject one whose
+     * `createdAt` is older than the cap, and delete the row on the way out so
+     * the revocation is real rather than merely unreported — the point of
+     * database sessions.
+     *
+     * Done at the adapter rather than in a callback because returning null here
+     * is what makes `auth()` report no session at all; a callback runs too late
+     * to undo the lookup.
+     */
+    getSessionAndUser: async (sessionToken: string) => {
+      const result = await base.getSessionAndUser!(sessionToken);
+      if (!result) {
+        return null;
+      }
+
+      const [row] = await getDb()
+        .select({ createdAt: sessions.createdAt })
+        .from(sessions)
+        .where(eq(sessions.sessionToken, sessionToken))
+        .limit(1);
+
+      const age = row ? Date.now() - row.createdAt.getTime() : 0;
+      if (age > ABSOLUTE_SESSION_MAX_SECONDS * 1000) {
+        await getDb()
+          .delete(sessions)
+          .where(eq(sessions.sessionToken, sessionToken));
+        return null;
+      }
+
+      return result;
     },
   };
 }
@@ -105,10 +160,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter,
   session: {
     strategy: "database",
-    // 7-day sliding window; refreshed at most once a day on activity. Tighten
-    // maxAge for a stricter idle-logoff policy if compliance asks.
-    maxAge: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
+    // Inactivity timeout, not a total lifetime: Auth.js slides `expires`
+    // forward on activity. `updateAge: 0` makes it slide on *every* request —
+    // with the default (24h) the deadline would only be refreshed once a day,
+    // so an active user would be logged out mid-session.
+    maxAge: IDLE_SESSION_MAX_SECONDS,
+    updateAge: 0,
   },
   pages: {
     signIn: "/login",
@@ -152,9 +209,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return (await findAuthUserByEmail(address)) !== null;
     },
     session({ session, user }) {
-      // Database strategy hands us the full adapter user; surface its id.
-      session.user.id = user.id;
-      return session;
+      // Return a deliberately minimal session rather than passing through what
+      // the adapter handed us.
+      //
+      // With the database strategy Auth.js merges the whole `sessions` row and
+      // the whole `users` row into what `/api/auth/session` serves. That
+      // exposed two things it should not:
+      //
+      //  - `sessionToken` — the session credential itself. It lives in an
+      //    httpOnly cookie precisely so page scripts cannot read it, and then
+      //    this endpoint handed it back to any script that could fetch. That
+      //    turns any XSS into full session theft.
+      //  - Every user column: date of birth, gender, ZIP, phone, and the Linus
+      //    participant id. None of it is needed to render a page, and shipping
+      //    it to the browser is at odds with keeping this tier PHI-light.
+      //
+      // `user.id` is the only field either app reads (see `session?.user?.id`
+      // in the assessments, welcome and login routes), so that is all we send.
+      return {
+        expires: session.expires,
+        user: { id: user.id },
+      };
     },
   },
   events: {

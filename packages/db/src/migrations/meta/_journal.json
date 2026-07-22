@@ -120,6 +120,13 @@
       "when": 1784742488757,
       "tag": "0016_medical_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1784746977031,
+      "tag": "0017_pale_shatterstar",
+      "breakpoints": true
     }
   ]
 }

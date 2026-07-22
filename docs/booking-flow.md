@@ -187,7 +187,28 @@ customer has to act on.
 | Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` | no |
 | Resume cookie | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry | no |
 | Payment handoff | `AUTH_HANDOFF_SECRET` | 10 min | `payments.handoff_consumed_at` | **yes** |
-| Magic link | `AUTH_SECRET` (Auth.js) | 30 min | `verification_tokens` | app only |
+| Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` | app only |
+
+### Session lifetimes
+
+Set from PBH's security review (Bill, 2026-07-22). HIPAA prescribes no specific
+duration — it requires an automatic logoff control proportionate to the risk, and
+the signed-in area reaches the Linus report.
+
+| Control | Value | Enforced by |
+|---|---|---|
+| Inactivity timeout | 15 min | Auth.js `session.maxAge` with `updateAge: 0` |
+| Absolute session cap | 8 hours | our `getSessionAndUser` override — Auth.js has no built-in |
+| Magic link | 15 min, single-use | provider `maxAge`; Auth.js deletes the token on redeem |
+
+`maxAge` alone is a *sliding* window: it moves forward on every request, so a
+continuously active session would never end. The absolute cap is the reason
+`sessions.created_at` exists — `expires` cannot tell you a session's true age
+once it has slid.
+
+Note the idle timer only advances on requests, so reading a report for longer
+than 15 minutes ends the session. That is deliberate and was accepted rather than
+softened with a warning dialog.
 
 `AUTH_HANDOFF_SECRET` must hold the **same value in both apps** — marketing signs,
 the app verifies.
