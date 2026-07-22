@@ -157,20 +157,29 @@ export async function sendConfirmEmail(
 ): Promise<SendEmailResult> {
   const confirmUrl = `${bookingBaseUrl()}/booking/confirm?token=${encodeURIComponent(rawToken)}`;
 
-  if (!process.env.RESEND_API_KEY) {
+  const result = process.env.RESEND_API_KEY
+    ? await sendTemplate(
+        "confirm-email",
+        userId,
+        "Confirm your email to continue",
+        () => ConfirmEmailEmail({ confirmUrl }),
+      )
+    : ({ sent: false, reason: "not-configured" } as const);
+
+  // Outside production, print the link whenever it did not reach an inbox — not
+  // only when Resend is unconfigured. A sandbox Resend key refuses every
+  // recipient except the account owner's own address, so without this a
+  // developer testing with any other address hits a blocking confirmation step
+  // with no way past it. Never in production: this is the raw token, and the
+  // whole point of storing only its hash is that it exists nowhere else.
+  if (!result.sent && process.env.NODE_ENV !== "production") {
     console.log(
-      `[email] RESEND_API_KEY not set — confirmation email skipped.\n` +
+      `[email] confirmation email not delivered (${result.reason}).\n` +
         `[email] Dev confirmation URL for user ${userId}:\n${confirmUrl}`,
     );
-    return { sent: false, reason: "not-configured" };
   }
 
-  return sendTemplate(
-    "confirm-email",
-    userId,
-    "Confirm your email to continue",
-    () => ConfirmEmailEmail({ confirmUrl }),
-  );
+  return result;
 }
 
 /** Email confirmed → welcome + how to get back in. */

@@ -66,6 +66,13 @@ export async function sendMagicLinkEmail(
     });
     if (error) {
       console.error("[auth] magic-link send failed:", error);
+      // Same reasoning as the booking confirmation email: a sandbox Resend key
+      // refuses every recipient but the account owner, so without this a
+      // developer testing any other address has no way to sign in. Never in
+      // production — this URL is a working credential.
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[auth] Dev sign-in URL for ${user.email}:\n${url}`);
+      }
       return;
     }
 
