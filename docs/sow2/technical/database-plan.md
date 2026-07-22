@@ -1,6 +1,6 @@
 # Database Plan
 
-Database choice for the funnel app (`apps/funnel`). Stripe handles payment data; this database holds everything else.
+Database choice for the funnel app (`apps/app`). Stripe handles payment data; this database holds everything else.
 
 ## Decision: Neon (Postgres) on Scale tier, with BAA
 

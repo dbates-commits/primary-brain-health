@@ -15,7 +15,7 @@ Marketing site and DTC consultation funnel for Primary Brain Health — a
 ```
 apps/
   marketing/   Next.js + TinaCMS marketing site (the V1 site)  → :3000
-  funnel/      Next.js funnel app (auth + Stripe + handoff)     → :3001
+  app/         Signed-in app (session, assessments, webhook)    → :3001
 packages/
   ui/          @pbh/ui     — shared design-system primitives (Button, Heading, …) + cn()
   tokens/      @pbh/tokens — Tailwind 4 theme + CSS variables (theme.css)
@@ -31,16 +31,16 @@ packages/
 
 ```bash
 pnpm install
-pnpm dev            # runs all apps in parallel (Turborepo): marketing :3000, funnel :3001
+pnpm dev            # runs all apps in parallel (Turborepo): marketing :3000, app :3001
 ```
 
 Open marketing at [http://localhost:3000](http://localhost:3000) (Tina admin at
-`/admin/index.html`) and the funnel at [http://localhost:3001](http://localhost:3001).
+`/admin/index.html`) and the app at [http://localhost:3001](http://localhost:3001).
 
 ```bash
 pnpm build                       # build everything (cached, only rebuilds what changed)
 pnpm --filter marketing build    # build just one app
-pnpm --filter funnel dev         # run just one app
+pnpm --filter app dev         # run just one app
 pnpm lint                        # eslint across the workspace
 pnpm typecheck                   # tsc --noEmit across the workspace
 pnpm format                      # prettier --write

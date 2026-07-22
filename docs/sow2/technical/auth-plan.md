@@ -1,6 +1,6 @@
 # Auth Plan
 
-Decision on the auth provider for the funnel app (`apps/funnel`). Locked-in pending PBH counsel's HIPAA posture decision (see `database-plan.md`).
+Decision on the auth provider for the funnel app (`apps/app`). Locked-in pending PBH counsel's HIPAA posture decision (see `database-plan.md`).
 
 ## Recommendation: **Auth.js v5 (NextAuth) with credentials provider, sessions in Neon**
 

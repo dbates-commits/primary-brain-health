@@ -7,7 +7,7 @@
   "files": [],
   "references": [
     { "path": "apps/marketing" },
-    { "path": "apps/funnel" },
+    { "path": "apps/app" },
     { "path": "packages/ui" },
     { "path": "packages/types" }
   ]

@@ -64,7 +64,7 @@ Imports look like:
 import { Button } from "@pbh/ui";
 import { cn } from "@pbh/ui/utils";
 
-// In apps/funnel/src/app/get-started/page.tsx
+// In apps/app/src/app/get-started/page.tsx
 import { Button, Input } from "@pbh/ui";
 import type { HandoffTokenPayload } from "@pbh/types";
 ```
@@ -75,12 +75,12 @@ The `@pbh/*` aliases are real workspace packages, not path aliases. TypeScript t
 
 Two Vercel projects, both connected to the same GitHub repo. Each project has its own:
 
-- **Root directory**: `apps/marketing` or `apps/funnel`
+- **Root directory**: `apps/marketing` or `apps/app`
 - **Domain**: `primarybrainhealth.com` or `app.primarybrainhealth.com`
 - **Environment variables**: marketing has Tina tokens; funnel has Stripe secrets, DB URL, auth secrets
 - **Build & deploy log**: independent
 
-Vercel's "Ignored Build Step" config does the path-based gating: marketing only rebuilds when `apps/marketing/**` or `packages/**` changes; funnel only rebuilds when `apps/funnel/**` or `packages/**` changes. So a TinaCMS edit to a marketing page never touches the funnel deploy.
+Vercel's "Ignored Build Step" config does the path-based gating: marketing only rebuilds when `apps/marketing/**` or `packages/**` changes; funnel only rebuilds when `apps/app/**` or `packages/**` changes. So a TinaCMS edit to a marketing page never touches the funnel deploy.
 
 ## Migration from current state
 
@@ -96,7 +96,7 @@ The existing repo becomes `apps/marketing` with minor changes. ~3–5 pts.
 
 Then extract design system into `packages/ui` - ~5–8 pts. We don't have to move everything at once; we move what both apps actually need (Button, Input, Hero, layout primitives, brand tokens). Marketing-specific components (BlockRenderer, the Hero variants) stay in `apps/marketing/src/components`.
 
-Create `apps/funnel/` from scratch (`pnpm create next-app`) - ~1 pt.
+Create `apps/app/` from scratch (`pnpm create next-app`) - ~1 pt.
 
 ## What "hacky" looks like (and we're avoiding)
 
@@ -121,7 +121,7 @@ What we're doing is the pattern documented in the [Turborepo + Vercel guide](htt
 | Extract design system to `packages/ui` (initial pass - common primitives + Hero) | 8 |
 | Set up `packages/tokens` (Tailwind preset + CSS vars) | 3 |
 | Set up `packages/config` (shared ESLint, TS, Prettier) | 3 |
-| Scaffold `apps/funnel` (`pnpm create next-app` + base imports from `@pbh/ui`) | 3 |
+| Scaffold `apps/app` (`pnpm create next-app` + base imports from `@pbh/ui`) | 3 |
 | Configure two Vercel projects + Ignored Build Step | 2 |
 | Update CI / pre-commit hooks for monorepo (if any) | 2 |
 | README + dev docs (commands, common workflows) | 2 |
@@ -146,7 +146,7 @@ pnpm build
 
 # build just one app
 pnpm --filter marketing build
-pnpm --filter funnel build
+pnpm --filter app build
 
 # lint everything
 pnpm lint
@@ -163,7 +163,7 @@ VS Code / Cursor / your editor of choice: opens the root, sees both apps and all
 - **Auth domain**: cookies set at `.primarybrainhealth.com` (apex domain) so they span both `primarybrainhealth.com` and `app.primarybrainhealth.com`. Validates with the chosen auth provider.
 - **GA4 cross-domain measurement**: configure GA4 to track sessions across both domains as one user journey.
 - **Local dev domains**: dev runs on `localhost:3000` and `localhost:3001` by default; we can map to `pbh.test` and `app.pbh.test` via `/etc/hosts` if cookie testing requires it.
-- **Whether `apps/funnel` needs TinaCMS at all** - probably not. Funnel pages aren't content-driven. Saves complexity.
+- **Whether `apps/app` needs TinaCMS at all** - probably not. Funnel pages aren't content-driven. Saves complexity.
 
 ## Estimate impact
 
@@ -176,7 +176,7 @@ Roughly +43 hrs of Phase 1 effort for monorepo setup. Pays for itself in deploy 
 
 ## What's NOT in this plan (yet)
 
-- Whether `apps/funnel` uses the same auth provider as a future portal - that's a discovery decision
+- Whether `apps/app` uses the same auth provider as a future portal - that's a discovery decision
 - Whether `packages/ui` becomes a publishable npm package down the road - not for this engagement
 - Storybook for the design system - possible Phase 2 addition, separate decision
 - E2E test infrastructure - likely Playwright at repo root running against both apps; scope in Phase 1 QA
