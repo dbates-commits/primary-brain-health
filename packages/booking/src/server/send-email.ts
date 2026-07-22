@@ -42,9 +42,22 @@ function appBaseUrl(): string {
  * the booking modal lives. Distinct from `appBaseUrl()`: the two run on separate
  * origins, and a confirmation link pointed at the funnel would land on a page
  * that has no booking flow to resume.
+ *
+ * Falls back to `VERCEL_URL`, the per-deployment hostname, so Preview works
+ * without configuration. A fixed value there would be wrong the moment a new
+ * preview is built: every confirmation link would point back at whichever
+ * deployment happened to be current when the variable was set. Production sets
+ * `BOOKING_BASE_URL` explicitly, because `VERCEL_URL` is the generated
+ * `*.vercel.app` host rather than the real domain.
  */
 function bookingBaseUrl(): string {
-  return process.env.BOOKING_BASE_URL ?? "http://localhost:3000";
+  if (process.env.BOOKING_BASE_URL) {
+    return process.env.BOOKING_BASE_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
 }
 
 export type SendEmailResult =
