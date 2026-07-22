@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   pgTable,
   primaryKey,
@@ -52,13 +53,19 @@ export const accounts = pgTable(
   ],
 );
 
-export const sessions = pgTable("sessions", {
-  sessionToken: text("session_token").primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp({ withTimezone: true, mode: "date" }).notNull(),
-});
+export const sessions = pgTable(
+  "sessions",
+  {
+    sessionToken: text("session_token").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expires: timestamp({ withTimezone: true, mode: "date" }).notNull(),
+  },
+  // Lookups are by primary key, but the cascade on user delete — and any future
+  // "sign out everywhere" — scans by user_id, which would otherwise be a seq scan.
+  (session) => [index("sessions_user_id_idx").on(session.userId)],
+);
 
 export const verificationTokens = pgTable(
   "verification_tokens",

@@ -1,8 +1,7 @@
-import { eq } from "drizzle-orm";
 import { Resend } from "resend";
-import { db, users, writeAuditLog } from "@pbh/db";
+import { writeAuditLog } from "@pbh/db";
 import { MagicLinkEmail, renderEmail } from "@pbh/emails";
-import { normalizeEmail } from "@pbh/booking/server";
+import { findAuthUserByEmail } from "@/lib/auth-user";
 
 /**
  * Send a passwordless sign-in email. Called by Auth.js's email provider via
@@ -27,20 +26,12 @@ export async function sendMagicLinkEmail(
   url: string,
   expiresMinutes: number,
 ): Promise<void> {
-  const email = normalizeEmail(rawEmail);
+  const user = await findAuthUserByEmail(rawEmail);
 
-  const [user] = await db
-    .select({
-      id: users.id,
-      email: users.email,
-      firstName: users.firstName,
-    })
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  // Login-only: never reveal whether an address is registered. No account →
-  // silently send nothing; the caller still shows the check-your-email page.
+  // Login-only backstop. The `signIn` callback already rejects unknown addresses
+  // before a token is minted, so this should not fire — but it keeps this
+  // function safe to call on its own, and never reveals whether an address is
+  // registered.
   if (!user) {
     console.log(
       "[auth] magic-link requested for an unregistered email — no send",

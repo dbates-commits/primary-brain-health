@@ -1,5 +1,6 @@
 "use server";
 
+import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 import { isValidEmail, normalizeEmail } from "@pbh/booking/server";
@@ -27,15 +28,27 @@ export async function requestMagicLink(
   }
 
   try {
-    await signIn("magic-link", { email, redirect: false });
-  } catch {
-    // AuthError (rare — e.g. provider/config issue). Keep the message generic
-    // so it never leaks internal state or account existence.
-    return {
-      status: "error",
+    // `redirectTo` is where the magic link lands once redeemed. Without it
+    // Auth.js falls back to the Referer header, which only works by accident.
+    await signIn("magic-link", {
       email,
-      message: "We couldn't start sign-in just now. Please try again.",
-    };
+      redirect: false,
+      redirectTo: "/assessments",
+    });
+  } catch (err) {
+    // AccessDenied is our own login-only rejection from the `signIn` callback
+    // (see auth.ts) — the address has no account. Fall through to the same
+    // check-your-email page a registered address gets, so the response never
+    // reveals who is registered. Anything else is a real provider/config
+    // failure; keep its message generic so it leaks nothing either.
+    const isUnregistered = err instanceof AuthError && err.type === "AccessDenied";
+    if (!isUnregistered) {
+      return {
+        status: "error",
+        email,
+        message: "We couldn't start sign-in just now. Please try again.",
+      };
+    }
   }
 
   redirect("/login/check-email");

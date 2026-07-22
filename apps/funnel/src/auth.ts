@@ -9,8 +9,10 @@ import {
   sessions,
   users,
   verificationTokens,
+  writeAuditLog,
 } from "@pbh/db";
 import { sendMagicLinkEmail } from "@/lib/auth-email";
+import { findAuthUserByEmail } from "@/lib/auth-user";
 
 /** How long a magic link stays valid, in seconds (30 minutes). */
 export const MAGIC_LINK_TTL_SECONDS = 60 * 30;
@@ -130,10 +132,67 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    /**
+     * Login-only gate. Auth.js mints the `verification_tokens` row and calls
+     * `sendVerificationRequest` in the same `Promise.all`, so refusing inside
+     * the send would still leave a token row behind for every unknown address.
+     * Rejecting here runs first and stops the token being created at all.
+     *
+     * `requestMagicLink` swallows the resulting AccessDenied and shows the same
+     * check-your-email page either way, so this stays non-enumerating.
+     */
+    async signIn({ user, email }) {
+      if (!email?.verificationRequest) {
+        return true;
+      }
+      const address = user.email;
+      if (!address) {
+        return false;
+      }
+      return (await findAuthUserByEmail(address)) !== null;
+    },
     session({ session, user }) {
       // Database strategy hands us the full adapter user; surface its id.
       session.user.id = user.id;
       return session;
+    },
+  },
+  events: {
+    /**
+     * Audit every successful sign-in. `createSessionForUser` writes its own
+     * `login` entry for the programmatic path; this covers magic-link sign-ins,
+     * which otherwise produced only a `magic_link_sent` and no access record.
+     */
+    async signIn({ user }) {
+      if (!user.id) {
+        return;
+      }
+      try {
+        await writeAuditLog({
+          eventType: "login",
+          userId: user.id,
+          metadata: { method: "magic-link" },
+        });
+      } catch (err) {
+        console.error("[auth] audit write for login failed:", err);
+      }
+    },
+    /**
+     * Audit sign-outs that go through Auth.js's own `/api/auth/signout`
+     * endpoint. The in-app Sign out button calls `destroyCurrentSession`, which
+     * audits itself — this covers the endpoint, so neither path is silent.
+     */
+    async signOut(message) {
+      const userId =
+        "session" in message ? message.session?.userId : message.token?.sub;
+      if (!userId) {
+        return;
+      }
+      try {
+        await writeAuditLog({ eventType: "logout", userId });
+      } catch (err) {
+        console.error("[auth] audit write for logout failed:", err);
+      }
     },
   },
 });

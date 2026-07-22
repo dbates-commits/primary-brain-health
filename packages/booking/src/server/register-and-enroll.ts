@@ -25,9 +25,6 @@ import {
   sendReportReadyEmail,
 } from "./send-email";
 
-/** Cookie set on successful payment so `/assessments` knows whose links to show. */
-export const ASSESSMENT_UID_COOKIE = "pbh_assessment_uid";
-
 /**
  * Per-card state:
  * - `available`     — not started / in progress; show "Start Assessment" (`redirect`).
