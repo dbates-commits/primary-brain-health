@@ -209,9 +209,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return (await findAuthUserByEmail(address)) !== null;
     },
     session({ session, user }) {
-      // Database strategy hands us the full adapter user; surface its id.
-      session.user.id = user.id;
-      return session;
+      // Return a deliberately minimal session rather than passing through what
+      // the adapter handed us.
+      //
+      // With the database strategy Auth.js merges the whole `sessions` row and
+      // the whole `users` row into what `/api/auth/session` serves. That
+      // exposed two things it should not:
+      //
+      //  - `sessionToken` — the session credential itself. It lives in an
+      //    httpOnly cookie precisely so page scripts cannot read it, and then
+      //    this endpoint handed it back to any script that could fetch. That
+      //    turns any XSS into full session theft.
+      //  - Every user column: date of birth, gender, ZIP, phone, and the Linus
+      //    participant id. None of it is needed to render a page, and shipping
+      //    it to the browser is at odds with keeping this tier PHI-light.
+      //
+      // `user.id` is the only field either app reads (see `session?.user?.id`
+      // in the assessments, welcome and login routes), so that is all we send.
+      return {
+        expires: session.expires,
+        user: { id: user.id },
+      };
     },
   },
   events: {
