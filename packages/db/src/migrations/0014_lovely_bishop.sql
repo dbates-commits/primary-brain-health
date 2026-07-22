@@ -1,0 +1,1 @@
+ALTER TABLE "payments" ADD COLUMN "handoff_consumed_at" timestamp with time zone;

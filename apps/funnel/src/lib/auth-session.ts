@@ -7,56 +7,84 @@ import { db, sessions, writeAuditLog } from "@pbh/db";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 /**
- * Secure cookies (and the `__Secure-` name prefix) on every deployed
- * environment — Vercel builds run with NODE_ENV=production and serve over
- * https. Plain http locally. This mirrors how Auth.js derives the cookie name,
- * so the cookie we set here is the one `auth()` reads back.
+ * Whether Auth.js is using secure cookies (and so the `__Secure-` name prefix).
+ *
+ * Auth.js derives this from the **request protocol**, not from NODE_ENV
+ * (`@auth/core/lib/init.js`: `config.useSecureCookies ?? url.protocol ===
+ * "https:"`). Callers that have the request must pass its protocol; guessing
+ * from NODE_ENV diverges for a production build served over http — we would
+ * write `__Secure-…` (which the browser then refuses over http) while `auth()`
+ * reads the unprefixed name, and the session would silently never be found.
  */
-function secureCookiesEnabled(): boolean {
+function secureCookiesEnabled(protocol?: string): boolean {
+  if (protocol) {
+    return protocol.startsWith("https");
+  }
   return process.env.NODE_ENV === "production";
 }
 
-export function sessionCookieName(): string {
-  return secureCookiesEnabled()
+export function sessionCookieName(protocol?: string): string {
+  return secureCookiesEnabled(protocol)
     ? "__Secure-authjs.session-token"
     : "authjs.session-token";
 }
 
+/** The cookie a caller must set for `auth()` to find the session it describes. */
+export interface SessionCookie {
+  name: string;
+  value: string;
+  options: {
+    httpOnly: true;
+    secure: boolean;
+    sameSite: "lax";
+    path: "/";
+    expires: Date;
+  };
+}
+
 /**
- * Programmatically sign a user in by minting a database session row and setting
- * the Auth.js session cookie. It does exactly what the adapter does on a normal
- * sign-in — a random session token row plus the same cookie Auth.js reads —
- * just initiated by us instead of by a magic-link click.
+ * Mint a database session for `userId` and describe the cookie that proves it.
  *
- * NOTE: currently has no caller. It existed for the funnel's "pay → land on
- * /assessments already signed in" flow, but checkout now runs in the marketing
- * app, which is a different origin and so cannot set the funnel's session
- * cookie. Paid users are handed to /login?email=… for a magic link instead.
- * Kept as the building block if we later add an authenticated cross-app handoff.
+ * Does exactly what the adapter does on a normal sign-in — a random session
+ * token row plus the cookie Auth.js reads — just initiated by us. Returns the
+ * cookie rather than setting it, because the two callers need it applied
+ * differently: a Route Handler must put it on its own `NextResponse` (cookies
+ * set via `next/headers` don't reliably survive a redirect response), while a
+ * Server Action can use `cookies()`.
+ *
+ * `protocol` should be the request's (e.g. `req.nextUrl.protocol`) so the cookie
+ * name matches what Auth.js will look for — see `secureCookiesEnabled`.
  */
-export async function createSessionForUser(userId: string): Promise<void> {
+export async function createSessionForUser(
+  userId: string,
+  opts: { protocol?: string; method?: string } = {},
+): Promise<SessionCookie> {
   const sessionToken = randomUUID();
   const expires = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000);
 
   await db.insert(sessions).values({ sessionToken, userId, expires });
 
-  (await cookies()).set(sessionCookieName(), sessionToken, {
-    httpOnly: true,
-    secure: secureCookiesEnabled(),
-    sameSite: "lax",
-    path: "/",
-    expires,
-  });
-
   try {
     await writeAuditLog({
       eventType: "login",
       userId,
-      metadata: { method: "post-payment" },
+      metadata: { method: opts.method ?? "post-payment" },
     });
   } catch (err) {
     console.error("[auth] audit write for login failed:", err);
   }
+
+  return {
+    name: sessionCookieName(opts.protocol),
+    value: sessionToken,
+    options: {
+      httpOnly: true,
+      secure: secureCookiesEnabled(opts.protocol),
+      sameSite: "lax",
+      path: "/",
+      expires,
+    },
+  };
 }
 
 /**

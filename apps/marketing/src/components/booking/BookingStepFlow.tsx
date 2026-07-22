@@ -28,6 +28,7 @@ import {
 } from "./actions";
 import {
   createAssessmentCheckoutSession,
+  createAssessmentHandoffUrl,
   finalizeCheckoutSession,
 } from "./payment/actions";
 
@@ -88,6 +89,7 @@ export function BookingStepFlow({
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
   const [context, setContext] = useState<FlowContext>(EMPTY_CONTEXT);
   const [expiredLink, setExpiredLink] = useState(false);
+  const [handoffUrl, setHandoffUrl] = useState<string | null>(null);
 
   const advance = useCallback(() => {
     setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
@@ -117,6 +119,24 @@ export function BookingStepFlow({
     },
     [advance],
   );
+
+  /**
+   * Payment done: mint the post-payment sign-in link before showing the
+   * confirmation, so the button there drops them straight into /assessments
+   * instead of asking for a magic link.
+   *
+   * Failure is not fatal — `createAssessmentHandoffUrl` returns null and
+   * `DoneStep` falls back to /login. Advancing regardless matters: the charge
+   * has already gone through, so nothing here may block the confirmation.
+   */
+  const completePayment = useCallback(async () => {
+    try {
+      setHandoffUrl(await createAssessmentHandoffUrl(context.userId));
+    } catch (err) {
+      console.error("handoff link failed:", err);
+    }
+    advance();
+  }, [advance, context.userId]);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -240,11 +260,17 @@ export function BookingStepFlow({
             userId={context.userId}
             createSession={createSession}
             finalize={finalizeCheckoutSession}
-            onComplete={advance}
+            onComplete={completePayment}
             showHeader={false}
           />
         )}
-        {step === "done" && <DoneStep email={context.email} onClose={close} />}
+        {step === "done" && (
+          <DoneStep
+            email={context.email}
+            handoffUrl={handoffUrl}
+            onClose={close}
+          />
+        )}
       </Modal>
     </>
   );

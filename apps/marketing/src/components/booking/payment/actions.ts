@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import {
+  createHandoffForLatestPayment,
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
@@ -72,4 +73,37 @@ export async function finalizeCheckoutSession(
   // own state, not a payment error: the charge stands and the webhook backstop
   // retries enrollment.
   return registerAndEnrollUserById(id);
+}
+
+/**
+ * Mint the post-payment sign-in link, so the customer lands on `/assessments`
+ * already authenticated instead of requesting a magic link.
+ *
+ * Marketing cannot set the funnel's session cookie (different origins), so this
+ * hands the funnel a short-lived, single-use token bound to the succeeded
+ * payment; the funnel verifies it and mints the real session.
+ *
+ * Returns null when there's nothing to hand off — the caller falls back to
+ * `/login`, which always works.
+ */
+export async function createAssessmentHandoffUrl(
+  userId: string,
+): Promise<string | null> {
+  const id = userId.trim();
+  if (!id) {
+    return null;
+  }
+  try {
+    const token = await createHandoffForLatestPayment(id);
+    if (!token) {
+      return null;
+    }
+    const base = process.env.NEXT_PUBLIC_FUNNEL_URL ?? "";
+    return `${base}/api/auth/handoff?token=${encodeURIComponent(token)}`;
+  } catch (err) {
+    // A missing AUTH_HANDOFF_SECRET throws here. That must not strand a paid
+    // customer on a broken confirmation screen — fall back to the magic link.
+    console.error("createAssessmentHandoffUrl failed:", err);
+    return null;
+  }
 }

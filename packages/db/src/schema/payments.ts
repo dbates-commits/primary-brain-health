@@ -37,6 +37,13 @@ export const payments = pgTable(
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),
     succeededAt: timestamp("succeeded_at", { withTimezone: true }),
+    // Set the moment this payment's post-checkout sign-in handoff is redeemed at
+    // the funnel. The handoff token is a login credential, so it must be usable
+    // exactly once: claiming it is an atomic UPDATE on this column, which also
+    // binds the sign-in to a real `succeeded` payment rather than to a signature
+    // alone. Nullable — most rows are never handed off (webhook-only fulfilment,
+    // or a customer who signed in by magic link instead).
+    handoffConsumedAt: timestamp("handoff_consumed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
