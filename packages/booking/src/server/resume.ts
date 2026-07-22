@@ -2,6 +2,7 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 import { consents, db, payments, users } from "@pbh/db";
+import { resolvePackageKey, type PackageKey } from "../packages";
 
 /**
  * Where a returning customer picks the booking back up. Mirrors the modal's own
@@ -19,6 +20,8 @@ export interface BookingResumeState {
   firstName: string;
   /** Decides how the details step is worded and what it asks. */
   patientIdentification: string;
+  /** The package chosen at signup, so payment charges what they picked. */
+  packageKey: PackageKey;
   step: BookingResumeStep;
 }
 
@@ -45,6 +48,7 @@ export async function resolveBookingResumeState(
       patientIdentification: users.patientIdentification,
       emailVerified: users.emailVerified,
       dateOfBirth: users.dateOfBirth,
+      selectedPackageKey: users.selectedPackageKey,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -58,6 +62,7 @@ export async function resolveBookingResumeState(
     userId: user.id,
     firstName: user.firstName,
     patientIdentification: user.patientIdentification ?? "Self",
+    packageKey: resolvePackageKey(user.selectedPackageKey),
   };
 
   if (!user.emailVerified) {

@@ -107,6 +107,20 @@ export function BookingStepFlow({
     setOpen(true);
   }, []);
 
+  /**
+   * Carry the chosen package into signup so it is persisted on the account.
+   * The confirmation gate sends the customer away and they return to a fresh
+   * page, so this component's state is gone by the time they reach payment —
+   * the stored value is what checkout actually charges.
+   */
+  const signupWithPackage = useCallback(
+    (prev: Parameters<typeof signupAction>[0], formData: FormData) => {
+      formData.set("packageKey", packageKey);
+      return signupAction(prev, formData);
+    },
+    [packageKey],
+  );
+
   const completeSignup = useCallback(
     (result: SignupResult) => {
       setContext({
@@ -165,6 +179,10 @@ export function BookingStepFlow({
         email: "",
         patientIdentification: resumed.patientIdentification,
       });
+      // Without this the flow would fall back to the default package and charge
+      // the basic price for a Comprehensive booking — every customer passes
+      // through here, because the confirmation gate is blocking.
+      setPackageKey(resumed.packageKey);
       // An expired link lands on the confirmation step whatever else is done,
       // since the address still isn't proven.
       const target = marker === "expired" ? "confirm" : resumed.step;
@@ -226,7 +244,7 @@ export function BookingStepFlow({
       >
         {step === "signup" && (
           <SignupForm
-            action={signupAction}
+            action={signupWithPackage}
             onComplete={completeSignup}
             showHeader={false}
           />

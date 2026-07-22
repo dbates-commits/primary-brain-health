@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "selected_package_key" text;

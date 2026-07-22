@@ -47,10 +47,15 @@ export async function createCheckoutSessionCore(
     return checkoutError(ACCOUNT_NOT_FOUND);
   }
 
-  // Re-resolve the package server-side. The key arrives from the client, so an
-  // unknown or not-yet-purchasable value falls back to the default rather than
-  // being trusted — a tampered form can't start a checkout we can't fulfill.
-  const pkg = getPackage(resolvePackageKey(opts.packageKey))!;
+  // The package stored on the account at signup wins. The client also sends a
+  // key, but only as a fallback for accounts created before this was recorded:
+  // trusting it would let someone drive the $449 flow in the UI while quietly
+  // checking out at the $149 price. Either way the value is re-resolved
+  // server-side, so an unknown or unpurchasable key can't start a checkout we
+  // can't fulfil.
+  const pkg = getPackage(
+    resolvePackageKey(user.selectedPackageKey ?? opts.packageKey),
+  )!;
 
   // Pinned onto both the Session and the PaymentIntent it creates, so that
   // `verifyAndRecordCheckout` and the webhook backstop can each confirm

@@ -5,6 +5,7 @@ import type { SignupState, SignupValues } from "../types";
 import { PATIENT_IDENTIFICATION_VALUES } from "../field-options";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
+import { resolvePackageKey } from "../packages";
 import { sendBookingConfirmation } from "./email-verification";
 
 /**
@@ -65,6 +66,9 @@ export async function createAccountCore(
         firstName,
         lastName,
         patientIdentification,
+        // Captured now so it survives the email-confirmation round-trip; the
+        // client's in-memory choice is gone by the time they return.
+        selectedPackageKey: resolvePackageKey(formData.get("packageKey")),
       })
       .returning({ id: users.id });
 
