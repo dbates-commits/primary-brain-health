@@ -19,14 +19,23 @@ export const GENDER_OPTIONS = [
   { value: "OTHER", label: "Other" },
 ] as const;
 
-/** Maps to the Linus `education` enum (representative `ED_YEARS_*` per bucket). */
+/**
+ * Maps to the Linus `education` enum (representative `ED_YEARS_*` per bucket).
+ *
+ * Only 0–18 and 21 are configured for the PBH organization — confirmed by Linus
+ * (Corina Lunn, 2026-07-22) and verified against the API. Anything outside that
+ * set fails the whole registration with a 500, not a validation error, so a
+ * customer pays and is then left unregistered. `ED_YEARS_19` and `ED_YEARS_20`
+ * both do this; 21 is the doctorate bucket. Check any new value against the API
+ * before adding it here.
+ */
 export const EDUCATION_LEVELS = [
   { value: "ED_YEARS_11", label: "Less than high school" },
   { value: "ED_YEARS_12", label: "High school graduate" },
   { value: "ED_YEARS_14", label: "Associate's (2 years)" },
   { value: "ED_YEARS_16", label: "Bachelor's (4 years)" },
   { value: "ED_YEARS_18", label: "Master's (6 years)" },
-  { value: "ED_YEARS_20", label: "Doctorate (8+ years)" },
+  { value: "ED_YEARS_21", label: "Doctorate (8+ years)" },
 ] as const;
 
 /**
