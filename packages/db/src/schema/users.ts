@@ -14,6 +14,15 @@ export const users = pgTable("users", {
   email: citext().notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  // --- Auth.js (NextAuth) adapter columns ---
+  // The Drizzle adapter reads/writes these by name on the users table. We keep
+  // firstName/lastName as our canonical identity; `name` is Auth.js's single
+  // display field (nullable — the funnel populates first/last, not name), and
+  // `image` is unused today but part of the AdapterUser shape. `emailVerified`
+  // is stamped when a user proves control of their inbox via a magic link.
+  name: text("name"),
+  image: text("image"),
+  emailVerified: timestamp("email_verified", { withTimezone: true, mode: "date" }),
   // Collected in step 2 of signup, so nullable until that step completes.
   passwordHash: text("password_hash"),
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.

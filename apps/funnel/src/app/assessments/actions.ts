@@ -1,60 +1,27 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { db, linusEnrollments, users } from "@pbh/db";
 import { extractReportData, getCampaigns, getReport } from "@pbh/linus";
+import { auth } from "@/auth";
 import {
-  ASSESSMENT_UID_COOKIE,
-  isValidEmail,
-  normalizeEmail,
-  runRegisterAndEnroll,
+  registerAndEnrollUserById,
   type LinusState,
 } from "@pbh/booking/server";
 
 /**
- * Short-lived cookie identifying whose assessments/reports to serve.
+ * Register + enroll a user server-side, returning the state the caller renders.
  *
- * NOTE: the value is an unsigned user id — acceptable for this unauthenticated
- * scaffold. Gate this behind a real signed session once auth lands.
+ * NOTE: this deliberately does NOT sign the user in — its `userId` is
+ * client-supplied. Sessions are only ever minted by a magic-link sign-in, so
+ * called directly this is a harmless idempotent enroll that grants no session.
  */
-const ASSESSMENT_COOKIE_OPTS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  path: "/",
-  maxAge: 60 * 60,
-};
-
-/**
- * Form action for the `/login` email sign-in. On success we drop the assessment
- * session cookie for that user (so the page and report route, which auth via the
- * cookie, work) and forward to /assessments. On failure we return the error
- * state so the form can show it inline.
- */
-export async function registerAndEnroll(
+export async function completeAssessmentSetup(
   _prev: LinusState,
   formData: FormData,
 ): Promise<LinusState> {
-  const email = normalizeEmail(String(formData.get("email") ?? ""));
-  if (!isValidEmail(email)) {
-    return { status: "error", email, message: "Enter a valid email address." };
-  }
-  const state = await runRegisterAndEnroll(email);
-  if (state.status !== "success") {
-    return state;
-  }
-
-  const [user] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-  if (user) {
-    (await cookies()).set(ASSESSMENT_UID_COOKIE, user.id, ASSESSMENT_COOKIE_OPTS);
-  }
-  redirect("/assessments");
+  const userId = String(formData.get("userId") ?? "").trim();
+  return registerAndEnrollUserById(userId);
 }
 
 /** ASCII-safe, hyphenated slug for a download filename. */
@@ -76,14 +43,17 @@ export type ReportResult =
 /**
  * Fetch a subject's report PDF on demand, returning its base64 bytes plus a
  * descriptive filename so the client can download it — no server-rendered report
- * route. Auth is the same short-lived cookie the page uses: the report is fetched
- * under the cookie user's own participantId, so a user can only read their own
- * report.
+ * route. Auth is the signed-in session: the report is fetched under the session
+ * user's own participantId, so a user can only read their own report.
  */
 export async function getReportPdf(enrollmentId: string): Promise<ReportResult> {
-  const uid = (await cookies()).get(ASSESSMENT_UID_COOKIE)?.value;
+  const session = await auth();
+  const uid = session?.user?.id;
   if (!uid) {
-    return { status: "error", message: "Your session has expired. Please sign in again." };
+    return {
+      status: "error",
+      message: "Your session has expired. Please sign in again.",
+    };
   }
 
   const [user] = await db
@@ -99,7 +69,10 @@ export async function getReportPdf(enrollmentId: string): Promise<ReportResult> 
     .where(eq(users.id, uid))
     .limit(1);
   if (!user?.participantId) {
-    return { status: "error", message: "We couldn't find an assessment account for you yet." };
+    return {
+      status: "error",
+      message: "We couldn't find an assessment account for you yet.",
+    };
   }
 
   let report: unknown;

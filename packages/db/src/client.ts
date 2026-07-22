@@ -20,7 +20,15 @@ type Db = NeonHttpDatabase<Schema>;
 // still fails loudly if the URL is missing.
 let instance: Db | null = null;
 
-function getDb(): Db {
+/**
+ * The real Drizzle client, constructed on first call. Exported for the rare
+ * consumer that needs the genuine instance rather than the `db` Proxy below —
+ * notably anything that type-sniffs it. Drizzle's `is()` walks the prototype
+ * chain, which the Proxy's plain-object target defeats, so e.g. the Auth.js
+ * Drizzle adapter must be handed this. Call it lazily; calling it at module
+ * scope reintroduces the build-time `DATABASE_URL` requirement.
+ */
+export function getDb(): Db {
   if (!instance) {
     instance = drizzle({ client: neon(getDatabaseUrl()), schema });
   }

@@ -1,25 +1,25 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Card, Container, Heading, Section } from "@pbh/ui";
+import { auth } from "@/auth";
 import { AssessmentsView } from "./AssessmentsView";
-import {
-  ASSESSMENT_UID_COOKIE,
-  registerAndEnrollUserById,
-} from "@pbh/booking/server";
+import { SignOutButton } from "./SignOutButton";
+import { registerAndEnrollUserById } from "@pbh/booking/server";
 
 export const metadata = {
   title: "Assessments",
 };
 
 /**
- * Post-payment landing. The payment step (or the /login form) sets the
- * `ASSESSMENT_UID_COOKIE`; here we read it and re-enroll (idempotent for active
- * enrollments) to resolve each assessment's links/report state. With no cookie
- * we bounce to /login (Clerk will own that flow later); registration itself is
- * gated to the payment step, so this read path never creates a subject.
+ * Post-payment landing, gated by the Auth.js session — minted by a magic-link
+ * sign-in. Here we read it, re-enroll (idempotent for active enrollments) to
+ * resolve each assessment's links/report state, and never register a new subject
+ * (registration is gated to the payment step). With no session we bounce to
+ * /login — the proxy already redirects anonymous visitors, this is the
+ * authoritative server-side check.
  */
 export default async function AssessmentsPage() {
-  const uid = (await cookies()).get(ASSESSMENT_UID_COOKIE)?.value;
+  const session = await auth();
+  const uid = session?.user?.id;
   if (!uid) {
     redirect("/login");
   }
@@ -30,6 +30,9 @@ export default async function AssessmentsPage() {
     return (
       <main>
         <Section className="py-16 sm:py-24">
+          <div className="mb-6 flex justify-end">
+            <SignOutButton />
+          </div>
           <AssessmentsView
             firstName={result.firstName}
             enrollments={result.enrollments}
@@ -43,6 +46,9 @@ export default async function AssessmentsPage() {
     <main>
       <Section className="py-24">
         <Container size="narrow">
+          <div className="mb-6 flex justify-end">
+            <SignOutButton />
+          </div>
           <Heading as="h1" size="lg" className="mb-2">
             Assessments
           </Heading>
