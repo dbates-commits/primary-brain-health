@@ -60,7 +60,18 @@ export const sessions = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    // Idle deadline. Auth.js slides this forward on activity, so it enforces the
+    // inactivity timeout but says nothing about total session age.
     expires: timestamp({ withTimezone: true, mode: "date" }).notNull(),
+    // When the session was first minted, which `expires` cannot tell us once it
+    // has slid forward. This is what backs the absolute cap: a session that has
+    // been continuously active still ends after ABSOLUTE_SESSION_MAX_SECONDS,
+    // so one cannot stay authenticated indefinitely (PBH security review,
+    // 2026-07-22). Auth.js has no built-in for this — see `getSessionAndUser`
+    // in apps/app/src/auth.ts.
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   // Lookups are by primary key, but the cascade on user delete — and any future
   // "sign out everywhere" — scans by user_id, which would otherwise be a seq scan.
