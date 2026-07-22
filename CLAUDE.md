@@ -8,8 +8,9 @@ This is a **pnpm + Turborepo monorepo**. Run these from the repo root:
 
 ```bash
 pnpm install                     # install all workspaces
-pnpm dev                         # all apps in parallel (marketing :3000, app :3001)
+pnpm dev                         # everything in parallel (marketing :3000, app :3001, emails :3002)
 pnpm build                       # build everything (Turborepo cached)
+pnpm email                       # React Email preview only, on :3002
 pnpm lint                        # eslint across the workspace
 pnpm typecheck                   # tsc --noEmit across the workspace
 pnpm --filter marketing dev      # run a single app/package (marketing | app | @pbh/ui …)

@@ -31,20 +31,26 @@ packages/
 
 ```bash
 pnpm install
-pnpm dev            # runs all apps in parallel (Turborepo): marketing :3000, app :3001
+pnpm dev            # everything in parallel: marketing :3000, app :3001, email preview :3002
 ```
 
 Open marketing at [http://localhost:3000](http://localhost:3000) (Tina admin at
-`/admin/index.html`) and the app at [http://localhost:3001](http://localhost:3001).
+`/admin/index.html`), the app at [http://localhost:3001](http://localhost:3001),
+and the email preview at [http://localhost:3002](http://localhost:3002).
 
 ```bash
 pnpm build                       # build everything (cached, only rebuilds what changed)
 pnpm --filter marketing build    # build just one app
-pnpm --filter app dev         # run just one app
+pnpm --filter app dev            # run just one app
+pnpm email                       # email templates only, on :3002
 pnpm lint                        # eslint across the workspace
 pnpm typecheck                   # tsc --noEmit across the workspace
 pnpm format                      # prettier --write
 ```
+
+`pnpm email` starts the React Email preview on its own — useful when you're
+iterating on a template and don't want the two Next apps running. It renders each
+template from its `PreviewProps`, so no database or API keys are needed.
 
 > **Tina builds** (`tinacms build`, run as part of `marketing` build) require
 > TinaCloud credentials (`NEXT_PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN`) or local
