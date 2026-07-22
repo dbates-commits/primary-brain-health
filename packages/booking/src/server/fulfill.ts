@@ -18,6 +18,10 @@ import { and, eq, ne } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db, payments, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry } from "@pbh/payments";
+import {
+  sendPaymentReceiptEmail,
+  sendPaymentRefundedEmail,
+} from "./send-email";
 
 export type RecordResult =
   | { status: "recorded"; userId: string; firstWrite: boolean }
@@ -100,6 +104,14 @@ export async function recordSucceededPayment(
       metadata: { paymentIntentId: intent.id, amountCents: intent.amount },
       ipHash: opts.ipHash ?? null,
     });
+    // firstWrite is the exactly-once signal across the racing client/webhook
+    // paths, so the receipt goes out here (never throws — see send-email.ts).
+    await sendPaymentReceiptEmail(userId, {
+      amountCents: intent.amount,
+      currency: intent.currency,
+      cardBrand: card?.brand ?? null,
+      cardLast4: card?.last4 ?? null,
+    });
   }
 
   return { status: "recorded", userId, firstWrite };
@@ -176,18 +188,34 @@ export async function recordRefundedPayment(
         ne(payments.status, "refunded"),
       ),
     )
-    .returning({ id: payments.id, userId: payments.userId });
+    .returning({
+      id: payments.id,
+      userId: payments.userId,
+      amountCents: payments.amountCents,
+      currency: payments.currency,
+      cardBrand: payments.cardBrand,
+      cardLast4: payments.cardLast4,
+    });
 
   if (written.length === 0) {
     // No matching row (unknown intent) or already refunded → nothing to do.
     return { status: "recorded", userId: "", firstWrite: false };
   }
 
-  const userId = written[0].userId;
+  const refunded = written[0];
+  const userId = refunded.userId;
   await writeAuditLog({
     eventType: "payment_refunded",
     userId,
     metadata: { paymentIntentId },
+  });
+
+  // First transition to refunded (the update above is the once-only gate).
+  await sendPaymentRefundedEmail(userId, {
+    amountCents: refunded.amountCents,
+    currency: refunded.currency,
+    cardBrand: refunded.cardBrand,
+    cardLast4: refunded.cardLast4,
   });
 
   return { status: "recorded", userId, firstWrite: true };
