@@ -34,6 +34,15 @@
   --color-on-primary-container: #a3d4e4;
   --color-primary-fixed: #d1eaf2;
   --color-primary-fixed-dim: #8ec7da;
+  /* Card surface sitting on `primary` in the booking/CTA section (Figma
+     1088:4452). Deliberately lighter and less saturated than
+     `primary-container`, which reads almost flat against `primary` at card
+     size. */
+  --color-primary-container-high: #224b60;
+  /* Pale green used to emphasise text on `primary` — the "HSA/FSA
+     reimbursement" phrase in the booking section. Not part of the aqua
+     secondary ramp; it is a highlight, not an accent surface. */
+  --color-on-primary-highlight: #deffc8;
 
   /* Secondary palette — Aqua accent per identity guide */
   --color-secondary: #009ea1;
@@ -107,6 +116,8 @@
   --color-on-primary: var(--color-on-primary);
   --color-on-primary-container: var(--color-on-primary-container);
   --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-primary-container-high: var(--color-primary-container-high);
+  --color-on-primary-highlight: var(--color-on-primary-highlight);
   --color-secondary: var(--color-secondary);
   --color-secondary-container: var(--color-secondary-container);
   --color-on-secondary: var(--color-on-secondary);

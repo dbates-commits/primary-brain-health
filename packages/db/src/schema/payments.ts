@@ -25,6 +25,13 @@ export const payments = pgTable(
     stripePaymentIntentId: text("stripe_payment_intent_id").notNull().unique(),
     amountCents: integer("amount_cents").notNull(),
     currency: text().notNull().default("usd"),
+    // Which assessment package was bought ('basic' | 'comprehensive'; see
+    // ASSESSMENT_PACKAGES in @pbh/booking). Taken from the PaymentIntent's
+    // metadata, which we set server-side at Session creation — the amount alone
+    // can't identify the package once prices change. Nullable: rows written
+    // before packages existed have no value, and backfilling them from amount
+    // would be a guess.
+    packageKey: text("package_key"),
     status: text().notNull(), // 'pending' | 'succeeded' | 'failed' | 'refunded'
     isHsaFsa: boolean("is_hsa_fsa").notNull().default(false),
     cardBrand: text("card_brand"),

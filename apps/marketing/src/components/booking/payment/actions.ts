@@ -23,13 +23,17 @@ function paymentError(message: string): LinusState {
 /**
  * Start payment for the paying user — delegates to the shared
  * `createCheckoutSessionCore`, passing the request's hashed IP for the
- * `payment_pending` audit entry.
+ * `payment_pending` audit entry and the package chosen on the landing card.
+ *
+ * `packageKey` is client-supplied and re-resolved server-side, so an unknown or
+ * not-yet-purchasable value falls back to the default rather than being trusted.
  */
 export async function createAssessmentCheckoutSession(
   userId: string,
+  packageKey?: string,
 ): Promise<CreateCheckoutResult> {
   const ipHash = hashIp(getClientIp(await headers()));
-  return createCheckoutSessionCore(userId, { ipHash });
+  return createCheckoutSessionCore(userId, { ipHash, packageKey });
 }
 
 /**

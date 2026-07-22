@@ -3,12 +3,17 @@
 import { useCallback, useState } from "react";
 import { StepHeader } from "@pbh/ui";
 import {
+  SignupForm,
   DetailsForm,
   ConsentForm,
   PaymentStep,
   detailsHeader,
+  SIGNUP_HEADER,
   CONSENT_HEADER,
   PAYMENT_HEADER,
+  DEFAULT_PACKAGE_KEY,
+  type AssessmentPackage,
+  type PackageKey,
   type SignupResult,
 } from "@pbh/booking";
 import { Modal } from "./Modal";
@@ -21,14 +26,14 @@ import {
 } from "./payment/actions";
 
 /**
- * Modal steps that run after the inline signup. `signup` itself is the inline
- * form on the page (not a modal step) — submitting it opens the modal at
- * `details`.
+ * The whole booking flow now runs in the modal, signup included — the landing
+ * section is two package cards, and a card's CTA opens the modal at `signup`.
  */
-const MODAL_STEPS = ["details", "consent", "payment", "done"] as const;
+const MODAL_STEPS = ["signup", "details", "consent", "payment", "done"] as const;
 type ModalStep = (typeof MODAL_STEPS)[number];
 
 const STEP_LABEL: Record<ModalStep, string> = {
+  signup: "Create your account",
   details: "Complete your details",
   consent: "Review terms and consent",
   payment: "Payment",
@@ -43,11 +48,18 @@ type FlowContext = {
   patientIdentification: string;
 };
 
+const EMPTY_CONTEXT: FlowContext = {
+  userId: "",
+  firstName: "",
+  email: "",
+  patientIdentification: "",
+};
+
 /**
- * Client orchestrator for the booking flow. Renders the inline `BookingSection`
- * (shared `SignupForm`); on submit it opens the modal and steps through the
- * shared `DetailsForm` → `ConsentForm` → `PaymentStep` (Stripe Embedded Checkout)
- * → done. Every step calls a real `@pbh/booking/server`-backed action injected
+ * Client orchestrator for the booking flow. Renders the `BookingSection` cards;
+ * choosing a package opens the modal and steps through the shared `SignupForm` →
+ * `DetailsForm` → `ConsentForm` → `PaymentStep` (Stripe Embedded Checkout) →
+ * done. Every step calls a real `@pbh/booking/server`-backed action injected
  * here (pbh-ggr.5). State is in-memory for the session.
  */
 export function BookingStepFlow({
@@ -59,29 +71,49 @@ export function BookingStepFlow({
 }) {
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const [context, setContext] = useState<FlowContext>({
-    userId: "",
-    firstName: "",
-    email: "",
-    patientIdentification: "",
-  });
-
-  const start = useCallback((result: SignupResult) => {
-    setContext({
-      userId: result.userId,
-      firstName: result.firstName,
-      email: result.email,
-      patientIdentification: result.patientIdentification,
-    });
-    setStepIndex(0);
-    setOpen(true);
-  }, []);
+  const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
+  const [context, setContext] = useState<FlowContext>(EMPTY_CONTEXT);
 
   const advance = useCallback(() => {
     setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
   }, []);
 
+  /**
+   * Open the modal at signup for the chosen package. Context is reset so a
+   * second booking in the same session can't inherit the first one's account.
+   */
+  const selectPackage = useCallback((pkg: AssessmentPackage) => {
+    setPackageKey(pkg.key);
+    setContext(EMPTY_CONTEXT);
+    setStepIndex(0);
+    setOpen(true);
+  }, []);
+
+  const completeSignup = useCallback(
+    (result: SignupResult) => {
+      setContext({
+        userId: result.userId,
+        firstName: result.firstName,
+        email: result.email,
+        patientIdentification: result.patientIdentification,
+      });
+      advance();
+    },
+    [advance],
+  );
+
   const close = useCallback(() => setOpen(false), []);
+
+  /**
+   * Bind the chosen package to the checkout action. Memoised deliberately:
+   * `PaymentStep` mints its Session from a `useEffect` keyed on this function,
+   * so a new identity each render would create a fresh Stripe Session every
+   * time the component re-rendered.
+   */
+  const createSession = useCallback(
+    (userId: string) => createAssessmentCheckoutSession(userId, packageKey),
+    [packageKey],
+  );
 
   const step = MODAL_STEPS[stepIndex];
 
@@ -89,7 +121,9 @@ export function BookingStepFlow({
   // scroll area (so only the body scrolls), using the step's own exported copy.
   // `done` renders its own header (it never scrolls).
   const stepHeader =
-    step === "details" ? (
+    step === "signup" ? (
+      <StepHeader {...SIGNUP_HEADER} />
+    ) : step === "details" ? (
       <StepHeader
         {...detailsHeader(
           context.firstName,
@@ -107,8 +141,7 @@ export function BookingStepFlow({
       <BookingSection
         headline={headline}
         subheadline={subheadline}
-        signupAction={signupAction}
-        onStart={start}
+        onSelectPackage={selectPackage}
       />
       <Modal
         open={open}
@@ -116,6 +149,13 @@ export function BookingStepFlow({
         label={STEP_LABEL[step]}
         header={stepHeader}
       >
+        {step === "signup" && (
+          <SignupForm
+            action={signupAction}
+            onComplete={completeSignup}
+            showHeader={false}
+          />
+        )}
         {step === "details" && (
           <DetailsForm
             action={detailsAction}
@@ -137,7 +177,7 @@ export function BookingStepFlow({
         {step === "payment" && (
           <PaymentStep
             userId={context.userId}
-            createSession={createAssessmentCheckoutSession}
+            createSession={createSession}
             finalize={finalizeCheckoutSession}
             onComplete={advance}
             showHeader={false}
