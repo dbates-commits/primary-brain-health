@@ -26,6 +26,18 @@ export const payments = pgTable(
     amountCents: integer("amount_cents").notNull(),
     currency: text().notNull().default("usd"),
     status: text().notNull(), // 'pending' | 'succeeded' | 'failed' | 'refunded'
+    /**
+     * Which product this purchase was: 'wellness' | 'clinical'. An immutable
+     * record of what was bought, NOT the buyer's current entitlement — a user
+     * who upgrades has one row of each. Current entitlement is derived as the
+     * highest track across their succeeded rows (see `getEntitledTrack`), so a
+     * refund automatically drops them back without a second column to update.
+     *
+     * The default exists so the column could be added not-null to a table that
+     * already had rows: every payment taken before the clinical track existed
+     * was a wellness purchase. The write path always sets it explicitly.
+     */
+    track: text().notNull().default("wellness"),
     isHsaFsa: boolean("is_hsa_fsa").notNull().default(false),
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),

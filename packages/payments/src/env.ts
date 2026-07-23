@@ -1,3 +1,5 @@
+import type { Track } from "@pbh/copy";
+
 /**
  * Validated Stripe server-side environment access, mirroring db/env.ts and
  * linus/env.ts: read `process.env`, throw a helpful error if the secret key is
@@ -17,20 +19,36 @@ export function getStripeSecretKey(): string {
 }
 
 /**
- * Catalog Price ID for the brain-health assessment, charged at checkout. The
- * amount and currency live on the Stripe Price object (the single source of
- * truth), so this ID — not a hardcoded cents value — is what varies between
- * environments: the sandbox test price locally/on Preview, the live
- * `clinical_assessment` price in Production. Set it per Vercel environment.
+ * Which env var holds each track's Catalog Price ID.
+ *
+ * The wellness track deliberately keeps the original
+ * `STRIPE_ASSESSMENT_PRICE_ID` name rather than being renamed to something
+ * symmetrical: that variable is already set in every environment (local,
+ * Preview, Production) and in both apps, and renaming it would break payments
+ * everywhere the moment this deploys. Only the clinical price is new.
  */
-export function getStripeAssessmentPriceId(): string {
-  const priceId = process.env.STRIPE_ASSESSMENT_PRICE_ID;
+export const TRACK_PRICE_ENV_VARS = {
+  wellness: "STRIPE_ASSESSMENT_PRICE_ID",
+  clinical: "STRIPE_CLINICAL_PRICE_ID",
+} as const satisfies Record<Track, string>;
+
+/**
+ * Catalog Price ID for a track's product, charged at checkout. The amount and
+ * currency live on the Stripe Price object (the single source of truth), so
+ * this ID — not a hardcoded cents value — is what varies between environments:
+ * the sandbox test price locally/on Preview, the live price in Production. Set
+ * both per Vercel environment.
+ */
+export function getStripePriceId(track: Track): string {
+  const envVar = TRACK_PRICE_ENV_VARS[track];
+  const priceId = process.env[envVar];
   if (!priceId) {
     throw new Error(
-      "Stripe checkout is not configured. Missing STRIPE_ASSESSMENT_PRICE_ID. " +
-        "Locally, copy .env.example to .env.local and paste a test-mode Price " +
-        "ID from the same Stripe account as your secret key. On Vercel, set it " +
-        "per environment (sandbox price on Preview, live price in Production).",
+      `Stripe checkout is not configured for the ${track} track. Missing ` +
+        `${envVar}. Locally, copy .env.example to .env.local and paste a ` +
+        "test-mode Price ID from the same Stripe account as your secret key. " +
+        "On Vercel, set it per environment (sandbox price on Preview, live " +
+        "price in Production).",
     );
   }
   return priceId;

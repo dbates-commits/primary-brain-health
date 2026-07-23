@@ -1,14 +1,20 @@
 /**
- * Assessment price, resolved from the Stripe catalog. The Price object is the
- * single source of truth for the amount and currency; we only configure *which*
- * price via `STRIPE_ASSESSMENT_PRICE_ID` (see env.ts). Server-only — it calls
+ * Per-track product pricing, resolved from the Stripe catalog. The Price object
+ * is the single source of truth for the amount and currency; we only configure
+ * *which* price each track uses, via env (see env.ts). Server-only — it calls
  * the Stripe API. The checkout UI never imports this: Embedded Checkout renders
  * the amount straight from the Session/Price.
+ *
+ * Nothing here branches on a dollar figure. Code asks for a `Track` and Stripe
+ * answers with the amount, so a repricing is an env/dashboard change rather
+ * than a code change.
  */
-import { getStripeAssessmentPriceId } from "./env";
+import type { Track } from "@pbh/copy";
+import { getStripePriceId } from "./env";
 import { getStripe } from "./server";
 
-export interface AssessmentCatalogEntry {
+export interface CatalogEntry {
+  track: Track;
   priceId: string;
   amountCents: number;
   currency: string;
@@ -16,28 +22,32 @@ export interface AssessmentCatalogEntry {
   productName: string;
 }
 
-let cached: AssessmentCatalogEntry | undefined;
+/** @deprecated Use `CatalogEntry`. Kept so existing imports keep compiling. */
+export type AssessmentCatalogEntry = CatalogEntry;
+
+const cache = new Map<Track, CatalogEntry>();
 
 /**
- * Fetch the configured assessment Price (and its Product) from Stripe, cached
- * per warm instance so the checkout and fulfillment paths don't hit the API on
+ * Fetch a track's configured Price (and its Product) from Stripe, cached per
+ * warm instance so the checkout and fulfillment paths don't hit the API on
  * every request/event. Expands the Product so callers can surface its name.
  * Throws if the price is inactive or isn't a fixed one-off amount.
  */
-export async function getAssessmentCatalogEntry(): Promise<AssessmentCatalogEntry> {
+export async function getCatalogEntry(track: Track): Promise<CatalogEntry> {
+  const cached = cache.get(track);
   if (cached) {
     return cached;
   }
-  const priceId = getStripeAssessmentPriceId();
+  const priceId = getStripePriceId(track);
   const price = await getStripe().prices.retrieve(priceId, {
     expand: ["product"],
   });
   if (!price.active) {
-    throw new Error(`Stripe price ${priceId} is not active.`);
+    throw new Error(`Stripe price ${priceId} (${track}) is not active.`);
   }
   if (price.unit_amount == null) {
     throw new Error(
-      `Stripe price ${priceId} has no fixed unit_amount (unsupported pricing model).`,
+      `Stripe price ${priceId} (${track}) has no fixed unit_amount (unsupported pricing model).`,
     );
   }
   // `product` is expanded above; it's a string ID only if not expanded, and a
@@ -47,11 +57,21 @@ export async function getAssessmentCatalogEntry(): Promise<AssessmentCatalogEntr
     typeof product !== "string" && !product.deleted && product.name
       ? product.name
       : "Brain health assessment";
-  cached = {
+  const entry: CatalogEntry = {
+    track,
     priceId,
     amountCents: price.unit_amount,
     currency: price.currency,
     productName,
   };
-  return cached;
+  cache.set(track, entry);
+  return entry;
+}
+
+/**
+ * @deprecated Call `getCatalogEntry(track)` instead. This resolves the wellness
+ * price, which is what the single-product funnel always charged.
+ */
+export async function getAssessmentCatalogEntry(): Promise<CatalogEntry> {
+  return getCatalogEntry("wellness");
 }

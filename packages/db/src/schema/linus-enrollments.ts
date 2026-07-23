@@ -34,6 +34,17 @@ export const linusEnrollments = pgTable(
     redirect: text().notNull(),
     /** True once a report has been generated for this enrollment. */
     hasReport: boolean("has_report").notNull().default(false),
+    /**
+     * The track this assessment was *produced* under — not the user's current
+     * one. An upgraded user's older assessments were carried out under the
+     * wellness track, and relabelling them with clinical vocabulary after the
+     * upgrade would describe work that never happened. Assessment-level copy
+     * reads this column; page chrome reads the current entitlement.
+     *
+     * Defaulted for the same reason as `payments.track`: every enrollment that
+     * predates the clinical track was a wellness one.
+     */
+    track: text().notNull().default("wellness"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
