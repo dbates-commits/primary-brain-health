@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { Button, Checkbox, FieldError, StepHeader } from "@pbh/ui";
+import { copyFor, type Track } from "@pbh/copy";
 import { StickyActions } from "./StickyActions";
 import {
   CONSENT_REQUIRED_ERROR,
@@ -51,19 +52,23 @@ const TERMS_UPDATED = "Last updated: October 24, 2023";
  * itself (e.g. the marketing modal, which pins it above the scroll area) uses the
  * same title/subtitle as the inline funnel step.
  */
-export const CONSENT_HEADER = {
-  title: "Almost there!",
-  subtitle:
-    "Please, read carefully the following form to know what the terms of the assessments and consultation.",
-} as const;
+export function consentHeader(track: Track) {
+  return {
+    title: "Almost there!",
+    subtitle: copyFor({ track }).phrase("consent.subtitle"),
+  };
+}
 
 export function ConsentForm({
   action,
+  track,
   userId,
   onComplete,
   showHeader = true,
 }: {
   action: ConsentAction;
+  /** Which product is being consented to — decides the wording. */
+  track: Track;
   userId: string;
   onComplete: () => void;
   showHeader?: boolean;
@@ -114,7 +119,7 @@ export function ConsentForm({
     >
       <input type="hidden" name="userId" value={userId} />
 
-      {showHeader ? <StepHeader {...CONSENT_HEADER} /> : null}
+      {showHeader ? <StepHeader {...consentHeader(track)} /> : null}
 
       {/* The terms live inside the fieldset so the fieldset spans the scrollable
           content. A `sticky` child can only travel within its containing block —

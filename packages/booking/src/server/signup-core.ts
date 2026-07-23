@@ -45,7 +45,10 @@ export async function createAccountCore(
   // Asked here rather than on the details step because it decides what every
   // later question means — see SignupResult.patientIdentification.
   if (!PATIENT_IDENTIFICATION_VALUES.has(patientIdentification)) {
-    fieldErrors.patientIdentification = "Select who this consultation is for.";
+    // Track-neutral on purpose: this core validates a form that doesn't post a
+    // track, and "consultation" (clinical) or "assessment" (wellness) here would
+    // be right on one path and wrong on the other.
+    fieldErrors.patientIdentification = "Select who this is for.";
   }
 
   if (Object.keys(fieldErrors).length > 0) {

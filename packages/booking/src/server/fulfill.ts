@@ -16,8 +16,9 @@ import "server-only";
 
 import { and, eq, ne } from "drizzle-orm";
 import type Stripe from "stripe";
+import { parseTrack, type Track } from "@pbh/copy";
 import { db, payments, writeAuditLog } from "@pbh/db";
-import { getAssessmentCatalogEntry } from "@pbh/payments";
+import { getCatalogEntry } from "@pbh/payments";
 import {
   sendPaymentReceiptEmail,
   sendPaymentRefundedEmail,
@@ -26,6 +27,28 @@ import {
 export type RecordResult =
   | { status: "recorded"; userId: string; firstWrite: boolean }
   | { status: "rejected"; reason: string };
+
+/**
+ * Which product a PaymentIntent was for, from the metadata we pinned on it at
+ * checkout (see `createCheckoutSessionCore`).
+ *
+ * An intent with no `track` predates the two-product split — every payment
+ * taken before it was the wellness assessment — so that is what an absent value
+ * means, not an unknown. This matters during the deploy itself: sessions created
+ * by the old code can still be in flight when the new webhook picks them up.
+ *
+ * A *present but unrecognised* value is a different thing entirely (tampering,
+ * or a track added to one app and not the other) and is rejected rather than
+ * guessed at. Either way the caller re-checks the amount against the resolved
+ * track's price, so a mislabelled intent cannot fulfill the wrong product.
+ */
+function trackFromIntent(intent: Stripe.PaymentIntent): Track | "unknown" {
+  const raw = intent.metadata?.track?.trim();
+  if (!raw) {
+    return "wellness";
+  }
+  return parseTrack(raw) ?? "unknown";
+}
 
 /** Non-sensitive card fields off the expanded latest charge (never the PAN/CVV). */
 function cardFromIntent(intent: Stripe.PaymentIntent) {
@@ -59,7 +82,14 @@ export async function recordSucceededPayment(
   if (intent.status !== "succeeded") {
     return { status: "rejected", reason: `intent status is ${intent.status}` };
   }
-  const catalog = await getAssessmentCatalogEntry();
+  const track = trackFromIntent(intent);
+  if (track === "unknown") {
+    return { status: "rejected", reason: "intent has an unrecognised track" };
+  }
+  // Re-checking the amount against *this track's* price is what keeps the
+  // metadata honest: a payment claiming to be clinical only fulfills if it was
+  // actually charged the clinical amount.
+  const catalog = await getCatalogEntry(track);
   if (
     intent.amount !== catalog.amountCents ||
     intent.currency !== catalog.currency
@@ -77,6 +107,7 @@ export async function recordSucceededPayment(
       amountCents: intent.amount,
       currency: intent.currency,
       status: "succeeded",
+      track,
       cardBrand: card?.brand ?? null,
       cardLast4: card?.last4 ?? null,
       succeededAt: new Date(),
@@ -87,6 +118,7 @@ export async function recordSucceededPayment(
         status: "succeeded",
         amountCents: intent.amount,
         currency: intent.currency,
+        track,
         cardBrand: card?.brand ?? null,
         cardLast4: card?.last4 ?? null,
         succeededAt: new Date(),
@@ -101,7 +133,11 @@ export async function recordSucceededPayment(
     await writeAuditLog({
       eventType: "payment_succeeded",
       userId,
-      metadata: { paymentIntentId: intent.id, amountCents: intent.amount },
+      metadata: {
+        paymentIntentId: intent.id,
+        amountCents: intent.amount,
+        track,
+      },
       ipHash: opts.ipHash ?? null,
     });
     // firstWrite is the exactly-once signal across the racing client/webhook
@@ -131,6 +167,11 @@ export async function recordFailedPayment(
     return { status: "rejected", reason: "intent has no userId metadata" };
   }
 
+  // A failed row never counts toward entitlement, so an unrecognised track is
+  // not worth rejecting the record over — leave the column at its default
+  // rather than lose the failure itself.
+  const failedTrack = trackFromIntent(intent);
+
   const written = await db
     .insert(payments)
     .values({
@@ -139,6 +180,7 @@ export async function recordFailedPayment(
       amountCents: intent.amount,
       currency: intent.currency,
       status: "failed",
+      track: failedTrack === "unknown" ? undefined : failedTrack,
     })
     // No `pending` row is ever written (session creation only audit-logs), so
     // any existing row here is already terminal (succeeded/failed/refunded).

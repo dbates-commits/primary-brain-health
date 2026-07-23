@@ -1,8 +1,9 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
+import type { Track } from "@pbh/copy";
 import { db, users, writeAuditLog } from "@pbh/db";
-import { getAssessmentCatalogEntry, getStripe } from "@pbh/payments";
+import { getCatalogEntry, getStripe } from "@pbh/payments";
 import type { CreateCheckoutResult } from "../types";
 import { recordSucceededPayment } from "./fulfill";
 
@@ -34,7 +35,7 @@ function checkoutError(message: string): CreateCheckoutResult {
  */
 export async function createCheckoutSessionCore(
   userId: string,
-  opts: { ipHash: string },
+  opts: { ipHash: string; track: Track },
 ): Promise<CreateCheckoutResult> {
   const id = userId.trim();
   if (!id) {
@@ -48,14 +49,21 @@ export async function createCheckoutSessionCore(
 
   // Pinned onto both the Session and the PaymentIntent it creates, so that
   // `verifyAndRecordCheckout` and the webhook backstop can each confirm
-  // server-side that the payment belongs to this user.
-  const metadata = { userId: id, product: "brain-health-assessment" };
+  // server-side that the payment belongs to this user — and which product they
+  // bought. `track` is set here, server-side, and comes back on the signed
+  // webhook event; fulfillment cross-checks it against the amount, so a
+  // tampered value can't fulfill the cheaper product at the dearer price.
+  const metadata = {
+    userId: id,
+    product: "brain-health-assessment",
+    track: opts.track,
+  };
 
   try {
     const stripe = getStripe();
     // Catalog entry is the source of truth for amount/currency/name; we only
     // pass its price ID as the line item and let Stripe render the rest.
-    const catalog = await getAssessmentCatalogEntry();
+    const catalog = await getCatalogEntry(opts.track);
     // One-time guest checkout — no Stripe Customer. We don't save cards for
     // off-session reuse, so a durable Customer object buys nothing here; the
     // receipt goes to `receipt_email` and the user is tracked via metadata.
@@ -80,6 +88,7 @@ export async function createCheckoutSessionCore(
         checkoutSessionId: session.id,
         amountCents: catalog.amountCents,
         productName: catalog.productName,
+        track: opts.track,
       },
       ipHash: opts.ipHash,
     });

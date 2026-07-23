@@ -7,6 +7,7 @@ import {
   EmbeddedCheckoutProvider,
 } from "@stripe/react-stripe-js";
 import { StepHeader } from "@pbh/ui";
+import type { Track } from "@pbh/copy";
 import type { CreateCheckoutAction, PaymentFinalizeAction } from "./types";
 
 // Publishable key is inlined at build; safe to expose to the client. Missing key
@@ -37,12 +38,15 @@ export const PAYMENT_HEADER = { title: "Payment" } as const;
 
 export function PaymentStep({
   userId,
+  track,
   createSession,
   finalize,
   onComplete,
   showHeader = true,
 }: {
   userId: string;
+  /** Which product is being bought — decides the Stripe price for this session. */
+  track: Track;
   createSession: CreateCheckoutAction;
   finalize: PaymentFinalizeAction;
   onComplete: () => void;
@@ -61,7 +65,7 @@ export function PaymentStep({
     }
     started.current = true;
 
-    createSession(userId)
+    createSession(userId, track)
       .then((result) => {
         if (result.status === "ready") {
           setClientSecret(result.clientSecret);
@@ -77,7 +81,7 @@ export function PaymentStep({
         console.error("createSession failed:", err);
         setInitError("Couldn't start payment. Please try again.");
       });
-  }, [userId, createSession]);
+  }, [userId, track, createSession]);
 
   // Fired once Embedded Checkout finishes the payment (the customer stays on the
   // page). Verify + persist + enroll server-side (re-fetches the session from

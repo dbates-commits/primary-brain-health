@@ -10,6 +10,7 @@ import {
   type LinusState,
 } from "@pbh/booking/server";
 import type { CreateCheckoutResult } from "@pbh/booking";
+import { isTrack, type Track } from "@pbh/copy";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
@@ -24,12 +25,22 @@ function paymentError(message: string): LinusState {
  * Start payment for the paying user — delegates to the shared
  * `createCheckoutSessionCore`, passing the request's hashed IP for the
  * `payment_pending` audit entry.
+ *
+ * `track` arrives from the client, so it's re-validated here at the server-action
+ * boundary. It isn't a privilege: the track picks the Stripe price *and* the
+ * product, and fulfillment records the track that was actually charged — so
+ * sending a different one buys that product at that product's price, which is
+ * just what choosing it on the page does.
  */
 export async function createAssessmentCheckoutSession(
   userId: string,
+  track: Track,
 ): Promise<CreateCheckoutResult> {
+  if (!isTrack(track)) {
+    return { status: "error", message: PAYMENT_UNCONFIRMED };
+  }
   const ipHash = hashIp(getClientIp(await headers()));
-  return createCheckoutSessionCore(userId, { ipHash });
+  return createCheckoutSessionCore(userId, { ipHash, track });
 }
 
 /**

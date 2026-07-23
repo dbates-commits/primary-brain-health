@@ -14,6 +14,7 @@
 
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
+import { copyFor, type Track } from "@pbh/copy";
 import { db, users, writeAuditLog } from "@pbh/db";
 import {
   AssessmentReadyEmail,
@@ -180,19 +181,27 @@ export async function sendAssessmentReadyEmail(
   );
 }
 
-/** A completed assessment's report became available → link back to sign in. */
+/**
+ * A completed assessment's report became available → link back to sign in.
+ *
+ * Takes the assessment's own `track` (not the reader's current entitlement):
+ * this email describes a specific piece of finished work, and who reviewed it
+ * doesn't change because the reader upgraded afterwards.
+ */
 export async function sendReportReadyEmail(
   userId: string,
   assessmentName: string,
+  track: Track,
 ): Promise<SendEmailResult> {
   return sendTemplate(
     "report-ready",
     userId,
-    "Your assessment report is ready",
+    copyFor({ track }).phrase("email.reportReady.subject"),
     (recipient) =>
       ReportReadyEmail({
         firstName: recipient.firstName,
         assessmentName,
+        track,
         assessmentsUrl: `${appBaseUrl()}/assessments`,
       }),
   );

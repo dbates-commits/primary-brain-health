@@ -355,7 +355,20 @@ export function BlockRenderer({
           // non-main deploy. A dedicated block can come later, on main.
           case "PageBlocksIntakeForm":
             content = (
+              // Pinned to the wellness track: the $149 assessment is the only
+              // product this block has ever sold. The editor-facing `track`
+              // field on the Tina schema lands with the content layer (PR 5 of
+              // docs/sow2/technical/track-copy-mapping-plan.md); until then this
+              // is the one place the choice is made, and it is made explicitly
+              // rather than by defaulting inside the component.
               <BookingStepFlow
+                track="wellness"
+                // Carried over verbatim from the panel's previous hardcoded
+                // value, and pinned here beside the track so the two can't drift
+                // apart. The real fix is reading the amount from the Stripe
+                // catalog, which needs a server boundary this client block
+                // doesn't have.
+                priceLabel="$149"
                 headline={block.headline}
                 subheadline={block.subheadline}
               />

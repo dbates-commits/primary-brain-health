@@ -7,6 +7,8 @@
  * app's action agree on one contract.
  */
 
+import type { Track } from "@pbh/copy";
+
 export type SignupValues = {
   firstName: string;
   lastName: string;
@@ -113,6 +115,7 @@ export type CreateCheckoutResult =
 
 export type CreateCheckoutAction = (
   userId: string,
+  track: Track,
 ) => Promise<CreateCheckoutResult>;
 
 /** Minimal shape the payment step reads from an app's finalize action. */

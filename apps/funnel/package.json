@@ -13,6 +13,7 @@
     "@auth/drizzle-adapter": "^1.11.2",
     "@neondatabase/serverless": "^1.0.1",
     "@pbh/booking": "workspace:*",
+    "@pbh/copy": "workspace:*",
     "@pbh/db": "workspace:*",
     "@pbh/emails": "workspace:*",
     "@pbh/linus": "workspace:*",

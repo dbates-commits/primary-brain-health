@@ -7,6 +7,7 @@ import "server-only";
  */
 
 import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { parseTrack, type Track } from "@pbh/copy";
 import { db, linusEnrollments, users, type User } from "@pbh/db";
 import {
   buildRegisterInput,
@@ -20,6 +21,7 @@ import {
   registerSubject,
 } from "@pbh/linus";
 import { isPgError, PgErrorCode } from "./db-errors";
+import { getEntitledTrack } from "./entitlement";
 import {
   sendAssessmentReadyEmail,
   sendReportReadyEmail,
@@ -43,6 +45,14 @@ export interface EnrollmentView {
   name: string;
   campaignId: string;
   enrollmentId: string;
+  /**
+   * The track this assessment was produced under — NOT the user's current
+   * entitlement. An upgraded user's earlier assessments were carried out under
+   * wellness, and describing them afterwards in clinical language would
+   * misdescribe work that already happened. Card-level copy reads this; page
+   * chrome reads `getEntitledTrack`.
+   */
+  track: Track;
   /** Latest assessment link; only meaningful when `status === "available"`. */
   redirect: string;
   status: EnrollmentStatus;
@@ -94,16 +104,24 @@ async function loadEnrollmentRows(
   return new Map(rows.map((row) => [row.campaignId, row]));
 }
 
-/** Upsert the latest enrollmentId + redirect for a (user, campaign). */
+/**
+ * Upsert the latest enrollmentId + redirect for a (user, campaign).
+ *
+ * `track` is written on insert only — deliberately absent from the conflict
+ * `set`. It records what this assessment was produced under, so the first write
+ * wins for the life of the row; letting a later upsert move it would rewrite
+ * history the moment a user upgrades.
+ */
 async function upsertEnrollmentRow(
   userId: string,
   campaignId: string,
   enrollmentId: string,
   redirect: string,
+  track: Track,
 ): Promise<void> {
   await db
     .insert(linusEnrollments)
-    .values({ userId, campaignId, enrollmentId, redirect })
+    .values({ userId, campaignId, enrollmentId, redirect, track })
     .onConflictDoUpdate({
       target: [linusEnrollments.userId, linusEnrollments.campaignId],
       set: { enrollmentId, redirect },
@@ -409,6 +427,12 @@ async function resolveEnrollments(
   const rows = await loadEnrollmentRows(userId);
   const firstResolution = rows.size === 0;
 
+  // The track any *new* enrollment is produced under. Enrollment is gated on a
+  // succeeded payment, so a null entitlement here shouldn't happen — but if it
+  // ever does, wellness is the conservative answer: it can only ever understate
+  // what someone bought, never dress a wellness purchase in clinical language.
+  const newEnrollmentTrack = (await getEntitledTrack(userId)) ?? "wellness";
+
   // The active-enrollment set is only needed (and only fetched) when a stored
   // enrollment has no report yet — fetched lazily, at most once per request.
   let activeIds: Set<string> | null = null;
@@ -422,6 +446,7 @@ async function resolveEnrollments(
 
   const enrollments: EnrollmentView[] = [];
   for (const campaign of campaigns) {
+    const row = rows.get(campaign.campaignId);
     const base = {
       key: campaign.key,
       name: campaign.name,
@@ -429,8 +454,10 @@ async function resolveEnrollments(
       description: campaign.description,
       duration: campaign.duration,
       infoUrl: campaign.infoUrl,
+      // A stored row carries the track it was produced under; a campaign being
+      // enrolled for the first time takes the user's current one.
+      track: (row ? parseTrack(row.track) : null) ?? newEnrollmentTrack,
     };
-    const row = rows.get(campaign.campaignId);
     // Defaults to false — only campaigns explicitly flagged `true` get a report.
     const producesReport = campaign.producesReport ?? false;
 
@@ -455,7 +482,9 @@ async function resolveEnrollments(
           // sends exactly once. Today the transition is only ever detected
           // during an /assessments load (the user is already on the page); a
           // background poller should own this send when one exists.
-          await sendReportReadyEmail(userId, campaign.name);
+          // The email describes this assessment, so it takes the assessment's
+          // own track — not the reader's current entitlement.
+          await sendReportReadyEmail(userId, campaign.name, base.track);
           enrollments.push({
             ...base,
             enrollmentId: row.enrollmentId,
@@ -502,6 +531,7 @@ async function resolveEnrollments(
       campaign.campaignId,
       enrollment.enrollmentId,
       enrollment.redirect,
+      newEnrollmentTrack,
     );
     enrollments.push({
       ...base,

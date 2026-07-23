@@ -7,10 +7,11 @@ import {
   ConsentForm,
   PaymentStep,
   detailsHeader,
-  CONSENT_HEADER,
+  consentHeader,
   PAYMENT_HEADER,
   type SignupResult,
 } from "@pbh/booking";
+import type { Track } from "@pbh/copy";
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
 import { DoneStep } from "./DoneStep";
@@ -51,9 +52,15 @@ type FlowContext = {
  * here (pbh-ggr.5). State is in-memory for the session.
  */
 export function BookingStepFlow({
+  track,
+  priceLabel,
   headline,
   subheadline,
 }: {
+  /** Which product this booking flow sells — decides copy and the Stripe price. */
+  track: Track;
+  /** Display price for the "Includes" panel — see IncludesPanel. */
+  priceLabel: string;
   headline?: string;
   subheadline?: string;
 }) {
@@ -97,7 +104,7 @@ export function BookingStepFlow({
         )}
       />
     ) : step === "consent" ? (
-      <StepHeader {...CONSENT_HEADER} />
+      <StepHeader {...consentHeader(track)} />
     ) : step === "payment" ? (
       <StepHeader {...PAYMENT_HEADER} />
     ) : undefined;
@@ -105,6 +112,8 @@ export function BookingStepFlow({
   return (
     <>
       <BookingSection
+        track={track}
+        priceLabel={priceLabel}
         headline={headline}
         subheadline={subheadline}
         signupAction={signupAction}
@@ -129,6 +138,7 @@ export function BookingStepFlow({
         {step === "consent" && (
           <ConsentForm
             action={consentAction}
+            track={track}
             userId={context.userId}
             onComplete={advance}
             showHeader={false}
@@ -137,6 +147,7 @@ export function BookingStepFlow({
         {step === "payment" && (
           <PaymentStep
             userId={context.userId}
+            track={track}
             createSession={createAssessmentCheckoutSession}
             finalize={finalizeCheckoutSession}
             onComplete={advance}

@@ -1,4 +1,5 @@
 import { Card, Heading } from "@pbh/ui";
+import { copyFor, type Track } from "@pbh/copy";
 import { AssessmentCard } from "./AssessmentCard";
 import type { EnrollmentView } from "@pbh/booking/server";
 
@@ -8,14 +9,25 @@ import type { EnrollmentView } from "@pbh/booking/server";
  * a completion footer. Presentational — no hooks — so it renders from both the
  * server page and the client login form. Enrollments arrive already ordered and
  * carry their display copy (from `lib/linus/campaigns.ts`).
+ *
+ * Two tracks are in play here and they are not interchangeable. This page's own
+ * chrome speaks to who the reader *is now* (`track`, their current
+ * entitlement), while each card describes a specific assessment and carries its
+ * own `enrollment.track` — the one it was produced under. For an upgraded user
+ * those differ, and rendering the older cards in the newer vocabulary would
+ * describe work that never happened.
  */
 export function AssessmentsView({
   firstName,
+  track,
   enrollments,
 }: {
   firstName?: string;
+  /** The reader's current entitlement — page chrome only. */
+  track: Track;
   enrollments: EnrollmentView[];
 }) {
+  const copy = copyFor({ track });
   const [first, ...rest] = enrollments;
   const total = enrollments.length;
 
@@ -26,7 +38,7 @@ export function AssessmentsView({
           Welcome Back{firstName ? `, ${firstName}` : ""}!
         </Heading>
         <p className="text-xl font-normal text-on-surface-variant">
-          Complete your preferred assessments and then view your report
+          {copy.phrase("assessments.intro")}
         </p>
       </header>
 
