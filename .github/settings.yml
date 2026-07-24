@@ -1,0 +1,40 @@
+# Branch protection as code — declares the PR gate for main and staging.
+#
+# ACTIVATION: this file is applied by the "Settings" GitHub App
+# (https://github.com/apps/settings). Install it on dbates-commits/primary-brain-health
+# and it reconciles the rules below on every push to the default branch.
+# If you don't install the app, apply the same protection manually in
+# Settings → Branches, or with the `gh api` calls noted in the PR description.
+#
+# The required status check name is the workflow JOB, shown in the checks list
+# as "E2E (smoke) / smoke". If GitHub reports the context as unmatched, use the
+# exact string from a completed run's check.
+
+branches:
+  - name: main
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        require_code_owner_reviews: true
+        dismiss_stale_reviews: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - "smoke"
+      enforce_admins: false
+      required_linear_history: false
+      restrictions: null
+
+  - name: staging
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        require_code_owner_reviews: true
+        dismiss_stale_reviews: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - "smoke"
+      enforce_admins: false
+      required_linear_history: false
+      restrictions: null
