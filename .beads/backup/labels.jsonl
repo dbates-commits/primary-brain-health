@@ -30,9 +30,6 @@
 {"issue_id":"pbh-bws.20","label":"agentic"}
 {"issue_id":"pbh-bws.20","label":"phase-1"}
 {"issue_id":"pbh-bws.20","label":"track:build-funnel"}
-{"issue_id":"pbh-bws.21","label":"agentic"}
-{"issue_id":"pbh-bws.21","label":"phase-1"}
-{"issue_id":"pbh-bws.21","label":"track:build-funnel"}
 {"issue_id":"pbh-bws.22","label":"agentic"}
 {"issue_id":"pbh-bws.22","label":"phase-1"}
 {"issue_id":"pbh-bws.22","label":"seam"}
@@ -60,9 +57,6 @@
 {"issue_id":"pbh-bws.29","label":"agentic"}
 {"issue_id":"pbh-bws.29","label":"phase-1"}
 {"issue_id":"pbh-bws.29","label":"track:qa"}
-{"issue_id":"pbh-bws.3","label":"ops"}
-{"issue_id":"pbh-bws.3","label":"phase-1"}
-{"issue_id":"pbh-bws.3","label":"track:foundation"}
 {"issue_id":"pbh-bws.30","label":"agentic"}
 {"issue_id":"pbh-bws.30","label":"phase-1"}
 {"issue_id":"pbh-bws.30","label":"track:qa"}
