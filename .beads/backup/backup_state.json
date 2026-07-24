@@ -1,11 +1,11 @@
 {
-  "last_dolt_commit": "e074emg9fv95evo9vvh20hbkmliovk3f",
-  "timestamp": "2026-07-24T13:38:39.704845Z",
+  "last_dolt_commit": "ngbvkon97u739s0kr4k6cht6nhn53pov",
+  "timestamp": "2026-07-24T13:41:39.643266Z",
   "counts": {
-    "issues": 65,
-    "events": 59614,
+    "issues": 64,
+    "events": 59606,
     "comments": 0,
-    "dependencies": 99,
+    "dependencies": 98,
     "labels": 82,
     "config": 12
   }
