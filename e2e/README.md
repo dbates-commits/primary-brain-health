@@ -1,18 +1,23 @@
 # E2E tests (Playwright)
 
-End-to-end tests for the onboarding flow, which spans both apps:
-marketing booking (`:3000`) → app handoff → `/assessments` (`:3001`).
+End-to-end tests for the marketing booking → Stripe payment flow (`:3000`).
 
 Config: [`playwright.config.ts`](../playwright.config.ts). Specs live here in `e2e/`.
+
+> Scope note: the tests stop at the Stripe **payment outcome**. The post-payment
+> Linus enrollment and the sign-in handoff to `/assessments` are intentionally
+> out of scope — per the Jul 2026 direction, the **Linus Engagement App** owns
+> login/entry after the HubSpot/marketing pages, superseding the custom app-side
+> handoff.
 
 ## Run
 
 ```bash
-pnpm test:e2e                 # headless, boots both apps via webServer
+pnpm test:e2e                 # headless
 pnpm test:e2e:ui              # Playwright UI mode
 pnpm test:e2e booking-smoke   # a single spec
 
-# Against already-running dev servers (skip the managed webServer):
+# Against an already-running dev server (skip the managed webServer):
 E2E_SKIP_WEBSERVER=1 pnpm test:e2e
 ```
 
@@ -23,36 +28,38 @@ First-time browser install (once per machine): `npx playwright install chromium`
 | Spec | Needs | Runs by default |
 |---|---|---|
 | `booking-smoke.spec.ts` | marketing app only | ✅ yes |
-| `onboarding.spec.ts` (money path) | test DB + Stripe + Linus | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
+| `onboarding.spec.ts` (payment path) | test DB + Stripe test keys | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
 
-The smoke spec proves the harness + booking entry work with no secrets. The full
-money-path spec is skipped (not failed) unless you opt in, so a missing secret is
+The smoke spec proves the harness + booking entry work with no secrets. The
+payment spec is skipped (not failed) unless you opt in, so a missing secret is
 never a false red.
 
-## Full-flow (`E2E_FULL_FLOW=1`) — run locally behind a US VPN
+`onboarding.spec.ts` drives the whole path (signup → email confirm → details →
+consent → Stripe) for a fresh user per case and asserts the charge outcome:
 
-The money path is a **local-only** run: the Linus sandbox is **US-only**, so it
-must be driven from a **US IP (VPN)** against the real sandbox. It is
-deliberately **not** in CI, and there is no Linus stub (a test-only stub in the
-Linus client risks handing out fake enrollments if the flag ever reaches prod).
+- **accepted** — Visa and Mastercard → Stripe's "Thanks for your payment".
+- **declined** — generic-decline and insufficient-funds test cards → the
+  in-frame decline reason, and no success.
 
-Reuse **staging's env** for most of it — copy staging's values into both
-`apps/marketing/.env.local` and `apps/app/.env.local`, then override only the
-database:
+(Stripe test mode has no distinct HSA/FSA card and the funnel doesn't flag them,
+so HSA/FSA cards are covered as ordinary branded charges.)
+
+## Full flow (`E2E_FULL_FLOW=1`)
+
+Runs entirely in the marketing app — **no Linus, no app server, no VPN** (the
+path ends at payment). It writes real rows and drives Stripe, so it needs:
 
 - **`DATABASE_URL`** → a **dedicated Neon branch** (cheap, disposable). NEVER
-  prod, and NEVER staging's own URL / a Vercel preview URL — previews share the
-  prod Neon DB, and the flow writes `users` / `consents` / `payments` rows.
-  Apply migrations to the branch before the first run.
-- **Stripe** → staging already runs TEST keys with an **ACTIVE** price; reuse
-  them. Values that are shared across the two apps (`STRIPE_*`,
-  `BOOKING_RESUME_SECRET`, `AUTH_HANDOFF_SECRET`) must **match** in both.
-- **Linus** → staging's `LINUS_*` sandbox creds; connect a **US VPN** before
-  running or the enroll step 403s.
-- **Handoff URLs** → `NEXT_PUBLIC_FUNNEL_URL` / `APP_BASE_URL` =
-  `http://localhost:3001`, `BOOKING_BASE_URL` = `http://localhost:3000`.
+  prod, and NEVER a Vercel preview URL — previews share the prod Neon DB, and the
+  flow writes `users` / `consents` / `payments` rows. Apply migrations to the
+  branch before the first run.
+- **Stripe TEST keys + an ACTIVE price** (`STRIPE_SECRET_KEY`,
+  `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_ASSESSMENT_PRICE_ID`). Reuse
+  staging's — they're already test-mode.
 
-Then, on the VPN:
+Put these in `apps/marketing/.env.local`. The config disables `RESEND_API_KEY`
+for the run and tees the marketing server log so the test can read back the
+email-confirmation link (signup gates on it) instead of needing a mailbox.
 
 ```bash
 E2E_FULL_FLOW=1 pnpm test:e2e --project=marketing
@@ -60,13 +67,14 @@ E2E_FULL_FLOW=1 pnpm test:e2e --project=marketing
 
 ## CI
 
-`.github/workflows/e2e.yml` runs the **smoke tier only** on PRs. The full flow
-stays out of CI by design (US-only Linus). If it ever needs to run headless,
-that's a separate task: a US-region runner + the secrets above as Actions
-secrets.
+`.github/workflows/e2e.yml` runs the **smoke tier only** on PRs. The payment
+flow is skipped there (no `E2E_FULL_FLOW`). It could be added to CI without a
+US-region runner — it no longer touches Linus — given a test DB and Stripe test
+keys as Actions secrets; that's a separate task.
 
 ## Conventions
 
-- Prefer role/label locators (`getByRole`, `getByLabel`) over `data-testid`; add
-  a `data-testid` only where semantic targeting is genuinely ambiguous.
-- The Stripe card fields live in an iframe — target them with `frameLocator`.
+- Prefer role/label locators (`getByRole`, `getByLabel`) over `data-testid`.
+- The Stripe card fields live in the `embedded-checkout` iframe — reach them with
+  `frameLocator` and their stable ids (`#cardNumber`, `#cardExpiry`, `#cardCvc`);
+  opt out of Link "save my info" (it forces a required phone).
