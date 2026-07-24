@@ -29,25 +29,41 @@ The smoke spec proves the harness + booking entry work with no secrets. The full
 money-path spec is skipped (not failed) unless you opt in, so a missing secret is
 never a false red.
 
-## Full-flow env (`E2E_FULL_FLOW=1`)
+## Full-flow (`E2E_FULL_FLOW=1`) — run locally behind a US VPN
 
-Put these in `.env.e2e` (gitignored) or the shell:
+The money path is a **local-only** run: the Linus sandbox is **US-only**, so it
+must be driven from a **US IP (VPN)** against the real sandbox. It is
+deliberately **not** in CI, and there is no Linus stub (a test-only stub in the
+Linus client risks handing out fake enrollments if the flag ever reaches prod).
 
-- **`DATABASE_URL`** → a **dedicated test DB / Neon branch**. NEVER prod, and
-  NEVER a Vercel preview URL — previews currently share the prod Neon DB.
-  The flow writes `users` / `consents` / `payments` rows; seed/clean per run.
-- **Stripe** → TEST keys (`STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`)
-  and an **ACTIVE** assessment price (an archived price makes "start payment"
-  fail). If asserting fulfillment via the webhook, also wire
-  `STRIPE_WEBHOOK_SECRET` + `stripe listen`.
-- **Linus** → sandbox creds (`LINUS_*`). The Linus sandbox API is **US-only**;
-  enrollment 403s off a US IP. In CI, stub Linus or use a US-region runner.
-- **`NEXT_PUBLIC_APP_URL`** (marketing → app handoff target).
+Reuse **staging's env** for most of it — copy staging's values into both
+`apps/marketing/.env.local` and `apps/app/.env.local`, then override only the
+database:
+
+- **`DATABASE_URL`** → a **dedicated Neon branch** (cheap, disposable). NEVER
+  prod, and NEVER staging's own URL / a Vercel preview URL — previews share the
+  prod Neon DB, and the flow writes `users` / `consents` / `payments` rows.
+  Apply migrations to the branch before the first run.
+- **Stripe** → staging already runs TEST keys with an **ACTIVE** price; reuse
+  them. Values that are shared across the two apps (`STRIPE_*`,
+  `BOOKING_RESUME_SECRET`, `AUTH_HANDOFF_SECRET`) must **match** in both.
+- **Linus** → staging's `LINUS_*` sandbox creds; connect a **US VPN** before
+  running or the enroll step 403s.
+- **Handoff URLs** → `NEXT_PUBLIC_FUNNEL_URL` / `APP_BASE_URL` =
+  `http://localhost:3001`, `BOOKING_BASE_URL` = `http://localhost:3000`.
+
+Then, on the VPN:
+
+```bash
+E2E_FULL_FLOW=1 pnpm test:e2e --project=marketing
+```
 
 ## CI
 
-No GitHub Actions workflow yet (`.github/` doesn't exist). Adding one — with the
-secrets above and a cached browser — is tracked separately, not in this setup.
+`.github/workflows/e2e.yml` runs the **smoke tier only** on PRs. The full flow
+stays out of CI by design (US-only Linus). If it ever needs to run headless,
+that's a separate task: a US-region runner + the secrets above as Actions
+secrets.
 
 ## Conventions
 
