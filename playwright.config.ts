@@ -51,9 +51,11 @@ export default defineConfig({
     },
   ],
 
-  // Boot both apps for the run. `reuseExistingServer` lets a local `pnpm dev`
-  // satisfy these; CI starts them fresh. Skipped entirely when
-  // E2E_SKIP_WEBSERVER=1 (point the base URLs at running servers instead).
+  // Boot the app servers the run needs. Marketing is always required; the app
+  // (:3001) needs a database, so it's only booted for the full money path
+  // (E2E_FULL_FLOW=1) — the smoke tier never touches it. `reuseExistingServer`
+  // lets a local `pnpm dev` satisfy these; CI starts them fresh. Skipped
+  // entirely when E2E_SKIP_WEBSERVER=1 (point base URLs at running servers).
   webServer: skipWebServer
     ? undefined
     : [
@@ -63,11 +65,15 @@ export default defineConfig({
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
         },
-        {
-          command: "pnpm --filter app dev",
-          url: APP_URL,
-          reuseExistingServer: !process.env.CI,
-          timeout: 120_000,
-        },
+        ...(process.env.E2E_FULL_FLOW === "1"
+          ? [
+              {
+                command: "pnpm --filter app dev",
+                url: APP_URL,
+                reuseExistingServer: !process.env.CI,
+                timeout: 120_000,
+              },
+            ]
+          : []),
       ],
 });
