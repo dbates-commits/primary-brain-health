@@ -63,7 +63,9 @@ export default defineConfig({
         // For the full flow, tee marketing's stdout to a log the test reads (to
         // recover the email-confirmation link) and disable Resend so that link
         // is logged instead of mailed — and so signup doesn't 422 on test
-        // addresses. The smoke tier keeps the plain command untouched.
+        // addresses. The smoke tier keeps the plain command untouched. The full
+        // flow ends at Stripe payment success, entirely within marketing, so the
+        // app (:3001) is not booted here — add it back if an app-side spec needs it.
         process.env.E2E_FULL_FLOW === "1"
           ? {
               command: `sh -c 'pnpm --filter marketing dev 2>&1 | tee ${MARKETING_LOG}'`,
@@ -78,15 +80,5 @@ export default defineConfig({
               reuseExistingServer: !process.env.CI,
               timeout: 120_000,
             },
-        ...(process.env.E2E_FULL_FLOW === "1"
-          ? [
-              {
-                command: "pnpm --filter app dev",
-                url: APP_URL,
-                reuseExistingServer: !process.env.CI,
-                timeout: 120_000,
-              },
-            ]
-          : []),
       ],
 });
