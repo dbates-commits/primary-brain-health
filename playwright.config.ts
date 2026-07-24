@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { MARKETING_LOG } from "./e2e/helpers/confirm";
 
 /**
  * E2E config for the PBH onboarding flow, which spans two apps:
@@ -59,12 +60,24 @@ export default defineConfig({
   webServer: skipWebServer
     ? undefined
     : [
-        {
-          command: "pnpm --filter marketing dev",
-          url: MARKETING_URL,
-          reuseExistingServer: !process.env.CI,
-          timeout: 120_000,
-        },
+        // For the full flow, tee marketing's stdout to a log the test reads (to
+        // recover the email-confirmation link) and disable Resend so that link
+        // is logged instead of mailed — and so signup doesn't 422 on test
+        // addresses. The smoke tier keeps the plain command untouched.
+        process.env.E2E_FULL_FLOW === "1"
+          ? {
+              command: `sh -c 'pnpm --filter marketing dev 2>&1 | tee ${MARKETING_LOG}'`,
+              url: MARKETING_URL,
+              reuseExistingServer: !process.env.CI,
+              timeout: 120_000,
+              env: { RESEND_API_KEY: "" },
+            }
+          : {
+              command: "pnpm --filter marketing dev",
+              url: MARKETING_URL,
+              reuseExistingServer: !process.env.CI,
+              timeout: 120_000,
+            },
         ...(process.env.E2E_FULL_FLOW === "1"
           ? [
               {
