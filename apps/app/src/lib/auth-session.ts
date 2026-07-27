@@ -2,9 +2,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { db, sessions, writeAuditLog } from "@pbh/db";
-
-/** Matches the `session.maxAge` in auth.ts (7 days). */
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+import { IDLE_SESSION_MAX_SECONDS } from "@/auth";
 
 /**
  * Whether Auth.js is using secure cookies (and so the `__Secure-` name prefix).
@@ -60,7 +58,13 @@ export async function createSessionForUser(
   opts: { protocol?: string; method?: string } = {},
 ): Promise<SessionCookie> {
   const sessionToken = randomUUID();
-  const expires = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000);
+  // The idle deadline, same as any adapter-minted session: Auth.js slides it
+  // forward on activity. Minting it further out would give this one path a
+  // longer inactivity window than the 15 minutes compliance signed off on — a
+  // session nobody touches would sit redeemable until that longer deadline,
+  // since nothing shortens it before the first authenticated request. The
+  // 8-hour absolute cap is enforced separately, off `sessions.created_at`.
+  const expires = new Date(Date.now() + IDLE_SESSION_MAX_SECONDS * 1000);
 
   await db.insert(sessions).values({ sessionToken, userId, expires });
 
