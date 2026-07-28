@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
-  BOOKING_RESUME_COOKIE,
-  BOOKING_RESUME_TTL_SECONDS,
   consumeBookingConfirmation,
-  createResumeCookieValue,
+  issueBookingSession,
 } from "@pbh/booking/server";
 
 // Verifies a one-time token and writes a cookie — never cacheable, and it needs
@@ -44,13 +42,9 @@ export async function GET(req: NextRequest) {
   home.hash = "booking";
   const res = NextResponse.redirect(home);
 
-  res.cookies.set(BOOKING_RESUME_COOKIE, createResumeCookieValue(result.userId), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: BOOKING_RESUME_TTL_SECONDS,
-  });
+  // Re-issued here, not just at signup, so the link works in a different browser
+  // from the one that signed up — and so its TTL restarts on a genuine return.
+  issueBookingSession(res.cookies, result.userId);
 
   return res;
 }

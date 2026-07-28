@@ -85,7 +85,6 @@ export function SignupForm({
     if (state.status === "success" && !advanced.current) {
       advanced.current = true;
       onComplete({
-        userId: state.userId,
         email: state.email,
         firstName: state.firstName,
         lastName: state.lastName,

@@ -16,7 +16,6 @@ export type BookingResumeStep =
   | "done";
 
 export interface BookingResumeState {
-  userId: string;
   firstName: string;
   /** Decides how the details step is worded and what it asks. */
   patientIdentification: string;
@@ -58,8 +57,9 @@ export async function resolveBookingResumeState(
     return null;
   }
 
+  // No `userId` in the returned state: this is read by the client, and the id
+  // stays server-side in the booking cookie (see `booking-session.ts`).
   const base = {
-    userId: user.id,
     firstName: user.firstName,
     patientIdentification: user.patientIdentification ?? "Self",
     packageKey: resolvePackageKey(user.selectedPackageKey),

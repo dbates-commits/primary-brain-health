@@ -1,12 +1,13 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
-  createHandoffForLatestPayment,
+  createHandoffForCheckoutSession,
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
   registerAndEnrollUserById,
+  resolveBookingUserId,
   verifyAndRecordCheckout,
   type LinusState,
 } from "@pbh/booking/server";
@@ -16,6 +17,8 @@ import type { CreateCheckoutResult } from "@pbh/booking";
 // server logs, never to the customer.
 const PAYMENT_UNCONFIRMED = "We couldn't confirm your payment.";
 const PAYMENT_UNVERIFIED = "We couldn't verify your payment. Please try again.";
+const NO_BOOKING_SESSION =
+  "We couldn't find your booking. Please start again from the top.";
 
 function paymentError(message: string): LinusState {
   return { status: "error", email: "", message };
@@ -26,13 +29,18 @@ function paymentError(message: string): LinusState {
  * `createCheckoutSessionCore`, passing the request's hashed IP for the
  * `payment_pending` audit entry and the package chosen on the landing card.
  *
- * `packageKey` is client-supplied and re-resolved server-side, so an unknown or
+ * Who is charged comes from the signed booking cookie, so nobody can open a
+ * Checkout Session against another customer's account. `packageKey` is
+ * client-supplied and re-resolved server-side, so an unknown or
  * not-yet-purchasable value falls back to the default rather than being trusted.
  */
 export async function createAssessmentCheckoutSession(
-  userId: string,
   packageKey?: string,
 ): Promise<CreateCheckoutResult> {
+  const userId = resolveBookingUserId(await cookies());
+  if (!userId) {
+    return { status: "error", message: NO_BOOKING_SESSION };
+  }
   const ipHash = hashIp(getClientIp(await headers()));
   return createCheckoutSessionCore(userId, { ipHash, packageKey });
 }
@@ -48,10 +56,9 @@ export async function createAssessmentCheckoutSession(
  * failures surface inline (the charge stands and the webhook backstop retries).
  */
 export async function finalizeCheckoutSession(
-  userId: string,
   checkoutSessionId: string,
 ): Promise<LinusState> {
-  const id = userId.trim();
+  const id = resolveBookingUserId(await cookies());
   const sessionId = checkoutSessionId.trim();
   if (!id || !sessionId) {
     return paymentError(PAYMENT_UNCONFIRMED);
@@ -83,18 +90,24 @@ export async function finalizeCheckoutSession(
  * hands the funnel a short-lived, single-use token bound to the succeeded
  * payment; the funnel verifies it and mints the real session.
  *
+ * This action mints a login credential, so it is the most sensitive one here:
+ * the account comes from the signed booking cookie, and the payment from a
+ * Checkout Session re-verified with Stripe in this same request. Both must
+ * agree, so a handoff can only be minted for a payment this browser just made.
+ *
  * Returns null when there's nothing to hand off — the caller falls back to
  * `/login`, which always works.
  */
 export async function createAssessmentHandoffUrl(
-  userId: string,
+  checkoutSessionId: string,
 ): Promise<string | null> {
-  const id = userId.trim();
-  if (!id) {
+  const id = resolveBookingUserId(await cookies());
+  const sessionId = checkoutSessionId.trim();
+  if (!id || !sessionId) {
     return null;
   }
   try {
-    const token = await createHandoffForLatestPayment(id);
+    const token = await createHandoffForCheckoutSession(id, sessionId);
     if (!token) {
       return null;
     }

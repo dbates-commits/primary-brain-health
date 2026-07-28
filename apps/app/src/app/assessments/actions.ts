@@ -10,17 +10,26 @@ import {
 } from "@pbh/booking/server";
 
 /**
- * Register + enroll a user server-side, returning the state the caller renders.
+ * Register + enroll the signed-in user with Linus, returning the state the
+ * caller renders.
  *
- * NOTE: this deliberately does NOT sign the user in — its `userId` is
- * client-supplied. Sessions are only ever minted by a magic-link sign-in, so
- * called directly this is a harmless idempotent enroll that grants no session.
+ * The account is the session's, never the submission's: any `userId` in the form
+ * is ignored outright. Enrollment writes to a Linus participant record, so
+ * driving it for an arbitrary account is a real write on someone else's data,
+ * even though it mints no session here.
  */
 export async function completeAssessmentSetup(
   _prev: LinusState,
-  formData: FormData,
 ): Promise<LinusState> {
-  const userId = String(formData.get("userId") ?? "").trim();
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return {
+      status: "error",
+      email: "",
+      message: "Your session has expired. Please sign in again.",
+    };
+  }
   return registerAndEnrollUserById(userId);
 }
 

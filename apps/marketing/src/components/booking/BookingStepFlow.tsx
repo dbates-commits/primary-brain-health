@@ -55,8 +55,12 @@ const STEP_LABEL: Record<ModalStep, string> = {
   done: "Confirmation",
 };
 
+/**
+ * What the client knows about the booking in progress. No user id: identity is
+ * the server's signed HttpOnly cookie, so every action below resolves the
+ * account itself rather than being told which one to write to (pbh-9yb.2).
+ */
 type FlowContext = {
-  userId: string;
   firstName: string;
   email: string;
   /** Answered at signup; decides how the details step is worded and what it asks. */
@@ -64,7 +68,6 @@ type FlowContext = {
 };
 
 const EMPTY_CONTEXT: FlowContext = {
-  userId: "",
   firstName: "",
   email: "",
   patientIdentification: "",
@@ -124,7 +127,6 @@ export function BookingStepFlow({
   const completeSignup = useCallback(
     (result: SignupResult) => {
       setContext({
-        userId: result.userId,
         firstName: result.firstName,
         email: result.email,
         patientIdentification: result.patientIdentification,
@@ -139,18 +141,25 @@ export function BookingStepFlow({
    * confirmation, so the button there drops them straight into /assessments
    * instead of asking for a magic link.
    *
+   * The Checkout Session id comes back from the payment step and is the only
+   * thing passed — the server re-verifies it with Stripe against the booking
+   * cookie, so it authorizes nothing on its own.
+   *
    * Failure is not fatal — `createAssessmentHandoffUrl` returns null and
    * `DoneStep` falls back to /login. Advancing regardless matters: the charge
    * has already gone through, so nothing here may block the confirmation.
    */
-  const completePayment = useCallback(async () => {
-    try {
-      setHandoffUrl(await createAssessmentHandoffUrl(context.userId));
-    } catch (err) {
-      console.error("handoff link failed:", err);
-    }
-    advance();
-  }, [advance, context.userId]);
+  const completePayment = useCallback(
+    async (checkoutSessionId: string) => {
+      try {
+        setHandoffUrl(await createAssessmentHandoffUrl(checkoutSessionId));
+      } catch (err) {
+        console.error("handoff link failed:", err);
+      }
+      advance();
+    },
+    [advance],
+  );
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -174,7 +183,6 @@ export function BookingStepFlow({
         return;
       }
       setContext({
-        userId: resumed.userId,
         firstName: resumed.firstName,
         email: "",
         patientIdentification: resumed.patientIdentification,
@@ -202,7 +210,7 @@ export function BookingStepFlow({
    * time the component re-rendered.
    */
   const createSession = useCallback(
-    (userId: string) => createAssessmentCheckoutSession(userId, packageKey),
+    () => createAssessmentCheckoutSession(packageKey),
     [packageKey],
   );
 
@@ -249,16 +257,10 @@ export function BookingStepFlow({
             showHeader={false}
           />
         )}
-        {step === "confirm" && (
-          <EmailConfirmationStep
-            userId={context.userId}
-            expired={expiredLink}
-          />
-        )}
+        {step === "confirm" && <EmailConfirmationStep expired={expiredLink} />}
         {step === "details" && (
           <DetailsForm
             action={detailsAction}
-            userId={context.userId}
             name={context.firstName}
             patientIdentification={context.patientIdentification}
             onComplete={advance}
@@ -268,14 +270,12 @@ export function BookingStepFlow({
         {step === "consent" && (
           <ConsentForm
             action={consentAction}
-            userId={context.userId}
             onComplete={advance}
             showHeader={false}
           />
         )}
         {step === "payment" && (
           <PaymentStep
-            userId={context.userId}
             createSession={createSession}
             finalize={finalizeCheckoutSession}
             onComplete={completePayment}

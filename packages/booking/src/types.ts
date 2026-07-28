@@ -15,11 +15,16 @@ export type SignupValues = {
   patientIdentification: string;
 };
 
+/**
+ * No `userId` in any of these shapes, on purpose: identity lives in the signed
+ * HttpOnly booking cookie the server issues at signup (see `booking-session.ts`
+ * and `resolveBookingUserId`). Handing the id to the client is what let a caller
+ * post back someone else's.
+ */
 export type SignupState =
   | { status: "idle" }
   | {
       status: "success";
-      userId: string;
       email: string;
       firstName: string;
       lastName: string;
@@ -34,7 +39,6 @@ export type SignupState =
 
 /** Success payload handed to `SignupForm`'s `onComplete`. */
 export type SignupResult = {
-  userId: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -111,9 +115,7 @@ export type CreateCheckoutResult =
   | { status: "ready"; clientSecret: string; sessionId: string }
   | { status: "error"; message: string };
 
-export type CreateCheckoutAction = (
-  userId: string,
-) => Promise<CreateCheckoutResult>;
+export type CreateCheckoutAction = () => Promise<CreateCheckoutResult>;
 
 /** Minimal shape the payment step reads from an app's finalize action. */
 export type PaymentFinalizeResult =
@@ -121,6 +123,5 @@ export type PaymentFinalizeResult =
   | { status: "idle" | "success" };
 
 export type PaymentFinalizeAction = (
-  userId: string,
   sessionId: string,
 ) => Promise<PaymentFinalizeResult>;
