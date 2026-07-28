@@ -55,14 +55,12 @@ export function detailsHeader(name: string, isForSomeoneElse = false) {
 
 export function DetailsForm({
   action,
-  userId,
   name,
   patientIdentification,
   onComplete,
   showHeader = true,
 }: {
   action: DetailsAction;
-  userId: string;
   name: string;
   /** "Self" | "Someone else", answered at signup. */
   patientIdentification: string;
@@ -121,9 +119,9 @@ export function DetailsForm({
         <StepHeader {...detailsHeader(name, isForSomeoneElse)} />
       ) : null}
 
+      {/* No hidden `userId`: the action reads it from the signed booking
+          cookie, so the form carries profile data only. */}
       <form action={formAction} noValidate>
-        <input type="hidden" name="userId" value={userId} />
-
         <fieldset
           disabled={pending}
           aria-busy={pending}

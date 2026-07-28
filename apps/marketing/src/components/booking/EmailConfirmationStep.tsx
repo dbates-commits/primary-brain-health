@@ -13,10 +13,8 @@ import { resendConfirmationAction } from "./actions";
  * never reads as a dead end.
  */
 export function EmailConfirmationStep({
-  userId,
   expired = false,
 }: {
-  userId: string;
   expired?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
@@ -24,7 +22,8 @@ export function EmailConfirmationStep({
 
   function handleResend() {
     startTransition(async () => {
-      await resendConfirmationAction(userId);
+      // No recipient argument: the server derives it from the booking cookie.
+      await resendConfirmationAction();
       // Always reported as sent. The action throttles silently, and saying
       // "too soon" would expose how recently a link went out.
       setResent(true);
@@ -53,7 +52,7 @@ export function EmailConfirmationStep({
               <button
                 type="button"
                 onClick={handleResend}
-                disabled={pending || !userId}
+                disabled={pending}
                 className="font-bold text-primary underline underline-offset-2 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {pending ? "Sending…" : "Re-send confirmation email."}

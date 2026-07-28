@@ -36,16 +36,20 @@ const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 export const PAYMENT_HEADER = { title: "Payment" } as const;
 
 export function PaymentStep({
-  userId,
   createSession,
   finalize,
   onComplete,
   showHeader = true,
 }: {
-  userId: string;
   createSession: CreateCheckoutAction;
   finalize: PaymentFinalizeAction;
-  onComplete: () => void;
+  /**
+   * Handed the Checkout Session id this step just paid, so the host can mint a
+   * post-payment handoff bound to *this* payment. Nothing identifying: the
+   * server re-fetches the session from Stripe and matches it against the
+   * booking cookie before it means anything.
+   */
+  onComplete: (checkoutSessionId: string) => void;
   showHeader?: boolean;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -61,7 +65,7 @@ export function PaymentStep({
     }
     started.current = true;
 
-    createSession(userId)
+    createSession()
       .then((result) => {
         if (result.status === "ready") {
           setClientSecret(result.clientSecret);
@@ -77,7 +81,7 @@ export function PaymentStep({
         console.error("createSession failed:", err);
         setInitError("Couldn't start payment. Please try again.");
       });
-  }, [userId, createSession]);
+  }, [createSession]);
 
   // Fired once Embedded Checkout finishes the payment (the customer stays on the
   // page). Verify + persist + enroll server-side (re-fetches the session from
@@ -90,17 +94,17 @@ export function PaymentStep({
     }
     setCompleteError(null);
     try {
-      const finalized = await finalize(userId, sessionId);
+      const finalized = await finalize(sessionId);
       if (finalized.status === "error") {
         setCompleteError(finalized.message);
         return;
       }
-      onComplete();
+      onComplete(sessionId);
     } catch (err) {
       console.error("finalize failed:", err);
       setCompleteError("We couldn't confirm your payment. Please try again.");
     }
-  }, [userId, sessionId, finalize, onComplete]);
+  }, [sessionId, finalize, onComplete]);
 
   // Owns its bottom padding: the modal body leaves it to the step (see
   // Modal.tsx), and this step has no `StickyActions` bar to supply it.

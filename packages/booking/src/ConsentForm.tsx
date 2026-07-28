@@ -59,12 +59,10 @@ export const CONSENT_HEADER = {
 
 export function ConsentForm({
   action,
-  userId,
   onComplete,
   showHeader = true,
 }: {
   action: ConsentAction;
-  userId: string;
   onComplete: () => void;
   showHeader?: boolean;
 }) {
@@ -112,8 +110,8 @@ export function ConsentForm({
       noValidate
       className="flex flex-col items-center gap-8 bg-surface"
     >
-      <input type="hidden" name="userId" value={userId} />
-
+      {/* No hidden `userId`: whose consent this records is decided by the signed
+          booking cookie, not by the submission. */}
       {showHeader ? <StepHeader {...CONSENT_HEADER} /> : null}
 
       {/* The terms live inside the fieldset so the fieldset spans the scrollable

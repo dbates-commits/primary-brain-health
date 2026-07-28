@@ -3,6 +3,7 @@ import "server-only";
 import { db, users, writeAuditLog } from "@pbh/db";
 import type { SignupState, SignupValues } from "../types";
 import { PATIENT_IDENTIFICATION_VALUES } from "../field-options";
+import { issueBookingSession, type BookingCookieJar } from "./booking-session";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
 import { resolvePackageKey } from "../packages";
@@ -10,13 +11,18 @@ import { sendBookingConfirmation } from "./email-verification";
 
 /**
  * Create the partial account at signup: validate the first/last/email, insert a
- * `users` row, and write a `signup` audit entry. Framework-agnostic — each app's
- * `"use server"` wrapper passes the submitted `FormData` and its own audit
- * `source` label. Returns the shared `SignupState` the form renders.
+ * `users` row, write a `signup` audit entry, and issue the signed booking cookie
+ * that identifies this browser for the rest of the flow. Framework-agnostic —
+ * each app's `"use server"` wrapper passes the submitted `FormData`, its own
+ * audit `source` label, and its cookie jar. Returns the shared `SignupState` the
+ * form renders.
+ *
+ * The new user's id is deliberately not in that state: it goes to the browser
+ * only inside the HttpOnly cookie, so no later step can post it back.
  */
 export async function createAccountCore(
   formData: FormData,
-  opts: { source: string },
+  opts: { source: string; cookies: BookingCookieJar },
 ): Promise<SignupState> {
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
@@ -78,6 +84,11 @@ export async function createAccountCore(
       metadata: { source: opts.source },
     });
 
+    // Issued before the confirmation email is sent, so the very next step
+    // already has an identity to act on. It proves nothing about the address —
+    // `resolveBookingResumeState` still gates on `users.emailVerified`.
+    issueBookingSession(opts.cookies, created.id);
+
     // Best-effort (never throws): a failed send must not fail signup — they can
     // re-send from the confirmation step. The welcome email deliberately does
     // NOT go out here: the flow is now blocked until this link is clicked, and
@@ -87,7 +98,6 @@ export async function createAccountCore(
 
     return {
       status: "success",
-      userId: created.id,
       email,
       firstName,
       lastName,

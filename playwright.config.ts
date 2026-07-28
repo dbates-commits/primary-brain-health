@@ -26,7 +26,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // The full flow recovers each signup's confirmation link by reading the *last*
+  // one printed to the marketing log (`helpers/confirm.ts`) — the raw token
+  // exists nowhere else. That only identifies this test's link if one signup is
+  // in flight at a time, so the DB-backed tier is serial, not just CI.
+  workers: process.env.CI || process.env.E2E_FULL_FLOW === "1" ? 1 : undefined,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
 
   use: {

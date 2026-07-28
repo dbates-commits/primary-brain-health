@@ -3,6 +3,7 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { db, payments } from "@pbh/db";
+import { getStripe } from "@pbh/payments";
 
 /**
  * Post-payment sign-in handoff: marketing charges the card, the funnel owns the
@@ -19,6 +20,9 @@ import { db, payments } from "@pbh/db";
  *     `payments.handoff_consumed_at`, so a replay from history finds nothing.
  *  3. **Bound to a real payment** — the claim only succeeds against a row that
  *     actually reached `succeeded`. A valid signature alone grants nothing.
+ *  4. **Only mintable by the payer** — issuance requires a Checkout Session
+ *     verified with Stripe in the same request, matching the browser's booking
+ *     cookie (see `createHandoffForCheckoutSession`).
  *
  * It is also only issued after the email address has been confirmed earlier in
  * the booking flow, so the inbox is known to belong to the payer.
@@ -107,20 +111,59 @@ export async function redeemHandoffToken(
 }
 
 /**
- * Find the payment this user just completed and mint a handoff token for it.
- * Returns null when there is nothing to hand off — no succeeded payment, or one
- * whose handoff was already redeemed — so the caller falls back to the magic
- * link rather than producing a token that cannot work.
+ * How recently the payment must have been made for a handoff to be issued for
+ * it. This is the window between Stripe confirming the charge and the browser
+ * asking for its sign-in link — seconds in practice.
  */
-export async function createHandoffForLatestPayment(
+export const HANDOFF_PAYMENT_MAX_AGE_SECONDS = 600;
+
+/**
+ * Mint a handoff token for the payment made by *this* Checkout Session.
+ *
+ * Deliberately not "the latest succeeded payment for this user": that only ever
+ * needed a user id, so anyone holding one could ask for that customer's sign-in
+ * link for as long as the payment stayed unredeemed. Issuance is now bound to a
+ * Checkout Session re-fetched from Stripe in the same request, whose
+ * `metadata.userId` must match the caller's booking cookie, and to a charge no
+ * older than `HANDOFF_PAYMENT_MAX_AGE_SECONDS` — so a token can only be minted
+ * for a payment this browser has just completed.
+ *
+ * Returns null when there is nothing safe to hand off, so the caller falls back
+ * to the magic link rather than producing a token that cannot work.
+ */
+export async function createHandoffForCheckoutSession(
   userId: string,
+  checkoutSessionId: string,
 ): Promise<string | null> {
+  const stripe = getStripe();
+  const session = await stripe.checkout.sessions.retrieve(checkoutSessionId, {
+    expand: ["payment_intent"],
+  });
+
+  const intent = session.payment_intent;
+  if (!intent || typeof intent === "string") {
+    return null;
+  }
+  // The charge must belong to the cookie holder, and must actually have
+  // succeeded — the client's claim that it did counts for nothing.
+  if (intent.metadata?.userId !== userId || intent.status !== "succeeded") {
+    return null;
+  }
+  const ageSeconds = Date.now() / 1000 - intent.created;
+  if (ageSeconds > HANDOFF_PAYMENT_MAX_AGE_SECONDS) {
+    return null;
+  }
+
+  // Belt and braces with `redeemHandoffToken`'s own claim: skip minting a token
+  // for a payment whose handoff was already spent, so the confirmation screen
+  // offers the magic link instead of a link that will fail.
   const [payment] = await db
     .select({ intentId: payments.stripePaymentIntentId })
     .from(payments)
     .where(
       and(
         eq(payments.userId, userId),
+        eq(payments.stripePaymentIntentId, intent.id),
         eq(payments.status, "succeeded"),
         isNull(payments.handoffConsumedAt),
       ),

@@ -1,5 +1,5 @@
 import { test, expect, type FrameLocator, type Page } from "@playwright/test";
-import { waitForConfirmUrl } from "./helpers/confirm";
+import { reachConsentStep, submitConsent } from "./helpers/booking";
 
 /**
  * The onboarding money-path through Stripe: marketing booking → email confirm →
@@ -42,12 +42,6 @@ const DECLINED_CARDS = [
   },
 ];
 
-let seq = 0;
-function uniqueEmail(): string {
-  seq += 1;
-  return `e2e+${Date.now()}-${seq}@example.com`;
-}
-
 /**
  * Drive signup → email confirm → details → consent for a fresh user and stop on
  * the payment step, returning the Stripe embedded-checkout frame. Resend is
@@ -55,32 +49,8 @@ function uniqueEmail(): string {
  * server log rather than an inbox.
  */
 async function reachPaymentStep(page: Page): Promise<FrameLocator> {
-  const email = uniqueEmail();
-
-  await page.goto("/");
-  await page.getByRole("button", { name: "Book Basic Assessment" }).click();
-  await page.getByLabel("First Name").fill("Ada");
-  await page.getByLabel("Last Name").fill("Lovelace");
-  await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Continue" }).click();
-
-  await expect(
-    page.getByRole("heading", { name: /email confirmation/i }),
-  ).toBeVisible();
-  const confirmUrl = await waitForConfirmUrl();
-  await page.goto(confirmUrl);
-
-  await page.getByLabel("Date of birth").fill("1990-01-15");
-  await page.getByLabel("ZIP code").fill("02101");
-  await page.getByLabel("Phone number").fill("(555) 000-0000");
-  await page.getByLabel("Gender").selectOption({ index: 1 });
-  await page.getByLabel("State of residence").selectOption({ label: "Massachusetts" });
-  await page.getByLabel("Highest level of education").selectOption({ index: 1 });
-  await page.getByRole("button", { name: "Submit" }).click();
-
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: /continue with payment/i }).click();
-
+  await reachConsentStep(page);
+  await submitConsent(page);
   return page.frameLocator('iframe[name="embedded-checkout"]');
 }
 

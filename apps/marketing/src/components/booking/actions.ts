@@ -1,14 +1,11 @@
 "use server";
 
-import { headers } from "next/headers";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
-  BOOKING_RESUME_COOKIE,
   completeProfileCore,
   createAccountCore,
   getClientIp,
   hashIp,
-  readResumeCookieValue,
   recordConsentCore,
   resendBookingConfirmation,
   resolveBookingResumeState,
@@ -22,29 +19,66 @@ import type { ConsentState, DetailsState, SignupState } from "@pbh/booking";
  * replacing the `.3` stubs. Each is a thin `"use server"` wrapper over the shared
  * `@pbh/booking/server` cores, reading request metadata and the current user
  * (identity seam) here and delegating the DB writes to the package.
+ *
+ * Every mutation below resolves the user from the signed HttpOnly booking cookie
+ * — never from the submitted form — and refuses to write when it is missing,
+ * forged, or expired (pbh-9yb.2).
  */
+
+/**
+ * Shown when the booking cookie can't be verified. Vague on purpose: it must not
+ * distinguish "you never signed up" from "your session ran out", and the honest
+ * remedy is the same either way.
+ */
+const NO_BOOKING_SESSION =
+  "We couldn't find your booking. Please start again from the top.";
 
 export async function signupAction(
   _prev: SignupState,
   formData: FormData,
 ): Promise<SignupState> {
-  return createAccountCore(formData, { source: "marketing-booking" });
+  return createAccountCore(formData, {
+    source: "marketing-booking",
+    cookies: await cookies(),
+  });
 }
 
 export async function detailsAction(
   _prev: DetailsState,
   formData: FormData,
 ): Promise<DetailsState> {
-  return completeProfileCore(resolveBookingUserId(formData), formData);
+  const userId = resolveBookingUserId(await cookies());
+  if (!userId) {
+    return {
+      status: "error",
+      message: NO_BOOKING_SESSION,
+      values: {
+        patientFirstName: String(formData.get("patientFirstName") ?? ""),
+        patientLastName: String(formData.get("patientLastName") ?? ""),
+        dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
+        zip: String(formData.get("zip") ?? ""),
+        stateOfResidence: String(formData.get("stateOfResidence") ?? ""),
+        phone: String(formData.get("phone") ?? ""),
+        gender: String(formData.get("gender") ?? ""),
+        educationLevel: String(formData.get("educationLevel") ?? ""),
+      },
+    };
+  }
+  return completeProfileCore(userId, formData);
 }
 
 export async function consentAction(
   _prev: ConsentState,
   formData: FormData,
 ): Promise<ConsentState> {
+  const userId = resolveBookingUserId(await cookies());
+  if (!userId) {
+    return { status: "error", message: NO_BOOKING_SESSION };
+  }
+
   const requestHeaders = await headers();
   return recordConsentCore({
-    userId: resolveBookingUserId(formData),
+    userId,
     agreed: formData.get("agreed") === "on",
     ipHash: hashIp(getClientIp(requestHeaders)),
     userAgent: requestHeaders.get("user-agent"),
@@ -52,7 +86,7 @@ export async function consentAction(
 }
 
 /**
- * Read the signed resume cookie and work out where this booking left off.
+ * Read the signed booking cookie and work out where this booking left off.
  *
  * Called from the client on mount rather than resolved in the page, so the
  * marketing home page stays statically rendered — only a customer actually
@@ -63,8 +97,7 @@ export async function consentAction(
  * the client sends.
  */
 export async function getBookingResumeState(): Promise<BookingResumeState | null> {
-  const jar = await cookies();
-  const userId = readResumeCookieValue(jar.get(BOOKING_RESUME_COOKIE)?.value);
+  const userId = resolveBookingUserId(await cookies());
   if (!userId) {
     return null;
   }
@@ -72,16 +105,16 @@ export async function getBookingResumeState(): Promise<BookingResumeState | null
 }
 
 /**
- * Re-send the confirmation email for the browser holding a resume cookie, or —
- * before confirmation, when no cookie exists yet — for the account just created
- * in this session. Throttled inside `resendBookingConfirmation`.
+ * Re-send the confirmation email for the browser holding a booking cookie.
+ *
+ * Takes no argument: the recipient is whoever the cookie says, so this can't be
+ * pointed at another customer's inbox. Throttled inside
+ * `resendBookingConfirmation`.
  */
-export async function resendConfirmationAction(
-  userId: string,
-): Promise<{ ok: true }> {
-  const id = userId.trim();
-  if (!id) {
+export async function resendConfirmationAction(): Promise<{ ok: true }> {
+  const userId = resolveBookingUserId(await cookies());
+  if (!userId) {
     return { ok: true };
   }
-  return resendBookingConfirmation(id);
+  return resendBookingConfirmation(userId);
 }

@@ -20,8 +20,13 @@ path), `@pbh/emails`, `@pbh/linus` and `@pbh/payments`.
 
 One fact explains most of the design: **they are different origins, so marketing
 cannot set the app's session cookie.** That is why there is a signed handoff
-token, why the resume cookie exists, and why `createSessionForUser` returns a
-cookie descriptor instead of setting one.
+token, why marketing has a booking cookie of its own, and why
+`createSessionForUser` returns a cookie descriptor instead of setting one.
+
+Marketing has no login, so the booking cookie is what stands in for one:
+`pbh_booking_session`, signed and HttpOnly, issued server-side at signup. It is
+the **only** thing that says which account a booking step may write to — see
+`resolveBookingUserId`.
 
 ---
 
@@ -42,6 +47,7 @@ sequenceDiagram
     Note over M: packageKey held in flow state
     C->>M: Submit signup
     M->>DB: users row (+ selected_package_key)
+    M-->>C: Signed pbh_booking_session cookie (identity, 2h)
     M->>DB: booking_email_verifications (token HASH, 24h)
     M->>R: Confirmation email
     M-->>C: Email Confirmation modal (BLOCKING)
@@ -49,7 +55,7 @@ sequenceDiagram
     C->>M: GET /booking/confirm?token=…
     M->>DB: claim consumed_at, set users.email_verified
     M->>R: Welcome email
-    M-->>C: Signed pbh_booking_resume cookie → /?booking=resume
+    M-->>C: Fresh pbh_booking_session cookie → /?booking=resume
 
     C->>M: Resume
     M->>DB: resolveBookingResumeState → step + packageKey
@@ -71,6 +77,7 @@ sequenceDiagram
         F->>L: register + enroll
     end
 
+    M->>S: Re-verify the Checkout Session (cookie's user? paid < 10 min ago?)
     M->>DB: mint handoff token (bound to the payment intent)
     C->>F: GET /api/auth/handoff?token=…
     F->>DB: claim payments.handoff_consumed_at, insert sessions row
@@ -112,7 +119,7 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | Step | Client | Action | Shared core | Writes |
 |---|---|---|---|---|
 | Landing | `BookingSection` → `PackageCard` | — | `ASSESSMENT_PACKAGES` | — (choice held in flow state) |
-| Signup | `SignupForm` | `signupAction` | `createAccountCore` | `users` row incl. `selected_package_key`; audit `signup` |
+| Signup | `SignupForm` | `signupAction` | `createAccountCore` | `users` row incl. `selected_package_key`; audit `signup`; issues `pbh_booking_session` |
 | — | — | — | `sendBookingConfirmation` | `booking_email_verifications`; audit `email_verification_sent` |
 | Confirm | `EmailConfirmationStep` | `GET /booking/confirm` | `consumeBookingConfirmation` | `consumed_at`, `users.email_verified`; audit `email_verified` |
 | Resume | `BookingStepFlow` (on mount) | `getBookingResumeState` | `resolveBookingResumeState` | — (read only) |
@@ -121,7 +128,7 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | Payment | `PaymentStep` | `createAssessmentCheckoutSession` | `createCheckoutSessionCore` | audit `payment_pending`; Stripe Session |
 | Fulfilment | — | `finalizeCheckoutSession` | `recordSucceededPayment` | `payments` row incl. `package_key`; audit `payment_succeeded` |
 | Enrollment | — | — | `registerAndEnrollUserById` | `users.linus_participant_id`, `linus_enrollments` |
-| Handoff | `DoneStep` | `createAssessmentHandoffUrl` | `createHandoffForLatestPayment` | — (signs a token) |
+| Handoff | `DoneStep` | `createAssessmentHandoffUrl` | `createHandoffForCheckoutSession` | — (signs a token) |
 | Sign-in | — | `GET /api/auth/handoff` | `redeemHandoffToken` | `payments.handoff_consumed_at`, `sessions` row; audit `login` |
 
 ### The chosen package
@@ -185,7 +192,7 @@ customer has to act on.
 | Token | Signed with | TTL | Single-use via | Crosses apps |
 |---|---|---|---|---|
 | Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` | no |
-| Resume cookie | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry | no |
+| Booking cookie (`pbh_booking_session`) | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry | no |
 | Payment handoff | `AUTH_HANDOFF_SECRET` | 10 min | `payments.handoff_consumed_at` | **yes** |
 | Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` | app only |
 
@@ -214,9 +221,11 @@ softened with a warning dialog.
 the app verifies.
 
 The handoff token is a login credential travelling in a URL, so it lands in
-browser history and referrers. Three things make that acceptable: the short TTL,
-the atomic single-use claim, and the fact that it is bound to a `succeeded`
-payment — a valid signature alone grants nothing.
+browser history and referrers. Four things make that acceptable: the short TTL,
+the atomic single-use claim, the fact that it is bound to a `succeeded` payment
+— a valid signature alone grants nothing — and that it can only be *issued* to
+the browser holding the booking cookie for a Checkout Session re-verified with
+Stripe in the same request, no more than 10 minutes after the charge.
 
 ---
 
@@ -240,7 +249,8 @@ Each of these has actually happened:
 | Symptom | Cause |
 |---|---|
 | Confirmation button falls back to `/login` | `AUTH_HANDOFF_SECRET` missing or mismatched between apps |
-| `/booking/confirm` throws | `BOOKING_RESUME_SECRET` missing |
+| Signup or `/booking/confirm` throws | `BOOKING_RESUME_SECRET` missing — it signs the booking cookie |
+| Every step after signup says "We couldn't find your booking" | The `pbh_booking_session` cookie is absent, expired (2h), or signed with a different `BOOKING_RESUME_SECRET` than the one reading it |
 | Paid charge rejected as "amount/currency mismatch" | Apps pointed at different Stripe accounts or price IDs |
 | No email arrives; flow stalls at the confirmation modal | `RESEND_API_KEY` unset — sends become logged no-ops and the confirmation URL is printed to the server console instead. This is how local testing works |
 | "Couldn't register with Linus (status 500)" after payment | An `education` value outside Linus's configured set (0–18 or 21) — see `pbh-a0n` |
@@ -252,9 +262,6 @@ Each of these has actually happened:
 
 Documented so nobody mistakes them for intent:
 
-- **`resolveBookingUserId`** (`packages/booking/src/server/auth.ts`) still trusts a
-  client-supplied `userId` for the details and consent steps. The resume cookie
-  and the stored package key narrow the blast radius; the seam itself is open.
 - **Comprehensive ($449) provisions exactly what Basic ($149) does** — the same
   three Linus campaigns. There is no per-package fulfilment, and the consent copy
   is still the wellness + HIPAA NPP text rather than anything written for a

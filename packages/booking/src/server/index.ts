@@ -21,7 +21,7 @@ export * from "./register-and-enroll";
 export * from "./signup-core";
 export * from "./email-verification";
 export * from "./resume";
-export * from "./resume-cookie";
+export * from "./booking-session";
 export * from "./handoff";
 export * from "./details-core";
 export * from "./consent-core";

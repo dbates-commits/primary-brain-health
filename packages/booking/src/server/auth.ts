@@ -1,18 +1,26 @@
 import "server-only";
 
+import {
+  BOOKING_SESSION_COOKIE,
+  readBookingSessionValue,
+  type BookingCookieJar,
+} from "./booking-session";
+
 /**
  * Identity seam for the booking flow.
  *
- * Today the paying user's id rides along in the multi-step flow (returned by
- * `createAccountCore` at signup, carried in client memory, and posted back as a
- * hidden `userId` field on the details/consent steps). This function is the
- * single, deliberate place that reads it — so it's the one thing that changes
- * when real auth lands.
+ * The paying user's id comes from the signed, HttpOnly booking cookie issued
+ * server-side by `createAccountCore` (and re-issued by the email-confirmation
+ * route) — never from the request body. There is deliberately no fallback to a
+ * form field: a fallback is the vulnerability, since an attacker controls
+ * whether the cookie is present.
  *
- * TODO(clerk): Clerk will own identity. Replace the body with the server-side
- * session read (`const { userId } = await auth()`) and drop the hidden `userId`
- * field from the step forms — the client-trusted value stops being trusted.
+ * Returns null when the cookie is missing, forged, or expired; every caller must
+ * treat that as "not authorized" and write nothing.
+ *
+ * TODO(clerk): when Clerk owns identity, replace the body with the session read
+ * (`const { userId } = await auth()`) and drop the cookie.
  */
-export function resolveBookingUserId(formData: FormData): string {
-  return String(formData.get("userId") ?? "").trim();
+export function resolveBookingUserId(jar: BookingCookieJar): string | null {
+  return readBookingSessionValue(jar.get(BOOKING_SESSION_COOKIE)?.value);
 }
