@@ -39,7 +39,9 @@ The funnel app stores:
 | Vercel integration | Native, auto-wires DATABASE_URL env vars per environment |
 | Pricing scaling | Predictable; doesn't surprise at scale |
 
-The branching feature deserves specific call-out: every preview deployment in Vercel can get its own database branch automatically. That means PR previews have isolated data, staging stays clean, and we never test against production data.
+The branching feature deserves specific call-out: every preview deployment in Vercel *can* get its own database branch automatically, which is the basis for the environment separation described under [Environments](#environments) below.
+
+> **As-built, corrected 2026-07-28 (pbh-9yb.3).** This paragraph previously claimed PR previews had isolated data and that "we never test against production data". That was the design intent, never the deployed reality: from launch until 2026-07-28 the Vercel **Preview** scope carried the *production* `DATABASE_URL`, so every PR preview read and wrote live rows — and, since Preview points at the Linus sandbox, wrote sandbox participant ids onto production users. Read [Environments](#environments) for what is actually wired today; do not cite this section in a compliance attestation without it.
 
 ## HIPAA tier reasoning
 
@@ -121,14 +123,46 @@ ORM: **Drizzle** (lightweight, TypeScript-first, fits the Next.js + Vercel + Neo
 
 ## Environments
 
-| Environment | Database | Purpose |
-| :---- | :---- | :---- |
-| Production | Neon production branch | Live |
-| Staging | Neon staging branch (child of production schema, empty or seeded) | UAT, integration tests |
-| Preview (per PR) | Neon ephemeral branch (auto-created by Vercel + Neon integration) | PR preview testing |
-| Local dev | Neon dev branch OR local Postgres via Docker | Engineer workstations |
+**As built** (project `primary-brain-health`, corrected 2026-07-28 under pbh-9yb.3):
 
-The Vercel + Neon integration handles preview branches automatically - no manual setup per PR.
+| Vercel scope | Neon branch | `DATABASE_ENV` | Purpose |
+| :---- | :---- | :---- | :---- |
+| Production | `production` (default) | `production` | Live |
+| Preview (all PRs, incl. `staging`) | `preview` — one shared branch | `preview` | PR previews, UAT |
+| Local dev | `dev` | `development` | Engineer workstations, `E2E_FULL_FLOW=1` runs |
+
+One shared preview branch, not one per PR. That is the MVP shape: it removes the
+production exposure, which is the compliance-relevant part, without per-PR
+provisioning. Two PRs with conflicting migrations will collide on it — accepted
+for now, and the reason branch-per-PR stays on the roadmap below.
+
+### How it is enforced
+
+An env var alone is only as good as whoever last edited it in the Vercel UI, so
+two things check it:
+
+1. **Boot assertion** — `assertDatabaseEnvironment()` (`packages/db/src/env-assert.ts`),
+   called from each app's `instrumentation.ts`, refuses to start a deployment
+   whose `DATABASE_ENV` contradicts `VERCEL_ENV`, or that pairs the production
+   database with sandbox Linus credentials. It throws; a preview writing
+   production rows is not a degraded mode worth running in.
+2. **Migration gate** — `apps/app/vercel.json` runs `db:migrate` on production,
+   and on preview *only when* `DATABASE_ENV=preview`. Previously it was
+   production-only precisely because preview shared the production database
+   (commit 84a8da0), which also made any PR containing a migration untestable on
+   preview by construction.
+
+`DATABASE_ENV` is not a secret — it names which database the connection string
+leads to, and it must be set in every scope alongside `DATABASE_URL`. Where it is
+unset the boot check logs loudly and continues, so rolling it out can't take an
+environment down.
+
+### Planned, not built
+
+- **Ephemeral branch per PR**, auto-created by the Vercel + Neon integration and
+  torn down on merge. Removes the shared-preview collision above.
+- **A dedicated staging branch.** `staging` currently deploys into the Preview
+  scope and therefore shares the preview branch with every PR.
 
 ## Open decisions
 
