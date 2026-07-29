@@ -1,1 +1,0 @@
-export { VideoSpotlight } from "./VideoSpotlight";

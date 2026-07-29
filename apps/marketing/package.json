@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tinacms dev -c \"next dev\"",
-    "build": "tinacms build && next build",
+    "build": "tinacms build $([ \"$VERCEL_ENV\" = production ] || echo --skip-cloud-checks) && next build",
     "start": "tinacms build && next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

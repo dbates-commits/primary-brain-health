@@ -3,22 +3,14 @@
 import React from "react";
 import { tinaField } from "tinacms/dist/react";
 import { Hero } from "@/components/blocks/Hero";
-import { Features } from "@/components/blocks/Features";
-import { Team } from "@/components/blocks/Team";
 import { Stats } from "@/components/blocks/Stats";
 import { FAQ } from "@/components/blocks/FAQ";
-import { CallToAction } from "@/components/blocks/CallToAction";
-import { PricingTable } from "@/components/blocks/PricingTable";
 import { Gallery } from "@/components/blocks/Gallery";
-import { ContentSection } from "@/components/blocks/ContentSection";
 import { Testimonials } from "@/components/blocks/Testimonials";
-import { LogoCloud } from "@/components/blocks/LogoCloud";
 import { BookingStepFlow } from "@/components/booking";
-import { ScrollReveal } from "@/components/blocks/ScrollReveal";
 import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
 import { BenefitsList } from "@/components/blocks/BenefitsList";
-import { VideoSpotlight } from "@/components/blocks/VideoSpotlight";
 import { ContactForm } from "@/components/blocks/ContactForm";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,37 +84,6 @@ export function BlockRenderer({
             );
             break;
 
-          case "PageBlocksFeatures":
-            content = (
-              <Features
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                subheadline={block.subheadline}
-                columns={block.columns}
-                items={block.items || []}
-                tinaFields={{
-                  headline: getFieldPath(index, "headline"),
-                  subheadline: getFieldPath(index, "subheadline"),
-                }}
-                blockData={data?.blocks?.[index]}
-              />
-            );
-            break;
-
-          case "PageBlocksTeam":
-            content = (
-              <Team
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                subheadline={block.subheadline}
-                columns={block.columns}
-                members={block.members || []}
-              />
-            );
-            break;
-
           case "PageBlocksStats":
             content = (
               <Stats
@@ -192,34 +153,6 @@ export function BlockRenderer({
             break;
           }
 
-          case "PageBlocksCta":
-            content = (
-              <CallToAction
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                description={block.subheadline}
-                primaryButtonText={block.primaryButtonText}
-                primaryButtonLink={block.primaryButtonLink}
-                secondaryButtonText={block.secondaryButtonText}
-                secondaryButtonLink={block.secondaryButtonLink}
-                image={block.image}
-              />
-            );
-            break;
-
-          case "PageBlocksPricingTable":
-            content = (
-              <PricingTable
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                subheadline={block.subheadline}
-                tiers={block.tiers || []}
-              />
-            );
-            break;
-
           case "PageBlocksGallery":
             content = (
               <Gallery
@@ -234,26 +167,6 @@ export function BlockRenderer({
             );
             break;
 
-          case "PageBlocksContent":
-            content = (
-              <ContentSection
-                variant={block.variant}
-                theme={block.theme}
-                label={block.label}
-                headline={block.headline}
-                bodyText={block.bodyText}
-                sidebarContent={block.sidebarContent}
-                leftColumn={block.leftColumn}
-                rightColumn={block.rightColumn}
-                tinaFields={{
-                  label: getFieldPath(index, "label"),
-                  headline: getFieldPath(index, "headline"),
-                  bodyText: getFieldPath(index, "bodyText"),
-                }}
-              />
-            );
-            break;
-
           case "PageBlocksTestimonials":
             content = (
               <Testimonials
@@ -262,18 +175,6 @@ export function BlockRenderer({
                 headline={block.headline}
                 subheadline={block.subheadline}
                 items={block.testimonials || []}
-              />
-            );
-            break;
-
-          case "PageBlocksLogoCloud":
-            content = (
-              <LogoCloud
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                grayscale={block.grayscale}
-                logos={block.logos || []}
               />
             );
             break;
@@ -310,41 +211,11 @@ export function BlockRenderer({
             );
             break;
 
-          case "PageBlocksScrollReveal":
-            content = (
-              <ScrollReveal
-                label={block.label}
-                headline={block.headline}
-                tinaFields={{
-                  label: getFieldPath(index, "label"),
-                  headline: getFieldPath(index, "headline"),
-                }}
-              />
-            );
-            break;
-
           case "PageBlocksScrollFillLogo":
             content = (
               <ScrollFillLogo
                 slides={block.slides || []}
                 blockData={data?.blocks?.[index]}
-              />
-            );
-            break;
-
-          case "PageBlocksVideoSpotlight":
-            content = (
-              <VideoSpotlight
-                headline={block.headline}
-                subheadline={block.subheadline}
-                video={block.video}
-                poster={block.poster}
-                leftImage={block.leftImage}
-                rightImage={block.rightImage}
-                tinaFields={{
-                  headline: getFieldPath(index, "headline"),
-                  subheadline: getFieldPath(index, "subheadline"),
-                }}
               />
             );
             break;
