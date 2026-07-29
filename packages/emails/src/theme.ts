@@ -49,8 +49,23 @@ export function emailLogoUrl(): string {
   if (process.env.EMAIL_LOGO_URL) {
     return ensureSecureUrl(process.env.EMAIL_LOGO_URL);
   }
+  return emailAssetUrl("pbh-logo.png");
+}
+
+/**
+ * The teal-washed man-and-woman photo used as the Welcome email hero
+ * background — the same couple from the marketing homepage hero, with a
+ * mostly-opaque teal overlay baked in (email clients can't reliably layer a
+ * color over a background image). Served from the funnel's public/email-assets.
+ */
+export function emailHeroImageUrl(): string {
+  return emailAssetUrl("welcome-hero-bg.jpg");
+}
+
+/** Absolute, HTTPS-safe URL for a file under the funnel's public/email-assets. */
+function emailAssetUrl(file: string): string {
   const base = process.env.APP_BASE_URL ?? "http://localhost:3001";
-  return ensureSecureUrl(`${base}/email-assets/pbh-logo.png`);
+  return ensureSecureUrl(`${base}/email-assets/${file}`);
 }
 
 /**

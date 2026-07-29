@@ -5,7 +5,7 @@ what keys are required, what endpoints exist, and how a payment moves through th
 system. For design rationale and the SAQ-A / HSA-FSA notes, see
 [stripe-architecture.md](./stripe-architecture.md); this doc is the "wiring".
 
-Scope: `apps/funnel`. Card data never touches PBH servers (Stripe-hosted
+Scope: `apps/app`. Card data never touches PBH servers (Stripe-hosted
 **Embedded Checkout** — `ui_mode: "embedded_page"`); the backend only handles
 Stripe objects.
 
@@ -50,7 +50,7 @@ Accessors: `getStripeSecretKey()` / `getStripeWebhookSecret()` in
 
 | Action | File | Purpose |
 | :---- | :---- | :---- |
-| `createAssessmentCheckoutSession(userId)` | `src/app/get-started/payment/actions.ts` | Creates the Checkout Session (`ui_mode: "embedded_page"`), returns its `client_secret` + `sessionId` to mount Embedded Checkout |
+| `createAssessmentCheckoutSession(userId)` | `apps/marketing/src/components/booking/payment/actions.ts` | Creates the Checkout Session (`ui_mode: "embedded_page"`), returns its `client_secret` + `sessionId` to mount Embedded Checkout |
 | `finalizeCheckoutSession(userId, checkoutSessionId)` | same | Client fast path, called from Embedded Checkout's `onComplete`: re-verify → record → enroll → return success state to the stepper |
 
 ### Outbound (calls we make to Stripe)
@@ -203,9 +203,9 @@ and the client/webhook race are no-ops, and each audit entry is written once.
 stripe login
 stripe listen --forward-to localhost:3001/api/stripe/webhook   # prints whsec_…
 ```
-1. Put the printed `whsec_…` in `apps/funnel/.env.local` as `STRIPE_WEBHOOK_SECRET`
+1. Put the printed `whsec_…` in `apps/app/.env.local` as `STRIPE_WEBHOOK_SECRET`
    (alongside the test `STRIPE_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`).
-2. `pnpm --filter funnel dev`
+2. `pnpm --filter app dev`
 3. Pay with test card `4242 4242 4242 4242`, any future expiry, any CVC.
 
 ### Vercel

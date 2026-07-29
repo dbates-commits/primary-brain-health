@@ -5,6 +5,12 @@ interface EmailHeroProps {
   heading: React.ReactNode;
   /** Optional white sub-headline under the main hero heading. */
   subhead?: React.ReactNode;
+  /**
+   * Optional hero background image (already teal-washed). Rendered under the
+   * teal `backgroundColor`, which stays as the fallback for clients that drop
+   * CSS background images (e.g. Outlook desktop).
+   */
+  backgroundImageUrl?: string;
 }
 
 /**
@@ -13,10 +19,21 @@ interface EmailHeroProps {
  * same family used elsewhere in these emails) rather than the design's serif,
  * which isn't reliably servable to email clients.
  */
-export function EmailHero({ heading, subhead }: EmailHeroProps) {
+export function EmailHero({ heading, subhead, backgroundImageUrl }: EmailHeroProps) {
+  const style = backgroundImageUrl
+    ? {
+        ...heroStyle,
+        // Roughly double the plain hero's height so more of the photo shows.
+        padding: "96px 40px",
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }
+    : heroStyle;
   return (
     <Section style={wrapperStyle}>
-      <Section style={heroStyle}>
+      <Section style={style}>
         <Heading style={headingStyle}>{heading}</Heading>
         {subhead ? <Text style={subheadStyle}>{subhead}</Text> : null}
       </Section>

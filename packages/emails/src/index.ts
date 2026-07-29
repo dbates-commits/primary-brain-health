@@ -2,6 +2,14 @@ export { renderEmail, type RenderedEmail } from "./render";
 
 export { WelcomeEmail, type WelcomeEmailProps } from "./emails/WelcomeEmail";
 export {
+  MagicLinkEmail,
+  type MagicLinkEmailProps,
+} from "./emails/MagicLinkEmail";
+export {
+  ConfirmEmailEmail,
+  type ConfirmEmailEmailProps,
+} from "./emails/ConfirmEmailEmail";
+export {
   PaymentReceiptEmail,
   type PaymentReceiptEmailProps,
 } from "./emails/PaymentReceiptEmail";

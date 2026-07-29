@@ -12,9 +12,9 @@ and Bearer token); nothing touches the client bundle.
 
 The integration lives in:
 
-- `apps/funnel/src/lib/linus/` — the API client, env/config, and the register payload builder.
-- `apps/funnel/src/app/assessments/` — the page, server actions (including `getReportPdf`), the register/enroll engine, and the `ViewReportButton`.
-- `apps/funnel/src/db/schema/` — the `users` and `linus_enrollments` tables.
+- `apps/app/src/lib/linus/` — the API client, env/config, and the register payload builder.
+- `apps/app/src/app/assessments/` — the page, server actions (including `getReportPdf`), the register/enroll engine, and the `ViewReportButton`.
+- `apps/app/src/db/schema/` — the `users` and `linus_enrollments` tables.
 
 ## Request flow
 

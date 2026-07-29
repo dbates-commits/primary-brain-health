@@ -11,6 +11,8 @@ interface EmailLayoutProps {
   heading: React.ReactNode;
   /** Optional white sub-headline under the hero heading. */
   subhead?: React.ReactNode;
+  /** Optional teal-washed hero background image (behind the teal fallback). */
+  heroBackgroundImageUrl?: string;
   children: React.ReactNode;
 }
 
@@ -22,6 +24,7 @@ export function EmailLayout({
   previewText,
   heading,
   subhead,
+  heroBackgroundImageUrl,
   children,
 }: EmailLayoutProps) {
   return (
@@ -31,7 +34,11 @@ export function EmailLayout({
       <Body style={bodyStyle}>
         <Container style={cardStyle}>
           <EmailHeader />
-          <EmailHero heading={heading} subhead={subhead} />
+          <EmailHero
+            heading={heading}
+            subhead={subhead}
+            backgroundImageUrl={heroBackgroundImageUrl}
+          />
           <Section style={contentStyle}>{children}</Section>
           <EmailFooter />
         </Container>

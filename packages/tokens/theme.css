@@ -13,14 +13,18 @@
    classes (`bg-primary`, `text-on-surface`, …) rather than raw hex.
    ============================================================= */
 
-/* Register the shared design-system component source so Tailwind 4
-   generates the utility classes used *inside* @pbh/ui (Button, Card,
-   …). Automatic content detection skips node_modules, where pnpm
-   symlinks workspace packages — without this, those classes are only
-   emitted by accident when an app's own source happens to use them
-   (which is why funnel rendered @pbh/ui unstyled). Path is relative to
-   this file; every app inherits it by importing @pbh/tokens/theme.css. */
+/* Register the shared design-system component sources so Tailwind 4
+   generates the utility classes used *inside* them (@pbh/ui: Button,
+   Card, …; @pbh/booking: the step forms). Automatic content detection
+   skips node_modules, where pnpm symlinks workspace packages — without
+   this, those classes are only emitted by accident when an app's own
+   source happens to use them (which is why funnel rendered @pbh/ui
+   unstyled, and why the booking fieldsets lost their `space-y-6`). Any
+   new @pbh/* package that ships className strings must be added here.
+   Paths are relative to this file; every app inherits them by importing
+   @pbh/tokens/theme.css. */
 @source "../ui/src";
+@source "../booking/src";
 
 :root {
   /* Primary palette — Dark Teal per identity guide */
@@ -30,6 +34,15 @@
   --color-on-primary-container: #a3d4e4;
   --color-primary-fixed: #d1eaf2;
   --color-primary-fixed-dim: #8ec7da;
+  /* Card surface sitting on `primary` in the booking/CTA section (Figma
+     1088:4452). Deliberately lighter and less saturated than
+     `primary-container`, which reads almost flat against `primary` at card
+     size. */
+  --color-primary-container-high: #224b60;
+  /* Pale green used to emphasise text on `primary` — the "HSA/FSA
+     reimbursement" phrase in the booking section. Not part of the aqua
+     secondary ramp; it is a highlight, not an accent surface. */
+  --color-on-primary-highlight: #deffc8;
 
   /* Secondary palette — Aqua accent per identity guide */
   --color-secondary: #009ea1;
@@ -56,6 +69,18 @@
   /* Outline */
   --color-outline: #75777e;
   --color-outline-variant: #c5c6ce;
+
+  /* Neutral grey ramp — cool/neutral greys from the Figma form designs
+     (terms panels, form inputs). Intentionally cooler than the warm
+     `surface` hierarchy above; use where a surface must match the
+     design's neutral greys rather than the brand's warm off-whites. */
+  --color-neutral-50: #f6f6f6;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #dfdfdf;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-600: #4b5563;
+  --color-neutral-900: #111827;
 
   /* Error */
   --color-error: #ba1a1a;
@@ -91,6 +116,8 @@
   --color-on-primary: var(--color-on-primary);
   --color-on-primary-container: var(--color-on-primary-container);
   --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-primary-container-high: var(--color-primary-container-high);
+  --color-on-primary-highlight: var(--color-on-primary-highlight);
   --color-secondary: var(--color-secondary);
   --color-secondary-container: var(--color-secondary-container);
   --color-on-secondary: var(--color-on-secondary);
@@ -108,6 +135,13 @@
   --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);
   --color-outline-variant: var(--color-outline-variant);
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-900: var(--color-neutral-900);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);

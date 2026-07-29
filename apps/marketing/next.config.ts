@@ -2,7 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Workspace packages ship raw TS/TSX; Next transpiles them on demand.
-  transpilePackages: ["@pbh/ui", "@pbh/tokens", "@pbh/types"],
+  transpilePackages: [
+    "@pbh/booking",
+    "@pbh/ui",
+    "@pbh/tokens",
+    "@pbh/types",
+    "@pbh/db",
+    "@pbh/payments",
+    "@pbh/linus",
+  ],
   images: {
     remotePatterns: [
       {

@@ -1,5 +1,6 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import { Button } from "@pbh/ui";
 import { HeroProps, DEFAULT_HERO_IMAGE } from "./hero-utils";
 
@@ -11,6 +12,25 @@ export function HeroFullImage({
   primaryButtonLink,
   tinaFields,
 }: HeroProps) {
+  // `Button` renders a Next.js <Link>, which updates the hash for a same-page
+  // anchor but never performs the jump — so an in-page CTA like `#intake` would
+  // change the URL and go nowhere. Scroll to the section ourselves. (The Header
+  // works around the same Link behaviour for its consultation CTA.)
+  function handlePrimaryClick(
+    e: MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
+  ) {
+    if (!primaryButtonLink?.startsWith("#")) {
+      return;
+    }
+    const target = document.getElementById(primaryButtonLink.slice(1));
+    if (!target) {
+      return;
+    }
+    e.preventDefault();
+    target.scrollIntoView({ behavior: "smooth" });
+    window.history.replaceState(null, "", primaryButtonLink);
+  }
+
   return (
     <div className="mx-auto max-w-[1880px] px-6 lg:px-10 mt-8">
       <section
@@ -55,6 +75,7 @@ export function HeroFullImage({
           >
             <Button
               href={primaryButtonLink}
+              onClick={handlePrimaryClick}
               variant="solid"
               color="primary"
               size="lg"

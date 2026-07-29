@@ -7,7 +7,7 @@ import { Stats } from "@/components/blocks/Stats";
 import { FAQ } from "@/components/blocks/FAQ";
 import { Gallery } from "@/components/blocks/Gallery";
 import { Testimonials } from "@/components/blocks/Testimonials";
-import { IntakeForm } from "@/components/blocks/IntakeForm";
+import { BookingStepFlow } from "@/components/booking";
 import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
 import { BenefitsList } from "@/components/blocks/BenefitsList";
@@ -19,12 +19,20 @@ type Block = any;
 type PageData = any;
 
 function slugify(text?: string): string | undefined {
-  if (!text) return undefined;
+  if (!text) {
+    return undefined;
+  }
   return text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
+
+// Every "Book a Consultation" CTA (hero, header, footer, global CTAs) targets
+// `#intake`, and the Header resolves it with getElementById. So the booking
+// block's anchor has to stay put even when an editor rewrites its headline —
+// hence a fixed id here rather than one slugified from the copy.
+const BOOKING_ANCHOR_ID = "intake";
 
 export function BlockRenderer({
   blocks,
@@ -33,7 +41,9 @@ export function BlockRenderer({
   blocks: Block[] | null | undefined;
   data?: PageData;
 }) {
-  if (!blocks) return null;
+  if (!blocks) {
+    return null;
+  }
 
   const getFieldPath = (index: number, field: string) => {
     return data?.blocks?.[index]
@@ -44,7 +54,10 @@ export function BlockRenderer({
   return (
     <>
       {blocks.map((block: Block, index: number) => {
-        const sectionId = slugify(block.headline);
+        const sectionId =
+          block.__typename === "PageBlocksIntakeForm"
+            ? BOOKING_ANCHOR_ID
+            : slugify(block.headline);
 
         let content: React.ReactNode = null;
 
@@ -207,18 +220,15 @@ export function BlockRenderer({
             );
             break;
 
+          // The "intakeForm" block now mounts the booking StepFlow. Reusing the
+          // existing (already-indexed) block type avoids a Tina schema change —
+          // adding a new block type fails the TinaCloud schema check on any
+          // non-main deploy. A dedicated block can come later, on main.
           case "PageBlocksIntakeForm":
             content = (
-              <IntakeForm
+              <BookingStepFlow
                 headline={block.headline}
                 subheadline={block.subheadline}
-                buttonText={block.buttonText}
-                buttonTextMobile={block.buttonTextMobile}
-                showIncludes={block.showIncludes ?? true}
-                tinaFields={{
-                  headline: getFieldPath(index, "headline"),
-                  subheadline: getFieldPath(index, "subheadline"),
-                }}
               />
             );
             break;

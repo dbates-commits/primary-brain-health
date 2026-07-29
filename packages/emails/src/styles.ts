@@ -29,4 +29,9 @@ export const mutedStyle: React.CSSProperties = {
 
 export const ctaSectionStyle: React.CSSProperties = {
   padding: "8px 0 12px",
+  // `EmailButton` is an inline-block, so without this it sits hard left. Set on
+  // the section rather than the button: react-email renders `Section` as a
+  // table, and text-align inherits down to the cell, which is what actually
+  // centres an inline-block in Outlook as well as the webmail clients.
+  textAlign: "center",
 };

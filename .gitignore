@@ -64,3 +64,9 @@ docs/sow2/proposal/SOW2-Proposal.md
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
+# Playwright E2E
+/test-results/
+/playwright-report/
+/playwright/.cache/
+.env.e2e

@@ -1,0 +1,1 @@
+ALTER TABLE "payments" ADD COLUMN "package_key" text;

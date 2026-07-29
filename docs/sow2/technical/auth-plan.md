@@ -1,6 +1,12 @@
 # Auth Plan
 
-Decision on the auth provider for the funnel app (`apps/funnel`). Locked-in pending PBH counsel's HIPAA posture decision (see `database-plan.md`).
+Decision on the auth provider for the funnel app (`apps/app`). Locked-in pending PBH counsel's HIPAA posture decision (see `database-plan.md`).
+
+> **Decided (PBH-119): passwordless magic link, not a password/credentials provider.** Shipped in
+> PR #24 — `apps/app/src/app/login/` sends a one-time email link (`@pbh/emails` `MagicLinkEmail` +
+> Resend). Chosen per the compliance thread ("easiest right now" — Stefanie): no stored passwords,
+> no reset flow, email possession is the factor. The credentials/password recommendation below is
+> superseded; the "Password security" and "Forgot password flow" sections do not apply.
 
 ## Recommendation: **Auth.js v5 (NextAuth) with credentials provider, sessions in Neon**
 
@@ -92,10 +98,49 @@ The existing `users` table from `database-plan.md` keeps its app-specific column
 
 ## Session strategy
 
-- Database-backed sessions (not JWT). Easier to revoke, easier to audit, supports immediate logout-everywhere on password change.
+- Database-backed sessions (not JWT). Easier to revoke, easier to audit, supports immediate sign-out-everywhere.
 - Cookie scoped to `.primarybrainhealth.com` (apex domain) so it spans `primarybrainhealth.com` and `app.primarybrainhealth.com` cleanly.
 - `httpOnly`, `secure`, `sameSite=lax`.
-- 30-day sliding expiration; refresh on activity.
+- Session lifetime is governed by the automatic-logoff controls below, not by a
+  convenience-length expiry.
+
+### HIPAA automatic-logoff controls
+
+HIPAA prescribes no specific session-timeout duration. It requires an automatic
+logoff control proportionate to the organization's risk assessment
+(§164.312(a)(2)(iii), addressable). The authenticated dashboard reaches the Linus
+report, so the dashboard session is part of the protected access pathway even
+though the report itself remains stored in Linus. That is what sets the durations
+below (Stefanie Kamps, compliance review, Jul 2026; PBH-120).
+
+| Control | Value | Scope |
+| --- | --- | --- |
+| Inactivity timeout | **15 minutes** | The entire authenticated dashboard |
+| Absolute session cap | **8 hours** | The entire authenticated dashboard |
+| Sign-in link TTL | **15 minutes**, single-use | Magic-link email |
+
+- **Scope is the whole authenticated area, not just the report page.** Every
+  signed-in route is behind the same control set; there is no page-level carve-out.
+- **Inactivity timeout** — 15 minutes idle and the next request is
+  unauthenticated. Auth.js slides the session deadline forward on activity, so
+  this is an inactivity measure, not a total lifetime.
+- **Absolute cap** — a session ends 8 hours after it was minted however
+  continuously active it has been, so a session cannot stay authenticated
+  indefinitely. Auth.js has no built-in for this; it is enforced against the
+  session's creation time, which is recorded separately from the sliding idle
+  deadline.
+- **Sign-in link** — short-lived and single-use; redeeming it consumes the token.
+
+Implemented in `apps/app/src/auth.ts` (`IDLE_SESSION_MAX_SECONDS`,
+`ABSOLUTE_SESSION_MAX_SECONDS`, `MAGIC_LINK_TTL_SECONDS`) and backed by
+`sessions.created_at` in `packages/db/src/schema/auth.ts`. Change the values in
+one place: the doc records the requirement, the constants are the implementation.
+
+**Considered and not adopted — step-up re-authentication.** The original
+compliance thread also recommended requiring the customer to authenticate again
+before reopening or downloading the report. This was dropped from scope: the idle
+and absolute timeouts are the control set being committed to. Revisit only if
+compliance asks for it again.
 
 ## Email verification
 

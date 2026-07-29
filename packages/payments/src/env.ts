@@ -17,6 +17,40 @@ export function getStripeSecretKey(): string {
 }
 
 /**
+ * Catalog Price ID for the brain-health assessment, charged at checkout. The
+ * amount and currency live on the Stripe Price object (the single source of
+ * truth), so this ID — not a hardcoded cents value — is what varies between
+ * environments: the sandbox test price locally/on Preview, the live
+ * `clinical_assessment` price in Production. Set it per Vercel environment.
+ */
+export function getStripeAssessmentPriceId(): string {
+  return getStripePriceIdFromEnv("STRIPE_ASSESSMENT_PRICE_ID");
+}
+
+/**
+ * Read a package's Stripe Price ID from the env var that backs it. Each
+ * assessment package names its own var (see `ASSESSMENT_PACKAGES` in
+ * `@pbh/booking`), so adding a package is a config change here plus a Price in
+ * the Stripe catalog — never a hardcoded amount.
+ *
+ * Both price IDs must come from the SAME Stripe account as `STRIPE_SECRET_KEY`,
+ * and that account must match the one the funnel's webhook uses; fulfillment
+ * re-fetches the PaymentIntent and validates it against the catalog price.
+ */
+export function getStripePriceIdFromEnv(envVar: string): string {
+  const priceId = process.env[envVar];
+  if (!priceId) {
+    throw new Error(
+      `Stripe checkout is not configured. Missing ${envVar}. Locally, copy ` +
+        ".env.example to .env.local and paste a test-mode Price ID from the " +
+        "same Stripe account as your secret key. On Vercel, set it per " +
+        "environment (sandbox price on Preview, live price in Production).",
+    );
+  }
+  return priceId;
+}
+
+/**
  * Signing secret for the Stripe webhook endpoint, used to verify that inbound
  * events genuinely came from Stripe. Distinct per endpoint: the local Stripe
  * CLI (`stripe listen`) prints its own `whsec_…`, and each hosted endpoint in
