@@ -70,6 +70,336 @@ var heroBlock = {
   ]
 };
 
+// tina/blocks/testimonials.ts
+var testimonialsBlock = {
+  name: "testimonials",
+  label: "Testimonials Section",
+  ui: {
+    defaultItem: {
+      variant: "carousel",
+      theme: "light",
+      headline: "What Our Customers Say",
+      useReferences: false,
+      items: [
+        {
+          quote: "This product has completely transformed how we work. Highly recommended!",
+          authorName: "Jane Doe",
+          authorRole: "CEO",
+          company: "Acme Inc",
+          rating: 5
+        }
+      ]
+    },
+    itemProps: (item) => ({
+      label: `Testimonials - ${item?.variant || "carousel"}`
+    })
+  },
+  fields: [
+    {
+      name: "variant",
+      label: "Layout Style",
+      type: "string",
+      options: [
+        { value: "carousel", label: "Carousel" },
+        { value: "grid", label: "Grid" },
+        { value: "single", label: "Single Featured" },
+        { value: "quotes", label: "Quotes Wall" }
+      ]
+    },
+    {
+      name: "theme",
+      label: "Color Theme",
+      type: "string",
+      options: [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" },
+        { value: "primary", label: "Primary" }
+      ]
+    },
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Subheadline",
+      type: "string"
+    },
+    {
+      name: "useReferences",
+      label: "Use Referenced Testimonials",
+      type: "boolean",
+      description: "Pull from the Testimonials collection instead of inline"
+    },
+    {
+      name: "testimonialRefs",
+      label: "Referenced Testimonials",
+      type: "object",
+      list: true,
+      fields: [
+        {
+          name: "testimonial",
+          label: "Testimonial",
+          type: "reference",
+          collections: ["testimonial"]
+        }
+      ]
+    },
+    {
+      name: "items",
+      label: "Inline Testimonials",
+      type: "object",
+      list: true,
+      description: "Add testimonials directly (when not using references)",
+      ui: {
+        itemProps: (item) => ({
+          label: item?.authorName || "Testimonial"
+        })
+      },
+      fields: [
+        {
+          name: "quote",
+          label: "Quote",
+          type: "string",
+          required: true,
+          ui: {
+            component: "textarea"
+          }
+        },
+        {
+          name: "authorName",
+          label: "Author Name",
+          type: "string",
+          required: true
+        },
+        {
+          name: "authorRole",
+          label: "Author Role",
+          type: "string"
+        },
+        {
+          name: "company",
+          label: "Company",
+          type: "string"
+        },
+        {
+          name: "avatar",
+          label: "Avatar",
+          type: "image"
+        },
+        {
+          name: "rating",
+          label: "Rating (1-5)",
+          type: "number"
+        }
+      ]
+    }
+  ]
+};
+
+// tina/blocks/gallery.ts
+var galleryBlock = {
+  name: "gallery",
+  label: "Gallery Section",
+  ui: {
+    defaultItem: {
+      variant: "grid",
+      theme: "light",
+      columns: "3",
+      items: []
+    },
+    itemProps: (item) => ({
+      label: `Gallery - ${item?.variant || "grid"} (${item?.items?.length || 0} items)`
+    })
+  },
+  fields: [
+    {
+      name: "variant",
+      label: "Layout Style",
+      type: "string",
+      options: [
+        { value: "grid", label: "Grid" },
+        { value: "masonry", label: "Masonry" },
+        { value: "carousel", label: "Carousel" },
+        { value: "lightbox", label: "Lightbox Gallery" }
+      ]
+    },
+    {
+      name: "theme",
+      label: "Color Theme",
+      type: "string",
+      options: [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" }
+      ]
+    },
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Subheadline",
+      type: "string"
+    },
+    {
+      name: "columns",
+      label: "Columns",
+      type: "string",
+      options: ["2", "3", "4", "5"]
+    },
+    {
+      name: "gap",
+      label: "Gap Size",
+      type: "string",
+      options: [
+        { value: "none", label: "None" },
+        { value: "small", label: "Small" },
+        { value: "medium", label: "Medium" },
+        { value: "large", label: "Large" }
+      ]
+    },
+    {
+      name: "items",
+      label: "Gallery Items",
+      type: "object",
+      list: true,
+      ui: {
+        itemProps: (item) => ({
+          label: item?.caption || item?.alt || "Gallery Item"
+        })
+      },
+      fields: [
+        {
+          name: "image",
+          label: "Image",
+          type: "image"
+        },
+        {
+          name: "alt",
+          label: "Alt Text",
+          type: "string"
+        },
+        {
+          name: "caption",
+          label: "Caption",
+          type: "string"
+        },
+        {
+          name: "video",
+          label: "Video URL",
+          type: "string",
+          description: "YouTube/Vimeo URL (overrides image in lightbox)"
+        },
+        {
+          name: "aspectRatio",
+          label: "Aspect Ratio",
+          type: "string",
+          options: [
+            { value: "square", label: "Square (1:1)" },
+            { value: "video", label: "Video (16:9)" },
+            { value: "portrait", label: "Portrait (3:4)" },
+            { value: "landscape", label: "Landscape (4:3)" }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// tina/blocks/faq.ts
+var faqBlock = {
+  name: "faq",
+  label: "FAQ Section",
+  ui: {
+    defaultItem: {
+      variant: "accordion",
+      theme: "light",
+      headline: "Frequently Asked Questions",
+      items: []
+    },
+    itemProps: (item) => ({
+      label: `FAQ - ${item?.variant || "accordion"} (${item?.items?.length || 0} items)`
+    })
+  },
+  fields: [
+    {
+      name: "variant",
+      label: "Layout Style",
+      type: "string",
+      options: [
+        { value: "accordion", label: "Accordion" },
+        { value: "twoColumn", label: "Two Column" },
+        { value: "cards", label: "Cards" }
+      ]
+    },
+    {
+      name: "theme",
+      label: "Color Theme",
+      type: "string",
+      options: [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" }
+      ]
+    },
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Subheadline",
+      type: "string"
+    },
+    {
+      name: "items",
+      label: "FAQ Items",
+      type: "object",
+      list: true,
+      description: "Pick FAQs from the FAQ collection. Order here is overridden by each FAQ's Sort Order if set.",
+      fields: [
+        {
+          name: "faq",
+          label: "FAQ",
+          type: "reference",
+          collections: ["faq"]
+        }
+      ]
+    },
+    {
+      name: "limit",
+      label: "Limit",
+      type: "number",
+      description: "Show only the first N FAQs (after sorting). Leave empty to show all."
+    },
+    {
+      name: "showCategories",
+      label: "Show Category Filters",
+      type: "boolean"
+    },
+    {
+      name: "ctaText",
+      label: "CTA Description",
+      type: "string",
+      description: "Optional text above the CTA button, e.g. 'Still have questions?'"
+    },
+    {
+      name: "ctaButtonText",
+      label: "CTA Button Text",
+      type: "string",
+      description: "e.g. 'View All FAQs' or 'Contact Us'"
+    },
+    {
+      name: "ctaLink",
+      label: "CTA Link",
+      type: "string"
+    }
+  ]
+};
+
 // tina/fields/IconPicker.tsx
 import { useMemo, useState } from "react";
 import * as PhosphorIcons from "@phosphor-icons/react";
@@ -299,912 +629,6 @@ function IconPickerInner({ input }) {
 }
 var IconPicker = wrapFieldsWithMeta(IconPickerInner);
 
-// tina/blocks/features.ts
-var featuresBlock = {
-  name: "features",
-  label: "Features Section",
-  ui: {
-    defaultItem: {
-      variant: "grid",
-      theme: "light",
-      headline: "Why Choose Us",
-      subheadline: "Everything you need to succeed",
-      columns: "3",
-      items: [
-        {
-          title: "Feature One",
-          description: "Description of your first amazing feature",
-          icon: "rocket"
-        },
-        {
-          title: "Feature Two",
-          description: "Description of your second amazing feature",
-          icon: "shield"
-        },
-        {
-          title: "Feature Three",
-          description: "Description of your third amazing feature",
-          icon: "zap"
-        }
-      ]
-    },
-    itemProps: (item) => ({
-      label: `Features - ${item?.variant || "grid"} (${item?.items?.length || 0} items)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "grid", label: "Grid" },
-        { value: "alternating", label: "Alternating" },
-        { value: "iconCards", label: "Icon Cards" },
-        { value: "comparison", label: "Comparison" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-        { value: "primary", label: "Primary" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "columns",
-      label: "Columns",
-      type: "string",
-      options: ["2", "3", "4"],
-      description: "Number of columns (grid variant only)"
-    },
-    {
-      name: "items",
-      label: "Feature Items",
-      type: "object",
-      list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: item?.title || "Feature Item"
-        })
-      },
-      fields: [
-        {
-          name: "title",
-          label: "Title",
-          type: "string",
-          required: true
-        },
-        {
-          name: "description",
-          label: "Description",
-          type: "string",
-          ui: {
-            component: "textarea"
-          }
-        },
-        {
-          name: "icon",
-          label: "Icon",
-          type: "string",
-          description: "Pick a Phosphor icon.",
-          ui: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            component: IconPicker
-          }
-        },
-        {
-          name: "image",
-          label: "Image",
-          type: "image",
-          description: "Used for alternating layout"
-        },
-        {
-          name: "link",
-          label: "Link",
-          type: "string"
-        }
-      ]
-    }
-  ]
-};
-
-// tina/blocks/testimonials.ts
-var testimonialsBlock = {
-  name: "testimonials",
-  label: "Testimonials Section",
-  ui: {
-    defaultItem: {
-      variant: "carousel",
-      theme: "light",
-      headline: "What Our Customers Say",
-      useReferences: false,
-      items: [
-        {
-          quote: "This product has completely transformed how we work. Highly recommended!",
-          authorName: "Jane Doe",
-          authorRole: "CEO",
-          company: "Acme Inc",
-          rating: 5
-        }
-      ]
-    },
-    itemProps: (item) => ({
-      label: `Testimonials - ${item?.variant || "carousel"}`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "carousel", label: "Carousel" },
-        { value: "grid", label: "Grid" },
-        { value: "single", label: "Single Featured" },
-        { value: "quotes", label: "Quotes Wall" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-        { value: "primary", label: "Primary" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "useReferences",
-      label: "Use Referenced Testimonials",
-      type: "boolean",
-      description: "Pull from the Testimonials collection instead of inline"
-    },
-    {
-      name: "testimonialRefs",
-      label: "Referenced Testimonials",
-      type: "object",
-      list: true,
-      fields: [
-        {
-          name: "testimonial",
-          label: "Testimonial",
-          type: "reference",
-          collections: ["testimonial"]
-        }
-      ]
-    },
-    {
-      name: "items",
-      label: "Inline Testimonials",
-      type: "object",
-      list: true,
-      description: "Add testimonials directly (when not using references)",
-      ui: {
-        itemProps: (item) => ({
-          label: item?.authorName || "Testimonial"
-        })
-      },
-      fields: [
-        {
-          name: "quote",
-          label: "Quote",
-          type: "string",
-          required: true,
-          ui: {
-            component: "textarea"
-          }
-        },
-        {
-          name: "authorName",
-          label: "Author Name",
-          type: "string",
-          required: true
-        },
-        {
-          name: "authorRole",
-          label: "Author Role",
-          type: "string"
-        },
-        {
-          name: "company",
-          label: "Company",
-          type: "string"
-        },
-        {
-          name: "avatar",
-          label: "Avatar",
-          type: "image"
-        },
-        {
-          name: "rating",
-          label: "Rating (1-5)",
-          type: "number"
-        }
-      ]
-    }
-  ]
-};
-
-// tina/blocks/cta.ts
-var ctaBlock = {
-  name: "cta",
-  label: "Call to Action",
-  ui: {
-    defaultItem: {
-      variant: "simple",
-      theme: "primary",
-      headline: "Ready to Get Started?",
-      description: "Join thousands of satisfied customers today.",
-      primaryButtonText: "Start Free Trial",
-      primaryButtonLink: "#"
-    },
-    itemProps: (item) => ({
-      label: `CTA - ${item?.variant || "simple"}`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "simple", label: "Simple" },
-        { value: "withImage", label: "With Image" },
-        { value: "newsletter", label: "Newsletter" },
-        { value: "reference", label: "Global CTA Reference" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-        { value: "primary", label: "Primary" },
-        { value: "gradient", label: "Gradient" }
-      ]
-    },
-    {
-      name: "globalCtaRef",
-      label: "Global CTA Reference",
-      type: "reference",
-      collections: ["globalCta"],
-      description: "Use a shared CTA (only for reference variant)"
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "description",
-      label: "Description",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
-    },
-    {
-      name: "image",
-      label: "Image",
-      type: "image",
-      description: "For withImage variant"
-    },
-    {
-      name: "primaryButtonText",
-      label: "Primary Button Text",
-      type: "string"
-    },
-    {
-      name: "primaryButtonLink",
-      label: "Primary Button Link",
-      type: "string"
-    },
-    {
-      name: "secondaryButtonText",
-      label: "Secondary Button Text",
-      type: "string"
-    },
-    {
-      name: "secondaryButtonLink",
-      label: "Secondary Button Link",
-      type: "string"
-    },
-    {
-      name: "emailPlaceholder",
-      label: "Email Placeholder",
-      type: "string",
-      description: "For newsletter variant"
-    },
-    {
-      name: "submitButtonText",
-      label: "Submit Button Text",
-      type: "string",
-      description: "For newsletter variant"
-    }
-  ]
-};
-
-// tina/blocks/content.ts
-var contentBlock = {
-  name: "content",
-  label: "Content Section",
-  ui: {
-    defaultItem: {
-      variant: "default",
-      theme: "light"
-    },
-    itemProps: (item) => ({
-      label: `Content - ${item?.variant || "default"}`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "default", label: "Default (Full Width)" },
-        { value: "twoColumn", label: "Two Column" },
-        { value: "withSidebar", label: "With Sidebar" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "label",
-      label: "Section Label",
-      type: "string",
-      description: "Small uppercase text above the headline (e.g. 'Our Approach')"
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "bodyText",
-      label: "Body Content",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
-    },
-    {
-      name: "sidebarContent",
-      label: "Sidebar Content",
-      type: "rich-text",
-      description: "For withSidebar variant"
-    },
-    {
-      name: "leftColumn",
-      label: "Left Column",
-      type: "rich-text",
-      description: "For twoColumn variant"
-    },
-    {
-      name: "rightColumn",
-      label: "Right Column",
-      type: "rich-text",
-      description: "For twoColumn variant"
-    }
-  ]
-};
-
-// tina/blocks/gallery.ts
-var galleryBlock = {
-  name: "gallery",
-  label: "Gallery Section",
-  ui: {
-    defaultItem: {
-      variant: "grid",
-      theme: "light",
-      columns: "3",
-      items: []
-    },
-    itemProps: (item) => ({
-      label: `Gallery - ${item?.variant || "grid"} (${item?.items?.length || 0} items)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "grid", label: "Grid" },
-        { value: "masonry", label: "Masonry" },
-        { value: "carousel", label: "Carousel" },
-        { value: "lightbox", label: "Lightbox Gallery" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "columns",
-      label: "Columns",
-      type: "string",
-      options: ["2", "3", "4", "5"]
-    },
-    {
-      name: "gap",
-      label: "Gap Size",
-      type: "string",
-      options: [
-        { value: "none", label: "None" },
-        { value: "small", label: "Small" },
-        { value: "medium", label: "Medium" },
-        { value: "large", label: "Large" }
-      ]
-    },
-    {
-      name: "items",
-      label: "Gallery Items",
-      type: "object",
-      list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: item?.caption || item?.alt || "Gallery Item"
-        })
-      },
-      fields: [
-        {
-          name: "image",
-          label: "Image",
-          type: "image"
-        },
-        {
-          name: "alt",
-          label: "Alt Text",
-          type: "string"
-        },
-        {
-          name: "caption",
-          label: "Caption",
-          type: "string"
-        },
-        {
-          name: "video",
-          label: "Video URL",
-          type: "string",
-          description: "YouTube/Vimeo URL (overrides image in lightbox)"
-        },
-        {
-          name: "aspectRatio",
-          label: "Aspect Ratio",
-          type: "string",
-          options: [
-            { value: "square", label: "Square (1:1)" },
-            { value: "video", label: "Video (16:9)" },
-            { value: "portrait", label: "Portrait (3:4)" },
-            { value: "landscape", label: "Landscape (4:3)" }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
-// tina/blocks/pricing.ts
-var pricingBlock = {
-  name: "pricing",
-  label: "Pricing Section",
-  ui: {
-    defaultItem: {
-      variant: "cards",
-      theme: "light",
-      headline: "Simple, Transparent Pricing",
-      subheadline: "Choose the plan that works for you",
-      tiers: [
-        {
-          name: "Starter",
-          price: "9",
-          period: "month",
-          description: "Perfect for individuals",
-          features: ["5 Projects", "Basic Support", "1GB Storage"],
-          buttonText: "Get Started",
-          buttonLink: "#"
-        },
-        {
-          name: "Pro",
-          price: "29",
-          period: "month",
-          description: "Best for growing teams",
-          features: ["Unlimited Projects", "Priority Support", "10GB Storage", "Analytics"],
-          buttonText: "Start Free Trial",
-          buttonLink: "#",
-          highlighted: true
-        },
-        {
-          name: "Enterprise",
-          price: "99",
-          period: "month",
-          description: "For large organizations",
-          features: ["Everything in Pro", "Dedicated Support", "Unlimited Storage", "Custom Integrations", "SLA"],
-          buttonText: "Contact Sales",
-          buttonLink: "#"
-        }
-      ]
-    },
-    itemProps: (item) => ({
-      label: `Pricing - ${item?.variant || "cards"} (${item?.tiers?.length || 0} tiers)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "cards", label: "Cards" },
-        { value: "table", label: "Table" },
-        { value: "comparison", label: "Feature Comparison" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "showToggle",
-      label: "Show Monthly/Annual Toggle",
-      type: "boolean"
-    },
-    {
-      name: "annualDiscount",
-      label: "Annual Discount %",
-      type: "number",
-      description: "Discount percentage for annual billing"
-    },
-    {
-      name: "tiers",
-      label: "Pricing Tiers",
-      type: "object",
-      list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: item?.name || "Tier"
-        })
-      },
-      fields: [
-        {
-          name: "name",
-          label: "Tier Name",
-          type: "string",
-          required: true
-        },
-        {
-          name: "price",
-          label: "Price",
-          type: "string",
-          required: true
-        },
-        {
-          name: "period",
-          label: "Billing Period",
-          type: "string",
-          options: [
-            { value: "month", label: "Per Month" },
-            { value: "year", label: "Per Year" },
-            { value: "once", label: "One Time" }
-          ]
-        },
-        {
-          name: "description",
-          label: "Description",
-          type: "string"
-        },
-        {
-          name: "features",
-          label: "Features",
-          type: "string",
-          list: true
-        },
-        {
-          name: "buttonText",
-          label: "Button Text",
-          type: "string"
-        },
-        {
-          name: "buttonLink",
-          label: "Button Link",
-          type: "string"
-        },
-        {
-          name: "highlighted",
-          label: "Highlighted (Featured)",
-          type: "boolean"
-        },
-        {
-          name: "badge",
-          label: "Badge Text",
-          type: "string",
-          description: "e.g., 'Most Popular'"
-        }
-      ]
-    }
-  ]
-};
-
-// tina/blocks/faq.ts
-var faqBlock = {
-  name: "faq",
-  label: "FAQ Section",
-  ui: {
-    defaultItem: {
-      variant: "accordion",
-      theme: "light",
-      headline: "Frequently Asked Questions",
-      items: []
-    },
-    itemProps: (item) => ({
-      label: `FAQ - ${item?.variant || "accordion"} (${item?.items?.length || 0} items)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "accordion", label: "Accordion" },
-        { value: "twoColumn", label: "Two Column" },
-        { value: "cards", label: "Cards" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "items",
-      label: "FAQ Items",
-      type: "object",
-      list: true,
-      description: "Pick FAQs from the FAQ collection. Order here is overridden by each FAQ's Sort Order if set.",
-      fields: [
-        {
-          name: "faq",
-          label: "FAQ",
-          type: "reference",
-          collections: ["faq"]
-        }
-      ]
-    },
-    {
-      name: "limit",
-      label: "Limit",
-      type: "number",
-      description: "Show only the first N FAQs (after sorting). Leave empty to show all."
-    },
-    {
-      name: "showCategories",
-      label: "Show Category Filters",
-      type: "boolean"
-    },
-    {
-      name: "ctaText",
-      label: "CTA Description",
-      type: "string",
-      description: "Optional text above the CTA button, e.g. 'Still have questions?'"
-    },
-    {
-      name: "ctaButtonText",
-      label: "CTA Button Text",
-      type: "string",
-      description: "e.g. 'View All FAQs' or 'Contact Us'"
-    },
-    {
-      name: "ctaLink",
-      label: "CTA Link",
-      type: "string"
-    }
-  ]
-};
-
-// tina/blocks/team.ts
-var teamBlock = {
-  name: "team",
-  label: "Team Section",
-  ui: {
-    defaultItem: {
-      variant: "grid",
-      theme: "light",
-      headline: "Meet Our Team",
-      subheadline: "The people behind the magic",
-      useReferences: false
-    },
-    itemProps: (item) => ({
-      label: `Team - ${item?.variant || "grid"}`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "grid", label: "Grid" },
-        { value: "carousel", label: "Carousel" },
-        { value: "list", label: "List" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "columns",
-      label: "Columns",
-      type: "string",
-      options: ["2", "3", "4"]
-    },
-    {
-      name: "useReferences",
-      label: "Use Author References",
-      type: "boolean",
-      description: "Pull from the Authors collection"
-    },
-    {
-      name: "authorRefs",
-      label: "Referenced Authors",
-      type: "object",
-      list: true,
-      fields: [
-        {
-          name: "author",
-          label: "Author",
-          type: "reference",
-          collections: ["author"]
-        }
-      ]
-    },
-    {
-      name: "members",
-      label: "Team Members (Inline)",
-      type: "object",
-      list: true,
-      description: "Add team members directly",
-      ui: {
-        itemProps: (item) => ({
-          label: item?.name || "Team Member"
-        })
-      },
-      fields: [
-        {
-          name: "name",
-          label: "Name",
-          type: "string",
-          required: true
-        },
-        {
-          name: "role",
-          label: "Role",
-          type: "string"
-        },
-        {
-          name: "avatar",
-          label: "Avatar",
-          type: "image"
-        },
-        {
-          name: "bio",
-          label: "Bio",
-          type: "string",
-          ui: {
-            component: "textarea"
-          }
-        },
-        {
-          name: "social",
-          label: "Social Links",
-          type: "object",
-          fields: [
-            { name: "twitter", label: "Twitter URL", type: "string" },
-            { name: "linkedin", label: "LinkedIn URL", type: "string" },
-            { name: "github", label: "GitHub URL", type: "string" }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
 // tina/blocks/stats.ts
 var statsBlock = {
   name: "stats",
@@ -1313,100 +737,6 @@ var statsBlock = {
   ]
 };
 
-// tina/blocks/logoCloud.ts
-var logoCloudBlock = {
-  name: "logoCloud",
-  label: "Logo Cloud Section",
-  ui: {
-    defaultItem: {
-      variant: "simple",
-      theme: "light",
-      headline: "Trusted by Industry Leaders",
-      grayscale: true
-    },
-    itemProps: (item) => ({
-      label: `Logo Cloud - ${item?.variant || "simple"} (${item?.logos?.length || 0} logos)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "simple", label: "Simple Row" },
-        { value: "marquee", label: "Marquee (Scrolling)" },
-        { value: "grid", label: "Grid" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "grayscale",
-      label: "Grayscale Logos",
-      type: "boolean",
-      description: "Display logos in grayscale (color on hover)"
-    },
-    {
-      name: "size",
-      label: "Logo Size",
-      type: "string",
-      options: [
-        { value: "small", label: "Small" },
-        { value: "medium", label: "Medium" },
-        { value: "large", label: "Large" }
-      ]
-    },
-    {
-      name: "logos",
-      label: "Logos",
-      type: "object",
-      list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: item?.name || "Logo"
-        })
-      },
-      fields: [
-        {
-          name: "image",
-          label: "Logo Image",
-          type: "image",
-          required: true
-        },
-        {
-          name: "name",
-          label: "Company Name",
-          type: "string",
-          required: true
-        },
-        {
-          name: "url",
-          label: "Website URL",
-          type: "string"
-        }
-      ]
-    }
-  ]
-};
-
 // tina/blocks/intakeForm.ts
 var intakeFormBlock = {
   name: "intakeForm",
@@ -1455,37 +785,6 @@ var intakeFormBlock = {
   ]
 };
 
-// tina/blocks/scrollReveal.ts
-var scrollRevealBlock = {
-  name: "scrollReveal",
-  label: "Scroll Reveal Text",
-  ui: {
-    defaultItem: {
-      label: "YOU ARE DOING THE RIGHT THING AT THE RIGHT PLACE",
-      headline: "We help you understand your brain, reduce your risk, and take action early through advanced assessment, clinical insight, and ongoing personalized care."
-    },
-    itemProps: (item) => ({
-      label: `Scroll Reveal - ${item?.headline?.slice(0, 40) || "Untitled"}`
-    })
-  },
-  fields: [
-    {
-      name: "label",
-      label: "Eyebrow Label",
-      type: "string",
-      description: "Small uppercase text shown above the headline (optional)"
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
-    }
-  ]
-};
-
 // tina/blocks/scrollFillLogo.ts
 var scrollFillLogoBlock = {
   name: "scrollFillLogo",
@@ -1494,8 +793,8 @@ var scrollFillLogoBlock = {
     defaultItem: {
       slides: [
         {
-          label: "You are doing the right thing at the right place",
-          headline: "We help you understand your brain, reduce your risk, and take action early through advanced assessment, clinical insight, and ongoing personalized care."
+          label: "Trust the instinct that brought you here",
+          headline: "We help you understand how your brain is performing, reduce your risk of cognitive decline, and take action early through advanced assessment, clinical insight, and ongoing personalized care."
         },
         {
           label: "Why Primary Brain Health?",
@@ -1689,60 +988,6 @@ var benefitsListBlock = {
   ]
 };
 
-// tina/blocks/videoSpotlight.ts
-var videoSpotlightBlock = {
-  name: "videoSpotlight",
-  label: "Video Spotlight",
-  ui: {
-    defaultItem: {
-      headline: "",
-      subheadline: ""
-    },
-    itemProps: (item) => ({
-      label: `Video Spotlight - ${item?.headline?.slice(0, 40) || "Untitled"}`
-    })
-  },
-  fields: [
-    {
-      name: "headline",
-      label: "Headline (optional)",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline (optional)",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
-    },
-    {
-      name: "video",
-      label: "Video URL",
-      type: "string",
-      description: "Path to a video file in /public (e.g. /videos/intro.mp4). Plays in a modal when the play button is clicked."
-    },
-    {
-      name: "poster",
-      label: "Poster Image",
-      type: "image",
-      description: "Still shown in the centered card before play"
-    },
-    {
-      name: "leftImage",
-      label: "Left Decorative Image",
-      type: "image",
-      description: "Decorative image peeking out behind the video on the left"
-    },
-    {
-      name: "rightImage",
-      label: "Right Decorative Image",
-      type: "image",
-      description: "Decorative image peeking out behind the video on the right"
-    }
-  ]
-};
-
 // tina/blocks/contactForm.ts
 var contactFormBlock = {
   name: "contactForm",
@@ -1823,22 +1068,14 @@ var pageCollection = {
       },
       templates: [
         heroBlock,
-        featuresBlock,
         testimonialsBlock,
-        ctaBlock,
-        contentBlock,
         galleryBlock,
-        pricingBlock,
         faqBlock,
-        teamBlock,
         statsBlock,
-        logoCloudBlock,
         intakeFormBlock,
-        scrollRevealBlock,
         scrollFillLogoBlock,
         stackSectionsBlock,
         benefitsListBlock,
-        videoSpotlightBlock,
         contactFormBlock
       ]
     }

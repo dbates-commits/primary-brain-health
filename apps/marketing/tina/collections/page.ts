@@ -1,21 +1,13 @@
 import type { Collection } from "tinacms";
 import { heroBlock } from "../blocks/hero";
-import { featuresBlock } from "../blocks/features";
 import { testimonialsBlock } from "../blocks/testimonials";
-import { ctaBlock } from "../blocks/cta";
-import { contentBlock } from "../blocks/content";
 import { galleryBlock } from "../blocks/gallery";
-import { pricingBlock } from "../blocks/pricing";
 import { faqBlock } from "../blocks/faq";
-import { teamBlock } from "../blocks/team";
 import { statsBlock } from "../blocks/stats";
-import { logoCloudBlock } from "../blocks/logoCloud";
 import { intakeFormBlock } from "../blocks/intakeForm";
-import { scrollRevealBlock } from "../blocks/scrollReveal";
 import { scrollFillLogoBlock } from "../blocks/scrollFillLogo";
 import { stackSectionsBlock } from "../blocks/stackSections";
 import { benefitsListBlock } from "../blocks/benefitsList";
-import { videoSpotlightBlock } from "../blocks/videoSpotlight";
 import { contactFormBlock } from "../blocks/contactForm";
 
 export const pageCollection: Collection = {
@@ -63,22 +55,14 @@ export const pageCollection: Collection = {
       },
       templates: [
         heroBlock,
-        featuresBlock,
         testimonialsBlock,
-        ctaBlock,
-        contentBlock,
         galleryBlock,
-        pricingBlock,
         faqBlock,
-        teamBlock,
         statsBlock,
-        logoCloudBlock,
         intakeFormBlock,
-        scrollRevealBlock,
         scrollFillLogoBlock,
         stackSectionsBlock,
         benefitsListBlock,
-        videoSpotlightBlock,
         contactFormBlock,
       ],
     },

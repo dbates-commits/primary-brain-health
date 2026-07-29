@@ -119,23 +119,6 @@ type PageBlocksHero {
   primaryButtonLink: String
 }
 
-type PageBlocksFeaturesItems {
-  title: String!
-  description: String
-  icon: String
-  image: String
-  link: String
-}
-
-type PageBlocksFeatures {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  columns: String
-  items: [PageBlocksFeaturesItems]
-}
-
 union PageBlocksTestimonialsTestimonialRefsTestimonial = Testimonial
 
 type PageBlocksTestimonialsTestimonialRefs {
@@ -161,34 +144,6 @@ type PageBlocksTestimonials {
   items: [PageBlocksTestimonialsItems]
 }
 
-union PageBlocksCtaGlobalCtaRef = GlobalCta
-
-type PageBlocksCta {
-  variant: String
-  theme: String
-  globalCtaRef: PageBlocksCtaGlobalCtaRef
-  headline: String
-  description: String
-  image: String
-  primaryButtonText: String
-  primaryButtonLink: String
-  secondaryButtonText: String
-  secondaryButtonLink: String
-  emailPlaceholder: String
-  submitButtonText: String
-}
-
-type PageBlocksContent {
-  variant: String
-  theme: String
-  label: String
-  headline: String
-  bodyText: String
-  sidebarContent: JSON
-  leftColumn: JSON
-  rightColumn: JSON
-}
-
 type PageBlocksGalleryItems {
   image: String
   alt: String
@@ -205,28 +160,6 @@ type PageBlocksGallery {
   columns: String
   gap: String
   items: [PageBlocksGalleryItems]
-}
-
-type PageBlocksPricingTiers {
-  name: String!
-  price: String!
-  period: String
-  description: String
-  features: [String]
-  buttonText: String
-  buttonLink: String
-  highlighted: Boolean
-  badge: String
-}
-
-type PageBlocksPricing {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  showToggle: Boolean
-  annualDiscount: Float
-  tiers: [PageBlocksPricingTiers]
 }
 
 union PageBlocksFaqItemsFaq = Faq
@@ -248,37 +181,6 @@ type PageBlocksFaq {
   ctaLink: String
 }
 
-union PageBlocksTeamAuthorRefsAuthor = Author
-
-type PageBlocksTeamAuthorRefs {
-  author: PageBlocksTeamAuthorRefsAuthor
-}
-
-type PageBlocksTeamMembersSocial {
-  twitter: String
-  linkedin: String
-  github: String
-}
-
-type PageBlocksTeamMembers {
-  name: String!
-  role: String
-  avatar: String
-  bio: String
-  social: PageBlocksTeamMembersSocial
-}
-
-type PageBlocksTeam {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  columns: String
-  useReferences: Boolean
-  authorRefs: [PageBlocksTeamAuthorRefs]
-  members: [PageBlocksTeamMembers]
-}
-
 type PageBlocksStatsItems {
   value: String!
   label: String!
@@ -296,33 +198,12 @@ type PageBlocksStats {
   items: [PageBlocksStatsItems]
 }
 
-type PageBlocksLogoCloudLogos {
-  image: String!
-  name: String!
-  url: String
-}
-
-type PageBlocksLogoCloud {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  grayscale: Boolean
-  size: String
-  logos: [PageBlocksLogoCloudLogos]
-}
-
 type PageBlocksIntakeForm {
   headline: String
   subheadline: String
   buttonText: String
   buttonTextMobile: String
   showIncludes: Boolean
-}
-
-type PageBlocksScrollReveal {
-  label: String
-  headline: String
 }
 
 type PageBlocksScrollFillLogoSlides {
@@ -360,22 +241,13 @@ type PageBlocksBenefitsList {
   items: [PageBlocksBenefitsListItems]
 }
 
-type PageBlocksVideoSpotlight {
-  headline: String
-  subheadline: String
-  video: String
-  poster: String
-  leftImage: String
-  rightImage: String
-}
-
 type PageBlocksContactForm {
   headline: String
   subheadline: String
   buttonText: String
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksFeatures | PageBlocksTestimonials | PageBlocksCta | PageBlocksContent | PageBlocksGallery | PageBlocksPricing | PageBlocksFaq | PageBlocksTeam | PageBlocksStats | PageBlocksLogoCloud | PageBlocksIntakeForm | PageBlocksScrollReveal | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksVideoSpotlight | PageBlocksContactForm
+union PageBlocks = PageBlocksHero | PageBlocksTestimonials | PageBlocksGallery | PageBlocksFaq | PageBlocksStats | PageBlocksIntakeForm | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksContactForm
 
 type Page implements Node & Document {
   title: String!
@@ -416,23 +288,6 @@ input PageBlocksHeroFilter {
   primaryButtonText: StringFilter
   primaryButtonTextMobile: StringFilter
   primaryButtonLink: StringFilter
-}
-
-input PageBlocksFeaturesItemsFilter {
-  title: StringFilter
-  description: StringFilter
-  icon: StringFilter
-  image: ImageFilter
-  link: StringFilter
-}
-
-input PageBlocksFeaturesFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  columns: StringFilter
-  items: PageBlocksFeaturesItemsFilter
 }
 
 input BooleanFilter {
@@ -477,36 +332,6 @@ input PageBlocksTestimonialsFilter {
   items: PageBlocksTestimonialsItemsFilter
 }
 
-input PageBlocksCtaGlobalCtaRefFilter {
-  globalCta: GlobalCtaFilter
-}
-
-input PageBlocksCtaFilter {
-  variant: StringFilter
-  theme: StringFilter
-  globalCtaRef: PageBlocksCtaGlobalCtaRefFilter
-  headline: StringFilter
-  description: StringFilter
-  image: ImageFilter
-  primaryButtonText: StringFilter
-  primaryButtonLink: StringFilter
-  secondaryButtonText: StringFilter
-  secondaryButtonLink: StringFilter
-  emailPlaceholder: StringFilter
-  submitButtonText: StringFilter
-}
-
-input PageBlocksContentFilter {
-  variant: StringFilter
-  theme: StringFilter
-  label: StringFilter
-  headline: StringFilter
-  bodyText: StringFilter
-  sidebarContent: RichTextFilter
-  leftColumn: RichTextFilter
-  rightColumn: RichTextFilter
-}
-
 input PageBlocksGalleryItemsFilter {
   image: ImageFilter
   alt: StringFilter
@@ -523,28 +348,6 @@ input PageBlocksGalleryFilter {
   columns: StringFilter
   gap: StringFilter
   items: PageBlocksGalleryItemsFilter
-}
-
-input PageBlocksPricingTiersFilter {
-  name: StringFilter
-  price: StringFilter
-  period: StringFilter
-  description: StringFilter
-  features: StringFilter
-  buttonText: StringFilter
-  buttonLink: StringFilter
-  highlighted: BooleanFilter
-  badge: StringFilter
-}
-
-input PageBlocksPricingFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  showToggle: BooleanFilter
-  annualDiscount: NumberFilter
-  tiers: PageBlocksPricingTiersFilter
 }
 
 input PageBlocksFaqItemsFaqFilter {
@@ -568,39 +371,6 @@ input PageBlocksFaqFilter {
   ctaLink: StringFilter
 }
 
-input PageBlocksTeamAuthorRefsAuthorFilter {
-  author: AuthorFilter
-}
-
-input PageBlocksTeamAuthorRefsFilter {
-  author: PageBlocksTeamAuthorRefsAuthorFilter
-}
-
-input PageBlocksTeamMembersSocialFilter {
-  twitter: StringFilter
-  linkedin: StringFilter
-  github: StringFilter
-}
-
-input PageBlocksTeamMembersFilter {
-  name: StringFilter
-  role: StringFilter
-  avatar: ImageFilter
-  bio: StringFilter
-  social: PageBlocksTeamMembersSocialFilter
-}
-
-input PageBlocksTeamFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  columns: StringFilter
-  useReferences: BooleanFilter
-  authorRefs: PageBlocksTeamAuthorRefsFilter
-  members: PageBlocksTeamMembersFilter
-}
-
 input PageBlocksStatsItemsFilter {
   value: StringFilter
   label: StringFilter
@@ -618,33 +388,12 @@ input PageBlocksStatsFilter {
   items: PageBlocksStatsItemsFilter
 }
 
-input PageBlocksLogoCloudLogosFilter {
-  image: ImageFilter
-  name: StringFilter
-  url: StringFilter
-}
-
-input PageBlocksLogoCloudFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  grayscale: BooleanFilter
-  size: StringFilter
-  logos: PageBlocksLogoCloudLogosFilter
-}
-
 input PageBlocksIntakeFormFilter {
   headline: StringFilter
   subheadline: StringFilter
   buttonText: StringFilter
   buttonTextMobile: StringFilter
   showIncludes: BooleanFilter
-}
-
-input PageBlocksScrollRevealFilter {
-  label: StringFilter
-  headline: StringFilter
 }
 
 input PageBlocksScrollFillLogoSlidesFilter {
@@ -682,15 +431,6 @@ input PageBlocksBenefitsListFilter {
   items: PageBlocksBenefitsListItemsFilter
 }
 
-input PageBlocksVideoSpotlightFilter {
-  headline: StringFilter
-  subheadline: StringFilter
-  video: StringFilter
-  poster: ImageFilter
-  leftImage: ImageFilter
-  rightImage: ImageFilter
-}
-
 input PageBlocksContactFormFilter {
   headline: StringFilter
   subheadline: StringFilter
@@ -699,22 +439,14 @@ input PageBlocksContactFormFilter {
 
 input PageBlocksFilter {
   hero: PageBlocksHeroFilter
-  features: PageBlocksFeaturesFilter
   testimonials: PageBlocksTestimonialsFilter
-  cta: PageBlocksCtaFilter
-  content: PageBlocksContentFilter
   gallery: PageBlocksGalleryFilter
-  pricing: PageBlocksPricingFilter
   faq: PageBlocksFaqFilter
-  team: PageBlocksTeamFilter
   stats: PageBlocksStatsFilter
-  logoCloud: PageBlocksLogoCloudFilter
   intakeForm: PageBlocksIntakeFormFilter
-  scrollReveal: PageBlocksScrollRevealFilter
   scrollFillLogo: PageBlocksScrollFillLogoFilter
   stackSections: PageBlocksStackSectionsFilter
   benefitsList: PageBlocksBenefitsListFilter
-  videoSpotlight: PageBlocksVideoSpotlightFilter
   contactForm: PageBlocksContactFormFilter
 }
 
@@ -1283,23 +1015,6 @@ input PageBlocksHeroMutation {
   primaryButtonLink: String
 }
 
-input PageBlocksFeaturesItemsMutation {
-  title: String
-  description: String
-  icon: String
-  image: String
-  link: String
-}
-
-input PageBlocksFeaturesMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  columns: String
-  items: [PageBlocksFeaturesItemsMutation]
-}
-
 input PageBlocksTestimonialsTestimonialRefsMutation {
   testimonial: String
 }
@@ -1323,32 +1038,6 @@ input PageBlocksTestimonialsMutation {
   items: [PageBlocksTestimonialsItemsMutation]
 }
 
-input PageBlocksCtaMutation {
-  variant: String
-  theme: String
-  globalCtaRef: String
-  headline: String
-  description: String
-  image: String
-  primaryButtonText: String
-  primaryButtonLink: String
-  secondaryButtonText: String
-  secondaryButtonLink: String
-  emailPlaceholder: String
-  submitButtonText: String
-}
-
-input PageBlocksContentMutation {
-  variant: String
-  theme: String
-  label: String
-  headline: String
-  bodyText: String
-  sidebarContent: JSON
-  leftColumn: JSON
-  rightColumn: JSON
-}
-
 input PageBlocksGalleryItemsMutation {
   image: String
   alt: String
@@ -1365,28 +1054,6 @@ input PageBlocksGalleryMutation {
   columns: String
   gap: String
   items: [PageBlocksGalleryItemsMutation]
-}
-
-input PageBlocksPricingTiersMutation {
-  name: String
-  price: String
-  period: String
-  description: String
-  features: [String]
-  buttonText: String
-  buttonLink: String
-  highlighted: Boolean
-  badge: String
-}
-
-input PageBlocksPricingMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  showToggle: Boolean
-  annualDiscount: Float
-  tiers: [PageBlocksPricingTiersMutation]
 }
 
 input PageBlocksFaqItemsMutation {
@@ -1406,35 +1073,6 @@ input PageBlocksFaqMutation {
   ctaLink: String
 }
 
-input PageBlocksTeamAuthorRefsMutation {
-  author: String
-}
-
-input PageBlocksTeamMembersSocialMutation {
-  twitter: String
-  linkedin: String
-  github: String
-}
-
-input PageBlocksTeamMembersMutation {
-  name: String
-  role: String
-  avatar: String
-  bio: String
-  social: PageBlocksTeamMembersSocialMutation
-}
-
-input PageBlocksTeamMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  columns: String
-  useReferences: Boolean
-  authorRefs: [PageBlocksTeamAuthorRefsMutation]
-  members: [PageBlocksTeamMembersMutation]
-}
-
 input PageBlocksStatsItemsMutation {
   value: String
   label: String
@@ -1452,33 +1090,12 @@ input PageBlocksStatsMutation {
   items: [PageBlocksStatsItemsMutation]
 }
 
-input PageBlocksLogoCloudLogosMutation {
-  image: String
-  name: String
-  url: String
-}
-
-input PageBlocksLogoCloudMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  grayscale: Boolean
-  size: String
-  logos: [PageBlocksLogoCloudLogosMutation]
-}
-
 input PageBlocksIntakeFormMutation {
   headline: String
   subheadline: String
   buttonText: String
   buttonTextMobile: String
   showIncludes: Boolean
-}
-
-input PageBlocksScrollRevealMutation {
-  label: String
-  headline: String
 }
 
 input PageBlocksScrollFillLogoSlidesMutation {
@@ -1516,15 +1133,6 @@ input PageBlocksBenefitsListMutation {
   items: [PageBlocksBenefitsListItemsMutation]
 }
 
-input PageBlocksVideoSpotlightMutation {
-  headline: String
-  subheadline: String
-  video: String
-  poster: String
-  leftImage: String
-  rightImage: String
-}
-
 input PageBlocksContactFormMutation {
   headline: String
   subheadline: String
@@ -1533,22 +1141,14 @@ input PageBlocksContactFormMutation {
 
 input PageBlocksMutation {
   hero: PageBlocksHeroMutation
-  features: PageBlocksFeaturesMutation
   testimonials: PageBlocksTestimonialsMutation
-  cta: PageBlocksCtaMutation
-  content: PageBlocksContentMutation
   gallery: PageBlocksGalleryMutation
-  pricing: PageBlocksPricingMutation
   faq: PageBlocksFaqMutation
-  team: PageBlocksTeamMutation
   stats: PageBlocksStatsMutation
-  logoCloud: PageBlocksLogoCloudMutation
   intakeForm: PageBlocksIntakeFormMutation
-  scrollReveal: PageBlocksScrollRevealMutation
   scrollFillLogo: PageBlocksScrollFillLogoMutation
   stackSections: PageBlocksStackSectionsMutation
   benefitsList: PageBlocksBenefitsListMutation
-  videoSpotlight: PageBlocksVideoSpotlightMutation
   contactForm: PageBlocksContactFormMutation
 }
 

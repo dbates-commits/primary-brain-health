@@ -23,21 +23,6 @@ export const PagePartsFragmentDoc = gql`
       primaryButtonTextMobile
       primaryButtonLink
     }
-    ... on PageBlocksFeatures {
-      variant
-      theme
-      headline
-      subheadline
-      columns
-      items {
-        __typename
-        title
-        description
-        icon
-        image
-        link
-      }
-    }
     ... on PageBlocksTestimonials {
       variant
       theme
@@ -111,62 +96,6 @@ export const PagePartsFragmentDoc = gql`
         rating
       }
     }
-    ... on PageBlocksCta {
-      variant
-      theme
-      globalCtaRef {
-        ... on GlobalCta {
-          __typename
-          name
-          headline
-          description
-          primaryButton {
-            __typename
-            text
-            link
-            style
-          }
-          secondaryButton {
-            __typename
-            text
-            link
-            style
-          }
-          theme
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
-      headline
-      description
-      image
-      primaryButtonText
-      primaryButtonLink
-      secondaryButtonText
-      secondaryButtonLink
-      emailPlaceholder
-      submitButtonText
-    }
-    ... on PageBlocksContent {
-      variant
-      theme
-      label
-      headline
-      bodyText
-      sidebarContent
-      leftColumn
-      rightColumn
-    }
     ... on PageBlocksGallery {
       variant
       theme
@@ -181,26 +110,6 @@ export const PagePartsFragmentDoc = gql`
         caption
         video
         aspectRatio
-      }
-    }
-    ... on PageBlocksPricing {
-      variant
-      theme
-      headline
-      subheadline
-      showToggle
-      annualDiscount
-      tiers {
-        __typename
-        name
-        price
-        period
-        description
-        features
-        buttonText
-        buttonLink
-        highlighted
-        badge
       }
     }
     ... on PageBlocksFaq {
@@ -238,59 +147,6 @@ export const PagePartsFragmentDoc = gql`
       ctaButtonText
       ctaLink
     }
-    ... on PageBlocksTeam {
-      variant
-      theme
-      headline
-      subheadline
-      columns
-      useReferences
-      authorRefs {
-        __typename
-        author {
-          ... on Author {
-            __typename
-            name
-            role
-            avatar
-            bio
-            email
-            social {
-              __typename
-              twitter
-              linkedin
-              github
-              website
-            }
-          }
-          ... on Document {
-            _sys {
-              filename
-              basename
-              hasReferences
-              breadcrumbs
-              path
-              relativePath
-              extension
-            }
-            id
-          }
-        }
-      }
-      members {
-        __typename
-        name
-        role
-        avatar
-        bio
-        social {
-          __typename
-          twitter
-          linkedin
-          github
-        }
-      }
-    }
     ... on PageBlocksStats {
       variant
       theme
@@ -306,30 +162,12 @@ export const PagePartsFragmentDoc = gql`
         progress
       }
     }
-    ... on PageBlocksLogoCloud {
-      variant
-      theme
-      headline
-      subheadline
-      grayscale
-      size
-      logos {
-        __typename
-        image
-        name
-        url
-      }
-    }
     ... on PageBlocksIntakeForm {
       headline
       subheadline
       buttonText
       buttonTextMobile
       showIncludes
-    }
-    ... on PageBlocksScrollReveal {
-      label
-      headline
     }
     ... on PageBlocksScrollFillLogo {
       slides {
@@ -359,14 +197,6 @@ export const PagePartsFragmentDoc = gql`
         body
         icon
       }
-    }
-    ... on PageBlocksVideoSpotlight {
-      headline
-      subheadline
-      video
-      poster
-      leftImage
-      rightImage
     }
     ... on PageBlocksContactForm {
       headline
