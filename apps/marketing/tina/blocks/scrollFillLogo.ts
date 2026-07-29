@@ -7,9 +7,9 @@ export const scrollFillLogoBlock: Template = {
     defaultItem: {
       slides: [
         {
-          label: "You are doing the right thing at the right place",
+          label: "Trust the instinct that brought you here",
           headline:
-            "We help you understand your brain, reduce your risk, and take action early through advanced assessment, clinical insight, and ongoing personalized care.",
+            "We help you understand how your brain is performing, reduce your risk of cognitive decline, and take action early through advanced assessment, clinical insight, and ongoing personalized care.",
         },
         {
           label: "Why Primary Brain Health?",
