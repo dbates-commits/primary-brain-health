@@ -166,13 +166,14 @@ export function checkoutFails(
 }
 
 /**
- * A session that stays in flight, holding the payment step on its pre-Stripe
- * state.
+ * A session that never settles, holding the payment step on "Loading payment…".
  *
- * Deliberately never resolves within a story's lifetime rather than returning a
- * fake `clientSecret`: when a publishable key is present — and it is, whenever
- * `.env.local` is loaded — a bogus secret makes `EmbeddedCheckout` mount and
- * fail against Stripe. Withholding the session keeps the step deterministic.
+ * Withholding the session is what keeps the step still enough to look at. The
+ * alternative — returning a fake `clientSecret` — is worse: with a publishable
+ * key present (and there is one whenever `.env.local` is loaded) Stripe mounts
+ * `EmbeddedCheckout` and then fails on the bogus secret. Only a server with the
+ * secret key can mint a session Checkout will accept, so the loading state is
+ * as far as a story can go.
  */
 export function checkoutPending(): CreateCheckoutAction {
   return () => new Promise(() => {});

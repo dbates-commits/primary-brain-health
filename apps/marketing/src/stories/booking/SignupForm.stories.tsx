@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { SignupForm, SIGNUP_HEADER } from "@pbh/booking";
-import { StepHeader } from "@pbh/ui";
+import { SignupForm } from "@pbh/booking";
 import { BookingModalShell } from "./BookingModalShell";
 import {
   SLOW_ACTION_DELAY_MS,
@@ -45,22 +44,6 @@ type Story = StoryObj<typeof meta>;
 
 /** The step as the funnel renders it, with its own header inline. */
 export const Default: Story = {};
-
-/**
- * How the marketing modal renders it: `showHeader={false}`, with the same
- * `SIGNUP_HEADER` copy pinned in the modal&rsquo;s fixed header region above the
- * scroll area.
- */
-export const InModal: Story = {
-  args: { showHeader: false },
-  decorators: [
-    (Story) => (
-      <BookingModalShell header={<StepHeader {...SIGNUP_HEADER} />}>
-        <Story />
-      </BookingModalShell>
-    ),
-  ],
-};
 
 /**
  * Choosing "Someone Else" adds the line explaining that the name and email below

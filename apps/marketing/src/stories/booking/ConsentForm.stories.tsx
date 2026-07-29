@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { ConsentForm, CONSENT_HEADER } from "@pbh/booking";
-import { StepHeader } from "@pbh/ui";
+import { ConsentForm } from "@pbh/booking";
 import { BookingModalShell } from "./BookingModalShell";
 import {
   SLOW_ACTION_DELAY_MS,
@@ -45,18 +44,6 @@ type Story = StoryObj<typeof meta>;
 
 /** The step as the funnel renders it, header inline. */
 export const Default: Story = {};
-
-/** As the marketing modal renders it, with `CONSENT_HEADER` pinned above. */
-export const InModal: Story = {
-  args: { showHeader: false },
-  decorators: [
-    (Story) => (
-      <BookingModalShell header={<StepHeader {...CONSENT_HEADER} />}>
-        <Story />
-      </BookingModalShell>
-    ),
-  ],
-};
 
 /** Ticked and ready — the state the CTA is meant to be pressed in. */
 export const Agreed: Story = {

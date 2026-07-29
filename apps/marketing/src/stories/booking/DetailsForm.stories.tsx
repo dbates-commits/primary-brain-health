@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { DetailsForm, detailsHeader } from "@pbh/booking";
-import { StepHeader } from "@pbh/ui";
+import { DetailsForm } from "@pbh/booking";
 import { BookingModalShell } from "./BookingModalShell";
 import {
   SLOW_ACTION_DELAY_MS,
@@ -56,30 +55,24 @@ export const ForSomeoneElse: Story = {
   args: { patientIdentification: 'Someone else' },
 };
 
-/** As the marketing modal renders it, with `detailsHeader()` pinned above. */
-export const InModal: Story = {
-  args: { showHeader: false },
-  decorators: [
-    (Story) => (
-      <BookingModalShell header={<StepHeader {...detailsHeader('Margaret')} />}>
-        <Story />
-      </BookingModalShell>
-    ),
-  ],
-};
-
 /** No name yet — the header falls back to a bare "Welcome". */
 export const WithoutName: Story = {
   args: { name: '' },
 };
 
-/** Server-side validation messages, one per field. */
+/**
+ * Every field carrying a server-side message at once — the three `<select>`s
+ * included, since they are as easy to leave unanswered as the text inputs.
+ */
 export const FieldErrors: Story = {
   args: {
     action: detailsFieldErrors({
       dateOfBirth: 'Enter a date of birth.',
+      gender: 'Select a gender.',
       zip: 'Enter a 5-digit ZIP code.',
       phone: 'Enter a 10-digit phone number.',
+      stateOfResidence: 'Select a state of residence.',
+      educationLevel: 'Select a level of education.',
     }),
   },
   play: async ({ canvasElement }) => {
@@ -87,6 +80,39 @@ export const FieldErrors: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
     await waitFor(async () => {
       await expect(canvas.getByText('Enter a date of birth.')).toBeInTheDocument();
+    });
+    // The selects report through the same FieldError as the inputs.
+    await expect(canvas.getByText('Select a gender.')).toBeInTheDocument();
+    await expect(
+      canvas.getByText('Select a state of residence.'),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByText('Select a level of education.'),
+    ).toBeInTheDocument();
+    await expect(canvas.getByLabelText('Gender')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+  },
+};
+
+/**
+ * Only the selects are wrong — the case that shows they are reachable on their
+ * own, not just as collateral in a whole-form failure.
+ */
+export const SelectErrorsOnly: Story = {
+  args: {
+    action: detailsFieldErrors({
+      gender: 'Select a gender.',
+      stateOfResidence: 'Select a state of residence.',
+      educationLevel: 'Select a level of education.',
+    }),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+    await waitFor(async () => {
+      await expect(canvas.getByText('Select a gender.')).toBeInTheDocument();
     });
   },
 };

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fn, waitFor, within } from 'storybook/test';
-import { PaymentStep, PAYMENT_HEADER } from "@pbh/booking";
-import { StepHeader } from "@pbh/ui";
+import { PaymentStep } from "@pbh/booking";
 import { BookingModalShell } from "./BookingModalShell";
 import { checkoutFails, checkoutPending, finalizeSucceeds } from "./mock-actions";
 
@@ -13,14 +12,17 @@ const meta = {
     docs: {
       description: {
         component:
-          'Step 5 — Stripe Embedded Checkout. **The card form itself does not mount here.** ' +
-          'Checkout is a cross-origin iframe driven by a real Checkout Session, which belongs ' +
-          'to the E2E test rather than to a story; these stories cover the states *around* it. ' +
-          'Note that the branch this step takes depends on the environment: `PaymentStep` ' +
-          'reads `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` at module scope, so with `.env.local` ' +
-          'loaded you get the session-loading state, and without a key you get the ' +
-          '"Payments aren’t configured" notice instead. Only **Session Error** renders the ' +
-          'same either way, so it is the only story that asserts.',
+          'Step 5 — Stripe Embedded Checkout. **No story here mounts the card form, and none ' +
+          'can.** Checkout renders in a cross-origin iframe from a real Checkout Session, ' +
+          'which only a server holding the secret key can mint; a fake `clientSecret` makes ' +
+          'Stripe mount and then fail. So these stories cover the states *around* Checkout — ' +
+          'what the step shows before and instead of it. Exercising the paid path belongs to ' +
+          'the E2E test (`pnpm test:e2e`), not to Storybook. ' +
+          'One environment note: the step reads `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` at ' +
+          'module scope, so with `.env.local` loaded you see the states below, and with no ' +
+          'key you get the "Payments aren’t configured" notice in their place. Only ' +
+          '**Session Error** renders identically either way, so it is the only story that ' +
+          'asserts.',
       },
     },
   },
@@ -43,22 +45,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Waiting on the Checkout Session. With a publishable key configured this is
- * "Loading payment…"; without one it is the configuration notice.
+ * Waiting on the Checkout Session — what the customer sees for the moment
+ * between opening the step and Stripe taking over.
+ *
+ * It stays here indefinitely on purpose: the session is deliberately left
+ * unresolved so the state holds still to be looked at. That is the story
+ * working, not hanging. Nothing further can render without a real session.
  */
-export const Default: Story = {};
-
-/** As the marketing modal renders it, with `PAYMENT_HEADER` pinned above. */
-export const InModal: Story = {
-  args: { showHeader: false },
-  decorators: [
-    (Story) => (
-      <BookingModalShell header={<StepHeader {...PAYMENT_HEADER} />}>
-        <Story />
-      </BookingModalShell>
-    ),
-  ],
-};
+export const LoadingSession: Story = {};
 
 /**
  * The session failed to mint — Stripe is never reached and the reason replaces
