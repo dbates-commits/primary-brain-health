@@ -1,0 +1,29 @@
+import type { ReactNode } from "react";
+
+/**
+ * The booking modal's panel, minus the portal and the focus trap.
+ *
+ * The step forms are built to live inside `Modal` (`apps/marketing/src/
+ * components/booking/Modal.tsx`): a `min-h-0 flex-1 overflow-y-auto` body with
+ * no bottom padding. `StickyActions` pins against that scroll container, so a
+ * step rendered on a bare page never shows its real behaviour. This shell
+ * reproduces the same box for stories.
+ *
+ * Kept deliberately dumb — no Escape handling, no scroll lock, no portal — so a
+ * story exercises the step, not the dialog. It also omits `Modal`'s optional
+ * pinned header region: every step here renders its own header inline, which is
+ * the `showHeader` default.
+ */
+export function BookingModalShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-[32rem] items-center justify-center bg-on-surface/50 p-4">
+      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl">
+        {/* `pr-14`/`pt-*` are Modal's no-header branch: with no pinned header the
+            body owns the top padding and clears the close button. */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pr-14 pt-6 sm:px-8 sm:pt-8">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
