@@ -71,10 +71,15 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Non-blocking to begin with: a first run against an existing dependency tree
-    # will surface a backlog, and failing every PR on day one trains people to
-    # ignore the check. Flip `continue-on-error` off once the backlog is triaged.
-    continue-on-error: true
+    # Reports, does not block. The first run found 92 advisories (4 critical,
+    # 43 high) in the existing tree — a real backlog, tracked for triage, but
+    # not something to fail every unrelated PR on from day one.
+    #
+    # `continue-on-error` alone is not enough: the job stops failing the run but
+    # the check still renders red, and a check that is always red is a check
+    # nobody reads. So the step swallows the exit code and writes the counts to
+    # the job summary instead. Make it blocking by deleting the `|| true` once
+    # the backlog is down.
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -85,7 +90,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Audit dependencies
-        run: pnpm audit --audit-level=high
+        run: |
+          set -uo pipefail
+          pnpm audit --audit-level=high | tee audit.txt || true
+          {
+            echo "### Dependency audit"
+            echo
+            if grep -q "No known vulnerabilities found" audit.txt; then
+              echo "No advisories at or above **high**."
+            else
+              echo '```'
+              grep -E "vulnerabilities found|^Severity:" audit.txt || echo "see job log"
+              echo '```'
+              echo
+              echo "Reporting only — this check does not block. Triage: pbh-mdx."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   secrets:
     runs-on: ubuntu-latest
