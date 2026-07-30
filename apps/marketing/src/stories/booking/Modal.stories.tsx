@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fireEvent, fn, userEvent, waitFor, within } from 'storybook/test';
 import { StepHeader } from "@pbh/ui";
 import { Modal } from "@/components/booking/Modal";
+import { ModalStoryHarness } from "./ModalStoryHarness";
 
 const PARAGRAPHS = Array.from({ length: 14 }, (_, i) => i);
 
@@ -20,6 +21,10 @@ const meta = {
           'scroll lock, a focus trap cycling within the panel, initial focus into the panel, ' +
           'and focus restored to the trigger on close. It is portal-safe for SSR because it ' +
           'returns `null` until `open` flips true, which is always a client event. ' +
+          '`Modal` is **controlled** — it reports intent through `onClose` and never closes ' +
+          'itself — so every story here is wrapped in `ModalStoryHarness`, which owns the ' +
+          '`open` state and renders the trigger button. Without a controller the dialog would ' +
+          'stay put however you dismissed it. ' +
           'The `header` region is optional and pinned: give it one and only the body scrolls, ' +
           'so the scrollbar spans the content rather than the whole dialog. The body ' +
           'deliberately carries no bottom padding — that belongs to the step, because padding ' +
@@ -33,6 +38,13 @@ const meta = {
     label: 'Book an assessment',
     onClose: fn(),
   },
+  // `open` is dropped deliberately: the harness owns it, so a story that set it
+  // would be overridden and read as ignored.
+  render: (args) => {
+    const { open, ...harnessProps } = args;
+    void open;
+    return <ModalStoryHarness {...harnessProps} />;
+  },
 } satisfies Meta<typeof Modal>;
 
 export default meta;
@@ -45,7 +57,8 @@ export const Open: Story = {
       <div className="flex flex-col gap-4 pb-6 sm:pb-10">
         <StepHeader title="Welcome." subtitle="A step that renders its own header." />
         <p className="text-sm text-on-surface-variant">
-          Short enough that nothing scrolls.
+          Short enough that nothing scrolls. Dismiss it and reopen from the
+          button behind.
         </p>
       </div>
     ),
@@ -79,37 +92,89 @@ export const Closed: Story = {
     open: false,
     children: <p>Never rendered.</p>,
   },
+  // The one story that wants the raw component: the harness always opens.
+  render: (args) => <Modal {...args} />,
   play: async () => {
     await expect(document.querySelector('[role="dialog"]')).toBeNull();
   },
 };
 
-/** Escape closes. */
+/** Escape dismisses it, and the dialog really leaves the DOM. */
 export const ClosesOnEscape: Story = {
   args: {
     children: <p className="pb-6 text-sm text-on-surface-variant">Press Escape.</p>,
   },
   play: async ({ args }) => {
     // The dialog is portalled onto document.body, so it is outside canvasElement.
-    const dialog = within(document.body);
-    await expect(dialog.getByRole('dialog')).toBeInTheDocument();
+    const body = within(document.body);
+    await expect(body.getByRole('dialog')).toBeInTheDocument();
     await userEvent.keyboard('{Escape}');
     await waitFor(async () => {
       await expect(args.onClose).toHaveBeenCalled();
     });
+    await waitFor(async () => {
+      await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   },
 };
 
-/** The close button reports too — same handler, different affordance. */
+/** The close button does the same. */
 export const ClosesOnCloseButton: Story = {
   args: {
     children: <p className="pb-6 text-sm text-on-surface-variant">Use the ✕.</p>,
   },
   play: async ({ args }) => {
-    const dialog = within(document.body);
-    await userEvent.click(dialog.getByRole('button', { name: 'Close' }));
+    const body = within(document.body);
+    await userEvent.click(body.getByRole('button', { name: 'Close' }));
     await waitFor(async () => {
       await expect(args.onClose).toHaveBeenCalled();
+    });
+    await waitFor(async () => {
+      await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  },
+};
+
+/** Clicking the backdrop dismisses it; clicking the panel does not. */
+export const ClosesOnBackdropClick: Story = {
+  args: {
+    children: (
+      <p className="pb-6 text-sm text-on-surface-variant">
+        Click the dimmed area outside the panel.
+      </p>
+    ),
+  },
+  play: async ({ args }) => {
+    const body = within(document.body);
+    const panel = body.getByRole('dialog');
+    // Dismissal is wired to mousedown, not click, so drive that directly —
+    // it also sidesteps the panel covering the backdrop's centre point.
+    // Inside the panel first: the dialog must survive this.
+    fireEvent.mouseDown(panel);
+    await expect(args.onClose).not.toHaveBeenCalled();
+
+    fireEvent.mouseDown(panel.parentElement as HTMLElement);
+    await waitFor(async () => {
+      await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  },
+};
+
+/** Reopening after a dismissal — the trigger regains focus, then reopens. */
+export const ReopensFromTrigger: Story = {
+  args: {
+    children: <p className="pb-6 text-sm text-on-surface-variant">Close, then reopen.</p>,
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(document.body);
+    const canvas = within(canvasElement);
+    await userEvent.click(body.getByRole('button', { name: 'Close' }));
+    await waitFor(async () => {
+      await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    await userEvent.click(canvas.getByRole('button', { name: 'Open the dialog' }));
+    await waitFor(async () => {
+      await expect(body.getByRole('dialog')).toBeInTheDocument();
     });
   },
 };
