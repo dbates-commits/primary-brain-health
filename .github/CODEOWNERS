@@ -1,0 +1,45 @@
+# Code owners — GitHub requests their review on matching PRs. Paired with the
+# branch ruleset's "require a pull request before merging", this is what puts a
+# reviewer in front of a change.
+#
+# Restored after ce863b0/99d29b3 (Jul 24, 2026) deleted it. Those commits were
+# an activation gap — the Settings GitHub App was never installed, so the config
+# silently did nothing — not a decision that gates were unwanted. See pbh-9yb.1.
+#
+# NOTE: the ruleset lists the two active developers as bypass actors, so they can
+# merge without waiting on each other. Ownership here still matters: it gates the
+# other collaborators with write access, and it puts an owner on the review
+# request for every change below.
+
+* @dbates-commits @Tuily @mstenquist
+
+# ── Repo gates themselves ────────────────────────────────────────────────────
+# Changes to CI, the ruleset payload, or the test gate must not slip through
+# unseen: weakening the gate is the one change no gate can catch.
+/.github/               @dbates-commits @Tuily @mstenquist
+/e2e/                   @dbates-commits @Tuily @mstenquist
+/playwright.config.ts   @dbates-commits @Tuily @mstenquist
+
+# ── Money path ───────────────────────────────────────────────────────────────
+# Checkout session minting, webhook verification, and fulfillment. PCI SAQ-A
+# eligibility depends on what these files do and do not touch.
+/packages/payments/                     @dbates-commits @Tuily @mstenquist
+/packages/booking/src/server/           @dbates-commits @Tuily @mstenquist
+/apps/app/src/app/api/stripe/           @dbates-commits @Tuily @mstenquist
+
+# ── Identity and session ─────────────────────────────────────────────────────
+# Session lifetimes and cookie flags are the 164.312(a)(2)(iii) control; the
+# handoff route mints a login credential.
+/apps/app/src/auth.ts                   @dbates-commits @Tuily @mstenquist
+/apps/app/src/lib/auth-session.ts       @dbates-commits @Tuily @mstenquist
+/apps/app/src/app/api/auth/             @dbates-commits @Tuily @mstenquist
+
+# ── PHI and third-party disclosure ───────────────────────────────────────────
+# The schema decides what we are capable of storing; the Linus client transmits
+# identifiers to a third party; the marketing API routes forward to HubSpot,
+# which has no BAA (see pbh-9yb.4 — a field added here without review is exactly
+# how that defect arrived).
+/packages/db/src/schema/                @dbates-commits @Tuily @mstenquist
+/packages/db/src/audit.ts               @dbates-commits @Tuily @mstenquist
+/packages/linus/src/                    @dbates-commits @Tuily @mstenquist
+/apps/marketing/src/app/api/            @dbates-commits @Tuily @mstenquist

@@ -1,0 +1,40 @@
+version: 2
+
+# Dependency vulnerability scanning — one of the checklist rows in pbh-9yb.1.
+# Grouped so a week's updates arrive as a handful of reviewable PRs rather than
+# thirty; ungrouped Dependabot on a monorepo this size produces noise that gets
+# ignored, which is worse than no scanning at all.
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      # Security fixes travel alone so they are never buried in a bulk bump.
+      production-dependencies:
+        applies-to: version-updates
+        dependency-type: production
+        update-types: [minor, patch]
+      development-dependencies:
+        applies-to: version-updates
+        dependency-type: development
+        update-types: [minor, patch]
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "chore(ci)"

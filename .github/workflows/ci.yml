@@ -1,0 +1,101 @@
+name: CI
+
+# Quality gates on every PR. Before this existed, .github held exactly one
+# workflow (the Playwright smoke tier), so lint / typecheck / build never ran on
+# a PR despite all three being defined in the root package.json. See pbh-9yb.1.
+
+on:
+  pull_request:
+    branches: [main, staging]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the changed-file lint can diff against the base.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # `marketing` is excluded deliberately: its ESLint run exhausts the heap
+      # and is killed (exit 137) even at 8 GB, so a whole-workspace lint can
+      # never go green. Tracked separately — until it is fixed, marketing is
+      # linted per changed file in the next step, which is what developers run
+      # locally anyway.
+      - name: Lint (workspace except marketing)
+        run: pnpm exec turbo run lint --filter='!marketing'
+
+      - name: Lint marketing (changed files)
+        run: |
+          set -euo pipefail
+          files=$(git diff --name-only --diff-filter=ACMR \
+            "origin/${{ github.base_ref }}...HEAD" \
+            -- 'apps/marketing/**/*.ts' 'apps/marketing/**/*.tsx' \
+            | sed 's|^apps/marketing/||')
+          if [ -z "$files" ]; then
+            echo "No marketing TypeScript changed — nothing to lint."
+            exit 0
+          fi
+          echo "Linting:"; echo "$files" | sed 's/^/  /'
+          cd apps/marketing
+          # shellcheck disable=SC2086
+          NODE_OPTIONS=--max-old-space-size=6144 pnpm exec eslint $files
+
+      # `marketing` is excluded here too: its build runs `tinacms build`, which
+      # needs TinaCloud credentials we deliberately do not put in Actions. Vercel
+      # already builds marketing on every PR with those credentials, and that
+      # deployment check is the real gate — see the ruleset payload in
+      # docs/ci/branch-ruleset.json.
+      - name: Build (workspace except marketing)
+        run: pnpm exec turbo run build --filter='!marketing'
+
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Non-blocking to begin with: a first run against an existing dependency tree
+    # will surface a backlog, and failing every PR on day one trains people to
+    # ignore the check. Flip `continue-on-error` off once the backlog is triaged.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gitleaks scans history, not just the diff.
+          fetch-depth: 0
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
