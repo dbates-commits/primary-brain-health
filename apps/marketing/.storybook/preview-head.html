@@ -1,0 +1,12 @@
+<!--
+  `--font-inter` is set by next/font on <body> in the app's layout.tsx. Storybook
+  never renders that layout, so the variable is defined here instead and the
+  family itself is self-hosted via @fontsource/inter (see preview.ts). The token
+  `--font-body` in @pbh/tokens reads `var(--font-inter, "Inter")`, so without
+  this every story falls back to system-ui.
+-->
+<style>
+  :root {
+    --font-inter: "Inter";
+  }
+</style>

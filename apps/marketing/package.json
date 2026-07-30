@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.1.1",
+    "@fontsource/inter": "^5.3.0",
     "@pbh/config": "workspace:*",
     "@storybook/addon-a11y": "^10.3.5",
     "@storybook/addon-docs": "^10.3.5",
