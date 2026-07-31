@@ -28,16 +28,23 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-body font-semibold rounded-full transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-flex items-center justify-center font-body font-bold rounded-full transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   // No `pointer-events-none` here: it would suppress the `cursor-not-allowed`
   // hover cursor. Clicks are already blocked by the native `disabled` attribute.
   const disabledStyles =
     "opacity-50 cursor-not-allowed active:scale-100 hover:brightness-100";
 
+  // `md` is the only size the design system defines — Figma's Button (609:785)
+  // has a single size at 24px horizontal / 16px vertical padding.
+  // `leading-[normal]` matches Figma's automatic line height, which comes from
+  // the font's own metrics (~19px for Inter at 16px). Tailwind's `text-base`
+  // would impose 24px instead, making the button 56px tall against the designed
+  // 51px — so padding alone does not reconcile it. `sm` and `lg` have no
+  // counterpart in the design and are left as-is.
   const sizeStyles = {
     sm: "px-4 py-2 text-sm",
-    md: "px-6 py-3 text-base",
+    md: "px-6 py-4 text-base leading-[normal]",
     lg: "px-8 py-4 text-lg",
   };
 
@@ -47,7 +54,11 @@ export function Button({
         "bg-primary text-on-primary hover:brightness-110 focus:ring-primary",
       secondary:
         "bg-secondary text-on-secondary hover:brightness-110 focus:ring-secondary",
-      white: "bg-white text-on-surface hover:bg-surface-container-low focus:ring-outline",
+      // Figma's Button `Type=Secondary`: bg `button/secondary/bg-color` #ffffff,
+      // label `button/secondary/text-color` #45474d — which is
+      // `on-surface-variant`, not `on-surface` (#1b1c19).
+      white:
+        "bg-white text-on-surface-variant hover:bg-surface-container-low focus:ring-outline",
       dark: "bg-on-surface text-surface hover:brightness-125 focus:ring-on-surface",
     },
     outline: {

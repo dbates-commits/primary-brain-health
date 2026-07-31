@@ -1,6 +1,6 @@
 "use client";
 
-import { PhosphorIcon } from "@pbh/ui";
+import { Button, PhosphorIcon } from "@pbh/ui";
 import type { AssessmentPackage } from "@pbh/booking";
 
 /**
@@ -59,23 +59,25 @@ export function PackageCard({
       </div>
 
       {pkg.purchasable ? (
-        <button
-          type="button"
+        <Button
+          color="white"
+          size="md"
           onClick={() => onSelect(pkg)}
-          className="mt-auto flex h-14 w-full items-center justify-center rounded-full bg-white px-6 font-bold text-on-surface-variant shadow-[0_8px_12px_rgba(0,0,0,0.12)] transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+          className="mt-auto w-full shadow-[0_8px_12px_rgba(0,0,0,0.12)] focus:ring-white focus:ring-offset-primary"
         >
           {pkg.ctaLabel}
-        </button>
+        </Button>
       ) : (
         <div className="mt-auto">
-          <button
-            type="button"
+          <Button
+            color="white"
+            size="md"
             disabled
             aria-describedby={`${pkg.key}-availability`}
-            className="flex h-14 w-full cursor-not-allowed items-center justify-center rounded-full bg-white/60 px-6 font-bold text-on-surface-variant"
+            className="w-full"
           >
             {pkg.ctaLabel}
-          </button>
+          </Button>
           <p
             id={`${pkg.key}-availability`}
             className="mt-3 text-center text-sm text-on-primary-container"

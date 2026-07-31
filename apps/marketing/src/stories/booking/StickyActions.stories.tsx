@@ -39,7 +39,7 @@ export const ShortContent: Story = {
           A step short enough to fit, so the bar never leaves the flow.
         </p>
         <StickyActions>
-          <Button color="primary" className="h-14 w-full text-base">
+          <Button color="primary" className="w-full">
             Continue
           </Button>
         </StickyActions>
@@ -62,7 +62,7 @@ export const ScrollingContent: Story = {
           ))}
         </div>
         <StickyActions>
-          <Button color="primary" className="h-14 w-full text-base">
+          <Button color="primary" className="w-full">
             Continue
           </Button>
         </StickyActions>
@@ -91,7 +91,7 @@ export const WithGateAboveTheCta: Story = {
           <p className="text-base text-on-surface">
             A gate that must stay visible with the button.
           </p>
-          <Button color="primary" className="h-14 w-full text-base">
+          <Button color="primary" className="w-full">
             Continue With Payment
           </Button>
         </StickyActions>

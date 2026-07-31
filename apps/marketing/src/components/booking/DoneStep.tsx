@@ -44,7 +44,7 @@ export function DoneStep({
         <Button
           href={assessmentsHref}
           color="primary"
-          className="h-14 w-full text-base"
+          className="w-full"
         >
           Continue to your assessments
         </Button>
@@ -52,7 +52,7 @@ export function DoneStep({
           type="button"
           variant="ghost"
           onClick={onClose}
-          className="h-12 w-full text-base"
+          className="w-full"
         >
           Done
         </Button>
