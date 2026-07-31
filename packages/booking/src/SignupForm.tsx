@@ -191,7 +191,7 @@ export function SignupForm({
           )}
 
           <StickyActions>
-            <Button type="submit" color="primary" className="h-14 w-full text-base">
+            <Button type="submit" color="primary" className="w-full">
               {pending ? "Creating account…" : submitLabel}
             </Button>
           </StickyActions>

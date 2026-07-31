@@ -180,7 +180,7 @@ export function ConsentForm({
             </p>
           )}
 
-          <Button type="submit" color="primary" className="h-14 w-full text-base">
+          <Button type="submit" color="primary" className="w-full">
             {pending ? "Saving…" : "Continue With Payment"}
           </Button>
         </StickyActions>

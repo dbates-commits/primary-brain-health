@@ -362,7 +362,7 @@ export function DetailsForm({
             <Button
               type="submit"
               color="primary"
-              className="h-14 w-full text-base"
+              className="w-full"
             >
               {pending ? "Saving…" : "Submit"}
             </Button>
