@@ -27,6 +27,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@pbh/copy": "workspace:*",
     "@react-email/render": "^2.1.0",
     "react-email": "^6.8.1"
   }

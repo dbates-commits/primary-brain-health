@@ -9,9 +9,10 @@ import {
   PaymentStep,
   detailsHeader,
   SIGNUP_HEADER,
-  CONSENT_HEADER,
+  consentHeader,
   PAYMENT_HEADER,
   DEFAULT_PACKAGE_KEY,
+  trackForPackage,
   type AssessmentPackage,
   type PackageKey,
   type SignupResult,
@@ -214,6 +215,15 @@ export function BookingStepFlow({
     [packageKey],
   );
 
+  /**
+   * Which product's vocabulary these steps speak in. Derived from the chosen
+   * package rather than tracked alongside it, so the words a customer reads
+   * can't disagree with the package they are being charged for — including
+   * after the confirmation gate, where `packageKey` is restored from the server
+   * and any parallel track state would have been lost.
+   */
+  const track = trackForPackage(packageKey);
+
   const step = MODAL_STEPS[stepIndex];
 
   // Each step's header is rendered by the Modal in a fixed region above the
@@ -232,7 +242,7 @@ export function BookingStepFlow({
         )}
       />
     ) : step === "consent" ? (
-      <StepHeader {...CONSENT_HEADER} />
+      <StepHeader {...consentHeader(track)} />
     ) : step === "payment" ? (
       <StepHeader {...PAYMENT_HEADER} />
     ) : undefined;
@@ -253,6 +263,7 @@ export function BookingStepFlow({
         {step === "signup" && (
           <SignupForm
             action={signupWithPackage}
+            track={track}
             onComplete={completeSignup}
             showHeader={false}
           />
@@ -270,6 +281,7 @@ export function BookingStepFlow({
         {step === "consent" && (
           <ConsentForm
             action={consentAction}
+            track={track}
             onComplete={advance}
             showHeader={false}
           />

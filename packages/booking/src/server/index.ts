@@ -17,6 +17,7 @@ export * from "./db-errors";
 export * from "./consent";
 export * from "./request-meta";
 export * from "./fulfill";
+export * from "./entitlement";
 export * from "./register-and-enroll";
 export * from "./signup-core";
 export * from "./email-verification";

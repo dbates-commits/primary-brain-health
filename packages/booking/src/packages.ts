@@ -61,7 +61,13 @@ export const ASSESSMENT_PACKAGES: readonly AssessmentPackage[] = [
     ctaLabel: "Book Basic Assessment",
     includes: [
       { text: "Brain health assessment (taken online)" },
-      { text: "A personal consultation with a brain health specialist" },
+      // "specialist" was here until the wellness compliance sweep flagged it
+      // (packages.test.ts): Basic sells the wellness track, and a specialist is
+      // a clinical role this package does not include. Replaced with the
+      // wellness lexicon's own name for the role (`TERMS.wellness["role.reviewer"]`).
+      // ⚠️ "consultation" is left as-is pending David — it is not on the banned
+      // list, but the lexicon calls the wellness visit a "results review".
+      { text: "A personal consultation with a Brain Health Navigator" },
       { text: "Clear explanation of findings and risk profile" },
       { text: "Personalized lifestyle recommendations and next steps" },
     ],

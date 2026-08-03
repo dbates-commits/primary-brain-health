@@ -10,6 +10,7 @@ import {
   fieldClass,
   labelClass,
 } from "@pbh/ui";
+import { copyFor, type Track } from "@pbh/copy";
 import { PATIENT_IDENTIFICATION_OPTIONS } from "./field-options";
 import { StickyActions } from "./StickyActions";
 import type { SignupAction, SignupResult, SignupState } from "./types";
@@ -34,6 +35,7 @@ export const SIGNUP_HEADER = {
  */
 export function SignupForm({
   action,
+  track,
   onComplete,
   showHeader = true,
   title = SIGNUP_HEADER.title,
@@ -41,12 +43,15 @@ export function SignupForm({
   submitLabel = "Continue",
 }: {
   action: SignupAction;
+  /** Which product this signup is for — decides the wording, not the fields. */
+  track: Track;
   onComplete: (result: SignupResult) => void;
   showHeader?: boolean;
   title?: string;
   subtitle?: string;
   submitLabel?: string;
 }) {
+  const copy = copyFor({ track });
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
@@ -109,11 +114,13 @@ export function SignupForm({
           {/* Asked before the name fields because it decides whose details the
               next step collects — and therefore how that step is worded. */}
           <div>
-            <span className={labelClass}>Who is this consultation for?</span>
+            <span className={labelClass}>
+              {copy.phrase("signup.patientQuestion")}
+            </span>
             <div ref={patientGroupRef} className="mt-2">
               <SegmentedControl
                 name="patientIdentification"
-                aria-label="Who is this consultation for?"
+                aria-label={copy.phrase("signup.patientQuestion")}
                 options={[...PATIENT_IDENTIFICATION_OPTIONS]}
                 value={patientIdentification}
                 onChange={(e) => setPatientIdentification(e.target.value)}

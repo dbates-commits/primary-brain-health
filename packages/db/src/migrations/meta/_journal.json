@@ -127,6 +127,13 @@
       "when": 1784746977031,
       "tag": "0017_pale_shatterstar",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1785767292098,
+      "tag": "0018_right_payback",
+      "breakpoints": true
     }
   ]
 }
