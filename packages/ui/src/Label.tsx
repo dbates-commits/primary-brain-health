@@ -8,7 +8,8 @@ import { cn } from "./utils";
  * a radio group (see `SegmentedControl`) is labelled by `aria-label` instead,
  * but still needs a visible caption that matches every other field's label.
  */
-export const labelClass = "block text-xs font-semibold text-on-surface-variant";
+/** Figma Text Field (1629:69) labels the field with `text/label` (#374151). */
+export const labelClass = "block text-xs font-semibold text-neutral-700";
 
 /**
  * Form field label. Wraps a native `<label>` with the shared label styling and

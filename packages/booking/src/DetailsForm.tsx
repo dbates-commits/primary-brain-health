@@ -11,6 +11,7 @@ import {
   Button,
   FieldError,
   Label,
+  Select,
   StepHeader,
   fieldClass,
 } from "@pbh/ui";
@@ -209,7 +210,7 @@ export function DetailsForm({
 
             <div>
               <Label htmlFor="gender">Gender</Label>
-              <select
+              <Select
                 ref={genderRef}
                 id="gender"
                 name="gender"
@@ -221,7 +222,6 @@ export function DetailsForm({
                 }
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className={fieldClass}
               >
                 <option value="" disabled>
                   Select
@@ -231,7 +231,7 @@ export function DetailsForm({
                     {g.label}
                   </option>
                 ))}
-              </select>
+              </Select>
               <FieldError id="gender-error" message={fieldErrors?.gender} />
             </div>
           </div>
@@ -286,7 +286,7 @@ export function DetailsForm({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="stateOfResidence">State of residence</Label>
-              <select
+              <Select
                 ref={stateRef}
                 id="stateOfResidence"
                 name="stateOfResidence"
@@ -301,7 +301,6 @@ export function DetailsForm({
                 }
                 value={stateOfResidence}
                 onChange={(e) => setStateOfResidence(e.target.value)}
-                className={fieldClass}
               >
                 <option value="" disabled>
                   Select a state
@@ -311,7 +310,7 @@ export function DetailsForm({
                     {s.name}
                   </option>
                 ))}
-              </select>
+              </Select>
               <FieldError
                 id="stateOfResidence-error"
                 message={fieldErrors?.stateOfResidence}
@@ -320,7 +319,7 @@ export function DetailsForm({
 
             <div>
               <Label htmlFor="educationLevel">Highest level of education</Label>
-              <select
+              <Select
                 ref={educationRef}
                 id="educationLevel"
                 name="educationLevel"
@@ -334,7 +333,6 @@ export function DetailsForm({
                 }
                 value={educationLevel}
                 onChange={(e) => setEducationLevel(e.target.value)}
-                className={fieldClass}
               >
                 <option value="" disabled>
                   Select
@@ -344,7 +342,7 @@ export function DetailsForm({
                     {level.label}
                   </option>
                 ))}
-              </select>
+              </Select>
               <FieldError
                 id="educationLevel-error"
                 message={fieldErrors?.educationLevel}

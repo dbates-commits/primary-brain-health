@@ -78,9 +78,24 @@
   --color-neutral-100: #f3f4f6;
   --color-neutral-200: #dfdfdf;
   --color-neutral-300: #d1d5db;
+  /* Figma `border/default` — the focus outline on a form field (1629:69). */
+  --color-neutral-350: #d8d8d8;
   --color-neutral-400: #9ca3af;
+  /* Figma `text/tertiary` — the disabled field label in Text Field (1629:69). */
+  --color-neutral-500: #888884;
   --color-neutral-600: #4b5563;
+  /* Figma `text/label` — the field label in Text Field (1629:69). */
+  --color-neutral-700: #374151;
   --color-neutral-900: #111827;
+
+  /* Value colour of a filled form field — Figma `text/warm-dark`. Warmer and
+     darker than `on-surface`; the design uses it for text the user has typed,
+     leaving `on-surface-variant` for the resting/placeholder state. */
+  --color-on-surface-warm: #231815;
+
+  /* Figma `accent/pink`, used as the error outline on a form field. Distinct
+     from `error` (#ba1a1a), which the design reserves for message text. */
+  --color-accent-pink: #d6007f;
 
   /* Error */
   --color-error: #ba1a1a;
@@ -139,9 +154,14 @@
   --color-neutral-100: var(--color-neutral-100);
   --color-neutral-200: var(--color-neutral-200);
   --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-350: var(--color-neutral-350);
   --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
   --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-700: var(--color-neutral-700);
   --color-neutral-900: var(--color-neutral-900);
+  --color-on-surface-warm: var(--color-on-surface-warm);
+  --color-accent-pink: var(--color-accent-pink);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);
