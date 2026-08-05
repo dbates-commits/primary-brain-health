@@ -19,6 +19,7 @@ import {
 } from "@pbh/booking";
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
+import { NavigatorNote } from "./NavigatorNote";
 import { DoneStep } from "./DoneStep";
 import { EmailConfirmationStep } from "./EmailConfirmationStep";
 import {
@@ -254,6 +255,7 @@ export function BookingStepFlow({
         subheadline={subheadline}
         onSelectPackage={selectPackage}
       />
+      <NavigatorNote />
       <Modal
         open={open}
         onClose={close}
