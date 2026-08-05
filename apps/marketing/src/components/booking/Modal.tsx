@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@pbh/ui";
 
@@ -22,23 +22,73 @@ const FOCUSABLE =
   'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 /**
+ * How long the open/close transition runs. Must stay in step with the
+ * `duration-200` classes below — this is the timer that keeps the modal mounted
+ * long enough for the exit animation to finish, so a mismatch either clips the
+ * animation or leaves an invisible overlay swallowing clicks.
+ */
+const TRANSITION_MS = 200;
+
+/**
  * Accessible modal dialog rendered into a portal on `document.body`. Handles the
  * a11y basics a raw overlay misses: Escape to close, backdrop click to close,
  * body scroll lock, a focus trap (Tab/Shift+Tab cycle within the panel), initial
  * focus into the panel, and focus restoration to the trigger on close.
  *
- * Portal-safe for SSR: it renders `null` until `open` flips true (a client-only
- * event), so `document` is always defined when the portal mounts.
+ * Portal-safe for SSR: it renders `null` until it has mounted on the client, so
+ * `document` is always defined when the portal mounts.
+ *
+ * Open and close are animated, which means the modal outlives `open` going
+ * false: `mounted` keeps it in the tree until the exit transition has run.
+ * `entered` flips a frame *after* mounting so the browser paints the closed
+ * state first — mount and animate in one pass and there is no start value to
+ * animate from, so nothing moves.
  */
 export function Modal({ open, onClose, label, header, children }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [entered, setEntered] = useState(false);
+
+  // Mounting is derived from `open`, not synced to it in an effect: it has to
+  // happen in the same render pass, or the first frame after opening paints
+  // nothing. This is React's documented adjust-state-during-render pattern.
+  if (open && !mounted) {
+    setMounted(true);
+  }
+
+  /** Drives the transition classes. Falls to false the moment `open` does. */
+  const shown = open && entered;
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      // Double rAF: the first lands in the frame that commits the mount, the
+      // second in the one after it has been painted — so there is a start value
+      // to animate from.
+      let inner = 0;
+      const outer = requestAnimationFrame(() => {
+        inner = requestAnimationFrame(() => setEntered(true));
+      });
+      return () => {
+        cancelAnimationFrame(outer);
+        cancelAnimationFrame(inner);
+      };
+    }
+    const timer = setTimeout(() => {
+      setMounted(false);
+      setEntered(false);
+    }, TRANSITION_MS);
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  useEffect(() => {
+    if (!mounted) {
       return;
     }
     previouslyFocused.current = document.activeElement as HTMLElement | null;
+    // Held for as long as the modal is in the tree, exit animation included:
+    // releasing it when `open` flips would let the page jump behind a modal
+    // that is still on screen.
     document.body.style.overflow = "hidden";
 
     const panel = panelRef.current;
@@ -78,15 +128,19 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
       document.body.style.overflow = "";
       previouslyFocused.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [mounted, onClose]);
 
-  if (!open) {
+  if (!mounted) {
     return null;
   }
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-on-surface/50 p-4"
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-on-surface/50 p-4",
+        "transition-opacity duration-200 ease-out motion-reduce:transition-none",
+        shown ? "opacity-100" : "opacity-0",
+      )}
       onMouseDown={onClose}
     >
       <div
@@ -95,7 +149,14 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl focus:outline-none"
+        className={cn(
+          "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl focus:outline-none",
+          // `transition` (not `transition-all`) already covers opacity and
+          // transform, and leaves layout properties alone — the panel's height
+          // changes between steps and must not animate.
+          "transition duration-200 ease-out motion-reduce:transition-none",
+          shown ? "scale-100 opacity-100" : "scale-95 opacity-0",
+        )}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button
