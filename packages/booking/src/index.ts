@@ -7,10 +7,11 @@
  */
 export { SignupForm, SIGNUP_HEADER } from "./SignupForm";
 export { DetailsForm, detailsHeader } from "./DetailsForm";
-export { ConsentForm, CONSENT_HEADER } from "./ConsentForm";
+export { ConsentForm, consentHeader } from "./ConsentForm";
 export { PaymentStep, PAYMENT_HEADER } from "./PaymentStep";
 export { StickyActions } from "./StickyActions";
 export * from "./types";
 export * from "./field-options";
 export * from "./packages";
+export * from "./track";
 export * from "./us-states";

@@ -1,0 +1,1 @@
+ALTER TABLE "linus_enrollments" ADD COLUMN "track" text DEFAULT 'wellness' NOT NULL;

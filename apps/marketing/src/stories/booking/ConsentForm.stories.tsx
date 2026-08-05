@@ -28,6 +28,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
     action: consentSucceeds(),
+    track: 'wellness',
     onComplete: fn(),
   },
   decorators: [
@@ -44,6 +45,16 @@ type Story = StoryObj<typeof meta>;
 
 /** The step as the funnel renders it, header inline. */
 export const Default: Story = {};
+
+/**
+ * The clinical package's consent step. The subtitle names the consultation the
+ * clinical product includes; the wellness one must not, since consenting to a
+ * consultation that was never sold is the misdescription this whole track axis
+ * exists to prevent.
+ */
+export const ClinicalTrack: Story = {
+  args: { track: 'clinical' },
+};
 
 /** Ticked and ready — the state the CTA is meant to be pressed in. */
 export const Agreed: Story = {

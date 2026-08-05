@@ -1,0 +1,19 @@
+{
+  "name": "@pbh/copy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo \"(no lint)\" && exit 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@pbh/config": "workspace:*",
+    "typescript": "^5",
+    "vitest": "^4.1.3"
+  }
+}

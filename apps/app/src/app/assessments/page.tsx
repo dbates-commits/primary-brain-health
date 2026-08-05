@@ -3,7 +3,7 @@ import { Card, Container, Heading, Section } from "@pbh/ui";
 import { auth } from "@/auth";
 import { AssessmentsView } from "./AssessmentsView";
 import { SignOutButton } from "./SignOutButton";
-import { registerAndEnrollUserById } from "@pbh/booking/server";
+import { getEntitledTrack, registerAndEnrollUserById } from "@pbh/booking/server";
 
 export const metadata = {
   title: "Assessments",
@@ -26,6 +26,12 @@ export default async function AssessmentsPage() {
 
   const result = await registerAndEnrollUserById(uid, { allowRegister: false });
 
+  // Page chrome speaks to the reader's *current* entitlement; each card carries
+  // the track its own assessment was produced under. Only a paid user reaches
+  // this page, so a null entitlement means something is wrong upstream — fall
+  // back to wellness, which can only ever understate what they bought.
+  const track = (await getEntitledTrack(uid)) ?? "wellness";
+
   if (result.status === "success") {
     return (
       <main>
@@ -35,6 +41,7 @@ export default async function AssessmentsPage() {
           </div>
           <AssessmentsView
             firstName={result.firstName}
+            track={track}
             enrollments={result.enrollments}
           />
         </Section>

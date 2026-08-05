@@ -28,6 +28,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
     action: signupSucceeds(),
+    track: 'wellness',
     onComplete: fn(),
   },
   decorators: [
@@ -44,6 +45,23 @@ type Story = StoryObj<typeof meta>;
 
 /** The step as the funnel renders it, with its own header inline. */
 export const Default: Story = {};
+
+/**
+ * The same step selling the clinical package. Only the vocabulary moves — the
+ * question becomes "Who is this consultation for?" where wellness asks about an
+ * assessment — because a consultation is a thing the clinical product includes
+ * and the wellness one does not. Side by side with `Default`, this is the story
+ * to review the lexicon against.
+ */
+export const ClinicalTrack: Story = {
+  args: { track: 'clinical' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(
+      canvas.getByText('Who is this consultation for?'),
+    ).toBeInTheDocument();
+  },
+};
 
 /**
  * Choosing "Someone Else" adds the line explaining that the name and email below
