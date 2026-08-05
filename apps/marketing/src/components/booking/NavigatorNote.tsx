@@ -5,9 +5,13 @@ import { Section } from "@pbh/ui";
  *
  * Its own band directly below the booking section, not part of it: the package
  * cards sell what you buy, this answers what the Brain Health Navigator
- * actually does once you have. Light surface on purpose — it breaks the dark
- * `bg-primary` booking band and hands off to the FAQ section, which is also
- * surface-toned.
+ * actually does once you have.
+ *
+ * Styled to match `BenefitsList` ("What You Gain") — same mint band, same
+ * headline treatment — so the two read as one family rather than two
+ * one-offs. The mint is a raw hex there too; `@pbh/tokens` has no token for it
+ * (the `surface-container` family is warm grey). If a third section wants it,
+ * promote it to a token rather than pasting the hex a third time.
  *
  * Kept a standalone component because its final home is still open: David
  * offered "near the pricing cards" or "How it works", so relocating it should
@@ -19,7 +23,7 @@ import { Section } from "@pbh/ui";
  * `/\bclinicians?\b/i` matches the role noun, not the adjective. Don't "fix" it.
  */
 
-const PROMISE = "your guide, not your gatekeeper";
+const TITLE = "Your Brain Health Navigator is your guide, not your gatekeeper.";
 
 const BODY =
   "They review your wellness assessment with you, explain what it means in " +
@@ -29,11 +33,26 @@ const BODY =
 
 export function NavigatorNote() {
   return (
-    <Section className="bg-surface px-6 py-16 md:px-10 md:py-20">
-      <p className="mx-auto max-w-3xl text-pretty text-center text-lg leading-relaxed text-on-surface-variant md:text-xl">
-        Your Brain Health Navigator is{" "}
-        <span className="font-semibold text-on-surface">{PROMISE}</span>. {BODY}
-      </p>
+    <Section
+      className="bg-[#E2EFEF] px-6 py-20 md:px-10 md:py-28"
+      stagger={90}
+    >
+      <div className="mx-auto max-w-4xl text-center">
+        {/* Smaller than BenefitsList's headline scale on purpose: that one
+            heads a section with three words, this is a full sentence. */}
+        <h2
+          data-scroll-item
+          className="text-balance font-headline text-3xl font-thin leading-[1.15] text-on-surface md:text-4xl"
+        >
+          {TITLE}
+        </h2>
+        <p
+          data-scroll-item
+          className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-on-surface-variant md:text-lg"
+        >
+          {BODY}
+        </p>
+      </div>
     </Section>
   );
 }
