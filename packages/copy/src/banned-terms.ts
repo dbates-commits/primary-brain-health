@@ -9,8 +9,9 @@
  * Scope note — the bare word "medical" is deliberately NOT banned. Wellness
  * copy legitimately needs it for negative disclaimers ("this is not medical
  * care"), and banning it would push authors toward vaguer language that says
- * less. The list below is limited to clinical role nouns and clinical actions,
- * where any occurrence on the wellness path is wrong regardless of framing.
+ * less. The list below is limited to clinical role nouns, clinical actions and
+ * the clinical name for the visit itself, where any occurrence on the wellness
+ * path is wrong regardless of framing.
  *
  * This is a floor, not a substitute for compliance review.
  */
@@ -22,6 +23,12 @@ export const CLINICAL_ONLY_PATTERNS: readonly RegExp[] = [
   /\bdiagnos\w*/i,
   /\bprescri\w*/i,
   /\btreatments?\b/i,
+  // The clinical track's own name for the visit
+  // (`TERMS.clinical["visit.name"]`); wellness calls it a "results review".
+  // Deliberately the noun and not the `\bconsult\w*` stem the neighbours above
+  // use — a stem also catches "consult your doctor before…", which is the same
+  // kind of negative disclaimer the "medical" carve-out above exists to allow.
+  /\bconsultations?\b/i,
 ];
 
 export interface BannedTermHit {

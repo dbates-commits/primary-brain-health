@@ -90,6 +90,24 @@ describe("wellness copy carries no clinical vocabulary", () => {
     expect(hits).toHaveLength(1);
     expect(hits[0].match).toBe("Specialist");
   });
+
+  it("catches the clinical name for the visit", () => {
+    // The wellness track calls this a "results review". Planted separately
+    // because the sentence a wellness author would actually write names no
+    // clinical role at all — the visit noun is the only thing wrong with it.
+    const hits = findBannedTerms("Book your consultation today.", "planted");
+    expect(hits).toHaveLength(1);
+    expect(hits[0].match).toBe("consultation");
+  });
+
+  it("leaves 'consult' alone outside the banned noun", () => {
+    // The pattern is the noun, not the `consult\w*` stem: wellness copy needs
+    // to be able to say "consult your doctor" in a negative disclaimer. See
+    // the scope note in banned-terms.ts.
+    expect(findBannedTerms("Consult your doctor before changing your routine.", "planted")).toEqual(
+      [],
+    );
+  });
 });
 
 /** Readable failure output: "PHRASES.wellness[…]: \"Specialist\"". */

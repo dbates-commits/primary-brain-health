@@ -177,7 +177,11 @@ values must allow functions as well as strings: `t("upgrade.credit", { amount })
 
 A test that walks the wellness lexicon plus wellness-track content files and
 fails on a banned-term regex (`specialist`, `diagnos*`, `physician`,
-`treatment`, `prescri*`, …).
+`treatment`, `prescri*`, `consultation`, …).
+
+⚠️ Only the lexicon half of that shipped. The content-file half is still
+unwritten, which is why the marketing chrome can say "Book a Consultation" in
+about ten places while the guard stays green — tracked on pbh-tyd.
 
 **It must cover the `upgrade.*` slice under the wellness track.** That slice
 renders on a wellness-coded purchase and its entire purpose is to make the
