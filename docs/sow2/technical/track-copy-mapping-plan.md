@@ -259,9 +259,13 @@ enrollments exist without a `track`.
   wellness) card promised "A personal consultation with a brain health
   **specialist**". It now names the wellness lexicon's own role
   (`TERMS.wellness["role.reviewer"]`), and `packages.test.ts` fails if a
-  clinical role noun returns to a wellness package. ⚠️ The word *consultation*
-  in that same bullet is untouched and needs David: it is not a banned term, but
-  the lexicon calls the wellness visit a "results review".
+  clinical role noun returns to a wellness package. The word *consultation* in
+  that same bullet was left pending David and he has since supplied the wording:
+  the bullet now reads "A 1:1 with your Brain Health Navigator to understand
+  your options and decide what's right for you." It calls the visit a "1:1"
+  rather than a *consultation* (clinical) or a *results review*
+  (`TERMS.wellness["visit.name"]`) — plain language instead of either track's
+  jargon.
 - Deliverables lists are **not** duplicated into the lexicon. `ASSESSMENT_PACKAGES`
   owns both the bullets and the Stripe price backing them, so what a customer
   reads and what they are charged cannot drift; the compliance sweep follows the

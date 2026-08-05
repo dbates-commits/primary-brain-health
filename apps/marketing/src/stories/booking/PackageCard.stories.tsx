@@ -64,24 +64,19 @@ export const NotYetPurchasable: Story = {
 /** A single bullet — the shortest the card can legitimately get. */
 export const MinimalIncludes: Story = {
   args: {
-    pkg: {
-      ...BASIC,
-      includes: [{ text: "Brain health assessment (taken online)" }],
-    },
+    pkg: { ...BASIC, includes: BASIC.includes.slice(0, 1) },
   },
 };
 
-/** Long bullet text wraps beside the tick instead of pushing it out of line. */
+/**
+ * Long bullet text wraps beside the tick instead of pushing it out of line.
+ * The Navigator bullet is the longest the catalog carries, so this is sliced
+ * from the real package rather than written out here — a hand-typed literal is
+ * how the old "brain health specialist" wording outlived its removal from
+ * `ASSESSMENT_PACKAGES`.
+ */
 export const LongIncludeText: Story = {
   args: {
-    pkg: {
-      ...BASIC,
-      includes: [
-        {
-          text: "A personal consultation with a brain health specialist, scheduled at a time that suits you and followed by a written summary of everything discussed",
-        },
-        { text: "Clear explanation of findings and risk profile" },
-      ],
-    },
+    pkg: { ...BASIC, includes: BASIC.includes.slice(1, 3) },
   },
 };

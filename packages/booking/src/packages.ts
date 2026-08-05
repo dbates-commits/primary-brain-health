@@ -65,9 +65,13 @@ export const ASSESSMENT_PACKAGES: readonly AssessmentPackage[] = [
       // (packages.test.ts): Basic sells the wellness track, and a specialist is
       // a clinical role this package does not include. Replaced with the
       // wellness lexicon's own name for the role (`TERMS.wellness["role.reviewer"]`).
-      // ⚠️ "consultation" is left as-is pending David — it is not on the banned
-      // list, but the lexicon calls the wellness visit a "results review".
-      { text: "A personal consultation with a Brain Health Navigator" },
+      // The sentence is David's final wording. It names the visit a "1:1"
+      // rather than a "consultation" (clinical) or a "results review"
+      // (`TERMS.wellness["visit.name"]`) — plain language in place of either
+      // track's jargon — and says what the visit is for, not who attends it.
+      {
+        text: "A 1:1 with your Brain Health Navigator to understand your options and decide what's right for you.",
+      },
       { text: "Clear explanation of findings and risk profile" },
       { text: "Personalized lifestyle recommendations and next steps" },
     ],
