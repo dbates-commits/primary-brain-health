@@ -2,10 +2,13 @@
 
 import type { MouseEvent } from "react";
 import { Button } from "@pbh/ui";
+import { TinaMarkdown } from "tinacms/dist/rich-text";
 import { HeroProps, DEFAULT_HERO_IMAGE } from "./hero-utils";
 
 export function HeroFullImage({
   headline,
+  subheadline,
+  subheadlineRich,
   image,
   primaryButtonText,
   primaryButtonTextMobile,
@@ -66,6 +69,20 @@ export function HeroFullImage({
         >
           {headline}
         </h1>
+
+        {(subheadlineRich || subheadline) && (
+          <div
+            className="animate-fade-up -mt-3 sm:-mt-6 max-w-4xl text-center font-body text-[18px] sm:text-[32px] font-normal leading-normal text-[#AFD2E3] text-pretty [&_p]:m-0"
+            style={{ animationDelay: "250ms" }}
+            data-tina-field={tinaFields?.subheadline}
+          >
+            {subheadlineRich ? (
+              <TinaMarkdown content={subheadlineRich} />
+            ) : (
+              <p>{subheadline}</p>
+            )}
+          </div>
+        )}
 
         {primaryButtonText && (
           <div
