@@ -126,6 +126,16 @@
 {"issue_id":"pbh-bws.41","label":"phase-1"}
 {"issue_id":"pbh-bws.42","label":"phase-1"}
 {"issue_id":"pbh-bws.42","label":"track:qa"}
+{"issue_id":"pbh-bws.45","label":"phase-1"}
+{"issue_id":"pbh-bws.45","label":"scope:net-new"}
+{"issue_id":"pbh-bws.45","label":"track:build-integrations"}
+{"issue_id":"pbh-bws.46","label":"phase-1"}
+{"issue_id":"pbh-bws.46","label":"track:build-integrations"}
+{"issue_id":"pbh-bws.46","label":"track:compliance"}
+{"issue_id":"pbh-bws.48","label":"phase-1"}
+{"issue_id":"pbh-bws.48","label":"track:content"}
+{"issue_id":"pbh-bws.49","label":"phase-1"}
+{"issue_id":"pbh-bws.49","label":"track:qa"}
 {"issue_id":"pbh-bws.6","label":"phase-1"}
 {"issue_id":"pbh-bws.6","label":"track:discovery"}
 {"issue_id":"pbh-bws.9","label":"phase-1"}
