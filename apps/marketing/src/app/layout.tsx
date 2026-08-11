@@ -63,6 +63,12 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Never call `auth()` here or in `Header` — it reads cookies, which would opt
+ * every page into dynamic rendering and take the Tina-driven pages off the CDN.
+ * A sign-out affordance, if one is ever wanted, belongs in a client component
+ * reading `/api/auth/session`.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

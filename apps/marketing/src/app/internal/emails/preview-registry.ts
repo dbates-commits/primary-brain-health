@@ -1,0 +1,62 @@
+import {
+  AccountDeactivatedEmail,
+  AssessmentReadyEmail,
+  PaymentReceiptEmail,
+  PaymentRefundedEmail,
+  WelcomeEmail,
+} from "@pbh/emails";
+
+export interface EmailPreview {
+  /** URL-anchor id and stable key. */
+  slug: string;
+  name: string;
+  /** Keep in sync with the subjects in `@pbh/booking/server` (send-email.ts). */
+  subject: string;
+  /** When the real send fires, for stakeholder context. */
+  trigger: string;
+  element: React.ReactElement;
+}
+
+/**
+ * Every template from `@pbh/emails`, instantiated with its own PreviewProps —
+ * the same sample data the react-email dev preview uses. Add new templates
+ * here so they show up at /internal/emails.
+ */
+export const emailPreviews: EmailPreview[] = [
+  {
+    slug: "welcome",
+    name: "Welcome",
+    subject: "Welcome to Primary Brain Health",
+    trigger: "Sent when the emailed confirmation link is redeemed at signup.",
+    element: WelcomeEmail(WelcomeEmail.PreviewProps),
+  },
+  {
+    slug: "payment-receipt",
+    name: "Payment receipt",
+    subject: "Your Primary Brain Health receipt",
+    trigger: "Sent once, when a payment is first recorded as succeeded.",
+    element: PaymentReceiptEmail(PaymentReceiptEmail.PreviewProps),
+  },
+  {
+    slug: "assessment-ready",
+    name: "Assessment ready",
+    subject: "Your brain health assessment is ready",
+    trigger: "Sent when the user's assessments are first enrolled and ready to start.",
+    element: AssessmentReadyEmail(AssessmentReadyEmail.PreviewProps),
+  },
+  {
+    slug: "payment-refunded",
+    name: "Payment refunded",
+    subject: "Your refund has been issued",
+    trigger: "Sent once, when a payment is refunded.",
+    element: PaymentRefundedEmail(PaymentRefundedEmail.PreviewProps),
+  },
+  {
+    slug: "account-deactivated",
+    name: "Account deactivated",
+    subject: "Your account has been deactivated",
+    trigger:
+      "Sent when an account deactivation request is processed. Copy is placeholder pending Linus-attorney-approved language; the in-app flow isn't built yet.",
+    element: AccountDeactivatedEmail(AccountDeactivatedEmail.PreviewProps),
+  },
+];

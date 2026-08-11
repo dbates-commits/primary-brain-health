@@ -44,10 +44,10 @@ export function PaymentStep({
   createSession: CreateCheckoutAction;
   finalize: PaymentFinalizeAction;
   /**
-   * Handed the Checkout Session id this step just paid, so the host can mint a
-   * post-payment handoff bound to *this* payment. Nothing identifying: the
-   * server re-fetches the session from Stripe and matches it against the
-   * booking cookie before it means anything.
+   * Handed the Checkout Session id this step just paid, in case the host needs
+   * to act on *this* payment. Nothing identifying on its own: the server
+   * re-fetches the session from Stripe and matches it against the booking
+   * cookie before it means anything.
    */
   onComplete: (checkoutSessionId: string) => void;
   showHeader?: boolean;

@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     "@pbh/booking",
     "@pbh/ui",
     "@pbh/tokens",
-    "@pbh/types",
+    "@pbh/emails",
     "@pbh/db",
     "@pbh/payments",
     "@pbh/linus",

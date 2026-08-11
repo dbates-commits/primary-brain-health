@@ -2,7 +2,6 @@
 
 import { cookies, headers } from "next/headers";
 import {
-  createHandoffForCheckoutSession,
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
@@ -12,6 +11,7 @@ import {
   type LinusState,
 } from "@pbh/booking/server";
 import type { CreateCheckoutResult } from "@pbh/booking";
+import { createSessionForUser } from "@/lib/auth-session";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
@@ -47,10 +47,11 @@ export async function createAssessmentCheckoutSession(
 
 /**
  * Called from Embedded Checkout's `onComplete`. Verify + record the payment
- * (shared), then register + enroll the user in Linus. Unlike the funnel, the
- * marketing app sets no session cookie — the paid + enrolled user is handed to
- * the funnel's `/login` (see `DoneStep`), which drops the assessment cookie and
- * lands on `/assessments`. That `/login` is the seam Clerk replaces later.
+ * (shared), sign the customer in, then register + enroll them in Linus.
+ *
+ * The sign-in used to need a signed token handed to a second app on another
+ * origin; with one app it is just a cookie we set here, so a customer who comes
+ * back later reaches `/welcome` without asking for a magic link.
  *
  * A `success` state advances the modal to the confirmation step; enrollment
  * failures surface inline (the charge stands and the webhook backstop retries).
@@ -76,47 +77,20 @@ export async function finalizeCheckoutSession(
     return paymentError(PAYMENT_UNVERIFIED);
   }
 
+  // Sign them in off the back of the verified payment. Swallowed on failure on
+  // purpose: the charge has already gone through, so nothing here may turn a
+  // successful payment into an error state. `/welcome` also accepts the booking
+  // cookie plus a succeeded payment, so a customer whose session didn't mint
+  // still gets back to the confirmation screen.
+  try {
+    const cookie = await createSessionForUser(id);
+    (await cookies()).set(cookie.name, cookie.value, cookie.options);
+  } catch (err) {
+    console.error("post-payment session mint failed:", err);
+  }
+
   // Deliberately outside the try above so an enrollment failure surfaces as its
   // own state, not a payment error: the charge stands and the webhook backstop
   // retries enrollment.
   return registerAndEnrollUserById(id);
-}
-
-/**
- * Mint the post-payment sign-in link, so the customer lands on `/assessments`
- * already authenticated instead of requesting a magic link.
- *
- * Marketing cannot set the funnel's session cookie (different origins), so this
- * hands the funnel a short-lived, single-use token bound to the succeeded
- * payment; the funnel verifies it and mints the real session.
- *
- * This action mints a login credential, so it is the most sensitive one here:
- * the account comes from the signed booking cookie, and the payment from a
- * Checkout Session re-verified with Stripe in this same request. Both must
- * agree, so a handoff can only be minted for a payment this browser just made.
- *
- * Returns null when there's nothing to hand off — the caller falls back to
- * `/login`, which always works.
- */
-export async function createAssessmentHandoffUrl(
-  checkoutSessionId: string,
-): Promise<string | null> {
-  const id = resolveBookingUserId(await cookies());
-  const sessionId = checkoutSessionId.trim();
-  if (!id || !sessionId) {
-    return null;
-  }
-  try {
-    const token = await createHandoffForCheckoutSession(id, sessionId);
-    if (!token) {
-      return null;
-    }
-    const base = process.env.NEXT_PUBLIC_FUNNEL_URL ?? "";
-    return `${base}/api/auth/handoff?token=${encodeURIComponent(token)}`;
-  } catch (err) {
-    // A missing AUTH_HANDOFF_SECRET throws here. That must not strand a paid
-    // customer on a broken confirmation screen — fall back to the magic link.
-    console.error("createAssessmentHandoffUrl failed:", err);
-    return null;
-  }
 }

@@ -1,6 +1,6 @@
 # Primary Brain Health
 
-Marketing site and DTC consultation funnel for Primary Brain Health — a
+Marketing site and DTC booking flow for Primary Brain Health — a
 **pnpm + Turborepo monorepo** built on Next.js + TinaCMS.
 
 ## Stack
@@ -14,34 +14,41 @@ Marketing site and DTC consultation funnel for Primary Brain Health — a
 
 ```
 apps/
-  marketing/   Next.js + TinaCMS marketing site (the V1 site)  → :3000
-  app/         Signed-in app (session, assessments, webhook)    → :3001
+  marketing/   Next.js + TinaCMS marketing site, booking flow, sign-in,
+               Stripe webhook — the whole customer surface              → :3000
 packages/
-  ui/          @pbh/ui     — shared design-system primitives (Button, Heading, …) + cn()
-  tokens/      @pbh/tokens — Tailwind 4 theme + CSS variables (theme.css)
-  types/       @pbh/types  — shared TS types (e.g. signed-token handoff payload)
-  config/      @pbh/config — shared ESLint flat config + tsconfig presets
+  ui/          @pbh/ui      — shared design-system primitives (Button, Heading, …) + cn()
+  tokens/      @pbh/tokens  — Tailwind 4 theme + CSS variables (theme.css)
+  booking/     @pbh/booking — the booking flow: forms + every server write path
+  db/          @pbh/db      — Drizzle schema + Neon client
+  emails/      @pbh/emails  — transactional email templates
+  linus/       @pbh/linus   — Linus Health API client
+  payments/    @pbh/payments— Stripe client + catalog
+  copy/        @pbh/copy    — wellness/clinical track vocabulary
+  config/      @pbh/config  — shared ESLint flat config + tsconfig presets
 ```
 
-`@pbh/*` are real workspace packages (not path aliases); apps consume them via
-`transpilePackages` in `next.config.ts`. See
-[`docs/sow2/technical/monorepo-plan.md`](docs/sow2/technical/monorepo-plan.md).
+`@pbh/*` are real workspace packages (not path aliases); the app consumes them
+via `transpilePackages` in `next.config.ts`. The two-app split that
+[`docs/sow2/technical/monorepo-plan.md`](docs/sow2/technical/monorepo-plan.md)
+describes is design history — `apps/app` was retired in August 2026, see
+[`docs/booking-flow.md`](docs/booking-flow.md).
 
 ## Getting Started
 
 ```bash
 pnpm install
-pnpm dev            # everything in parallel: marketing :3000, app :3001, email preview :3002
+pnpm dev            # everything in parallel: marketing :3000, email preview :3002
 ```
 
 Open marketing at [http://localhost:3000](http://localhost:3000) (Tina admin at
-`/admin/index.html`), the app at [http://localhost:3001](http://localhost:3001),
-and the email preview at [http://localhost:3002](http://localhost:3002).
+`/admin/index.html`) and the email preview at
+[http://localhost:3002](http://localhost:3002).
 
 ```bash
 pnpm build                       # build everything (cached, only rebuilds what changed)
-pnpm --filter marketing build    # build just one app
-pnpm --filter app dev            # run just one app
+pnpm --filter marketing build    # build just one workspace
+pnpm --filter marketing dev      # run just one workspace
 pnpm email                       # email templates only, on :3002
 pnpm lint                        # eslint across the workspace
 pnpm typecheck                   # tsc --noEmit across the workspace

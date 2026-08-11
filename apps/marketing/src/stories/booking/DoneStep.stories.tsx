@@ -12,17 +12,17 @@ const meta = {
       description: {
         component:
           'Step 6 — the confirmation shown once payment and Linus enrollment have both ' +
-          'completed. Its job is the handoff: `handoffUrl` is a single-use sign-in link that ' +
-          'lands the customer on `/assessments` already authenticated. When that link ' +
-          'couldn’t be minted the step falls back to `/login` with the email prefilled, which ' +
-          'always works — so the customer is never stranded on a dead end after paying.',
+          'completed, and the last screen we own. It renders `EngagementAppCta`, whose ' +
+          'button links out to the Linus Engagement App. That link comes from ' +
+          '`NEXT_PUBLIC_ENGAGEMENT_APP_URL`, inlined at build time: with it unset (as in ' +
+          'Storybook) the confirmation renders without a button and promises the link by ' +
+          'email instead, rather than showing a dead one to someone who has just paid.',
       },
     },
   },
   tags: ['autodocs'],
   args: {
     email: 'margaret@example.com',
-    handoffUrl: 'https://app.example.com/handoff?token=stub',
     onClose: fn(),
   },
   decorators: [
@@ -37,39 +37,23 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The happy path: a minted handoff link straight into the assessments. */
+/** The confirmation, addressed to the account that just paid. */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await expect(canvas.getByText(/You're all set/)).toBeInTheDocument();
     await expect(
-      canvas.getByRole('link', { name: 'Continue to your assessments' }),
-    ).toHaveAttribute('href', 'https://app.example.com/handoff?token=stub');
+      canvas.getByText(/margaret@example\.com/),
+    ).toBeInTheDocument();
   },
 };
 
-/**
- * The handoff couldn&rsquo;t be minted, so the CTA falls back to `/login` with
- * the email prefilled.
- */
-export const WithoutHandoffLink: Story = {
-  args: { handoffUrl: null },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(
-      canvas.getByRole('link', { name: 'Continue to your assessments' }),
-    ).toHaveAttribute(
-      'href',
-      expect.stringContaining('/login?email=margaret%40example.com'),
-    );
-  },
-};
-
-/** No email on hand — the subtitle drops the address and the prefill goes too. */
+/** No email on hand — the copy drops the address rather than leaving a gap. */
 export const WithoutEmail: Story = {
-  args: { email: '', handoffUrl: null },
+  args: { email: '' },
 };
 
-/** A long address still wraps inside the subtitle rather than overflowing. */
+/** A long address still wraps inside the copy rather than overflowing. */
 export const LongEmail: Story = {
   args: {
     email: 'margaret.hale.longaddress@a-very-long-domain-name.example.com',

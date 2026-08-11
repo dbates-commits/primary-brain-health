@@ -4,11 +4,11 @@ End-to-end tests for the marketing booking → Stripe payment flow (`:3000`).
 
 Config: [`playwright.config.ts`](../playwright.config.ts). Specs live here in `e2e/`.
 
-> Scope note: the tests stop at the Stripe **payment outcome**. The post-payment
-> Linus enrollment and the sign-in handoff to `/assessments` are intentionally
-> out of scope — per the Jul 2026 direction, the **Linus Engagement App** owns
-> login/entry after the HubSpot/marketing pages, superseding the custom app-side
-> handoff.
+> Scope note: the tests stop at the Stripe **payment outcome** and the welcome
+> screen behind it. Post-payment Linus enrollment is intentionally out of scope
+> (it needs a US IP), and there is nothing beyond the welcome screen to test —
+> per the Jul 2026 direction, the **Linus Engagement App** owns login and the
+> assessments themselves, so our surface ends at a link out to it.
 
 ## Run
 
@@ -27,7 +27,7 @@ First-time browser install (once per machine): `npx playwright install chromium`
 
 | Spec | Needs | Runs by default |
 |---|---|---|
-| `booking-smoke.spec.ts` | marketing app only | ✅ yes |
+| `booking-smoke.spec.ts` | the app only, no secrets | ✅ yes |
 | `onboarding.spec.ts` (payment path) | test DB + Stripe test keys | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
 
 The smoke spec proves the harness + booking entry work with no secrets. The
@@ -37,17 +37,18 @@ never a false red.
 `onboarding.spec.ts` drives the whole path (signup → email confirm → details →
 consent → Stripe) for a fresh user per case and asserts the charge outcome:
 
-- **accepted** — Visa and Mastercard → Stripe's "Thanks for your payment".
+- **accepted** — Visa and Mastercard → Stripe's "Thanks for your payment",
+  then our own welcome screen with its CTA out to the Engagement App.
 - **declined** — generic-decline and insufficient-funds test cards → the
   in-frame decline reason, and no success.
 
-(Stripe test mode has no distinct HSA/FSA card and the funnel doesn't flag them,
-so HSA/FSA cards are covered as ordinary branded charges.)
+(Stripe test mode has no distinct HSA/FSA card and we don't flag them, so
+HSA/FSA cards are covered as ordinary branded charges.)
 
 ## Full flow (`E2E_FULL_FLOW=1`)
 
-Runs entirely in the marketing app — **no Linus, no app server, no VPN** (the
-path ends at payment). It writes real rows and drives Stripe, so it needs:
+**No Linus and no VPN by default** — the assertions stop at the charge outcome.
+It writes real rows and drives Stripe, so it needs:
 
 - **`DATABASE_URL`** → a **dedicated Neon branch** (cheap, disposable). NEVER
   prod, and NEVER a Vercel preview URL — previews share the prod Neon DB, and the
@@ -56,6 +57,12 @@ path ends at payment). It writes real rows and drives Stripe, so it needs:
 - **Stripe TEST keys + an ACTIVE price** (`STRIPE_SECRET_KEY`,
   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_ASSESSMENT_PRICE_ID`). Reuse
   staging's — they're already test-mode.
+- Optionally **`E2E_LINUS=1`** (plus Linus sandbox creds and a **US IP**), which
+  extends the accepted-card cases past the charge to the welcome screen. The
+  modal only advances once enrollment returns, so without this the run stops at
+  the Stripe outcome — which is why the default needs no VPN. Set
+  `NEXT_PUBLIC_ENGAGEMENT_APP_URL` too and the CTA's href is asserted as well;
+  unset, the screen renders no button by design and that check is skipped.
 
 Put these in `apps/marketing/.env.local`. The config disables `RESEND_API_KEY`
 for the run and tees the marketing server log so the test can read back the

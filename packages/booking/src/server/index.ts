@@ -6,10 +6,10 @@ import "server-only";
  * fulfillment path, the Linus register/enroll flow, the webhook handler, and the
  * small helper set (email, db-errors, consent, request-meta) they build on.
  *
- * Both the funnel and the marketing app import from here, so this is the single
- * source of truth for the payment/enrollment logic. Each app keeps only its thin
- * `"use server"` wrappers (resolving the current user and reading request
- * headers) plus its own post-payment concerns (cookies, redirects, handoff).
+ * The app imports everything from here, so this is the single source of truth
+ * for the payment/enrollment logic. The app keeps only its thin `"use server"`
+ * wrappers (resolving the current user and reading request headers) plus its own
+ * post-payment concerns (cookies, redirects).
  */
 export * from "./auth";
 export * from "./email";
@@ -23,7 +23,6 @@ export * from "./signup-core";
 export * from "./email-verification";
 export * from "./resume";
 export * from "./booking-session";
-export * from "./handoff";
 export * from "./details-core";
 export * from "./consent-core";
 export * from "./checkout-core";

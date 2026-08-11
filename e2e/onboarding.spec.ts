@@ -5,8 +5,8 @@ import { reachConsentStep, submitConsent } from "./helpers/booking";
  * The onboarding money-path through Stripe: marketing booking → email confirm →
  * details → consent → Stripe test payment. Each case drives the whole flow with
  * a fresh user and ends at the charge outcome — success or a decline shown in
- * Stripe's Embedded Checkout. That's the boundary the funnel controls; the
- * post-payment Linus enrollment and app handoff are out of scope.
+ * Stripe's Embedded Checkout, plus the welcome screen behind it. Post-payment
+ * Linus enrollment is out of scope (it needs a US IP).
  *
  * Writes to the database and drives Stripe, so it only runs when the operator
  * opted in with E2E_FULL_FLOW=1 — otherwise skipped (not failed), since a
@@ -17,6 +17,20 @@ import { reachConsentStep, submitConsent } from "./helpers/booking";
  *   - Stripe TEST keys + an ACTIVE assessment price
  */
 const FULL_FLOW = process.env.E2E_FULL_FLOW === "1";
+
+/**
+ * Whether Linus enrollment can actually succeed in this run (the API is US-only,
+ * so it 403s off a US IP). The modal only advances past payment once enrollment
+ * returns, so the welcome-screen assertions are opt-in: without this the suite
+ * still stops at the charge outcome and needs no VPN.
+ */
+const LINUS_REACHABLE = process.env.E2E_LINUS === "1";
+
+/**
+ * The welcome screen's CTA target. With it unset the screen deliberately renders
+ * no button at all, so the href assertion is skipped rather than failed.
+ */
+const ENGAGEMENT_APP_URL = process.env.NEXT_PUBLIC_ENGAGEMENT_APP_URL ?? "";
 
 // Accepted Stripe test cards across brands. HSA/FSA cards are ordinary branded
 // cards — Stripe test mode has no distinct HSA/FSA number and the funnel doesn't
@@ -95,6 +109,20 @@ test.describe("onboarding payment", () => {
       await expect(stripe.getByText(/thanks for your payment/i)).toBeVisible({
         timeout: 30_000,
       });
+
+      // Once enrollment returns, the modal advances to the welcome step behind
+      // Checkout: the last screen we own, and the hand-off out to the Linus
+      // Engagement App.
+      if (LINUS_REACHABLE) {
+        await expect(page.getByText(/you're all set/i)).toBeVisible({
+          timeout: 30_000,
+        });
+        if (ENGAGEMENT_APP_URL) {
+          await expect(
+            page.getByRole("link", { name: /go to your app/i }),
+          ).toHaveAttribute("href", ENGAGEMENT_APP_URL);
+        }
+      }
     });
   }
 

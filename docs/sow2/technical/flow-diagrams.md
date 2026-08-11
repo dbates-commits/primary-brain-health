@@ -1,5 +1,11 @@
 # Flow Diagrams - PBH Phase 2
 
+> **⚠️ Superseded (August 2026).** `apps/app` was retired: everything the customer
+> touches now lives on the marketing site and ends at a welcome screen linking out
+> to the Linus Engagement App, which owns login and the assessments. This document
+> describes the two-app architecture and is kept as design history. For current
+> state see [`docs/booking-flow.md`](../../booking-flow.md).
+
 Visual reference for the funnel + handoff. Mermaid syntax - renders in GitHub, GitLab, VS Code, Cursor, and most markdown viewers. Source-controllable, easy to edit.
 
 Three diagrams:

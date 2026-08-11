@@ -1,11 +1,11 @@
 # Stripe Integration Reference — keys, endpoints & flow
 
-Operational reference for the funnel's Stripe integration (issue `pbh-bws.28`):
+Operational reference for the Stripe integration (issue `pbh-bws.28`):
 what keys are required, what endpoints exist, and how a payment moves through the
 system. For design rationale and the SAQ-A / HSA-FSA notes, see
 [stripe-architecture.md](./stripe-architecture.md); this doc is the "wiring".
 
-Scope: `apps/app`. Card data never touches PBH servers (Stripe-hosted
+Scope: `apps/marketing`. Card data never touches PBH servers (Stripe-hosted
 **Embedded Checkout** — `ui_mode: "embedded_page"`); the backend only handles
 Stripe objects.
 
@@ -91,7 +91,7 @@ flowchart LR
     subgraph Browser
         PE[Embedded Checkout<br/>Stripe-hosted iframe]
     end
-    subgraph Funnel[Funnel on Vercel]
+    subgraph Site[Marketing app on Vercel]
         SA[Server actions<br/>create / finalize]
         WH[POST /api/stripe/webhook]
         DB[(Neon: payments<br/>+ audit_log)]
@@ -137,7 +137,7 @@ sequenceDiagram
         A->>S: retrieve session → PaymentIntent (verify amount/user/status)
         A->>D: upsert payments=succeeded + audit (once)
         A->>L: register + enroll
-        A-->>B: set cookie + return success state → stepper shows "You're all set" → user clicks Continue → /assessments
+        A-->>B: set session cookie + success state → welcome screen → user clicks "Go to your app"
     and Webhook backstop
         S->>W: payment_intent.succeeded (signed)
         W->>W: verify signature (webhook secret)
@@ -173,7 +173,7 @@ sequenceDiagram
         W-->>S: 500 → Stripe retries w/ backoff
         Note over W,S: payment already recorded —<br/>retry re-attempts enroll (idempotent)
     end
-    Note over B: user returns later via /login →<br/>already registered, sees assessments
+    Note over B: user returns later via /login →<br/>lands back on /welcome
 ```
 
 ### 3.4 Payment status state machine
@@ -201,9 +201,9 @@ and the client/webhook race are no-ops, and each audit entry is written once.
 
 ```bash
 stripe login
-stripe listen --forward-to localhost:3001/api/stripe/webhook   # prints whsec_…
+stripe listen --forward-to localhost:3000/api/stripe/webhook   # prints whsec_…
 ```
-1. Put the printed `whsec_…` in `apps/app/.env.local` as `STRIPE_WEBHOOK_SECRET`
+1. Put the printed `whsec_…` in `apps/marketing/.env.local` as `STRIPE_WEBHOOK_SECRET`
    (alongside the test `STRIPE_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`).
 2. `pnpm --filter app dev`
 3. Pay with test card `4242 4242 4242 4242`, any future expiry, any CVC.

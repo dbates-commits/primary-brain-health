@@ -29,9 +29,9 @@ export const SIGNUP_HEADER = {
 
 /**
  * First/last/email account form. The per-step action is injected via `action`,
- * so the same component serves the funnel (its `createAccount`) and the marketing
- * modal. `showHeader`/`title`/`subtitle`/`submitLabel` let the host render it
- * with its own header treatment and CTA copy.
+ * so the component stays host-agnostic (the modal passes its real `"use server"`
+ * action; Storybook passes a stub). `showHeader`/`title`/`subtitle`/`submitLabel`
+ * let the host render it with its own header treatment and CTA copy.
  */
 export function SignupForm({
   action,

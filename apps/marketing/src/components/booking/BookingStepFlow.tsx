@@ -30,7 +30,6 @@ import {
 } from "./actions";
 import {
   createAssessmentCheckoutSession,
-  createAssessmentHandoffUrl,
   finalizeCheckoutSession,
 } from "./payment/actions";
 
@@ -94,7 +93,6 @@ export function BookingStepFlow({
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
   const [context, setContext] = useState<FlowContext>(EMPTY_CONTEXT);
   const [expiredLink, setExpiredLink] = useState(false);
-  const [handoffUrl, setHandoffUrl] = useState<string | null>(null);
 
   const advance = useCallback(() => {
     setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
@@ -133,31 +131,6 @@ export function BookingStepFlow({
         email: result.email,
         patientIdentification: result.patientIdentification,
       });
-      advance();
-    },
-    [advance],
-  );
-
-  /**
-   * Payment done: mint the post-payment sign-in link before showing the
-   * confirmation, so the button there drops them straight into /assessments
-   * instead of asking for a magic link.
-   *
-   * The Checkout Session id comes back from the payment step and is the only
-   * thing passed — the server re-verifies it with Stripe against the booking
-   * cookie, so it authorizes nothing on its own.
-   *
-   * Failure is not fatal — `createAssessmentHandoffUrl` returns null and
-   * `DoneStep` falls back to /login. Advancing regardless matters: the charge
-   * has already gone through, so nothing here may block the confirmation.
-   */
-  const completePayment = useCallback(
-    async (checkoutSessionId: string) => {
-      try {
-        setHandoffUrl(await createAssessmentHandoffUrl(checkoutSessionId));
-      } catch (err) {
-        console.error("handoff link failed:", err);
-      }
       advance();
     },
     [advance],
@@ -292,17 +265,11 @@ export function BookingStepFlow({
           <PaymentStep
             createSession={createSession}
             finalize={finalizeCheckoutSession}
-            onComplete={completePayment}
+            onComplete={advance}
             showHeader={false}
           />
         )}
-        {step === "done" && (
-          <DoneStep
-            email={context.email}
-            handoffUrl={handoffUrl}
-            onClose={close}
-          />
-        )}
+        {step === "done" && <DoneStep email={context.email} onClose={close} />}
       </Modal>
     </>
   );

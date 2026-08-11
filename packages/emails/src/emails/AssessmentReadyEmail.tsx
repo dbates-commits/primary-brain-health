@@ -8,7 +8,7 @@ export interface AssessmentReadyEmailProps {
   firstName: string;
   /** The enrolled campaigns to list, in display order. */
   assessments: Array<{ name: string; duration?: string }>;
-  /** The funnel /assessments page (not the raw Linus redirect link). */
+  /** The Linus Engagement App (not a raw Linus assessment redirect link). */
   assessmentsUrl: string;
 }
 

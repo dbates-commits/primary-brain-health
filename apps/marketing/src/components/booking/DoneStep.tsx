@@ -1,62 +1,34 @@
 "use client";
 
-import { Button, StepHeader } from "@pbh/ui";
-
-// Where paid + enrolled users continue to reach their assessments. The funnel's
-// `/login` reads `?email=` (prefill), drops the assessment cookie, and lands on
-// `/assessments` — the seam Clerk replaces later. Falls back to a relative
-// `/login` if the funnel URL isn't configured.
-const FUNNEL_URL = process.env.NEXT_PUBLIC_FUNNEL_URL ?? "";
+import { Button } from "@pbh/ui";
+import { EngagementAppCta } from "@/components/welcome/EngagementAppCta";
 
 /**
- * Modal step 4: confirmation. Shown after payment + Linus enrollment complete.
- * Hands the user off to the funnel to view their assessments (see `FUNNEL_URL`).
+ * Modal step 6: confirmation. Shown after payment + Linus enrollment complete,
+ * and the last thing we own — the CTA hands off to the Linus Engagement App.
+ *
+ * No gate of its own: reaching this step means completing a Stripe payment in
+ * this request. The same component backs the `/welcome` route, which is where
+ * a returning customer lands instead.
  */
 export function DoneStep({
   email,
-  handoffUrl,
   onClose,
 }: {
   email: string;
-  /**
-   * Single-use sign-in link that lands them on /assessments already
-   * authenticated. Null when it couldn't be minted — we then fall back to
-   * /login, which always works.
-   */
-  handoffUrl?: string | null;
   onClose: () => void;
 }) {
-  const assessmentsHref =
-    handoffUrl ??
-    `${FUNNEL_URL}/login${email ? `?email=${encodeURIComponent(email)}` : ""}`;
-
   return (
-    <div className="flex flex-col gap-8 pb-6 sm:pb-10">
-      <StepHeader
-        title="You're all set 🎉"
-        subtitle={
-          email
-            ? `Your payment is confirmed and we've saved your details for ${email}. Continue to view your brain health assessments.`
-            : "Your payment is confirmed and we've saved your details. Continue to view your brain health assessments."
-        }
-      />
-      <div className="flex flex-col gap-3">
-        <Button
-          href={assessmentsHref}
-          color="primary"
-          className="w-full"
-        >
-          Continue to your assessments
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onClose}
-          className="w-full"
-        >
-          Done
-        </Button>
-      </div>
+    <div className="flex flex-col gap-3 pb-6 sm:pb-10">
+      <EngagementAppCta email={email} />
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onClose}
+        className="w-full"
+      >
+        Done
+      </Button>
     </div>
   );
 }

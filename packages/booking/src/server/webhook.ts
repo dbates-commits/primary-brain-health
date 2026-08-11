@@ -11,10 +11,9 @@ import { registerAndEnrollUserById } from "./register-and-enroll";
 
 /**
  * Stripe webhook handler — the authoritative fulfillment path, mounted once, at
- * the funnel's `/api/stripe/webhook`. Stripe endpoints are account-scoped, so
- * that single endpoint receives events for payments started anywhere, including
- * the marketing booking modal; fulfillment resolves the user from
- * `intent.metadata.userId`, so it doesn't matter which app minted the intent.
+ * `/api/stripe/webhook`. Stripe endpoints are account-scoped, so that single
+ * endpoint receives every event for the account; fulfillment resolves the user
+ * from `intent.metadata.userId`.
  *
  * The client-confirm action (the booking flow's finalize) is the fast path for
  * the happy case; this is the backstop that still records the payment and enrolls
