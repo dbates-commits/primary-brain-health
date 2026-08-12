@@ -41,7 +41,8 @@ export const emailPreviews: EmailPreview[] = [
     slug: "assessment-ready",
     name: "Assessment ready",
     subject: "Your brain health assessment is ready",
-    trigger: "Sent when the user's assessments are first enrolled and ready to start.",
+    trigger:
+      "Sent when a user's assessments are first enrolled. NOT CURRENTLY SENT — nothing registers or enrolls anyone (pbh-ek8); kept because the template is what that send will use.",
     element: AssessmentReadyEmail(AssessmentReadyEmail.PreviewProps),
   },
   {
