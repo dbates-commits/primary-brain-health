@@ -105,7 +105,9 @@ test.describe("onboarding payment", () => {
       // Payment is the last step we own: the flow navigates to /welcome, the
       // hand-off out to the Linus Engagement App.
       await page.waitForURL(/\/welcome$/, { timeout: 30_000 });
-      await expect(page.getByText(/you're all set/i)).toBeVisible({
+      // The heading renders a typographic apostrophe (`&rsquo;` → U+2019), so
+      // match either form rather than the ASCII one alone.
+      await expect(page.getByText(/you[’']re all set/i)).toBeVisible({
         timeout: 30_000,
       });
       if (ENGAGEMENT_APP_URL) {

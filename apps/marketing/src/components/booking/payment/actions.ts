@@ -89,8 +89,15 @@ export async function finalizeCheckoutSession(
   // successful payment into an error state. `/welcome` also accepts the booking
   // cookie plus a succeeded payment, so a customer whose session didn't mint
   // still gets back to the confirmation screen.
+  //
+  // The protocol decides the cookie's `__Secure-` prefix, and Auth.js derives it
+  // from the request rather than NODE_ENV, so pass the real one where we can:
+  // `x-forwarded-proto` is set by any proxy, Vercel included. Left undefined
+  // when there is no proxy (a local `next dev`), which keeps the helper's
+  // NODE_ENV fallback — the case it is actually correct for.
   try {
-    const cookie = await createSessionForUser(id);
+    const proto = (await headers()).get("x-forwarded-proto") ?? undefined;
+    const cookie = await createSessionForUser(id, { protocol: proto });
     (await cookies()).set(cookie.name, cookie.value, cookie.options);
   } catch (err) {
     console.error("post-payment session mint failed:", err);

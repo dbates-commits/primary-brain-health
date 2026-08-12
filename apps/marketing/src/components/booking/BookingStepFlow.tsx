@@ -148,7 +148,11 @@ export function BookingStepFlow({
    * returning customer sees the same screen.
    */
   const completePayment = useCallback(() => {
-    router.push(WELCOME_PATH);
+    // `replace`, not `push`: the modal step the customer just left is behind a
+    // paid `?booking=resume` page whose mount effect sends them here again, so
+    // pushing would make Back bounce forward forever. Replacing keeps one exit
+    // to the marketing site.
+    router.replace(WELCOME_PATH);
   }, [router]);
 
   const close = useCallback(() => setOpen(false), []);
@@ -176,7 +180,7 @@ export function BookingStepFlow({
       // modal step, so send them to the screen it stands for. Checked before the
       // expired-link branch below, since a paid customer's address is proven.
       if (resumed.step === "done") {
-        router.push(WELCOME_PATH);
+        router.replace(WELCOME_PATH);
         return;
       }
       setContext({

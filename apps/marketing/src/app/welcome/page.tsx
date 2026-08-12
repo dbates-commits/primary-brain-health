@@ -4,6 +4,7 @@ import { getEntitledTrack, resolveBookingUserId } from "@pbh/booking/server";
 import { Button, Container, Section } from "@pbh/ui";
 import { auth } from "@/auth";
 import { EngagementAppCta } from "@/components/welcome/EngagementAppCta";
+import { SignOutButton } from "./SignOutButton";
 
 export const metadata = {
   title: "You're all set",
@@ -19,24 +20,30 @@ export const dynamic = "force-dynamic";
  * here once payment succeeds, and it is also where a returning customer lands
  * after a magic-link sign-in.
  *
- * Two ways in, checked in order:
- *  1. An Auth.js session — the magic-link path.
- *  2. The booking cookie plus a succeeded payment. This covers the customer
- *     whose post-payment session mint failed, or who closed the modal and came
- *     back, for the cookie's 2h life. It grants nothing beyond rendering an
- *     external link, so it is a cheap safety net rather than a second door.
+ * Identity comes from either an Auth.js session (the magic-link path) or the
+ * booking cookie — the latter covers a customer whose post-payment session mint
+ * failed, or who came back within the cookie's 2h life.
+ *
+ * **Whichever proves identity, the payment is what grants access.** Accounts
+ * exist from signup, before anyone pays, so a session alone means nothing here:
+ * an abandoned signup can request a magic link like anybody else, and without
+ * this check they would land on "Your payment is confirmed" and a CTA into the
+ * Engagement App having never paid.
+ *
+ * An unpaid visitor goes to `/` rather than `/login` — they are already signed
+ * in, so `/login` would send them straight back here and loop. Home is where
+ * the booking flow they abandoned actually lives.
  */
 export default async function WelcomePage() {
   const session = await auth();
-  let allowed = Boolean(session?.user?.id);
+  const signedIn = Boolean(session?.user?.id);
+  const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
 
-  if (!allowed) {
-    const userId = resolveBookingUserId(await cookies());
-    allowed = userId !== null && (await getEntitledTrack(userId)) !== null;
-  }
-
-  if (!allowed) {
+  if (!userId) {
     redirect("/login");
+  }
+  if ((await getEntitledTrack(userId)) === null) {
+    redirect("/");
   }
 
   return (
@@ -47,6 +54,7 @@ export default async function WelcomePage() {
           <Button href="/" variant="ghost" className="w-full">
             Back to Primary Brain Health
           </Button>
+          {signedIn ? <SignOutButton /> : null}
         </div>
       </Container>
     </Section>

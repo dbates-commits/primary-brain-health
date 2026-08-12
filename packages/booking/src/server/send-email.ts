@@ -38,9 +38,11 @@ const DEFAULT_FROM = "Primary Brain Health <onboarding@resend.dev>";
  * says the link is coming by email — see `EngagementAppCta`.
  */
 function assessmentsUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_ENGAGEMENT_APP_URL ?? `${siteBaseUrl()}/welcome`
-  );
+  // `||`, not `??`: .env.example ships this var as an empty string, and every
+  // Vercel scope that hasn't been given a real URL yet holds one too. `??` only
+  // catches undefined, so an empty value would sail through and render a CTA
+  // with no href at all.
+  return process.env.NEXT_PUBLIC_ENGAGEMENT_APP_URL || `${siteBaseUrl()}/welcome`;
 }
 
 export type SendEmailResult =
@@ -203,7 +205,12 @@ export async function sendPaymentReceiptEmail(
         paidOn: new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
           new Date(),
         ),
-        assessmentsUrl: `${siteBaseUrl()}/welcome`,
+        // The Engagement App when we know it, not our own gated /welcome: with
+        // enrollment switched off this receipt is the only email a payer gets,
+        // and both the session (15m idle) and the booking cookie (2h) are gone
+        // by the time most people open it — /welcome would just bounce them to
+        // a sign-in wall.
+        assessmentsUrl: assessmentsUrl(),
       }),
   );
 }

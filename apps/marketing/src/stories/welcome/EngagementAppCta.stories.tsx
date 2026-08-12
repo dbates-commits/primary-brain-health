@@ -29,6 +29,8 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/You're all set/)).toBeInTheDocument();
+    // The heading renders a typographic apostrophe (`&rsquo;` → U+2019), so
+    // match either form rather than the ASCII one alone.
+    await expect(canvas.getByText(/You[’']re all set/)).toBeInTheDocument();
   },
 };
