@@ -50,7 +50,7 @@ sequenceDiagram
   A-->>B: Welcome screen → link out to the Linus Engagement App
 
   Note over B,L: ② Report state — resolveEnrollments, per campaign
-  Note right of A: Only ever runs as part of ① now; there is no page<br/>in this repo that re-resolves enrollments on load.
+  Note right of A: Runs only as part of ① — no page in this repo<br/>re-resolves enrollments on load.
   A->>DB: load linus_enrollments rows
   alt has_report already set
     Note right of A: report_ready — no Linus calls
