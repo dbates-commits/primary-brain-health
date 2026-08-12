@@ -1,30 +1,39 @@
-# Booking flow: marketing → app
+# Booking flow
 
-How a customer goes from a package card on the marketing site to a signed-in
-assessments page in the app, and what is written along the way.
+How a customer goes from a package card on the marketing site to a paid account
+handed off to the Linus Engagement App, and what is written along the way.
+
+> **Linus registration is currently switched off** (pbh-ek8). The payment path
+> calls no Linus API: it records the payment, signs the customer in, and sends
+> them to `/welcome`. `@pbh/linus` and `register-and-enroll.ts` are still in the
+> tree but have no callers. See [Known gaps](#known-gaps).
 
 Kept next to the code on purpose: when the flow changes this should change in the
 same PR, and it should be obvious when it hasn't.
 
 ---
 
-## Why there are two apps
+## One app
 
-| | Owns |
-|---|---|
-| **Marketing** — `primarybrainhealth.com` (`apps/marketing`) | The booking section, the whole booking modal, and Stripe Checkout |
-| **App** — `app.primarybrainhealth.com` (`apps/app`) | The Auth.js session, `/assessments`, report downloads, and the **only** Stripe webhook endpoint |
+Everything the customer touches is `apps/marketing`: the booking section, the
+whole booking modal, Stripe Checkout, sign-in, the welcome screen, and the
+**only** Stripe webhook endpoint. It uses `@pbh/db` (one Neon database),
+`@pbh/booking/server` (every write path), `@pbh/emails` and `@pbh/payments`.
+(`@pbh/linus` is still a dependency, but nothing on a request path imports it.)
 
-They share `@pbh/db` (one Neon database), `@pbh/booking/server` (every write
-path), `@pbh/emails`, `@pbh/linus` and `@pbh/payments`.
+There used to be a second app (`apps/app`) holding the post-payment product —
+`/assessments`, report downloads, and its own Auth.js session. It was retired in
+August 2026: Linus decided the **Linus Engagement App** is the entry point for
+both PBH experiences, so the assessments and reports live there. Our surface now
+ends at a welcome screen with a link out to it.
 
-One fact explains most of the design: **they are different origins, so marketing
-cannot set the app's session cookie.** That is why there is a signed handoff
-token, why marketing has a booking cookie of its own, and why
-`createSessionForUser` returns a cookie descriptor instead of setting one.
+That deletion took a whole class of design with it. Marketing could not set the
+other app's session cookie — different origins — which is why there was a signed
+handoff token in the URL. Same origin now, so the post-payment sign-in is simply
+a cookie set by the server action that verified the payment.
 
-Marketing has no login, so the booking cookie is what stands in for one:
-`pbh_booking_session`, signed and HttpOnly, issued server-side at signup. It is
+The booking cookie still exists and still matters: `pbh_booking_session`, signed
+and HttpOnly, issued server-side at signup. Until the customer is signed in it is
 the **only** thing that says which account a booking step may write to — see
 `resolveBookingUserId`.
 
@@ -40,8 +49,7 @@ sequenceDiagram
     participant DB as Neon
     participant R as Resend
     participant S as Stripe
-    participant F as App
-    participant L as Linus
+    participant E as Linus Engagement App
 
     C->>M: Click "Book … Assessment"
     Note over M: packageKey held in flow state
@@ -70,20 +78,14 @@ sequenceDiagram
         S-->>M: onComplete
         M->>S: Re-fetch session + intent
         M->>DB: payments row, audit, receipt email
-        M->>L: register + enroll
+        M->>DB: sessions row → Auth.js session cookie
     and Webhook path (backstop)
-        S->>F: payment_intent.succeeded
-        F->>DB: same idempotent writes
-        F->>L: register + enroll
+        S->>M: payment_intent.succeeded
+        M->>DB: same idempotent writes
     end
 
-    M->>S: Re-verify the Checkout Session (cookie's user? paid < 10 min ago?)
-    M->>DB: mint handoff token (bound to the payment intent)
-    C->>F: GET /api/auth/handoff?token=…
-    F->>DB: claim payments.handoff_consumed_at, insert sessions row
-    F-->>C: Auth.js session cookie → /assessments
-    C->>F: /assessments (auth() is authoritative)
-    F->>L: resolve enrollment links / report state
+    M-->>C: Redirect to /welcome
+    C->>E: "Go to your app"
 ```
 
 ---
@@ -127,9 +129,8 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | Consent | `ConsentForm` | `consentAction` | `recordConsentCore` | two `consents` rows — `wellness` + `hipaa_npp` — with `ip_hash` + `user_agent` |
 | Payment | `PaymentStep` | `createAssessmentCheckoutSession` | `createCheckoutSessionCore` | audit `payment_pending`; Stripe Session |
 | Fulfilment | — | `finalizeCheckoutSession` | `recordSucceededPayment` | `payments` row incl. `package_key`; audit `payment_succeeded` |
-| Enrollment | — | — | `registerAndEnrollUserById` | `users.linus_participant_id`, `linus_enrollments` |
-| Handoff | `DoneStep` | `createAssessmentHandoffUrl` | `createHandoffForCheckoutSession` | — (signs a token) |
-| Sign-in | — | `GET /api/auth/handoff` | `redeemHandoffToken` | `payments.handoff_consumed_at`, `sessions` row; audit `login` |
+| Sign-in | — | `finalizeCheckoutSession` | `createSessionForUser` | `sessions` row; audit `login` (`method: post-payment`) |
+| Welcome | `/welcome` route | — | — | — (links out to the Engagement App) |
 
 ### The chosen package
 
@@ -140,6 +141,25 @@ Trusting the client would let someone drive the $449 flow while checking out at
 the $149 price, and fulfilment would accept it, since it validates the amount
 against whichever package the client named.
 
+### The welcome screen
+
+The `/welcome` route, rendering `EngagementAppCta`, is where the flow ends.
+Payment is the last step the modal owns: `PaymentStep`'s `onComplete` navigates
+there rather than advancing to an in-modal confirmation, so the screen survives a
+reload and a returning customer sees exactly the same thing. A booking resumed at
+step `done` (already paid) is sent there too, instead of opening the modal.
+
+`/welcome` allows two ways in, in order: an Auth.js session, or the booking
+cookie plus a succeeded payment (`getEntitledTrack`). The second covers a
+customer whose post-payment session mint failed, or who closed the modal and came
+back, for the cookie's 2h life. It grants nothing beyond rendering an external
+link.
+
+The CTA target is `NEXT_PUBLIC_ENGAGEMENT_APP_URL`. Unset, the screen renders the
+confirmation with **no button** — a dead button reads as a bug to someone who
+just paid. Being `NEXT_PUBLIC_*`, it is inlined at build time: changing it needs a
+redeploy, not just an env edit.
+
 ---
 
 ## Fulfilment runs twice, on purpose
@@ -147,21 +167,25 @@ against whichever package the client named.
 Two paths race after a successful payment, and either may win:
 
 - **Client path** — Embedded Checkout's `onComplete` → `finalizeCheckoutSession`.
-  Fast, gives the customer immediate feedback.
-- **Webhook path** — Stripe → `POST /api/stripe/webhook` in the **app** →
+  Fast, gives the customer immediate feedback, and is the only path that signs
+  them in (it is the one with a browser to set a cookie on).
+- **Webhook path** — Stripe → `POST /api/stripe/webhook` →
   `handleStripeWebhook`. The source of truth; survives a browser that closed
   mid-flow.
 
 Both call `recordSucceededPayment`, which is idempotent. Its `firstWrite` flag is
-the exactly-once signal that gates the audit row, the receipt email, and
-enrollment — so a redelivered event doesn't double-charge the audit log or email
-the customer twice.
+the exactly-once signal that gates the audit row and the receipt email — so a
+redelivered event doesn't double-charge the audit log or email the customer
+twice.
 
-> The webhook is deliberately the **only** endpoint, and it lives in the app
-> even though checkout happens in marketing. Stripe endpoints are account-scoped
-> and Stripe fans every event out to all of them, so a second endpoint would
-> process every payment twice. See the comment in
-> `apps/app/src/app/api/stripe/webhook/route.ts`.
+The webhook used to also register + enroll the payer and **throw** on failure so
+Stripe redelivered. That turned a Linus outage into a stream of 500s on the
+endpoint, and is gone with the rest of the Linus call sites (pbh-ek8).
+
+> The webhook is deliberately the **only** endpoint. Stripe endpoints are
+> account-scoped and Stripe fans every event out to all of them, so a second one
+> would process every payment twice. See the comment in
+> `apps/marketing/src/app/api/stripe/webhook/route.ts`.
 
 ---
 
@@ -176,69 +200,54 @@ Emails carry links only — never assessment results or report content.
 | Confirm your email | `email-verification.ts` | signup |
 | Welcome | `email-verification.ts` | confirmation redeemed |
 | Payment receipt | `fulfill.ts` | first `succeeded` write |
-| Assessment ready | `register-and-enroll.ts` | first enrollment resolution |
-| Report ready | `register-and-enroll.ts` | a report becomes available |
 | Payment refunded | `fulfill.ts` | `charge.refunded` |
-| Magic link | `apps/app/src/auth.ts` | `/login` request |
+| Magic link | `apps/marketing/src/auth.ts` | `/login` request |
 
 Welcome deliberately fires on **confirmation**, not signup: the flow is blocked on
 the confirmation link, and two emails arriving together buries the one the
 customer has to act on.
 
+Every link is built from `siteBaseUrl()` in `@pbh/emails` (`BOOKING_BASE_URL` →
+`VERCEL_URL` → `localhost:3000`).
+
+`sendAssessmentReadyEmail` still exists but nothing calls it: its only caller was
+`register-and-enroll.ts`, now dormant. There is no "report ready" email either —
+reports are read in the Engagement App, which owns notifying about them.
+
 ---
 
-## Four tokens, easily confused
+## Three tokens, easily confused
 
-| Token | Signed with | TTL | Single-use via | Crosses apps |
-|---|---|---|---|---|
-| Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` | no |
-| Booking cookie (`pbh_booking_session`) | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry | no |
-| Payment handoff | `AUTH_HANDOFF_SECRET` | 10 min | `payments.handoff_consumed_at` | **yes** |
-| Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` | app only |
+| Token | Signed with | TTL | Single-use via |
+|---|---|---|---|
+| Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` |
+| Booking cookie (`pbh_booking_session`) | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry |
+| Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` |
+
+There used to be a fourth — the cross-app payment handoff, signed with
+`AUTH_HANDOFF_SECRET`. It existed only to carry a session across an origin
+boundary that no longer exists.
 
 ### Session lifetimes
 
-Set from PBH's security review (Bill, 2026-07-22). HIPAA prescribes no specific
-duration — it requires an automatic logoff control proportionate to the risk, and
-the signed-in area reaches the Linus report.
-
-| Control | Value | Enforced by |
-|---|---|---|
-| Inactivity timeout | 15 min | Auth.js `session.maxAge` with `updateAge: 0` |
-| Absolute session cap | 8 hours | our `getSessionAndUser` override — Auth.js has no built-in |
-| Magic link | 15 min, single-use | provider `maxAge`; Auth.js deletes the token on redeem |
-
-`maxAge` alone is a *sliding* window: it moves forward on every request, so a
-continuously active session would never end. The absolute cap is the reason
-`sessions.created_at` exists — `expires` cannot tell you a session's true age
-once it has slid.
-
-Note the idle timer only advances on requests, so reading a report for longer
-than 15 minutes ends the session. That is deliberate and was accepted rather than
-softened with a warning dialog.
-
-`AUTH_HANDOFF_SECRET` must hold the **same value in both apps** — marketing signs,
-the app verifies.
-
-The handoff token is a login credential travelling in a URL, so it lands in
-browser history and referrers. Four things make that acceptable: the short TTL,
-the atomic single-use claim, the fact that it is bound to a `succeeded` payment
-— a valid signature alone grants nothing — and that it can only be *issued* to
-the browser holding the booking cookie for a Checkout Session re-verified with
-Stripe in the same request, no more than 10 minutes after the charge.
+15-minute inactivity timeout, 8-hour absolute cap, 15-minute single-use sign-in
+link — the automatic-logoff control set from PBH's compliance review. The values,
+the reasoning, and what was considered and dropped live in
+[`auth.md`](./auth.md#hipaa-automatic-logoff-controls); they are deliberately
+recorded in one place so the numbers here can't drift from the ones in the code.
 
 ---
 
 ## Alternative entry: magic link
 
-Independent of booking. `/login` in the app → `requestMagicLink` → Auth.js.
-The `signIn` callback rejects addresses with no account (login-only, and it stops
-a `verification_tokens` row being minted for a stranger); `requestMagicLink`
+Independent of booking. `/login` → `requestMagicLink` → Auth.js. The `signIn`
+callback rejects addresses with no account (login-only, and it stops a
+`verification_tokens` row being minted for a stranger); `requestMagicLink`
 swallows the resulting `AccessDenied` so the response is identical either way and
-cannot be used to discover who is registered.
+cannot be used to discover who is registered. A redeemed link lands on
+`/welcome`.
 
-Used by anyone returning later, and as the fallback whenever the post-payment
-handoff can't be minted.
+Used by anyone returning after the booking cookie has expired.
 
 ---
 
@@ -248,13 +257,16 @@ Each of these has actually happened:
 
 | Symptom | Cause |
 |---|---|
-| Confirmation button falls back to `/login` | `AUTH_HANDOFF_SECRET` missing or mismatched between apps |
 | Signup or `/booking/confirm` throws | `BOOKING_RESUME_SECRET` missing — it signs the booking cookie |
 | Every step after signup says "We couldn't find your booking" | The `pbh_booking_session` cookie is absent, expired (2h), or signed with a different `BOOKING_RESUME_SECRET` than the one reading it |
-| Paid charge rejected as "amount/currency mismatch" | Apps pointed at different Stripe accounts or price IDs |
+| Welcome screen has no button | `NEXT_PUBLIC_ENGAGEMENT_APP_URL` unset — or set *after* the build, since it is inlined at build time |
 | No email arrives; flow stalls at the confirmation modal | `RESEND_API_KEY` unset — sends become logged no-ops and the confirmation URL is printed to the server console instead. This is how local testing works |
-| "Couldn't register with Linus (status 500)" after payment | An `education` value outside Linus's configured set (0–18 or 21) — see `pbh-a0n` |
 | Session silently never found | Cookie-name mismatch: Auth.js derives the `__Secure-` prefix from the request protocol, not `NODE_ENV` |
+
+Retired, kept for the record: `"Couldn't register with Linus (status …)"` after
+payment used to strand a paying customer on the payment step — a 500 meant an
+`education` value outside Linus's set (`pbh-a0n`), a 503 meant Linus itself was
+down. The payment path no longer calls Linus, so neither can happen (`pbh-ek8`).
 
 ---
 
@@ -262,9 +274,22 @@ Each of these has actually happened:
 
 Documented so nobody mistakes them for intent:
 
-- **Comprehensive ($449) provisions exactly what Basic ($149) does** — the same
-  three Linus campaigns. There is no per-package fulfilment, and the consent copy
-  is still the wellness + HIPAA NPP text rather than anything written for a
-  diagnostic service. Tracked on `pbh-eaj`.
+- **Nobody is registered with Linus.** This is the live one (`pbh-ek8`). A paying
+  customer now gets a `payments` row, a session and the welcome screen, and no
+  Linus subject or enrollment at all — so nothing on the other side of the "Go to
+  your app" link knows about them, and the "assessment ready" email is never
+  sent. Deliberate: registration failures were stranding paying customers on the
+  payment step, and how clients should be registered is an open question. The
+  code to do it (`packages/linus/`, `register-and-enroll.ts`, the
+  `linus_participant_id` / `linus_enrollments` columns) is untouched and
+  callerless, waiting on that decision.
+- **Comprehensive ($449) provisions exactly what Basic ($149) does** — nothing,
+  at present, and the same three Linus campaigns whenever registration comes
+  back. There is no per-package fulfilment, and the consent copy is still the
+  wellness + HIPAA NPP text rather than anything written for a diagnostic
+  service. Tracked on `pbh-eaj`.
 - **No rate limiting on `requestMagicLink`** — an unauthenticated action that
   emails any registered address.
+- **Retired columns still in the schema** — `users.welcome_seen_at`,
+  `users.password_hash`, `payments.handoff_consumed_at`. Left in place so a
+  revert stays clean; a follow-up drops them.

@@ -1,5 +1,4 @@
 # Signed-Token Handoff Contract
-
 **Status:** v1.0 — ready for PBH product team review
 **Owners:** VisualBoston engineering (Mark Stenquist) + compliance specialist (Bill Laukaitis)
 **Version:** 1.0

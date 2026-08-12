@@ -68,7 +68,7 @@ export const sessions = pgTable(
     // been continuously active still ends after ABSOLUTE_SESSION_MAX_SECONDS,
     // so one cannot stay authenticated indefinitely (PBH security review,
     // 2026-07-22). Auth.js has no built-in for this — see `getSessionAndUser`
-    // in apps/app/src/auth.ts.
+    // in apps/marketing/src/auth.ts.
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

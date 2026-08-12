@@ -2,16 +2,17 @@
 
 import { cookies, headers } from "next/headers";
 import {
-  createHandoffForCheckoutSession,
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
-  registerAndEnrollUserById,
   resolveBookingUserId,
   verifyAndRecordCheckout,
-  type LinusState,
 } from "@pbh/booking/server";
-import type { CreateCheckoutResult } from "@pbh/booking";
+import type {
+  CreateCheckoutResult,
+  PaymentFinalizeResult,
+} from "@pbh/booking";
+import { createSessionForUser } from "@/lib/auth-session";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
@@ -20,8 +21,8 @@ const PAYMENT_UNVERIFIED = "We couldn't verify your payment. Please try again.";
 const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
-function paymentError(message: string): LinusState {
-  return { status: "error", email: "", message };
+function paymentError(message: string): PaymentFinalizeResult {
+  return { status: "error", message };
 }
 
 /**
@@ -47,17 +48,24 @@ export async function createAssessmentCheckoutSession(
 
 /**
  * Called from Embedded Checkout's `onComplete`. Verify + record the payment
- * (shared), then register + enroll the user in Linus. Unlike the funnel, the
- * marketing app sets no session cookie — the paid + enrolled user is handed to
- * the funnel's `/login` (see `DoneStep`), which drops the assessment cookie and
- * lands on `/assessments`. That `/login` is the seam Clerk replaces later.
+ * (shared) and sign the customer in. That is the whole job.
  *
- * A `success` state advances the modal to the confirmation step; enrollment
- * failures surface inline (the charge stands and the webhook backstop retries).
+ * It deliberately does NOT register or enroll the customer with Linus (pbh-ek8).
+ * A Linus outage used to strand a paying customer on the payment step with
+ * "Couldn't register with Linus (status 503)" — the charge had gone through and
+ * the modal wouldn't advance. Registration is on hold until we settle how
+ * clients get registered; `@pbh/linus` and `register-and-enroll.ts` are still on
+ * disk, just not called from any request path.
+ *
+ * The sign-in used to need a signed token handed to a second app on another
+ * origin; with one app it is just a cookie we set here, so a customer who comes
+ * back later reaches `/welcome` without asking for a magic link.
+ *
+ * A `success` state sends the customer on to `/welcome`.
  */
 export async function finalizeCheckoutSession(
   checkoutSessionId: string,
-): Promise<LinusState> {
+): Promise<PaymentFinalizeResult> {
   const id = resolveBookingUserId(await cookies());
   const sessionId = checkoutSessionId.trim();
   if (!id || !sessionId) {
@@ -76,47 +84,24 @@ export async function finalizeCheckoutSession(
     return paymentError(PAYMENT_UNVERIFIED);
   }
 
-  // Deliberately outside the try above so an enrollment failure surfaces as its
-  // own state, not a payment error: the charge stands and the webhook backstop
-  // retries enrollment.
-  return registerAndEnrollUserById(id);
-}
-
-/**
- * Mint the post-payment sign-in link, so the customer lands on `/assessments`
- * already authenticated instead of requesting a magic link.
- *
- * Marketing cannot set the funnel's session cookie (different origins), so this
- * hands the funnel a short-lived, single-use token bound to the succeeded
- * payment; the funnel verifies it and mints the real session.
- *
- * This action mints a login credential, so it is the most sensitive one here:
- * the account comes from the signed booking cookie, and the payment from a
- * Checkout Session re-verified with Stripe in this same request. Both must
- * agree, so a handoff can only be minted for a payment this browser just made.
- *
- * Returns null when there's nothing to hand off — the caller falls back to
- * `/login`, which always works.
- */
-export async function createAssessmentHandoffUrl(
-  checkoutSessionId: string,
-): Promise<string | null> {
-  const id = resolveBookingUserId(await cookies());
-  const sessionId = checkoutSessionId.trim();
-  if (!id || !sessionId) {
-    return null;
-  }
+  // Sign them in off the back of the verified payment. Swallowed on failure on
+  // purpose: the charge has already gone through, so nothing here may turn a
+  // successful payment into an error state. `/welcome` also accepts the booking
+  // cookie plus a succeeded payment, so a customer whose session didn't mint
+  // still gets back to the confirmation screen.
+  //
+  // The protocol decides the cookie's `__Secure-` prefix, and Auth.js derives it
+  // from the request rather than NODE_ENV, so pass the real one where we can:
+  // `x-forwarded-proto` is set by any proxy, Vercel included. Left undefined
+  // when there is no proxy (a local `next dev`), which keeps the helper's
+  // NODE_ENV fallback — the case it is actually correct for.
   try {
-    const token = await createHandoffForCheckoutSession(id, sessionId);
-    if (!token) {
-      return null;
-    }
-    const base = process.env.NEXT_PUBLIC_FUNNEL_URL ?? "";
-    return `${base}/api/auth/handoff?token=${encodeURIComponent(token)}`;
+    const proto = (await headers()).get("x-forwarded-proto") ?? undefined;
+    const cookie = await createSessionForUser(id, { protocol: proto });
+    (await cookies()).set(cookie.name, cookie.value, cookie.options);
   } catch (err) {
-    // A missing AUTH_HANDOFF_SECRET throws here. That must not strand a paid
-    // customer on a broken confirmation screen — fall back to the magic link.
-    console.error("createAssessmentHandoffUrl failed:", err);
-    return null;
+    console.error("post-payment session mint failed:", err);
   }
+
+  return { status: "success" };
 }

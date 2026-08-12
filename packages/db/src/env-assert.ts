@@ -3,7 +3,7 @@
  *
  * Until pbh-9yb.3, every Vercel Preview deploy read and wrote the **production**
  * Neon branch: the Preview scope carried the production `DATABASE_URL`, which is
- * also why `apps/app/vercel.json` gates migrations to production (see commit
+ * also why `apps/marketing/vercel.json` gates migrations to production (see commit
  * 84a8da0). So every PR preview touched live patient rows, and — because Preview
  * points at the Linus *sandbox* — wrote sandbox participant ids and enrollment
  * records onto production users.
@@ -55,7 +55,7 @@ function fail(message: string): never {
     `[env] Environment separation check failed.\n${message}\n` +
       "Set DATABASE_ENV (production | preview | development) alongside " +
       "DATABASE_URL in each Vercel scope and in .env.local. See " +
-      "docs/sow2/technical/database-plan.md § Environments.",
+      "docs/database.md § Environments.",
   );
 }
 

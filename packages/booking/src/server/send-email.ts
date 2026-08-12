@@ -1,20 +1,19 @@
 /**
- * Transactional email sends for the funnel, built on Resend + `@pbh/emails`.
+ * Transactional email sends for the booking flow, built on Resend + `@pbh/emails`.
  *
  * Env-gated: when `RESEND_API_KEY` is unset (local dev, preview without keys)
- * every send is a logged no-op, so the funnel works end-to-end with no email
+ * every send is a logged no-op, so the flow works end-to-end with no email
  * setup. Senders NEVER throw — email is a side effect of flows (signup,
  * payment, enrollment) that must not fail because a send did. Callers should
  * `await` them anyway: on Vercel, work left un-awaited after the response is
  * frozen with the function.
  *
  * PHI rule: emails carry no assessment results or report content — only links
- * back to the app, where viewing requires signing in.
+ * back to the site or out to the Linus Engagement App.
  */
 
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
-import { copyFor, type Track } from "@pbh/copy";
 import { db, users, writeAuditLog } from "@pbh/db";
 import {
   AssessmentReadyEmail,
@@ -22,7 +21,7 @@ import {
   PaymentReceiptEmail,
   PaymentRefundedEmail,
   renderEmail,
-  ReportReadyEmail,
+  siteBaseUrl,
   WelcomeEmail,
 } from "@pbh/emails";
 
@@ -33,32 +32,17 @@ import {
  */
 const DEFAULT_FROM = "Primary Brain Health <onboarding@resend.dev>";
 
-/** Base for the links inside emails (login, assessments) — the funnel app. */
-function appBaseUrl(): string {
-  return process.env.APP_BASE_URL ?? "http://localhost:3001";
-}
-
 /**
- * Base for links back into the booking flow — the MARKETING app, which is where
- * the booking modal lives. Distinct from `appBaseUrl()`: the two run on separate
- * origins, and a confirmation link pointed at the funnel would land on a page
- * that has no booking flow to resume.
- *
- * Falls back to `VERCEL_URL`, the per-deployment hostname, so Preview works
- * without configuration. A fixed value there would be wrong the moment a new
- * preview is built: every confirmation link would point back at whichever
- * deployment happened to be current when the variable was set. Production sets
- * `BOOKING_BASE_URL` explicitly, because `VERCEL_URL` is the generated
- * `*.vercel.app` host rather than the real domain.
+ * Where a paid customer actually goes: the Linus Engagement App, which owns
+ * login and the assessments. Unset falls back to our own welcome screen, which
+ * says the link is coming by email — see `EngagementAppCta`.
  */
-function bookingBaseUrl(): string {
-  if (process.env.BOOKING_BASE_URL) {
-    return process.env.BOOKING_BASE_URL;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
+function assessmentsUrl(): string {
+  // `||`, not `??`: .env.example ships this var as an empty string, and every
+  // Vercel scope that hasn't been given a real URL yet holds one too. `??` only
+  // catches undefined, so an empty value would sail through and render a CTA
+  // with no href at all.
+  return process.env.NEXT_PUBLIC_ENGAGEMENT_APP_URL || `${siteBaseUrl()}/welcome`;
 }
 
 export type SendEmailResult =
@@ -149,14 +133,14 @@ async function loadRecipient(userId: string): Promise<Recipient | null> {
  *
  * Builds the link from the raw token (the DB stores only its hash) and, when
  * Resend is unconfigured, logs the URL so local dev can still complete the flow
- * — the same affordance the funnel's magic link has. That log is the only place
+ * — the same affordance the magic-link email has. That log is the only place
  * the raw token appears outside the recipient's inbox.
  */
 export async function sendConfirmEmail(
   userId: string,
   rawToken: string,
 ): Promise<SendEmailResult> {
-  const confirmUrl = `${bookingBaseUrl()}/booking/confirm?token=${encodeURIComponent(rawToken)}`;
+  const confirmUrl = `${siteBaseUrl()}/booking/confirm?token=${encodeURIComponent(rawToken)}`;
 
   const result = process.env.RESEND_API_KEY
     ? await sendTemplate(
@@ -192,7 +176,7 @@ export async function sendWelcomeEmail(userId: string): Promise<SendEmailResult>
     (recipient) =>
       WelcomeEmail({
         firstName: recipient.firstName,
-        loginUrl: `${appBaseUrl()}/login`,
+        loginUrl: `${siteBaseUrl()}/login`,
       }),
   );
 }
@@ -221,7 +205,12 @@ export async function sendPaymentReceiptEmail(
         paidOn: new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
           new Date(),
         ),
-        assessmentsUrl: `${appBaseUrl()}/assessments`,
+        // The Engagement App when we know it, not our own gated /welcome: with
+        // enrollment switched off this receipt is the only email a payer gets,
+        // and both the session (15m idle) and the booking cookie (2h) are gone
+        // by the time most people open it — /welcome would just bounce them to
+        // a sign-in wall.
+        assessmentsUrl: assessmentsUrl(),
       }),
   );
 }
@@ -239,33 +228,7 @@ export async function sendAssessmentReadyEmail(
       AssessmentReadyEmail({
         firstName: recipient.firstName,
         assessments,
-        assessmentsUrl: `${appBaseUrl()}/assessments`,
-      }),
-  );
-}
-
-/**
- * A completed assessment's report became available → link back to sign in.
- *
- * Takes the assessment's own `track` (not the reader's current entitlement):
- * this email describes a specific piece of finished work, and who reviewed it
- * doesn't change because the reader upgraded afterwards.
- */
-export async function sendReportReadyEmail(
-  userId: string,
-  assessmentName: string,
-  track: Track,
-): Promise<SendEmailResult> {
-  return sendTemplate(
-    "report-ready",
-    userId,
-    copyFor({ track }).phrase("email.reportReady.subject"),
-    (recipient) =>
-      ReportReadyEmail({
-        firstName: recipient.firstName,
-        assessmentName,
-        track,
-        assessmentsUrl: `${appBaseUrl()}/assessments`,
+        assessmentsUrl: assessmentsUrl(),
       }),
   );
 }

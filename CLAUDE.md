@@ -8,13 +8,13 @@ This is a **pnpm + Turborepo monorepo**. Run these from the repo root:
 
 ```bash
 pnpm install                     # install all workspaces
-pnpm dev                         # everything in parallel (marketing :3000, app :3001, emails :3002)
+pnpm dev                         # everything in parallel (marketing :3000, emails :3002)
 pnpm build                       # build everything (Turborepo cached)
 pnpm email                       # React Email preview only, on :3002
 pnpm lint                        # eslint across the workspace
 pnpm typecheck                   # tsc --noEmit across the workspace
-pnpm --filter marketing dev      # run a single app/package (marketing | app | @pbh/ui …)
-pnpm --filter app build
+pnpm --filter marketing dev      # run a single app/package (marketing | @pbh/ui …)
+pnpm --filter marketing build
 ```
 
 Marketing's Tina admin is at `/admin/index.html` during development. Note: the
@@ -23,16 +23,19 @@ local mode); plain `next build` works without them.
 
 ## Workspace layout
 
-- `apps/marketing/` — the Next.js + TinaCMS marketing site (formerly the repo root)
-- `apps/app/` — the signed-in app: session, `/welcome`, `/assessments`, reports,
-  and the Stripe webhook, `:3001`
+- `apps/marketing/` — the only app: the Next.js + TinaCMS marketing site, the
+  booking flow, magic-link sign-in, the welcome screen, and the Stripe webhook
 - `packages/ui/` (`@pbh/ui`) — shared design-system primitives + `cn()`; consumed via `transpilePackages`
 - `packages/tokens/` (`@pbh/tokens`) — Tailwind 4 theme + CSS variables (`theme.css`)
-- `packages/types/` (`@pbh/types`) — shared TS types (signed-token handoff payload, …)
 - `packages/config/` (`@pbh/config`) — shared ESLint flat config (`eslint/base`) + tsconfig presets
 
-Path aliases `@/*` and `@tina/*` are scoped to each app. Cross-app sharing goes
-through the `@pbh/*` packages. See `docs/sow2/technical/monorepo-plan.md`.
+Path aliases `@/*` and `@tina/*` are scoped to the app; shared code lives in the
+`@pbh/*` packages.
+
+Current-state docs live directly in `docs/`: `booking-flow.md`, `auth.md`,
+`database.md`, `stripe-integration.md`, `linus/api-integration.md`. Everything
+under `docs/sow2/` is a point-in-time SOW2 artifact — proposals, specs and
+deliverables as they were sent — and is not a description of the code.
 
 ## Issue Tracking
 
@@ -100,10 +103,11 @@ Cross-app shared code is imported from the `@pbh/*` workspace packages, not via 
 
 ### Booking flow
 
-The booking flow spans both apps: marketing owns the modal and Stripe checkout,
-the app owns the session, `/assessments`, and the only Stripe webhook. See
+Signup → email confirmation → details → consent → Stripe checkout → a welcome
+screen that links out to the Linus Engagement App, all in `apps/marketing` (which
+also owns the only Stripe webhook). See
 [`docs/booking-flow.md`](docs/booking-flow.md) for the sequence, the resume state
-machine, what each step writes, and the four different tokens involved. Read it
+machine, what each step writes, and the three different tokens involved. Read it
 before changing anything in `packages/booking/src/server/`.
 
 ## Key Conventions

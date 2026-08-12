@@ -9,9 +9,8 @@ import "server-only";
  * so each write is guarded to be a no-op after the first effective one.
  *
  * These functions ONLY touch the `payments` mirror + `audit_log`. Enrollment
- * (the Linus register/enroll handoff) is deliberately left to the callers so it
- * runs exactly once per path (the client action delegates to
- * `registerAndEnrollUserById`; the webhook calls it too).
+ * used to be left to the callers so it ran once per path; nothing enrolls
+ * anybody today (pbh-ek8), so recording the payment is the whole job.
  */
 
 import { and, eq, ne } from "drizzle-orm";

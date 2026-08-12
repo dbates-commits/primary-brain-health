@@ -1,7 +1,23 @@
 # Linus Health API integration
 
-How the **funnel** app integrates the [Linus Health Public API](./Linus%20Health%20Public%20API.pdf):
+How the site integrates the [Linus Health Public API](./Linus%20Health%20Public%20API.pdf):
 what we call, what we persist, and when.
+
+> ## ⚠️ Currently not wired up
+>
+> **Nothing in this repo calls the Linus API.** As of `pbh-ek8` the payment path
+> records the payment, signs the customer in and sends them to `/welcome` — it no
+> longer registers or enrolls anyone. Linus outages were stranding paying
+> customers on the payment step with `Couldn't register with Linus (status 503)`,
+> and how clients should be registered is an open question.
+>
+> Everything below describes code that is still in the tree and still correct,
+> but has **no callers**: `packages/linus/`,
+> `packages/booking/src/server/register-and-enroll.ts`, and the
+> `users.linus_participant_id` / `users.linus_registration_claimed_at` /
+> `linus_enrollments` storage. It is kept as the reference for whatever the next
+> registration approach turns out to be. Read it as "how this worked", not "what
+> happens today".
 
 ## Overview
 
@@ -12,9 +28,14 @@ and Bearer token); nothing touches the client bundle.
 
 The integration lives in:
 
-- `apps/app/src/lib/linus/` — the API client, env/config, and the register payload builder.
-- `apps/app/src/app/assessments/` — the page, server actions (including `getReportPdf`), the register/enroll engine, and the `ViewReportButton`.
-- `apps/app/src/db/schema/` — the `users` and `linus_enrollments` tables.
+- `packages/linus/` — the API client, env/config, and the register payload builder.
+- `packages/booking/src/server/register-and-enroll.ts` — the register/enroll engine. It used to run on the payment path and in the Stripe webhook; both call sites are gone (see the warning above).
+- `packages/db/src/schema/` — the `users` and `linus_enrollments` tables.
+
+> Report **delivery** is no longer ours: with `apps/app` retired (August 2026),
+> customers read reports in the Linus Engagement App. The report-fetch client
+> remains in `packages/linus`, but nothing in this repo renders a report and no
+> "report ready" email is sent. See [`../booking-flow.md`](../booking-flow.md).
 
 ## Request flow
 
@@ -24,12 +45,12 @@ When each Linus call happens, and the DB writes around it.
 sequenceDiagram
   autonumber
   actor B as Browser
-  participant A as Funnel app
+  participant A as Marketing app
   participant DB as Postgres
   participant L as Linus API
 
-  Note over B,L: ① Payment step — completeAssessmentSetup
-  B->>A: Submit payment (userId)
+  Note over B,L: ① Payment step — finalizeCheckoutSession (or the Stripe webhook)
+  B->>A: Payment completes (userId from the booking cookie)
   A->>L: POST /oauth/token
   L-->>A: access_token (cached in-module)
   opt no stored participantId
@@ -42,10 +63,10 @@ sequenceDiagram
     L-->>A: enrollmentId + redirect
     A->>DB: upsert linus_enrollments (enrollment_id, redirect)
   end
-  A-->>B: Set pbh_assessment_uid cookie, redirect → /assessments
+  A-->>B: Welcome screen → link out to the Linus Engagement App
 
-  Note over B,L: ② Page load — resolveEnrollments, per campaign
-  B->>A: GET /assessments (cookie)
+  Note over B,L: ② Report state — resolveEnrollments, per campaign
+  Note right of A: Runs only as part of ① — no page in this repo<br/>re-resolves enrollments on load.
   A->>DB: load linus_enrollments rows
   alt has_report already set
     Note right of A: report_ready — no Linus calls
@@ -54,7 +75,6 @@ sequenceDiagram
     alt report ready
       L-->>A: report (PDF)
       A->>DB: set has_report = true
-      Note right of A: report_ready
     else not ready (400/404)
       L-->>A: error
       A->>L: GET /participants/{id}/enrollments (listEnrollments)
@@ -66,23 +86,16 @@ sequenceDiagram
     L-->>A: active enrollmentIds
     Note right of A: active → available<br/>finished → completed
   end
-  A-->>B: render cards
-
-  Note over B,L: ③ Download Report — getReportPdf server action
-  B->>A: getReportPdf(enrollmentId) (cookie)
-  A->>L: GET .../enrollments/{enrollmentId}/reports/patient-report
-  L-->>A: report (base64 PDF)
-  A-->>B: base64 PDF + filename → downloaded as a file
 ```
 
-A note on ②: a fresh `enrollSubject` POST happens only the first time a campaign is
-seen (no stored row); on later loads we never re-POST an existing enrollment, and
+A note on ②: a fresh `enrollSubject` POST happens only the first time a campaign
+is seen (no stored row); we never re-POST an existing enrollment, and
 `listEnrollments` is fetched lazily (at most once per request) only when a stored
 enrollment still has no report. See [Per-card status resolution](#per-card-status-resolution).
 
 ## Configuration
 
-`getLinusConfig()` (`lib/linus/env.ts`) requires these environment variables and
+`getLinusConfig()` (`packages/linus/src/env.ts`) requires these environment variables and
 throws a single aggregated error listing any that are missing:
 
 | Variable | Notes |
@@ -93,7 +106,7 @@ throws a single aggregated error listing any that are missing:
 | `LINUS_TOKEN_URL` | OAuth token endpoint (separate from the base URL) |
 | `LINUS_AUDIENCE` | OAuth audience |
 
-Campaigns live in **code**, in `lib/linus/campaigns.ts` — the single source of
+Campaigns live in **code**, in `packages/linus/src/campaigns.ts` — the single source of
 truth (they used to be a `LINUS_CAMPAIGNS` JSON env var). Everything
 env-independent (display copy, ordering, `producesReport`) lives once in the
 `CAMPAIGNS` map, keyed by `key`. The only thing that differs between the Linus
@@ -119,7 +132,7 @@ page shows an empty state.
 
 ## Endpoints we call
 
-All wrapped in `lib/linus/client.ts`. Paths below are appended to `LINUS_BASE_URL`
+All wrapped in `packages/linus/src/client.ts`. Paths below are appended to `LINUS_BASE_URL`
 (which already ends in `/v1`); the OAuth call uses the standalone `LINUS_TOKEN_URL`.
 
 | Method · path | Wrapper | Purpose | Returns |
@@ -138,7 +151,7 @@ empty user-agents), and `cache: "no-store"`. Non-2xx responses throw a
 
 ## Register payload
 
-`buildRegisterInput(user)` (`lib/linus/build-register-input.ts`) maps a `users`
+`buildRegisterInput(user)` (`packages/linus/src/build-register-input.ts`) maps a `users`
 row to the `POST /participants` body:
 
 - `firstName`, `lastName`, `email` — pass-through.
@@ -156,18 +169,22 @@ values, so this mapping is mostly pass-through.
 
 ### `users.linus_participant_id`
 
-Set **once**, on the **payment step**: `completeAssessmentSetup`
-(`assessments/actions.ts`) calls `registerAndEnrollUserById(userId)` with
-registration allowed. If the user has no `participantId` yet,
+Set **once**, on the **payment step**: `finalizeCheckoutSession`
+(`apps/marketing/src/components/booking/payment/actions.ts`) calls
+`registerAndEnrollUserById(userId)`, and the Stripe webhook does the same as a
+backstop. If the user has no `participantId` yet,
 `registerAndEnrollUser` (`register-and-enroll.ts`) calls `registerSubject` and
 writes the returned id to the unique `linus_participant_id` column. A concurrent
 double-submit can hit the unique constraint; we catch that and re-read the stored
 id instead of failing.
 
-Read paths never register: the `/assessments` page calls
-`registerAndEnrollUserById(uid, { allowRegister: false })`, so loading the page
-can't create a subject. (The `/login` email sign-in is a testing/admin path and
-does allow registration.)
+Payment was the *only* registration point, and it no longer registers either
+(see the warning at the top): **nothing sets this column any more.** The retired
+`/assessments` page used to re-run the resolver on every load with
+`{ allowRegister: false }`, which also gave a deferred registration a second
+chance to complete; then the webhook's `retryOnContention` retry was the only
+recovery; now there is none. See the known gaps in
+[`../booking-flow.md`](../booking-flow.md).
 
 ### `linus_enrollments` rows
 
@@ -181,21 +198,12 @@ Per `(user, campaign)`, written by helpers in `register-and-enroll.ts`:
 
 We never re-POST an enrollment that already has a row (see limitations).
 
-### `pbh_assessment_uid` cookie
-
-Identifies whose assessments/reports to serve. Set on **payment success** (and on
-the `/login` sign-in) with `ASSESSMENT_COOKIE_OPTS`: `httpOnly`, `secure` in
-production, `sameSite: "lax"`, `path: "/"`, `maxAge` 1 hour. The value is the raw
-(unsigned) user id — acceptable only for this unauthenticated scaffold; it should
-move behind a real signed session once auth lands. Read by the `/assessments` page
-(no cookie → redirect to `/login`) and the `getReportPdf` server action (no cookie
-→ error result).
-
 ## Per-card status resolution
 
-On each `/assessments` load, `resolveEnrollments()` resolves every configured
-campaign to one of three card states (`available`, `report_pending`,
-`report_ready`):
+`resolveEnrollments()` resolves every configured campaign to one of three states
+(`available`, `report_pending`, `report_ready`). Nothing in this repo renders
+those states any more — they are the enrollment engine's own bookkeeping, and the
+customer sees their assessments in the Linus Engagement App:
 
 1. Row has `has_report` → **report_ready**. No Linus calls.
 2. Else probe `getReport` for the stored enrollment → if a report exists,
@@ -246,17 +254,10 @@ the production deploy**, not run manually.
 
 ## Report delivery
 
-`getReportPdf(enrollmentId)` server action (`actions.ts`), called by the client
-`ViewReportButton` when the user clicks **Download Report** — there is no dedicated
-report route:
-
-- Authed via the `pbh_assessment_uid` cookie; the report is fetched server-side
-  under that user's own `participantId`, so a user can only read their own reports.
-- Returns one of `{ status: "ready", dataBase64, filename }`, `{ status: "not_ready" }`,
-  or `{ status: "error", message }`. The button decodes a `ready` payload into a
-  same-origin blob and downloads it with a descriptive filename built from the
-  user's name + the campaign key (e.g. `jane-doe-lhq-brain-health-report.pdf`);
-  `not_ready`/`error` show an inline message instead.
+**Not ours.** Customers read their reports in the Linus Engagement App. We keep
+`getReport` in `packages/linus` because the enrollment resolver probes it to
+decide whether an assessment is finished, but nothing here serves a PDF: the
+download UI went with `apps/app` in August 2026.
 
 ## Known API limitations / open issues
 
@@ -273,7 +274,7 @@ report route:
 - **Only LHQ generates a patient report right now** (confirmed by Linus). `getReport`
   returning `404 "Report unavailable"` for the other campaigns (DAC, Personal
   Priorities) is expected — they are not configured to produce a `patient-report` at
-  this time. Handled via the `producesReport` flag in `lib/linus/campaigns.ts` (defaults
+  this time. Handled via the `producesReport` flag in `packages/linus/src/campaigns.ts` (defaults
   `false`): only LHQ sets it `true`. Campaigns left at the default skip the report
   probe and settle into the `completed` ("Completed") card state once finished, instead
   of spinning on `report_pending` forever. Set `true` if/when Linus starts generating a

@@ -1,12 +1,11 @@
 # Stripe Payment Architecture Spec
-
 **Status:** v1.0 — ready for PBH review
 **Owner:** VisualBoston engineering (Mark Stenquist) + compliance specialist (Bill Laukaitis)
 **Date:** June 26, 2026
 
 Payment architecture spec for the PBH Website v2 funnel ($149 assessment → BHN consult → Linus Remote Assessments handoff). Covers implementation choice, data flow, MCC/HSA-FSA, PCI SAQ-A posture, and cross-team seams to be locked before build.
 
-Related: [handoff-token-contract.md](./handoff-token-contract.md), [SOW2-Proposal.md](../proposal/SOW2-Proposal.md).
+Related: [handoff-token-contract.md](./handoff-token-contract.md), [SOW2-Proposal.md](../proposal/SOW2-Proposal-v5-no-pricing.md).
 
 ---
 
@@ -67,7 +66,7 @@ Three SAQ-A-compatible flavors:
 > `setup_future_usage`, so the "Card on file" requirement row above, the
 > `Customer`/`PaymentMethod` handoff to Linus, and the `users.stripe_customer_id`
 > column no longer apply. GA4/HubSpot/Resend receipt side effects remain deferred.
-> See [stripe-integration-reference.md](./stripe-integration-reference.md) for the
+> See [stripe-integration.md](../../stripe-integration.md) for the
 > as-built wiring.
 
 ---

@@ -3,7 +3,7 @@
 **Status:** Final — delivered with Invoice 1B
 **Date:** June 30, 2026
 **Authors:** Mark Stenquist (VisualBoston), Bill Laukaitis (compliance)
-**Related:** [stripe-architecture.md](./stripe-architecture.md) · [handoff-token-contract.md](./handoff-token-contract.md) · [SOW2-Proposal.md](../proposal/SOW2-Proposal.md)
+**Related:** [stripe-architecture.md](./stripe-architecture.md) · [handoff-token-contract.md](./handoff-token-contract.md) · [SOW2-Proposal.md](../proposal/SOW2-Proposal-v5-no-pricing.md)
 
 ---
 

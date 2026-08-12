@@ -5,7 +5,7 @@ import { users } from "./users";
  * Append-only event stream backing SAQ-A (PCI) + HIPAA audit-trail
  * requirements. Write-only from the app via the `writeAuditLog` helper
  * (src/db/audit.ts); rows are never updated or deleted. HIPAA retention is
- * 6 years (see database-plan.md "Open decisions").
+ * 6 years (see docs/database.md "Open decisions").
  *
  * `userId` is nullable: some events (e.g. a failed signup) have no account yet.
  */

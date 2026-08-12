@@ -33,9 +33,9 @@ export function getStripeAssessmentPriceId(): string {
  * `@pbh/booking`), so adding a package is a config change here plus a Price in
  * the Stripe catalog — never a hardcoded amount.
  *
- * Both price IDs must come from the SAME Stripe account as `STRIPE_SECRET_KEY`,
- * and that account must match the one the funnel's webhook uses; fulfillment
- * re-fetches the PaymentIntent and validates it against the catalog price.
+ * Both price IDs must come from the SAME Stripe account as `STRIPE_SECRET_KEY`;
+ * fulfillment re-fetches the PaymentIntent and validates it against the catalog
+ * price.
  */
 export function getStripePriceIdFromEnv(envVar: string): string {
   const priceId = process.env[envVar];
@@ -62,7 +62,7 @@ export function getStripeWebhookSecret(): string {
   if (!secret) {
     throw new Error(
       "Stripe webhooks are not configured. Missing STRIPE_WEBHOOK_SECRET. " +
-        "Locally, run `stripe listen --forward-to localhost:3001/api/stripe/webhook` " +
+        "Locally, run `stripe listen --forward-to localhost:3000/api/stripe/webhook` " +
         "and paste the printed whsec_… into .env.local. On Vercel, set it per " +
         "environment from the endpoint's signing secret.",
     );

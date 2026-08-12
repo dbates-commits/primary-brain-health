@@ -23,9 +23,9 @@ jobs:
       # Marketing reads its CMS content from disk instead of TinaCloud.
       TINA_PUBLIC_IS_LOCAL: "true"
       # Non-secret placeholders so the server boots; the smoke tier never
-      # reaches payment/handoff, so these are never exercised.
+      # reaches payment, so these are never exercised.
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_placeholder"
-      NEXT_PUBLIC_FUNNEL_URL: "http://localhost:3001"
+      NEXT_PUBLIC_ENGAGEMENT_APP_URL: "https://engagement.example.invalid"
     steps:
       - uses: actions/checkout@v4
 

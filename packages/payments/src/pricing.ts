@@ -30,8 +30,8 @@ const cache = new Map<string, AssessmentCatalogEntry>();
  * request/event. Expands the Product so callers can surface its name. Throws if
  * the price is inactive or isn't a fixed one-off amount.
  *
- * Defaults to the basic package's var so existing callers — notably the funnel's
- * webhook fulfillment — keep working unchanged.
+ * Defaults to the basic package's var so existing callers — notably webhook
+ * fulfillment — keep working unchanged.
  */
 export async function getAssessmentCatalogEntry(
   priceEnvVar = "STRIPE_ASSESSMENT_PRICE_ID",

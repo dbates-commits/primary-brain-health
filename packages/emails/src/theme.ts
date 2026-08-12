@@ -1,3 +1,5 @@
+import { siteBaseUrl } from "./base-url";
+
 /**
  * Email-safe rendition of "The Cognitive Sanctuary" design tokens.
  *
@@ -42,8 +44,7 @@ export const emailFontStack = "Inter, -apple-system, 'Segoe UI', Helvetica, Aria
  * Absolute URL for the header logo — email clients need a hosted image, not
  * a relative path or data URI (Gmail blocks the latter). Resolved at render
  * time: EMAIL_LOGO_URL wins (set it once a stable production/CDN URL exists),
- * otherwise the file the funnel serves from public/email-assets/ under
- * APP_BASE_URL.
+ * otherwise the file the marketing site serves from public/email-assets/.
  */
 export function emailLogoUrl(): string {
   if (process.env.EMAIL_LOGO_URL) {
@@ -56,16 +57,15 @@ export function emailLogoUrl(): string {
  * The teal-washed man-and-woman photo used as the Welcome email hero
  * background — the same couple from the marketing homepage hero, with a
  * mostly-opaque teal overlay baked in (email clients can't reliably layer a
- * color over a background image). Served from the funnel's public/email-assets.
+ * color over a background image). Served from public/email-assets.
  */
 export function emailHeroImageUrl(): string {
   return emailAssetUrl("welcome-hero-bg.jpg");
 }
 
-/** Absolute, HTTPS-safe URL for a file under the funnel's public/email-assets. */
+/** Absolute, HTTPS-safe URL for a file under the site's public/email-assets. */
 function emailAssetUrl(file: string): string {
-  const base = process.env.APP_BASE_URL ?? "http://localhost:3001";
-  return ensureSecureUrl(`${base}/email-assets/${file}`);
+  return ensureSecureUrl(`${siteBaseUrl()}/email-assets/${file}`);
 }
 
 /**

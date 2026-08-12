@@ -15,7 +15,7 @@ export interface PaymentReceiptEmailProps {
   cardLast4?: string | null;
   /** Pre-formatted display date (e.g. "July 14, 2026"); the sender formats. */
   paidOn: string;
-  /** Where the paid-for assessments live (the funnel /assessments page). */
+  /** Where the customer picks up from here — our /welcome screen. */
   assessmentsUrl: string;
 }
 

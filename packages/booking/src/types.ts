@@ -1,10 +1,9 @@
 /**
  * Shared contracts for the booking/assessment step forms. The `*State` shapes
  * are the useActionState state each step form renders; the `*Action` types are
- * the injected per-step server action each app supplies (the funnel passes its
- * real `"use server"` action; marketing passes a stub in `.3` and the real
- * re-homed action in `.5`). Keeping the types here lets the components and every
- * app's action agree on one contract.
+ * the injected per-step server action the host supplies (the booking modal
+ * passes its real `"use server"` action; Storybook passes a stub). Keeping the
+ * types here lets the components and the actions agree on one contract.
  */
 
 export type SignupValues = {
@@ -109,7 +108,8 @@ export type ConsentAction = (
  * Payment-step contracts. The step component is presentation only (mounts Stripe
  * Embedded Checkout); each app injects a `createSession` action that mints a
  * Checkout Session and a `finalize` action that verifies + records the payment
- * and enrolls the user. Kept here so the component and both apps' actions agree.
+ * and signs the customer in. Kept here so the component and the app's actions
+ * agree.
  */
 export type CreateCheckoutResult =
   | { status: "ready"; clientSecret: string; sessionId: string }

@@ -7,8 +7,8 @@
  *
  * NOTE: the marketing consultation/intake form (IntakeForm.tsx) still writes
  * the old human-readable strings ("Male", "Bachelors (4 years)", …). The two
- * entry points have intentionally diverged for now — only the funnel feeds
- * Linus registration. Re-aligning marketing is a follow-up.
+ * entry points have intentionally diverged for now — only the booking flow
+ * feeds Linus registration. Re-aligning the intake form is a follow-up.
  */
 
 /** Maps to the Linus `sexAssignedAtBirth` enum. */

@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx turbo-ignore marketing"
+  "ignoreCommand": "npx turbo-ignore marketing",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"production\" ] || { [ \"$VERCEL_ENV\" = \"preview\" ] && [ \"$DATABASE_ENV\" = \"preview\" ]; }; then pnpm --filter @pbh/db run db:migrate; fi && pnpm run build"
 }

@@ -2,7 +2,7 @@
  * The one place clinical and wellness vocabulary is written down.
  *
  * Two mechanisms, used deliberately (see
- * docs/sow2/technical/track-copy-mapping-plan.md):
+ * docs/track-copy-mapping.md):
  *
  * - TERMS — nouns swapped inside otherwise-identical sentences.
  * - PHRASES — whole sentences, for anywhere the *claim* changes and not just

@@ -37,12 +37,11 @@ export const payments = pgTable(
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),
     succeededAt: timestamp("succeeded_at", { withTimezone: true }),
-    // Set the moment this payment's post-checkout sign-in handoff is redeemed at
-    // the funnel. The handoff token is a login credential, so it must be usable
-    // exactly once: claiming it is an atomic UPDATE on this column, which also
-    // binds the sign-in to a real `succeeded` payment rather than to a signature
-    // alone. Nullable — most rows are never handed off (webhook-only fulfilment,
-    // or a customer who signed in by magic link instead).
+    // DEPRECATED (pbh-23g): the cross-app sign-in handoff is gone. It existed to
+    // carry a session from marketing to a second app on another origin; with one
+    // app the checkout action just sets the cookie itself. Column kept so a
+    // revert stays clean and as a record of which payments were redeemed — a
+    // follow-up drops it. Nothing reads or writes it.
     handoffConsumedAt: timestamp("handoff_consumed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

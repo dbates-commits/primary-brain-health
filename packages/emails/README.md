@@ -1,9 +1,9 @@
 # @pbh/emails
 
-Transactional email templates for the PBH funnel, built with
-[react-email](https://react.email) v6. Rendering only — no sending
-provider is wired here; the consumer (funnel server action / webhook)
-renders and sends.
+Transactional email templates for PBH, built with
+[react-email](https://react.email) v6. Rendering only — no sending provider is
+wired here; the consumer (a marketing server action or the Stripe webhook, via
+`packages/booking/src/server/send-email.ts`) renders and sends.
 
 ## Preview
 
@@ -16,16 +16,17 @@ sample data.
 
 ## Templates
 
-| Template | Funnel trigger (to be wired) |
+| Template | Trigger |
 | --- | --- |
-| `WelcomeEmail` | Signup completes (`get-started/signup`) |
+| `WelcomeEmail` | Email confirmation redeemed (`email-verification.ts`) |
+| `ConfirmEmailEmail` | Signup completes (`email-verification.ts`) |
+| `MagicLinkEmail` | Sign-in requested (`apps/marketing/src/lib/auth-email.ts`) |
 | `PaymentReceiptEmail` | Payment succeeds (`fulfill.ts` / Stripe webhook) |
 | `AssessmentReadyEmail` | Linus enrollment lands (`register-and-enroll.ts`) |
-| `ReportReadyEmail` | A report becomes available (`report_ready`) |
 | `PaymentRefundedEmail` | Refund recorded (`recordRefundedPayment`) |
 | `AccountDeactivatedEmail` | Account deactivation processed (flow not built yet; copy pending Linus-attorney approval) |
 
-## Usage (the later hook-up branch)
+## Usage
 
 ```ts
 import { renderEmail, WelcomeEmail } from "@pbh/emails";
@@ -37,6 +38,10 @@ const { html, text } = await renderEmail(
 ```
 
 ## Styling
+
+Absolute URLs (logo, hero image) are built from `siteBaseUrl()` in
+`src/base-url.ts` — `BOOKING_BASE_URL`, else `VERCEL_URL`, else localhost. The
+assets themselves are served from `apps/marketing/public/email-assets/`.
 
 Brand values from `@pbh/tokens/theme.css` are mirrored as email-safe inline
 hex in `src/theme.ts` (email clients can't consume CSS variables or Tailwind).

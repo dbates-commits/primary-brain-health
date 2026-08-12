@@ -7,7 +7,7 @@ import { citext } from "./_types";
  *
  * No card data ever lives here (that stays at Stripe) and no clinical /
  * assessment data (owned by Linus Remote Assessments). See
- * docs/sow2/technical/database-plan.md.
+ * docs/database.md.
  */
 export const users = pgTable("users", {
   id: uuid().primaryKey().defaultRandom(),
@@ -31,7 +31,8 @@ export const users = pgTable("users", {
   // a hint, or someone could show themselves the $449 flow and pay the $149
   // price. See ASSESSMENT_PACKAGES in @pbh/booking.
   selectedPackageKey: text("selected_package_key"),
-  // Collected in step 2 of signup, so nullable until that step completes.
+  // DEPRECATED (pbh-23g): auth has been passwordless (magic link) since PBH-119;
+  // nothing has written this for some time. A follow-up drops it.
   passwordHash: text("password_hash"),
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.
   dateOfBirth: date("date_of_birth", { mode: "string" }),
@@ -70,10 +71,9 @@ export const users = pgTable("users", {
   linusRegistrationClaimedAt: timestamp("linus_registration_claimed_at", {
     withTimezone: true,
   }),
-  // First-login gate for the "Choose How to Start" welcome screen. Null until the
-  // user leaves that screen (via either CTA); once stamped, later logins skip
-  // straight to /assessments. The DB is the only store for this "have they seen
-  // it" flag.
+  // DEPRECATED (pbh-23g): /welcome is now the terminal screen — it links out to
+  // the Linus Engagement App and there is nowhere to skip ahead to, so it is
+  // always shown and nothing stamps this. A follow-up drops it.
   welcomeSeenAt: timestamp("welcome_seen_at", {
     withTimezone: true,
   }),

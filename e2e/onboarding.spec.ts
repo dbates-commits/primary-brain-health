@@ -3,10 +3,10 @@ import { reachConsentStep, submitConsent } from "./helpers/booking";
 
 /**
  * The onboarding money-path through Stripe: marketing booking → email confirm →
- * details → consent → Stripe test payment. Each case drives the whole flow with
- * a fresh user and ends at the charge outcome — success or a decline shown in
- * Stripe's Embedded Checkout. That's the boundary the funnel controls; the
- * post-payment Linus enrollment and app handoff are out of scope.
+ * details → consent → Stripe test payment → the welcome screen. Each case drives
+ * the whole flow with a fresh user and ends at the charge outcome — success or a
+ * decline shown in Stripe's Embedded Checkout. The payment path no longer calls
+ * Linus (pbh-ek8), so the run needs no US IP.
  *
  * Writes to the database and drives Stripe, so it only runs when the operator
  * opted in with E2E_FULL_FLOW=1 — otherwise skipped (not failed), since a
@@ -17,6 +17,12 @@ import { reachConsentStep, submitConsent } from "./helpers/booking";
  *   - Stripe TEST keys + an ACTIVE assessment price
  */
 const FULL_FLOW = process.env.E2E_FULL_FLOW === "1";
+
+/**
+ * The welcome screen's CTA target. With it unset the screen deliberately renders
+ * no button at all, so the href assertion is skipped rather than failed.
+ */
+const ENGAGEMENT_APP_URL = process.env.NEXT_PUBLIC_ENGAGEMENT_APP_URL ?? "";
 
 // Accepted Stripe test cards across brands. HSA/FSA cards are ordinary branded
 // cards — Stripe test mode has no distinct HSA/FSA number and the funnel doesn't
@@ -95,6 +101,20 @@ test.describe("onboarding payment", () => {
       await expect(stripe.getByText(/thanks for your payment/i)).toBeVisible({
         timeout: 30_000,
       });
+
+      // Payment is the last step we own: the flow navigates to /welcome, the
+      // hand-off out to the Linus Engagement App.
+      await page.waitForURL(/\/welcome$/, { timeout: 30_000 });
+      // The heading renders a typographic apostrophe (`&rsquo;` → U+2019), so
+      // match either form rather than the ASCII one alone.
+      await expect(page.getByText(/you[’']re all set/i)).toBeVisible({
+        timeout: 30_000,
+      });
+      if (ENGAGEMENT_APP_URL) {
+        await expect(
+          page.getByRole("link", { name: /go to your app/i }),
+        ).toHaveAttribute("href", ENGAGEMENT_APP_URL);
+      }
     });
   }
 

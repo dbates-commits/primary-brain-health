@@ -20,7 +20,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * and that is what reopens the modal at the right step.
  *
  * Not a session — it grants nothing in the funnel app. Signing in still happens
- * only through a magic link or the single-use post-payment handoff.
+ * only through a magic link or the session minted at payment.
  */
 export const BOOKING_SESSION_COOKIE = "pbh_booking_session";
 

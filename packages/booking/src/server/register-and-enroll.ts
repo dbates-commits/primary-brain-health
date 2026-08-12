@@ -1,9 +1,17 @@
 import "server-only";
 
 /**
- * Core register / enroll / list logic, shared by the funnel `/login` sign-in
- * action, both apps' payment step actions, and the `/assessments` page. Server-
- * only (touches the DB and the Linus client).
+ * Core register / enroll / list logic. Server-only — it touches the DB and the
+ * Linus client.
+ *
+ * ⚠️ DORMANT: nothing calls anything in this file (pbh-ek8). It used to run on
+ * the payment path — the checkout action and the Stripe webhook backstop — but a
+ * Linus outage there stranded paying customers on the payment step with
+ * "Couldn't register with Linus (status 503)", so both call sites were removed
+ * and the flow now ends at `/welcome`. Kept intact, not deleted, as the
+ * reference for whatever the next registration approach is; the DB columns it
+ * writes (`users.linus_participant_id`, `linus_enrollments`) are still in the
+ * schema. See `docs/linus/api-integration.md`.
  */
 
 import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
@@ -22,10 +30,7 @@ import {
 } from "@pbh/linus";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { getEntitledTrack } from "./entitlement";
-import {
-  sendAssessmentReadyEmail,
-  sendReportReadyEmail,
-} from "./send-email";
+import { sendAssessmentReadyEmail } from "./send-email";
 
 /**
  * Per-card state:
@@ -74,10 +79,10 @@ export type LinusState =
   | { status: "error"; email: string; message: string };
 
 /**
- * Probe whether one enrollment's report is ready. The PDF itself is fetched on
- * demand by the `getReportPdf` server action when the user clicks "View Report";
- * here we only need a boolean to drive the card's status. Never throws — a
- * missing report (404) or any error just means "not available yet".
+ * Probe whether one enrollment's report is ready. We never serve the PDF — that
+ * is the Linus Engagement App's job — so all we need is a boolean: a ready
+ * report means the assessment is finished and must not be re-POSTed. Never
+ * throws; a missing report (404) or any error just means "not available yet".
  */
 async function hasReadyReport(
   participantId: string,
@@ -478,13 +483,9 @@ async function resolveEnrollments(
       if (producesReport) {
         if (await hasReadyReport(participantId, row.enrollmentId)) {
           await markReportReady(userId, campaign.campaignId);
-          // The hasReport flip above is once-only per (user, campaign), so this
-          // sends exactly once. Today the transition is only ever detected
-          // during an /assessments load (the user is already on the page); a
-          // background poller should own this send when one exists.
-          // The email describes this assessment, so it takes the assessment's
-          // own track — not the reader's current entitlement.
-          await sendReportReadyEmail(userId, campaign.name, base.track);
+          // No email here any more: reports are read in the Linus Engagement
+          // App, which owns notifying about them. The `hasReport` bookkeeping
+          // stays — it is what stops us re-POSTing a finished enrollment.
           enrollments.push({
             ...base,
             enrollmentId: row.enrollmentId,
