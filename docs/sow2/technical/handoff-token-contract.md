@@ -1,11 +1,4 @@
 # Signed-Token Handoff Contract
-
-> **⚠️ Superseded (August 2026).** `apps/app` was retired: everything the customer
-> touches now lives on the marketing site and ends at a welcome screen linking out
-> to the Linus Engagement App, which owns login and the assessments. This document
-> describes the two-app architecture and is kept as design history. For current
-> state see [`docs/booking-flow.md`](../../booking-flow.md).
-
 **Status:** v1.0 — ready for PBH product team review
 **Owners:** VisualBoston engineering (Mark Stenquist) + compliance specialist (Bill Laukaitis)
 **Version:** 1.0

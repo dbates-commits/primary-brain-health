@@ -29,10 +29,12 @@ packages/
 ```
 
 `@pbh/*` are real workspace packages (not path aliases); the app consumes them
-via `transpilePackages` in `next.config.ts`. The two-app split that
-[`docs/sow2/technical/monorepo-plan.md`](docs/sow2/technical/monorepo-plan.md)
-describes is design history — `apps/app` was retired in August 2026, see
-[`docs/booking-flow.md`](docs/booking-flow.md).
+via `transpilePackages` in `next.config.ts`.
+
+Docs: [`docs/booking-flow.md`](docs/booking-flow.md) (how a customer books and
+pays), [`docs/auth.md`](docs/auth.md), [`docs/database.md`](docs/database.md),
+[`docs/stripe-integration.md`](docs/stripe-integration.md). Everything under
+[`docs/sow2/`](docs/sow2/) is a point-in-time SOW2 artifact, not current state.
 
 ## Getting Started
 

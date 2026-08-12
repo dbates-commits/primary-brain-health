@@ -3,7 +3,7 @@
 Operational reference for the Stripe integration (issue `pbh-bws.28`):
 what keys are required, what endpoints exist, and how a payment moves through the
 system. For design rationale and the SAQ-A / HSA-FSA notes, see
-[stripe-architecture.md](./stripe-architecture.md); this doc is the "wiring".
+[stripe-architecture.md](./sow2/technical/stripe-architecture.md); this doc is the "wiring".
 
 Scope: `apps/marketing`. Card data never touches PBH servers (Stripe-hosted
 **Embedded Checkout** — `ui_mode: "embedded_page"`); the backend only handles

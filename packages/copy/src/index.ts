@@ -5,7 +5,7 @@
  * plain data plus a resolver, safe in a server component, a client component,
  * and a react-email template alike.
  *
- * See docs/sow2/technical/track-copy-mapping-plan.md.
+ * See docs/track-copy-mapping.md.
  */
 export * from "./track";
 export * from "./lexicon";

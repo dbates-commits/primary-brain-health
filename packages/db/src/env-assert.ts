@@ -55,7 +55,7 @@ function fail(message: string): never {
     `[env] Environment separation check failed.\n${message}\n` +
       "Set DATABASE_ENV (production | preview | development) alongside " +
       "DATABASE_URL in each Vercel scope and in .env.local. See " +
-      "docs/sow2/technical/database-plan.md § Environments.",
+      "docs/database.md § Environments.",
   );
 }
 

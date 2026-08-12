@@ -7,7 +7,7 @@ import { citext } from "./_types";
  *
  * No card data ever lives here (that stays at Stripe) and no clinical /
  * assessment data (owned by Linus Remote Assessments). See
- * docs/sow2/technical/database-plan.md.
+ * docs/database.md.
  */
 export const users = pgTable("users", {
   id: uuid().primaryKey().defaultRandom(),

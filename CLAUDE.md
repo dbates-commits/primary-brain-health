@@ -30,8 +30,12 @@ local mode); plain `next build` works without them.
 - `packages/config/` (`@pbh/config`) — shared ESLint flat config (`eslint/base`) + tsconfig presets
 
 Path aliases `@/*` and `@tina/*` are scoped to the app; shared code lives in the
-`@pbh/*` packages. `docs/sow2/technical/monorepo-plan.md` describes the original
-two-app split and is design history — `apps/app` was retired in August 2026.
+`@pbh/*` packages.
+
+Current-state docs live directly in `docs/`: `booking-flow.md`, `auth.md`,
+`database.md`, `stripe-integration.md`, `linus/api-integration.md`. Everything
+under `docs/sow2/` is a point-in-time SOW2 artifact — proposals, specs and
+deliverables as they were sent — and is not a description of the code.
 
 ## Issue Tracking
 

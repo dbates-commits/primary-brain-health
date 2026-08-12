@@ -226,25 +226,11 @@ boundary that no longer exists.
 
 ### Session lifetimes
 
-Set from PBH's security review (Bill, 2026-07-22). HIPAA prescribes no specific
-duration — it requires an automatic logoff control proportionate to the risk.
-
-| Control | Value | Enforced by |
-|---|---|---|
-| Inactivity timeout | 15 min | Auth.js `session.maxAge` with `updateAge: 0` |
-| Absolute session cap | 8 hours | our `getSessionAndUser` override — Auth.js has no built-in |
-| Magic link | 15 min, single-use | provider `maxAge`; Auth.js deletes the token on redeem |
-
-`maxAge` alone is a *sliding* window: it moves forward on every request, so a
-continuously active session would never end. The absolute cap is the reason
-`sessions.created_at` exists — `expires` cannot tell you a session's true age
-once it has slid.
-
-> These numbers were sized when the signed-in area reached the Linus report. It
-> no longer reaches anything but an external link, so they are stricter than the
-> risk now warrants. Left unchanged deliberately — loosening a
-> compliance-signed-off control is Bill's call, not a side effect of this
-> refactor.
+15-minute inactivity timeout, 8-hour absolute cap, 15-minute single-use sign-in
+link — the automatic-logoff control set from PBH's compliance review. The values,
+the reasoning, and what was considered and dropped live in
+[`auth.md`](./auth.md#hipaa-automatic-logoff-controls); they are deliberately
+recorded in one place so the numbers here can't drift from the ones in the code.
 
 ---
 

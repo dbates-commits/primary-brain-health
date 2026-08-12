@@ -12,7 +12,7 @@ wellness surface.
 ## Why this needs a mapping and not a handful of ternaries
 
 Word choice here is a compliance surface, not only a branding one.
-`stripe-architecture.md` records that the offering sits at the wellness/medical
+`sow2/technical/stripe-architecture.md` records that the offering sits at the wellness/medical
 seam for MCC and HSA/FSA purposes. "Specialist", "diagnosis", "physician", and
 "treatment" rendered on a wellness-coded purchase are claims about what was
 sold. Collecting every one of those words into a single reviewable file means

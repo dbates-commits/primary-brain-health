@@ -1,12 +1,9 @@
-# Database Plan
+# Database
 
-> **⚠️ Superseded (August 2026).** `apps/app` was retired: everything the customer
-> touches now lives on the marketing site and ends at a welcome screen linking out
-> to the Linus Engagement App, which owns login and the assessments. This document
-> describes the two-app architecture and is kept as design history. For current
-> state see [`docs/booking-flow.md`](../../booking-flow.md).
-
-Database choice for the funnel app (`apps/app`). Stripe handles payment data; this database holds everything else.
+Why the database is Neon on the Scale tier with a BAA, what it holds, and how the
+environments are kept apart. The schema itself is code —
+`packages/db/src/schema/` is the source of truth; this records the decisions
+around it.
 
 ## Decision: Neon (Postgres) on Scale tier, with BAA
 
@@ -14,18 +11,17 @@ Locked in pending PBH counsel sign-off on the conservative HIPAA posture. See "O
 
 ## What lives in the database
 
-The funnel app stores:
-
 | Table | Purpose | Sensitivity |
 | :---- | :---- | :---- |
-| `users` | Account identity: name, email, hashed password, DOB, ZIP, state of residence | PII; conservatively HIPAA-adjacent |
+| `users` | Account identity: name, email, DOB, ZIP, state of residence, Linus participant id | PII; conservatively HIPAA-adjacent |
 | `consents` | Versioned wellness consent + HIPAA NPP acknowledgments. Stored with version number, timestamp, IP hash | PII; HIPAA-adjacent (consent to receive a health-related service) |
 | `payments` | Internal payment record mirror of Stripe events: stripe_payment_intent_id, amount, status, HSA/FSA flag, last-4 | PII; financial |
-| `audit_log` | Append-only log of significant events: signup, consent, payment, handoff token issued | Mixed; supports SAQ-A + HIPAA audit-trail requirements |
+| `audit_log` | Append-only log of significant events: signup, consent, payment, login | Mixed; supports SAQ-A + HIPAA audit-trail requirements |
+| `sessions`, `accounts`, `verification_tokens` | Auth.js tables for magic-link sign-in — see [`auth.md`](./auth.md) | PII |
 
 **Not in this database**:
 - Card numbers / CVV / full PAN - never; lives only at Stripe
-- Assessment responses / clinical data - owned by the Linus Remote Assessments, not this database
+- Assessment responses / clinical data - owned by Linus, not this database
 - BHN consultation notes, EMR data - Linus Remote Assessments + Athena
 - Marketing site content - TinaCMS, separate codebase (`apps/marketing`)
 
@@ -51,11 +47,11 @@ The branching feature deserves specific call-out: every preview deployment in Ve
 
 ## HIPAA tier reasoning
 
-Two readings of the funnel data:
+Two readings of the data we hold:
 
-**Conservative reading (recommended)**: Funnel data is HIPAA-covered. Being a user of Primary Brain Health implies a health interest; consents reference HIPAA NPP; the funnel is the entry door to a clinical experience. Auditors and counsel will lean this way.
+**Conservative reading (recommended)**: this data is HIPAA-covered. Being a user of Primary Brain Health implies a health interest; consents reference HIPAA NPP; the booking flow is the entry door to a clinical experience. Auditors and counsel will lean this way.
 
-**Pragmatic reading**: Funnel is pre-clinical, PII-only. HIPAA actually attaches once clinical data is collected (in the Linus Remote Assessments). Most healthcare DTC funnels operate this way.
+**Pragmatic reading**: the booking flow is pre-clinical, PII-only. HIPAA actually attaches once clinical data is collected (in Linus). Most healthcare DTC funnels operate this way.
 
 **Decision**: conservative reading. Reasons:
 
@@ -63,69 +59,17 @@ Two readings of the funnel data:
 2. Counsel review of "is this HIPAA-covered?" is itself expensive and slow
 3. Retrofitting HIPAA later (migrating data, signing BAAs after the fact, post-launch audit trails) is significantly worse than building HIPAA-aware from day one
 4. PBH risk tolerance reads conservative from the RFP language ("HIPAA-aware data handling at the seam")
-5. The Linus Remote Assessments is going to need HIPAA anyway - having matching posture across both prevents seam confusion
+5. Linus is going to need HIPAA anyway - having matching posture across both prevents seam confusion
 
-## Schema sketch (preliminary, finalized in discovery)
+## Schema
 
-```sql
--- users: account identity
-create table users (
-  id uuid primary key default gen_random_uuid(),
-  email citext unique not null,
-  password_hash text not null,
-  legal_name text not null,
-  date_of_birth date not null,
-  zip text not null,
-  state_of_residence char(2) not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+The tables above were sketched here during discovery; the built schema is
+`packages/db/src/schema/` (Drizzle), with migrations in
+`packages/db/src/migrations/`. Read the schema files — this doc would only ever
+be a stale copy of them.
 
--- consents: versioned consent records
-create table consents (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references users(id),
-  consent_type text not null,            -- 'wellness' | 'hipaa_npp'
-  version text not null,                  -- e.g. '2026-06-01'
-  acknowledged_at timestamptz not null default now(),
-  ip_hash text not null,
-  user_agent text
-);
-
--- payments: mirror of Stripe payment lifecycle
-create table payments (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references users(id),
-  stripe_payment_intent_id text unique not null,
-  amount_cents int not null,
-  currency text not null default 'usd',
-  status text not null,                   -- 'pending'|'succeeded'|'failed'|'refunded'
-  is_hsa_fsa boolean not null default false,
-  card_brand text,
-  card_last4 text,
-  succeeded_at timestamptz,
-  created_at timestamptz not null default now()
-);
-
--- audit_log: append-only event stream for SAQ-A + HIPAA audit trail
-create table audit_log (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references users(id),
-  event_type text not null,               -- 'signup'|'consent'|'payment_*'|'token_issued'|...
-  metadata jsonb,
-  occurred_at timestamptz not null default now(),
-  ip_hash text,
-  request_id text
-);
-
-create index on consents(user_id);
-create index on payments(user_id);
-create index on payments(stripe_payment_intent_id);
-create index on audit_log(user_id);
-create index on audit_log(event_type, occurred_at);
-```
-
-ORM: **Drizzle** (lightweight, TypeScript-first, fits the Next.js + Vercel + Neon stack idiomatically). Alternative is Prisma if the team prefers it.
+**Drizzle**, not Prisma: lighter footprint, TypeScript-first, and it fits the
+Next.js + Vercel + Neon stack idiomatically.
 
 ## Environments
 
@@ -148,11 +92,11 @@ An env var alone is only as good as whoever last edited it in the Vercel UI, so
 two things check it:
 
 1. **Boot assertion** — `assertDatabaseEnvironment()` (`packages/db/src/env-assert.ts`),
-   called from each app's `instrumentation.ts`, refuses to start a deployment
+   called from `apps/marketing/src/instrumentation.ts`, refuses to start a deployment
    whose `DATABASE_ENV` contradicts `VERCEL_ENV`, or that pairs the production
    database with sandbox Linus credentials. It throws; a preview writing
    production rows is not a degraded mode worth running in.
-2. **Migration gate** — `apps/app/vercel.json` runs `db:migrate` on production,
+2. **Migration gate** — `apps/marketing/vercel.json` runs `db:migrate` on production,
    and on preview *only when* `DATABASE_ENV=preview`. Previously it was
    production-only precisely because preview shared the production database
    (commit 84a8da0), which also made any PR containing a migration untestable on
@@ -172,19 +116,8 @@ environment down.
 
 ## Open decisions
 
-- **PBH counsel sign-off on HIPAA posture** - the conservative-reading recommendation needs David's compliance counsel to approve. If counsel says "PII-only is fine for funnel," we drop to Scale tier and save ~$8k/yr.
-- **ORM**: Drizzle vs Prisma - decide in discovery. Drizzle preferred for lighter footprint + edge runtime compatibility.
-- **Password hashing**: argon2 vs bcrypt. Argon2 if auth provider doesn't already handle it (e.g. NextAuth) - Clerk handles entirely on their side.
-- **Email verification flow**: required before payment? Or post-payment? Affects schema (verified_at column) and UX.
-- **Data retention policy**: how long do we keep `audit_log` entries? HIPAA requires 6 years. We default to that.
-
-## What this changes in the estimate
-
-The previous "Database choice + schema" task in `estimate.md` (5 pts) is now more specific:
-
-- Neon Scale setup + BAA signed by PBH legal - 2 pts
-- Schema + initial migration (Drizzle) - 5 pts
-- Vercel + Neon integration (preview branches) - 1 pt
-- Audit log infrastructure (event types, write helpers) - 3 pts
-
-Total: 11 pts (was 5). The bump reflects audit logging being treated as first-class infrastructure rather than something bolted on.
+- **PBH counsel sign-off on HIPAA posture** — the conservative-reading
+  recommendation needs David's compliance counsel to approve. If counsel says
+  "PII-only is fine", we drop to Scale tier without the BAA and save ~$8k/yr.
+- **Data retention** — how long `audit_log` entries are kept. HIPAA requires 6
+  years and that is what we default to; nothing enforces it yet.
