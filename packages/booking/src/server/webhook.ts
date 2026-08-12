@@ -7,7 +7,6 @@ import {
   recordRefundedPayment,
   recordSucceededPayment,
 } from "./fulfill";
-import { registerAndEnrollUserById } from "./register-and-enroll";
 
 /**
  * Stripe webhook handler — the authoritative fulfillment path, mounted once, at
@@ -16,16 +15,15 @@ import { registerAndEnrollUserById } from "./register-and-enroll";
  * from `intent.metadata.userId`.
  *
  * The client-confirm action (the booking flow's finalize) is the fast path for
- * the happy case; this is the backstop that still records the payment and enrolls
- * the user when the browser never makes it back (tab closed, connection dropped),
- * and the only path that reacts to async lifecycle events (failures, refunds).
+ * the happy case; this is the backstop that still records the payment when the
+ * browser never makes it back (tab closed, connection dropped), and the only
+ * path that reacts to async lifecycle events (failures, refunds).
  *
  * Response contract Stripe relies on:
  *  - 400 → bad/again-unverifiable signature. Stripe does NOT retry (correct: a
  *    signature won't become valid later).
- *  - 5xx / thrown → Stripe retries with backoff. We use this deliberately when a
- *    handler's work (e.g. enrollment) fails so the event is redelivered; every
- *    write here is idempotent, so a retry is safe.
+ *  - 5xx / thrown → Stripe retries with backoff, which is what an unexpected
+ *    handler failure gets; every write here is idempotent, so a retry is safe.
  *  - 2xx → done.
  *
  * The route that calls this must run on the Node.js runtime and be non-cached
@@ -87,14 +85,14 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
 }
 
 /**
- * Record the succeeded payment, then enroll. Re-fetches the intent with the
- * latest charge expanded so we capture card brand/last4 (the thin event payload
- * doesn't include them), which also re-reads live state as defense in depth.
+ * Record the succeeded payment. Re-fetches the intent with the latest charge
+ * expanded so we capture card brand/last4 (the thin event payload doesn't
+ * include them), which also re-reads live state as defense in depth.
  *
- * Enrollment runs on every delivery (it's idempotent) rather than only on the
- * first write, so a client that recorded the payment but died before enrolling
- * is still covered. If enrollment errors we throw, so the caller returns 500 and
- * Stripe retries the whole event.
+ * Recording the payment is now the whole job: this used to also register and
+ * enroll the payer with Linus and throw on failure so Stripe redelivered, which
+ * turned a Linus outage into a stream of 500s here (pbh-ek8). Registration is on
+ * hold until we settle how clients get registered.
  */
 async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
   const full = await getStripe().paymentIntents.retrieve(intent.id, {
@@ -103,22 +101,7 @@ async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
 
   const recorded = await recordSucceededPayment(full);
   if (recorded.status === "rejected") {
-    // Not our payment / failed re-verification — acknowledge without enrolling.
+    // Not our payment / failed re-verification — acknowledge and move on.
     console.warn(`Stripe webhook: skipped ${full.id} (${recorded.reason})`);
-    return;
-  }
-
-  // retryOnContention: if the client action is mid-first-registration, fail so
-  // Stripe redelivers rather than skipping enrollment — the registration claim
-  // guarantees only one of us actually registers the subject.
-  const enrolled = await registerAndEnrollUserById(recorded.userId, {
-    retryOnContention: true,
-  });
-  if (enrolled.status === "error") {
-    // Payment is safely recorded; surface as a retryable failure so Stripe
-    // redelivers and we re-attempt enrollment (idempotent).
-    throw new Error(
-      `Enrollment failed for user ${recorded.userId} after payment ${full.id}: ${enrolled.message}`,
-    );
   }
 }

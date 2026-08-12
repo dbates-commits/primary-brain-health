@@ -1,8 +1,12 @@
 # Booking flow
 
-How a customer goes from a package card on the marketing site to a paid,
-enrolled account handed off to the Linus Engagement App, and what is written
-along the way.
+How a customer goes from a package card on the marketing site to a paid account
+handed off to the Linus Engagement App, and what is written along the way.
+
+> **Linus registration is currently switched off** (pbh-ek8). The payment path
+> calls no Linus API: it records the payment, signs the customer in, and sends
+> them to `/welcome`. `@pbh/linus` and `register-and-enroll.ts` are still in the
+> tree but have no callers. See [Known gaps](#known-gaps).
 
 Kept next to the code on purpose: when the flow changes this should change in the
 same PR, and it should be obvious when it hasn't.
@@ -14,8 +18,8 @@ same PR, and it should be obvious when it hasn't.
 Everything the customer touches is `apps/marketing`: the booking section, the
 whole booking modal, Stripe Checkout, sign-in, the welcome screen, and the
 **only** Stripe webhook endpoint. It uses `@pbh/db` (one Neon database),
-`@pbh/booking/server` (every write path), `@pbh/emails`, `@pbh/linus` and
-`@pbh/payments`.
+`@pbh/booking/server` (every write path), `@pbh/emails` and `@pbh/payments`.
+(`@pbh/linus` is still a dependency, but nothing on a request path imports it.)
 
 There used to be a second app (`apps/app`) holding the post-payment product —
 `/assessments`, report downloads, and its own Auth.js session. It was retired in
@@ -45,7 +49,6 @@ sequenceDiagram
     participant DB as Neon
     participant R as Resend
     participant S as Stripe
-    participant L as Linus
     participant E as Linus Engagement App
 
     C->>M: Click "Book … Assessment"
@@ -76,14 +79,12 @@ sequenceDiagram
         M->>S: Re-fetch session + intent
         M->>DB: payments row, audit, receipt email
         M->>DB: sessions row → Auth.js session cookie
-        M->>L: register + enroll
     and Webhook path (backstop)
         S->>M: payment_intent.succeeded
         M->>DB: same idempotent writes
-        M->>L: register + enroll
     end
 
-    M-->>C: Welcome screen
+    M-->>C: Redirect to /welcome
     C->>E: "Go to your app"
 ```
 
@@ -129,8 +130,7 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | Payment | `PaymentStep` | `createAssessmentCheckoutSession` | `createCheckoutSessionCore` | audit `payment_pending`; Stripe Session |
 | Fulfilment | — | `finalizeCheckoutSession` | `recordSucceededPayment` | `payments` row incl. `package_key`; audit `payment_succeeded` |
 | Sign-in | — | `finalizeCheckoutSession` | `createSessionForUser` | `sessions` row; audit `login` (`method: post-payment`) |
-| Enrollment | — | — | `registerAndEnrollUserById` | `users.linus_participant_id`, `linus_enrollments` |
-| Welcome | `DoneStep` (or `/welcome`) | — | — | — (links out to the Engagement App) |
+| Welcome | `/welcome` route | — | — | — (links out to the Engagement App) |
 
 ### The chosen package
 
@@ -143,9 +143,11 @@ against whichever package the client named.
 
 ### The welcome screen
 
-One component, `EngagementAppCta`, rendered in two places: the modal's `done`
-step for someone who just paid, and the `/welcome` route for someone returning
-via a magic link. Keeping it single means the copy and the link can't drift.
+The `/welcome` route, rendering `EngagementAppCta`, is where the flow ends.
+Payment is the last step the modal owns: `PaymentStep`'s `onComplete` navigates
+there rather than advancing to an in-modal confirmation, so the screen survives a
+reload and a returning customer sees exactly the same thing. A booking resumed at
+step `done` (already paid) is sent there too, instead of opening the modal.
 
 `/welcome` allows two ways in, in order: an Auth.js session, or the booking
 cookie plus a succeeded payment (`getEntitledTrack`). The second covers a
@@ -154,9 +156,9 @@ back, for the cookie's 2h life. It grants nothing beyond rendering an external
 link.
 
 The CTA target is `NEXT_PUBLIC_ENGAGEMENT_APP_URL`. Unset, the screen renders the
-confirmation with **no button** and says the link will follow by email — a dead
-button reads as a bug to someone who just paid. Being `NEXT_PUBLIC_*`, it is
-inlined at build time: changing it needs a redeploy, not just an env edit.
+confirmation with **no button** — a dead button reads as a bug to someone who
+just paid. Being `NEXT_PUBLIC_*`, it is inlined at build time: changing it needs a
+redeploy, not just an env edit.
 
 ---
 
@@ -172,9 +174,13 @@ Two paths race after a successful payment, and either may win:
   mid-flow.
 
 Both call `recordSucceededPayment`, which is idempotent. Its `firstWrite` flag is
-the exactly-once signal that gates the audit row, the receipt email, and
-enrollment — so a redelivered event doesn't double-charge the audit log or email
-the customer twice.
+the exactly-once signal that gates the audit row and the receipt email — so a
+redelivered event doesn't double-charge the audit log or email the customer
+twice.
+
+The webhook used to also register + enroll the payer and **throw** on failure so
+Stripe redelivered. That turned a Linus outage into a stream of 500s on the
+endpoint, and is gone with the rest of the Linus call sites (pbh-ek8).
 
 > The webhook is deliberately the **only** endpoint. Stripe endpoints are
 > account-scoped and Stripe fans every event out to all of them, so a second one
@@ -194,7 +200,6 @@ Emails carry links only — never assessment results or report content.
 | Confirm your email | `email-verification.ts` | signup |
 | Welcome | `email-verification.ts` | confirmation redeemed |
 | Payment receipt | `fulfill.ts` | first `succeeded` write |
-| Assessment ready | `register-and-enroll.ts` | first enrollment resolution |
 | Payment refunded | `fulfill.ts` | `charge.refunded` |
 | Magic link | `apps/marketing/src/auth.ts` | `/login` request |
 
@@ -203,12 +208,11 @@ the confirmation link, and two emails arriving together buries the one the
 customer has to act on.
 
 Every link is built from `siteBaseUrl()` in `@pbh/emails` (`BOOKING_BASE_URL` →
-`VERCEL_URL` → `localhost:3000`), except the "assessment ready" CTA, which points
-at the Engagement App when one is configured.
+`VERCEL_URL` → `localhost:3000`).
 
-There is no "report ready" email: reports are read in the Engagement App, which
-owns notifying about them. The `has_report` bookkeeping stays, because it is what
-stops us re-POSTing a finished enrollment.
+`sendAssessmentReadyEmail` still exists but nothing calls it: its only caller was
+`register-and-enroll.ts`, now dormant. There is no "report ready" email either —
+reports are read in the Engagement App, which owns notifying about them.
 
 ---
 
@@ -257,8 +261,12 @@ Each of these has actually happened:
 | Every step after signup says "We couldn't find your booking" | The `pbh_booking_session` cookie is absent, expired (2h), or signed with a different `BOOKING_RESUME_SECRET` than the one reading it |
 | Welcome screen has no button | `NEXT_PUBLIC_ENGAGEMENT_APP_URL` unset — or set *after* the build, since it is inlined at build time |
 | No email arrives; flow stalls at the confirmation modal | `RESEND_API_KEY` unset — sends become logged no-ops and the confirmation URL is printed to the server console instead. This is how local testing works |
-| "Couldn't register with Linus (status 500)" after payment | An `education` value outside Linus's configured set (0–18 or 21) — see `pbh-a0n` |
 | Session silently never found | Cookie-name mismatch: Auth.js derives the `__Secure-` prefix from the request protocol, not `NODE_ENV` |
+
+Retired, kept for the record: `"Couldn't register with Linus (status …)"` after
+payment used to strand a paying customer on the payment step — a 500 meant an
+`education` value outside Linus's set (`pbh-a0n`), a 503 meant Linus itself was
+down. The payment path no longer calls Linus, so neither can happen (`pbh-ek8`).
 
 ---
 
@@ -266,18 +274,22 @@ Each of these has actually happened:
 
 Documented so nobody mistakes them for intent:
 
-- **Comprehensive ($449) provisions exactly what Basic ($149) does** — the same
-  three Linus campaigns. There is no per-package fulfilment, and the consent copy
-  is still the wellness + HIPAA NPP text rather than anything written for a
-  diagnostic service. Tracked on `pbh-eaj`.
+- **Nobody is registered with Linus.** This is the live one (`pbh-ek8`). A paying
+  customer now gets a `payments` row, a session and the welcome screen, and no
+  Linus subject or enrollment at all — so nothing on the other side of the "Go to
+  your app" link knows about them, and the "assessment ready" email is never
+  sent. Deliberate: registration failures were stranding paying customers on the
+  payment step, and how clients should be registered is an open question. The
+  code to do it (`packages/linus/`, `register-and-enroll.ts`, the
+  `linus_participant_id` / `linus_enrollments` columns) is untouched and
+  callerless, waiting on that decision.
+- **Comprehensive ($449) provisions exactly what Basic ($149) does** — nothing,
+  at present, and the same three Linus campaigns whenever registration comes
+  back. There is no per-package fulfilment, and the consent copy is still the
+  wellness + HIPAA NPP text rather than anything written for a diagnostic
+  service. Tracked on `pbh-eaj`.
 - **No rate limiting on `requestMagicLink`** — an unauthenticated action that
   emails any registered address.
-- **A deferred Linus registration has one fewer chance to complete.** The old
-  `/assessments` page re-ran `registerAndEnrollUserById` on every load, so a
-  registration deferred at payment time would finish the next time the customer
-  looked. Now the webhook's `retryOnContention` retry is the only recovery: if it
-  exhausts Stripe's redeliveries, the customer has a paid row and no Linus
-  subject, and nothing notices.
 - **Retired columns still in the schema** — `users.welcome_seen_at`,
   `users.password_hash`, `payments.handoff_consumed_at`. Left in place so a
   revert stays clean; a follow-up drops them.

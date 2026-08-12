@@ -15,9 +15,9 @@ export const dynamic = "force-dynamic";
 
 /**
  * The terminal screen: payment is done and the only thing left is the link out
- * to the Linus Engagement App. The booking modal shows the same component
- * inline (`DoneStep`); this route is where a returning customer lands after a
- * magic-link sign-in.
+ * to the Linus Engagement App. The booking modal sends the customer straight
+ * here once payment succeeds, and it is also where a returning customer lands
+ * after a magic-link sign-in.
  *
  * Two ways in, checked in order:
  *  1. An Auth.js session — the magic-link path.

@@ -5,10 +5,10 @@ End-to-end tests for the marketing booking → Stripe payment flow (`:3000`).
 Config: [`playwright.config.ts`](../playwright.config.ts). Specs live here in `e2e/`.
 
 > Scope note: the tests stop at the Stripe **payment outcome** and the welcome
-> screen behind it. Post-payment Linus enrollment is intentionally out of scope
-> (it needs a US IP), and there is nothing beyond the welcome screen to test —
-> per the Jul 2026 direction, the **Linus Engagement App** owns login and the
-> assessments themselves, so our surface ends at a link out to it.
+> screen it leads to. There is nothing beyond the welcome screen to test — per
+> the Jul 2026 direction, the **Linus Engagement App** owns login and the
+> assessments themselves, so our surface ends at a link out to it. The payment
+> path calls no Linus API at all (pbh-ek8), so no run needs a US IP.
 
 ## Run
 
@@ -37,8 +37,8 @@ never a false red.
 `onboarding.spec.ts` drives the whole path (signup → email confirm → details →
 consent → Stripe) for a fresh user per case and asserts the charge outcome:
 
-- **accepted** — Visa and Mastercard → Stripe's "Thanks for your payment",
-  then our own welcome screen with its CTA out to the Engagement App.
+- **accepted** — Visa and Mastercard → Stripe's "Thanks for your payment", then
+  a navigation to `/welcome` with its CTA out to the Engagement App.
 - **declined** — generic-decline and insufficient-funds test cards → the
   in-frame decline reason, and no success.
 
@@ -47,8 +47,7 @@ HSA/FSA cards are covered as ordinary branded charges.)
 
 ## Full flow (`E2E_FULL_FLOW=1`)
 
-**No Linus and no VPN by default** — the assertions stop at the charge outcome.
-It writes real rows and drives Stripe, so it needs:
+**No Linus, no VPN.** It writes real rows and drives Stripe, so it needs:
 
 - **`DATABASE_URL`** → a **dedicated Neon branch** (cheap, disposable). NEVER
   prod, and NEVER a Vercel preview URL — previews share the prod Neon DB, and the
@@ -57,12 +56,10 @@ It writes real rows and drives Stripe, so it needs:
 - **Stripe TEST keys + an ACTIVE price** (`STRIPE_SECRET_KEY`,
   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_ASSESSMENT_PRICE_ID`). Reuse
   staging's — they're already test-mode.
-- Optionally **`E2E_LINUS=1`** (plus Linus sandbox creds and a **US IP**), which
-  extends the accepted-card cases past the charge to the welcome screen. The
-  modal only advances once enrollment returns, so without this the run stops at
-  the Stripe outcome — which is why the default needs no VPN. Set
-  `NEXT_PUBLIC_ENGAGEMENT_APP_URL` too and the CTA's href is asserted as well;
-  unset, the screen renders no button by design and that check is skipped.
+- Optionally **`NEXT_PUBLIC_ENGAGEMENT_APP_URL`**, and the welcome screen's CTA
+  href is asserted too; unset, the screen renders no button by design and that
+  one check is skipped. Everything else on the welcome screen is asserted either
+  way.
 
 Put these in `apps/marketing/.env.local`. The config disables `RESEND_API_KEY`
 for the run and tees the marketing server log so the test can read back the

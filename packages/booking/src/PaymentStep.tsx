@@ -18,15 +18,16 @@ const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
  * Shared Stripe Embedded Checkout step (test mode), used by the marketing
  * booking modal. Presentation + Stripe wiring only; the consuming app injects its
  * own `createSession` (mint a Checkout Session) and `finalize` (verify → persist
- * → register/enroll) server actions.
+ * → sign in) server actions.
  *
  * Creates a Checkout Session (`ui_mode: "embedded_page"`,
  * `redirect_on_completion: "never"`) for this user and mounts Stripe's full
  * prebuilt form via `EmbeddedCheckoutProvider` / `EmbeddedCheckout`. When the
  * customer pays, Stripe fires `onComplete` (no redirect); we hand off to
- * `finalize` and, on success, call `onComplete` to advance the stepper. No PII or
- * card data ever touches our servers; Checkout branding is set in the Stripe
- * Dashboard (Settings → Branding).
+ * `finalize` and, on success, call `onComplete` — which is what moves the
+ * customer on (the booking flow navigates to `/welcome`). No PII or card data
+ * ever touches our servers; Checkout branding is set in the Stripe Dashboard
+ * (Settings → Branding).
  */
 /**
  * Header copy for the payment step, exported so a host that renders the header
@@ -84,10 +85,10 @@ export function PaymentStep({
   }, [createSession]);
 
   // Fired once Embedded Checkout finishes the payment (the customer stays on the
-  // page). Verify + persist + enroll server-side (re-fetches the session from
-  // Stripe; never trusts the client), then advance the stepper. On error the
-  // charge stands and the webhook backstop retries enrollment, so we just surface
-  // it inline rather than crash.
+  // page). Verify + persist server-side (re-fetches the session from Stripe;
+  // never trusts the client), then hand off to `onComplete`. On error the charge
+  // stands and the webhook backstop still records it, so we surface the message
+  // inline rather than crash.
   const handleComplete = useCallback(async () => {
     if (!sessionId) {
       return;

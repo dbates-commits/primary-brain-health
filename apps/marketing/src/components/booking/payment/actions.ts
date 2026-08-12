@@ -5,12 +5,13 @@ import {
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
-  registerAndEnrollUserById,
   resolveBookingUserId,
   verifyAndRecordCheckout,
-  type LinusState,
 } from "@pbh/booking/server";
-import type { CreateCheckoutResult } from "@pbh/booking";
+import type {
+  CreateCheckoutResult,
+  PaymentFinalizeResult,
+} from "@pbh/booking";
 import { createSessionForUser } from "@/lib/auth-session";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
@@ -20,8 +21,8 @@ const PAYMENT_UNVERIFIED = "We couldn't verify your payment. Please try again.";
 const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
-function paymentError(message: string): LinusState {
-  return { status: "error", email: "", message };
+function paymentError(message: string): PaymentFinalizeResult {
+  return { status: "error", message };
 }
 
 /**
@@ -47,18 +48,24 @@ export async function createAssessmentCheckoutSession(
 
 /**
  * Called from Embedded Checkout's `onComplete`. Verify + record the payment
- * (shared), sign the customer in, then register + enroll them in Linus.
+ * (shared) and sign the customer in. That is the whole job.
+ *
+ * It deliberately does NOT register or enroll the customer with Linus (pbh-ek8).
+ * A Linus outage used to strand a paying customer on the payment step with
+ * "Couldn't register with Linus (status 503)" — the charge had gone through and
+ * the modal wouldn't advance. Registration is on hold until we settle how
+ * clients get registered; `@pbh/linus` and `register-and-enroll.ts` are still on
+ * disk, just not called from any request path.
  *
  * The sign-in used to need a signed token handed to a second app on another
  * origin; with one app it is just a cookie we set here, so a customer who comes
  * back later reaches `/welcome` without asking for a magic link.
  *
- * A `success` state advances the modal to the confirmation step; enrollment
- * failures surface inline (the charge stands and the webhook backstop retries).
+ * A `success` state sends the customer on to `/welcome`.
  */
 export async function finalizeCheckoutSession(
   checkoutSessionId: string,
-): Promise<LinusState> {
+): Promise<PaymentFinalizeResult> {
   const id = resolveBookingUserId(await cookies());
   const sessionId = checkoutSessionId.trim();
   if (!id || !sessionId) {
@@ -89,8 +96,5 @@ export async function finalizeCheckoutSession(
     console.error("post-payment session mint failed:", err);
   }
 
-  // Deliberately outside the try above so an enrollment failure surfaces as its
-  // own state, not a payment error: the charge stands and the webhook backstop
-  // retries enrollment.
-  return registerAndEnrollUserById(id);
+  return { status: "success" };
 }

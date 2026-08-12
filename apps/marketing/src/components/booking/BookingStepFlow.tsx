@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { StepHeader } from "@pbh/ui";
 import {
   SignupForm,
@@ -20,7 +21,6 @@ import {
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
 import { NavigatorNote } from "./NavigatorNote";
-import { DoneStep } from "./DoneStep";
 import { EmailConfirmationStep } from "./EmailConfirmationStep";
 import {
   signupAction,
@@ -36,6 +36,9 @@ import {
 /**
  * The whole booking flow now runs in the modal, signup included — the landing
  * section is two package cards, and a card's CTA opens the modal at `signup`.
+ *
+ * Payment is the last step the modal owns: a paid customer is sent to
+ * `/welcome`, so there is no in-modal confirmation step (see `WELCOME_PATH`).
  */
 const MODAL_STEPS = [
   "signup",
@@ -43,7 +46,6 @@ const MODAL_STEPS = [
   "details",
   "consent",
   "payment",
-  "done",
 ] as const;
 type ModalStep = (typeof MODAL_STEPS)[number];
 
@@ -53,8 +55,14 @@ const STEP_LABEL: Record<ModalStep, string> = {
   details: "Complete your details",
   consent: "Review terms and consent",
   payment: "Payment",
-  done: "Confirmation",
 };
+
+/**
+ * Where the flow ends. The route gates on an Auth.js session or the booking
+ * cookie plus a succeeded payment — both of which `finalizeCheckoutSession` has
+ * just arranged — so a customer arriving here is always let in.
+ */
+const WELCOME_PATH = "/welcome";
 
 /**
  * What the client knows about the booking in progress. No user id: identity is
@@ -63,14 +71,12 @@ const STEP_LABEL: Record<ModalStep, string> = {
  */
 type FlowContext = {
   firstName: string;
-  email: string;
   /** Answered at signup; decides how the details step is worded and what it asks. */
   patientIdentification: string;
 };
 
 const EMPTY_CONTEXT: FlowContext = {
   firstName: "",
-  email: "",
   patientIdentification: "",
 };
 
@@ -88,6 +94,7 @@ export function BookingStepFlow({
   headline?: string;
   subheadline?: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
@@ -128,13 +135,21 @@ export function BookingStepFlow({
     (result: SignupResult) => {
       setContext({
         firstName: result.firstName,
-        email: result.email,
         patientIdentification: result.patientIdentification,
       });
       advance();
     },
     [advance],
   );
+
+  /**
+   * Payment is the last step we own — hand the customer to `/welcome` rather
+   * than a step inside the modal, so the confirmation survives a reload and a
+   * returning customer sees the same screen.
+   */
+  const completePayment = useCallback(() => {
+    router.push(WELCOME_PATH);
+  }, [router]);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -145,7 +160,7 @@ export function BookingStepFlow({
    * signed httpOnly cookie; the marker in the URL carries no identity of its own.
    * Resolving the step through a server action rather than in the page keeps the
    * home page statically rendered — only a returning customer pays the
-   * round-trip. Runs once on mount.
+   * round-trip. `router` is stable, so this still runs once on mount.
    */
   useEffect(() => {
     const marker = new URLSearchParams(window.location.search).get("booking");
@@ -157,9 +172,15 @@ export function BookingStepFlow({
       if (cancelled || !resumed) {
         return;
       }
+      // The server still calls a fully-paid booking "done"; that is no longer a
+      // modal step, so send them to the screen it stands for. Checked before the
+      // expired-link branch below, since a paid customer's address is proven.
+      if (resumed.step === "done") {
+        router.push(WELCOME_PATH);
+        return;
+      }
       setContext({
         firstName: resumed.firstName,
-        email: "",
         patientIdentification: resumed.patientIdentification,
       });
       // Without this the flow would fall back to the default package and charge
@@ -176,7 +197,7 @@ export function BookingStepFlow({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   /**
    * Bind the chosen package to the checkout action. Memoised deliberately:
@@ -202,7 +223,6 @@ export function BookingStepFlow({
 
   // Each step's header is rendered by the Modal in a fixed region above the
   // scroll area (so only the body scrolls), using the step's own exported copy.
-  // `done` renders its own header (it never scrolls).
   const stepHeader =
     step === "signup" ? (
       <StepHeader {...SIGNUP_HEADER} />
@@ -265,11 +285,10 @@ export function BookingStepFlow({
           <PaymentStep
             createSession={createSession}
             finalize={finalizeCheckoutSession}
-            onComplete={advance}
+            onComplete={completePayment}
             showHeader={false}
           />
         )}
-        {step === "done" && <DoneStep email={context.email} onClose={close} />}
       </Modal>
     </>
   );

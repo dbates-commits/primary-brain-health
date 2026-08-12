@@ -51,7 +51,7 @@ Accessors: `getStripeSecretKey()` / `getStripeWebhookSecret()` in
 | Action | File | Purpose |
 | :---- | :---- | :---- |
 | `createAssessmentCheckoutSession(userId)` | `apps/marketing/src/components/booking/payment/actions.ts` | Creates the Checkout Session (`ui_mode: "embedded_page"`), returns its `client_secret` + `sessionId` to mount Embedded Checkout |
-| `finalizeCheckoutSession(userId, checkoutSessionId)` | same | Client fast path, called from Embedded Checkout's `onComplete`: re-verify → record → enroll → return success state to the stepper |
+| `finalizeCheckoutSession(userId, checkoutSessionId)` | same | Client fast path, called from Embedded Checkout's `onComplete`: re-verify → record → sign in → return success, on which the flow navigates to `/welcome` |
 
 ### Outbound (calls we make to Stripe)
 
@@ -68,7 +68,7 @@ Register these on the Dashboard endpoint (and they're what `route.ts` switches o
 
 | Event | Effect |
 | :---- | :---- |
-| `payment_intent.succeeded` | record `succeeded` (+ brand/last4) → audit → register + enroll in Linus |
+| `payment_intent.succeeded` | record `succeeded` (+ brand/last4) → audit |
 | `payment_intent.payment_failed` | record `failed` → audit |
 | `charge.refunded` | record `refunded` → audit |
 
@@ -95,7 +95,6 @@ flowchart LR
         SA[Server actions<br/>create / finalize]
         WH[POST /api/stripe/webhook]
         DB[(Neon: payments<br/>+ audit_log)]
-        LN[Linus register/enroll]
     end
     Stripe[(Stripe)]
 
@@ -105,10 +104,11 @@ flowchart LR
     WH -->|webhook secret: verify| WH
     SA --> DB
     WH --> DB
-    SA --> LN
-    WH --> LN
     PE -.client_secret + sessionId.-> SA
 ```
+
+> Neither path calls Linus any more (`pbh-ek8`) — see
+> [`booking-flow.md`](./booking-flow.md#known-gaps).
 
 ### 3.2 Happy path (client stays on the page)
 
@@ -123,7 +123,6 @@ sequenceDiagram
     participant S as Stripe
     participant W as Webhook route
     participant D as DB (payments/audit)
-    participant L as Linus
 
     B->>A: createAssessmentCheckoutSession(userId)
     A->>S: checkout.sessions.create (embedded_page, amount, metadata.userId)
@@ -136,14 +135,12 @@ sequenceDiagram
         B->>A: finalizeCheckoutSession(userId, sessionId)
         A->>S: retrieve session → PaymentIntent (verify amount/user/status)
         A->>D: upsert payments=succeeded + audit (once)
-        A->>L: register + enroll
-        A-->>B: set session cookie + success state → welcome screen → user clicks "Go to your app"
+        A-->>B: set session cookie + success → navigate to /welcome → user clicks "Go to your app"
     and Webhook backstop
         S->>W: payment_intent.succeeded (signed)
         W->>W: verify signature (webhook secret)
         W->>S: retrieve intent (expand latest_charge)
         W->>D: upsert (no-op if already succeeded)
-        W->>L: register + enroll (idempotent)
         W-->>S: 200
     end
 ```
@@ -160,18 +157,16 @@ sequenceDiagram
     participant S as Stripe
     participant W as Webhook route
     participant D as DB
-    participant L as Linus
 
     B->>S: pay in Embedded Checkout — succeeded
     Note over B: tab closed / connection lost before<br/>onComplete — finalize never runs
     S->>W: payment_intent.succeeded (signed)
     W->>D: record payments=succeeded + audit
-    W->>L: register + enroll
-    alt enrollment ok
+    alt recorded
         W-->>S: 200 (done)
-    else enrollment fails (e.g. Linus down)
+    else unexpected handler failure
         W-->>S: 500 → Stripe retries w/ backoff
-        Note over W,S: payment already recorded —<br/>retry re-attempts enroll (idempotent)
+        Note over W,S: every write is idempotent,<br/>so a redelivery is safe
     end
     Note over B: user returns later via /login →<br/>lands back on /welcome
 ```

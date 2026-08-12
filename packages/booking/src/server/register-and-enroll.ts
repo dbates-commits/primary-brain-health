@@ -1,9 +1,17 @@
 import "server-only";
 
 /**
- * Core register / enroll / list logic, run on the payment path (the checkout
- * action and the Stripe webhook backstop). Server-only — it touches the DB and
- * the Linus client.
+ * Core register / enroll / list logic. Server-only — it touches the DB and the
+ * Linus client.
+ *
+ * ⚠️ DORMANT: nothing calls anything in this file (pbh-ek8). It used to run on
+ * the payment path — the checkout action and the Stripe webhook backstop — but a
+ * Linus outage there stranded paying customers on the payment step with
+ * "Couldn't register with Linus (status 503)", so both call sites were removed
+ * and the flow now ends at `/welcome`. Kept intact, not deleted, as the
+ * reference for whatever the next registration approach is; the DB columns it
+ * writes (`users.linus_participant_id`, `linus_enrollments`) are still in the
+ * schema. See `docs/linus/api-integration.md`.
  */
 
 import { and, eq, isNull, lt, or, sql } from "drizzle-orm";

@@ -108,7 +108,8 @@ export type ConsentAction = (
  * Payment-step contracts. The step component is presentation only (mounts Stripe
  * Embedded Checkout); each app injects a `createSession` action that mints a
  * Checkout Session and a `finalize` action that verifies + records the payment
- * and enrolls the user. Kept here so the component and both apps' actions agree.
+ * and signs the customer in. Kept here so the component and the app's actions
+ * agree.
  */
 export type CreateCheckoutResult =
   | { status: "ready"; clientSecret: string; sessionId: string }
