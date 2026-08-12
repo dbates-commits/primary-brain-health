@@ -103,6 +103,18 @@ export const PACKAGE_KEYS: ReadonlySet<string> = new Set(
 /** The package a booking defaults to when none was chosen. */
 export const DEFAULT_PACKAGE_KEY: PackageKey = "basic";
 
+/**
+ * The one package the marketing site offers today.
+ *
+ * The site stopped showing Comprehensive (`pbh-4by`) — the design sells a single
+ * price — but the entry stays in the catalog above so existing $449 payments
+ * keep resolving to the clinical track. Rendering from here rather than from a
+ * hardcoded price keeps what a customer reads tied to what checkout charges.
+ */
+export const DEFAULT_PACKAGE: AssessmentPackage = ASSESSMENT_PACKAGES.find(
+  (p) => p.key === DEFAULT_PACKAGE_KEY,
+)!;
+
 /** Look up a package by key, or `undefined` if the key isn't one of ours. */
 export function getPackage(key: string): AssessmentPackage | undefined {
   return ASSESSMENT_PACKAGES.find((p) => p.key === key);

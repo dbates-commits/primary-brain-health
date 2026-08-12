@@ -48,7 +48,6 @@ function signupValues(formData: FormData): SignupValues {
     firstName: text(formData, "firstName"),
     lastName: text(formData, "lastName"),
     email: text(formData, "email"),
-    patientIdentification: text(formData, "patientIdentification"),
   };
 }
 
@@ -58,7 +57,6 @@ function detailsValues(formData: FormData): DetailsValues {
     patientLastName: text(formData, "patientLastName"),
     dateOfBirth: text(formData, "dateOfBirth"),
     zip: text(formData, "zip"),
-    stateOfResidence: text(formData, "stateOfResidence"),
     phone: text(formData, "phone"),
     gender: text(formData, "gender"),
     educationLevel: text(formData, "educationLevel"),

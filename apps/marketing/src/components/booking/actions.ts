@@ -57,7 +57,6 @@ export async function detailsAction(
         patientLastName: String(formData.get("patientLastName") ?? ""),
         dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
         zip: String(formData.get("zip") ?? ""),
-        stateOfResidence: String(formData.get("stateOfResidence") ?? ""),
         phone: String(formData.get("phone") ?? ""),
         gender: String(formData.get("gender") ?? ""),
         educationLevel: String(formData.get("educationLevel") ?? ""),

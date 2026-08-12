@@ -4,17 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StepHeader } from "@pbh/ui";
 import {
-  SignupForm,
   DetailsForm,
   ConsentForm,
   PaymentStep,
-  detailsHeader,
-  SIGNUP_HEADER,
+  DETAILS_HEADER,
   consentHeader,
   PAYMENT_HEADER,
   DEFAULT_PACKAGE_KEY,
   trackForPackage,
-  type AssessmentPackage,
   type PackageKey,
   type SignupResult,
 } from "@pbh/booking";
@@ -34,23 +31,17 @@ import {
 } from "./payment/actions";
 
 /**
- * The whole booking flow now runs in the modal, signup included — the landing
- * section is two package cards, and a card's CTA opens the modal at `signup`.
+ * Signup happens on the page, not in the modal (Figma 1804:17908) — so the modal
+ * picks the flow up at the confirmation gate, which is where submitting that
+ * form lands the customer.
  *
- * Payment is the last step the modal owns: a paid customer is sent to
- * `/welcome`, so there is no in-modal confirmation step (see `WELCOME_PATH`).
+ * Payment is the last step it owns: a paid customer is sent to `/welcome`, so
+ * there is no in-modal confirmation step (see `WELCOME_PATH`).
  */
-const MODAL_STEPS = [
-  "signup",
-  "confirm",
-  "details",
-  "consent",
-  "payment",
-] as const;
+const MODAL_STEPS = ["confirm", "details", "consent", "payment"] as const;
 type ModalStep = (typeof MODAL_STEPS)[number];
 
 const STEP_LABEL: Record<ModalStep, string> = {
-  signup: "Create your account",
   confirm: "Confirm your email",
   details: "Complete your details",
   consent: "Review terms and consent",
@@ -70,29 +61,42 @@ const WELCOME_PATH = "/welcome";
  * account itself rather than being told which one to write to (pbh-9yb.2).
  */
 type FlowContext = {
+  /**
+   * Prefills the details step, which asks for the person being assessed. Starts
+   * as the account holder's name and is theirs to edit there — that edit is the
+   * only place we ask who the assessment is for.
+   */
   firstName: string;
-  /** Answered at signup; decides how the details step is worded and what it asks. */
-  patientIdentification: string;
+  lastName: string;
 };
 
 const EMPTY_CONTEXT: FlowContext = {
   firstName: "",
-  patientIdentification: "",
+  lastName: "",
 };
 
 /**
- * Client orchestrator for the booking flow. Renders the `BookingSection` cards;
- * choosing a package opens the modal and steps through the shared `SignupForm` →
- * `DetailsForm` → `ConsentForm` → `PaymentStep` (Stripe Embedded Checkout) →
- * done. Every step calls a real `@pbh/booking/server`-backed action injected
- * here (pbh-ggr.5). State is in-memory for the session.
+ * Client orchestrator for the booking flow. `BookingSection` renders the signup
+ * form on the page; submitting it creates the account and opens the modal at the
+ * confirmation gate, which then steps through `DetailsForm` → `ConsentForm` →
+ * `PaymentStep` (Stripe Embedded Checkout) → `/welcome`. Every step calls a real
+ * `@pbh/booking/server`-backed action injected here. State is in-memory for the
+ * session.
  */
 export function BookingStepFlow({
   headline,
   subheadline,
+  buttonText,
+  buttonTextMobile,
+  showIncludes,
+  tinaFields,
 }: {
   headline?: string;
   subheadline?: string;
+  buttonText?: string;
+  buttonTextMobile?: string;
+  showIncludes?: boolean;
+  tinaFields?: { headline?: string; subheadline?: string };
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -100,21 +104,16 @@ export function BookingStepFlow({
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
   const [context, setContext] = useState<FlowContext>(EMPTY_CONTEXT);
   const [expiredLink, setExpiredLink] = useState(false);
+  /**
+   * An account exists for this visit, so the on-page form must stop accepting
+   * submissions — it is still mounted behind the modal, React has reset its
+   * fields, and submitting again would only fail on the unique-email
+   * constraint. See `BookingFormCard`.
+   */
+  const [signedUp, setSignedUp] = useState(false);
 
   const advance = useCallback(() => {
     setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
-  }, []);
-
-  /**
-   * Open the modal at signup for the chosen package. Context is reset so a
-   * second booking in the same session can't inherit the first one's account.
-   */
-  const selectPackage = useCallback((pkg: AssessmentPackage) => {
-    setPackageKey(pkg.key);
-    setContext(EMPTY_CONTEXT);
-    setExpiredLink(false);
-    setStepIndex(0);
-    setOpen(true);
   }, []);
 
   /**
@@ -131,16 +130,23 @@ export function BookingStepFlow({
     [packageKey],
   );
 
-  const completeSignup = useCallback(
-    (result: SignupResult) => {
-      setContext({
-        firstName: result.firstName,
-        patientIdentification: result.patientIdentification,
-      });
-      advance();
-    },
-    [advance],
-  );
+  /**
+   * The account now exists and the confirmation email is out, so open the modal
+   * at the gate the customer has to clear. `confirm` is index 0 — the modal no
+   * longer owns the step that just ran.
+   */
+  const completeSignup = useCallback((result: SignupResult) => {
+    setContext({ firstName: result.firstName, lastName: result.lastName });
+    setSignedUp(true);
+    setExpiredLink(false);
+    setStepIndex(0);
+    setOpen(true);
+  }, []);
+
+  const reopen = useCallback(() => {
+    setStepIndex(0);
+    setOpen(true);
+  }, []);
 
   /**
    * Payment is the last step we own — hand the customer to `/welcome` rather
@@ -183,10 +189,16 @@ export function BookingStepFlow({
         router.replace(WELCOME_PATH);
         return;
       }
+      // Prefer the patient's name where the details step already captured one,
+      // so someone who booked for a parent doesn't find their own name back in
+      // the field they corrected.
       setContext({
-        firstName: resumed.firstName,
-        patientIdentification: resumed.patientIdentification,
+        firstName: resumed.patientFirstName ?? resumed.firstName,
+        lastName: resumed.patientLastName ?? resumed.lastName,
       });
+      // The account exists, so the on-page form behind the modal would only
+      // fail on the unique-email constraint if it were left submittable.
+      setSignedUp(true);
       // Without this the flow would fall back to the default package and charge
       // the basic price for a Comprehensive booking — every customer passes
       // through here, because the confirmation gate is blocking.
@@ -228,17 +240,10 @@ export function BookingStepFlow({
   // Each step's header is rendered by the Modal in a fixed region above the
   // scroll area (so only the body scrolls), using the step's own exported copy.
   const stepHeader =
-    step === "signup" ? (
-      <StepHeader {...SIGNUP_HEADER} />
-    ) : step === "confirm" ? (
+    step === "confirm" ? (
       <StepHeader title="Email Confirmation" />
     ) : step === "details" ? (
-      <StepHeader
-        {...detailsHeader(
-          context.firstName,
-          context.patientIdentification === "Someone else",
-        )}
-      />
+      <StepHeader {...DETAILS_HEADER} />
     ) : step === "consent" ? (
       <StepHeader {...consentHeader(track)} />
     ) : step === "payment" ? (
@@ -250,7 +255,14 @@ export function BookingStepFlow({
       <BookingSection
         headline={headline}
         subheadline={subheadline}
-        onSelectPackage={selectPackage}
+        buttonText={buttonText}
+        buttonTextShort={buttonTextMobile}
+        showIncludes={showIncludes}
+        action={signupWithPackage}
+        onSignupComplete={completeSignup}
+        signedUp={signedUp}
+        onReopen={reopen}
+        tinaFields={tinaFields}
       />
       <NavigatorNote />
       <Modal
@@ -259,20 +271,12 @@ export function BookingStepFlow({
         label={STEP_LABEL[step]}
         header={stepHeader}
       >
-        {step === "signup" && (
-          <SignupForm
-            action={signupWithPackage}
-            track={track}
-            onComplete={completeSignup}
-            showHeader={false}
-          />
-        )}
         {step === "confirm" && <EmailConfirmationStep expired={expiredLink} />}
         {step === "details" && (
           <DetailsForm
             action={detailsAction}
-            name={context.firstName}
-            patientIdentification={context.patientIdentification}
+            firstName={context.firstName}
+            lastName={context.lastName}
             onComplete={advance}
             showHeader={false}
           />

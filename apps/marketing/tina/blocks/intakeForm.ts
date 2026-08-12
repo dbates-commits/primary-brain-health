@@ -31,6 +31,8 @@ export const intakeFormBlock: Template = {
       name: "buttonText",
       label: "Button Text",
       type: "string",
+      description:
+        "Submit label on the booking form, e.g. 'Book Your Assessment and Consultation'.",
     },
     {
       name: "buttonTextMobile",
@@ -44,7 +46,7 @@ export const intakeFormBlock: Template = {
       label: "Show 'Includes:' panel",
       type: "boolean",
       description:
-        "Toggle the consultation 'Includes:' list. Turn off on general contact pages where the form is for any inquiry.",
+        "Toggle the right-hand panel listing what the assessment includes, and its price. Turn off on general contact pages where the form is for any inquiry — the form then goes full width. The list and price themselves are code-owned (ASSESSMENT_PACKAGES in @pbh/booking), because they are the promise the charge is made against.",
     },
   ],
 };

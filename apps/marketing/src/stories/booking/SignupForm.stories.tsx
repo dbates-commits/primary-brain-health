@@ -17,18 +17,19 @@ const meta = {
     docs: {
       description: {
         component:
-          'Step 1 of the booking flow — who the consultation is for, plus the *buyer&rsquo;s* ' +
-          'name and email. The server action arrives as the `action` prop, so these stories ' +
-          'pass a stand-in from `mock-actions.ts` instead of the real `"use server"` module. ' +
-          'The "who is this for" answer decides how step 3 is worded, and picking "Someone ' +
-          'Else" adds a line clarifying that these fields still describe the account holder.',
+          'The first step of the booking flow — the account holder&rsquo;s name and email. ' +
+          'It ships on the marketing page rather than in the modal (see Booking/BookingSection), ' +
+          'so `sticky={false}` is the shipping configuration; the sticky variant is kept for ' +
+          'any host that scrolls. The server action arrives as the `action` prop, so these ' +
+          'stories pass a stand-in from `mock-actions.ts` rather than the real ' +
+          '`"use server"` module. It no longer asks who the assessment is for: the details ' +
+          'step&rsquo;s name fields are prefilled from here and edited instead.',
       },
     },
   },
   tags: ['autodocs'],
   args: {
     action: signupSucceeds(),
-    track: 'wellness',
     onComplete: fn(),
   },
   decorators: [
@@ -43,37 +44,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The step as the funnel renders it, with its own header inline. */
+/** The step with its own header inline, and the sticky action bar a modal wants. */
 export const Default: Story = {};
 
 /**
- * The same step selling the clinical package. Only the vocabulary moves — the
- * question becomes "Who is this consultation for?" where wellness asks about an
- * assessment — because a consultation is a thing the clinical product includes
- * and the wellness one does not. Side by side with `Default`, this is the story
- * to review the lexicon against.
+ * How it actually ships: inside the white card on the booking section, where the
+ * container doesn&rsquo;t scroll — so the action bar must not stick, and the
+ * header comes from the section around it.
  */
-export const ClinicalTrack: Story = {
-  args: { track: 'clinical' },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(
-      canvas.getByText('Who is this consultation for?'),
-    ).toBeInTheDocument();
-  },
-};
-
-/**
- * Choosing "Someone Else" adds the line explaining that the name and email below
- * are still the buyer&rsquo;s — the patient is named on the details step.
- */
-export const BookingForSomeoneElse: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByText('Someone Else'));
-    await expect(
-      canvas.getByText('Please enter your personal information'),
-    ).toBeInTheDocument();
+export const OnPageCard: Story = {
+  args: {
+    showHeader: false,
+    sticky: false,
+    submitLabel: 'Book Your Assessment and Consultation',
+    submitLabelShort: 'Book Assessment',
   },
 };
 

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { BookingSection } from "@/components/booking/BookingSection";
+import { signupSucceeds } from "./mock-actions";
 
 const meta = {
   title: 'Booking/BookingSection',
@@ -10,30 +11,39 @@ const meta = {
     docs: {
       description: {
         component:
-          'The booking landing section: centred header, the two package cards side by side, ' +
-          'then the full-width HSA/FSA note. There is no inline signup form — each card’s CTA ' +
-          'opens the booking modal, which starts at signup. The cards are read from ' +
-          '`ASSESSMENT_PACKAGES` rather than passed in, so only the headline and subheadline ' +
-          'are props (the Tina block binds them).',
+          'The booking landing section (Figma 1804:17908): headline, subheadline and the ' +
+          'signup form in a white card on the left; what the assessment includes and its ' +
+          'price on the right. The form is on the page rather than behind a CTA, so this ' +
+          'section is the first step of the flow — submitting it creates the account and the ' +
+          'host opens the modal at the confirmation gate. The bullets and price come from ' +
+          '`ASSESSMENT_PACKAGES`, not from props, so they cannot drift from what checkout ' +
+          'charges; only the headline, subheadline and button label are CMS-bound.',
       },
     },
   },
   tags: ['autodocs'],
-  args: { onSelectPackage: fn() },
+  args: {
+    action: signupSucceeds(),
+    onSignupComplete: fn(),
+    signedUp: false,
+    onReopen: fn(),
+  },
 } satisfies Meta<typeof BookingSection>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** The design defaults, used whenever the CMS leaves the fields empty. */
-export const Default: Story = {};
+export const Default: Story = { args: {} };
 
-/** Headline and subheadline bound from Tina. */
+/** Headline, subheadline and button label bound from Tina. */
 export const CustomCopy: Story = {
   args: {
     headline: 'Know where your cognition stands today',
     subheadline:
       'A validated baseline, reviewed by a clinician, with a plan built around what it tells you.',
+    buttonText: 'Book Your Assessment and Consultation',
+    buttonTextShort: 'Book Assessment',
   },
 };
 
@@ -47,15 +57,39 @@ export const LongCopy: Story = {
   },
 };
 
-/** Choosing a package reports the whole package object, not just its key. */
-export const SelectingAPackage: Story = {
+/**
+ * Tina&rsquo;s "Show Includes panel" toggle turned off — the one-column variant
+ * for pages where the form is a general enquiry rather than this purchase.
+ */
+export const WithoutIncludes: Story = {
+  args: { showIncludes: false },
+};
+
+/**
+ * After a successful signup. The form is deliberately gone: an account now
+ * exists, so a second submit could only fail on the unique-email constraint.
+ */
+export const AfterSignup: Story = {
+  args: { signedUp: true },
+};
+
+/** Submitting the form reports the account back to the host, which opens the modal. */
+export const SubmittingTheForm: Story = {
+  args: {},
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Book Basic Assessment' }),
-    );
-    await expect(args.onSelectPackage).toHaveBeenCalledWith(
-      expect.objectContaining({ key: 'basic' }),
-    );
+    await userEvent.type(canvas.getByLabelText('First Name'), 'Margaret');
+    await userEvent.type(canvas.getByLabelText('Last Name'), 'Hale');
+    await userEvent.type(canvas.getByLabelText('Email'), 'margaret@example.com');
+    await userEvent.click(canvas.getByRole('button', { name: /continue/i }));
+    await waitFor(async () => {
+      await expect(args.onSignupComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'Margaret',
+          lastName: 'Hale',
+          email: 'margaret@example.com',
+        }),
+      );
+    });
   },
 };

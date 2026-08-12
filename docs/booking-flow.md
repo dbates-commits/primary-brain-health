@@ -1,7 +1,7 @@
 # Booking flow
 
-How a customer goes from a package card on the marketing site to a paid account
-handed off to the Linus Engagement App, and what is written along the way.
+How a customer goes from the signup form on the marketing home page to a paid
+account handed off to the Linus Engagement App, and what is written along the way.
 
 > **Linus registration is currently switched off** (pbh-ek8). The payment path
 > calls no Linus API: it records the payment, signs the customer in, and sends
@@ -51,9 +51,8 @@ sequenceDiagram
     participant S as Stripe
     participant E as Linus Engagement App
 
-    C->>M: Click "Book … Assessment"
-    Note over M: packageKey held in flow state
-    C->>M: Submit signup
+    C->>M: Submit the signup form (on the page, not in the modal)
+    Note over M: one package, so packageKey is always the default
     M->>DB: users row (+ selected_package_key)
     M-->>C: Signed pbh_booking_session cookie (identity, 2h)
     M->>DB: booking_email_verifications (token HASH, 24h)
@@ -99,10 +98,13 @@ state — never from anything the browser claims.
 `resolveBookingResumeState` (`packages/booking/src/server/resume.ts`) is the
 authority. If this diagram and that function disagree, the function is right.
 
+The modal owns four of these. Signup happens on the page, so a customer who has
+not started yet has no modal to be at.
+
 ```mermaid
 stateDiagram-v2
     [*] --> signup
-    signup --> confirm: users row created
+    signup --> confirm: users row created (on-page form)
     confirm --> details: users.email_verified set
     details --> consent: users.date_of_birth set
     consent --> payment: consents row exists
@@ -120,17 +122,25 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 
 | Step | Client | Action | Shared core | Writes |
 |---|---|---|---|---|
-| Landing | `BookingSection` → `PackageCard` | — | `ASSESSMENT_PACKAGES` | — (choice held in flow state) |
-| Signup | `SignupForm` | `signupAction` | `createAccountCore` | `users` row incl. `selected_package_key`; audit `signup`; issues `pbh_booking_session` |
+| Signup | `BookingSection` → `SignupForm`, on the page | `signupAction` | `createAccountCore` | `users` row incl. `selected_package_key`; audit `signup`; issues `pbh_booking_session` |
 | — | — | — | `sendBookingConfirmation` | `booking_email_verifications`; audit `email_verification_sent` |
 | Confirm | `EmailConfirmationStep` | `GET /booking/confirm` | `consumeBookingConfirmation` | `consumed_at`, `users.email_verified`; audit `email_verified` |
 | Resume | `BookingStepFlow` (on mount) | `getBookingResumeState` | `resolveBookingResumeState` | — (read only) |
-| Details | `DetailsForm` | `detailsAction` | `completeProfileCore` | `users` demographics (DOB, zip, state, phone, gender, education, patient names) |
+| Details | `DetailsForm` | `detailsAction` | `completeProfileCore` | `users` demographics (DOB, zip, phone, gender, education) + the patient's name |
 | Consent | `ConsentForm` | `consentAction` | `recordConsentCore` | two `consents` rows — `wellness` + `hipaa_npp` — with `ip_hash` + `user_agent` |
 | Payment | `PaymentStep` | `createAssessmentCheckoutSession` | `createCheckoutSessionCore` | audit `payment_pending`; Stripe Session |
 | Fulfilment | — | `finalizeCheckoutSession` | `recordSucceededPayment` | `payments` row incl. `package_key`; audit `payment_succeeded` |
 | Sign-in | — | `finalizeCheckoutSession` | `createSessionForUser` | `sessions` row; audit `login` (`method: post-payment`) |
 | Welcome | `/welcome` route | — | — | — (links out to the Engagement App) |
+
+### Who is being assessed
+
+Nobody is asked. The details step's name fields arrive prefilled with the account
+holder's, and someone booking for a parent or spouse types over them — so the
+common case answers by saying nothing, and the demographics below those fields
+always describe whoever is named there. `users.patient_identification` is the
+retired question (`pbh-4by`); `buildRegisterInput` falls back to the account name
+for rows that predate this.
 
 ### The chosen package
 

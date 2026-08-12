@@ -10,8 +10,6 @@ export type SignupValues = {
   firstName: string;
   lastName: string;
   email: string;
-  /** "Self" | "Someone else" — see PATIENT_IDENTIFICATION_OPTIONS. */
-  patientIdentification: string;
 };
 
 /**
@@ -27,7 +25,6 @@ export type SignupState =
       email: string;
       firstName: string;
       lastName: string;
-      patientIdentification: string;
     }
   | {
       status: "error";
@@ -36,17 +33,15 @@ export type SignupState =
       values: SignupValues;
     };
 
-/** Success payload handed to `SignupForm`'s `onComplete`. */
+/**
+ * Success payload handed to `SignupForm`'s `onComplete`. The names prefill the
+ * details step, which asks for the person being assessed — usually the buyer,
+ * so we fill them in rather than asking twice.
+ */
 export type SignupResult = {
   email: string;
   firstName: string;
   lastName: string;
-  /**
-   * Decides what the details step asks for: with "Someone else" it collects the
-   * patient's name and re-frames its copy, since the demographics that follow
-   * describe the patient rather than the buyer.
-   */
-  patientIdentification: string;
 };
 
 export type SignupAction = (
@@ -55,12 +50,15 @@ export type SignupAction = (
 ) => Promise<SignupState>;
 
 export type DetailsValues = {
-  /** Empty unless the booking is for someone else. */
+  /**
+   * Who is actually being assessed. Prefilled from the account name, and edited
+   * when someone books on another person's behalf — which is the only place we
+   * ask, since the demographics below describe the patient, not the buyer.
+   */
   patientFirstName: string;
   patientLastName: string;
   dateOfBirth: string;
   zip: string;
-  stateOfResidence: string;
   phone: string;
   gender: string;
   educationLevel: string;

@@ -31,11 +31,15 @@ export async function reachConsentStep(page: Page): Promise<void> {
   const email = uniqueEmail();
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Book Basic Assessment" }).click();
-  await page.getByLabel("First Name").fill("Ada");
-  await page.getByLabel("Last Name").fill("Lovelace");
-  await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Continue" }).click();
+
+  // Signup is on the page now, not behind a card CTA. Scope to the section:
+  // "First Name" also labels a field in the details step, so an unscoped
+  // locator would go ambiguous the moment the modal opens.
+  const booking = page.locator("#booking");
+  await booking.getByLabel("First Name").fill("Ada");
+  await booking.getByLabel("Last Name").fill("Lovelace");
+  await booking.getByLabel("Email").fill(email);
+  await booking.getByRole("button", { name: /book your assessment/i }).click();
 
   await expect(
     page.getByRole("heading", { name: /email confirmation/i }),
@@ -43,15 +47,17 @@ export async function reachConsentStep(page: Page): Promise<void> {
   const confirmUrl = await waitForConfirmUrl();
   await page.goto(confirmUrl);
 
-  await page.getByLabel("Date of birth").fill("1990-01-15");
-  await page.getByLabel("ZIP code").fill("02101");
-  await page.getByLabel("Phone number").fill("(555) 000-0000");
-  await page.getByLabel("Gender").selectOption({ index: 1 });
-  await page
-    .getByLabel("State of residence")
-    .selectOption({ label: "Massachusetts" });
-  await page.getByLabel("Highest level of education").selectOption({ index: 1 });
-  await page.getByRole("button", { name: "Submit" }).click();
+  // The details step's name fields arrive prefilled from signup — left as they
+  // are here, which is the "booking for myself" path.
+  const modal = page.getByRole("dialog");
+  await modal.getByLabel("Birthday").fill("1990-01-15");
+  await modal.getByLabel("ZIP Code").fill("02101");
+  await modal.getByLabel("Phone Number").fill("(555) 000-0000");
+  await modal.getByLabel("Gender").selectOption({ index: 1 });
+  await modal
+    .getByLabel("Highest Level of education")
+    .selectOption({ index: 1 });
+  await modal.getByRole("button", { name: "Submit" }).click();
 
   await expect(page.getByRole("checkbox")).toBeVisible();
 }
