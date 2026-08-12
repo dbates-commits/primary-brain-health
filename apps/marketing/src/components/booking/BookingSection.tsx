@@ -51,9 +51,11 @@ export function BookingSection({
       className="bg-primary px-6 py-16 text-on-primary md:px-20 md:py-20"
     >
       <div className="mx-auto flex max-w-6xl flex-col items-stretch gap-10 lg:flex-row lg:gap-[60px]">
-        {/* 659px in the design; below `lg` the two stack and this goes full
-            width, with the panel underneath. */}
-        <div className="flex flex-col gap-4 lg:w-[659px] lg:shrink-0">
+        {/* Equal halves. `flex-1` on both with a zero basis splits the row
+            evenly whatever the content measures — the design's 659px left
+            column is close to half of its own frame. Below `lg` they stack and
+            each goes full width, panel underneath. */}
+        <div className="flex flex-col gap-4 lg:flex-1">
           <h2
             data-tina-field={tinaFields?.headline}
             className="text-balance font-headline text-4xl font-thin leading-tight text-white md:text-5xl"
