@@ -1864,6 +1864,20 @@ var faqCollection = {
 
 // tina/fields/no-clinical-vocabulary.ts
 import { findBannedTerms } from "@pbh/copy";
+function noClinicalVocabulary(value) {
+  return check(typeof value === "string" ? value : "");
+}
+function check(text) {
+  if (text.trim() === "") {
+    return void 0;
+  }
+  const hits = findBannedTerms(text, "modal");
+  if (hits.length === 0) {
+    return void 0;
+  }
+  const words = [...new Set(hits.map((hit) => hit.match))].join(", ");
+  return `Clinical wording isn\u2019t allowed on this screen \u2014 such as: ${words}. The booking modal sells a wellness assessment and a results review, not a consultation, diagnosis or treatment, and not care from a specialist, physician, clinician or neurologist. Reword the line and save again.`;
+}
 
 // src/lib/rich-text.ts
 function richTextToPlainText(value) {
@@ -1891,24 +1905,23 @@ function richTextToPlainText(value) {
   walk(value);
   return collected.join(" ");
 }
+function hasRichTextContent(value) {
+  return richTextToPlainText(value).trim() !== "";
+}
 
-// tina/fields/no-clinical-vocabulary.ts
-function noClinicalVocabulary(value) {
-  return check(typeof value === "string" ? value : "");
-}
-function noClinicalVocabularyInRichText(value) {
-  return check(richTextToPlainText(value));
-}
-function check(text) {
-  if (text.trim() === "") {
-    return void 0;
+// tina/fields/consent-terms-version.ts
+function consentTermsVersion(value, allValues) {
+  const version = typeof value === "string" ? value.trim() : "";
+  if (version === "") {
+    return hasRichTextContent(allValues?.terms) ? "Set a version whenever the consent terms are written here, e.g. 2026-08-13. It is recorded against every customer who accepts these terms, and those records can't be corrected later." : void 0;
   }
-  const hits = findBannedTerms(text, "modal");
-  if (hits.length === 0) {
-    return void 0;
+  if (/\s/.test(version)) {
+    return "Use a single token with no spaces, e.g. 2026-08-13 \u2014 this is an identifier stored on consent records, not a description.";
   }
-  const words = [...new Set(hits.map((hit) => hit.match))].join(", ");
-  return `Clinical wording isn\u2019t allowed on this screen \u2014 such as: ${words}. The booking modal sells a wellness assessment and a results review, not a consultation, diagnosis or treatment, and not care from a specialist, physician, clinician or neurologist. Reword the line and save again.`;
+  if (version.length > 40) {
+    return "Keep the version under 40 characters.";
+  }
+  return void 0;
 }
 
 // tina/collections/modals.ts
@@ -1978,14 +1991,18 @@ var modalsCollection = {
           name: "terms",
           label: "Consent terms",
           type: "rich-text",
-          description: "The agreement shown in the scrolling box on this step, which a customer must accept before paying. Markdown: headings, bold, lists and links. Leave it empty and the terms that ship in code are shown instead.",
-          ui: { validate: noClinicalVocabularyInRichText }
+          description: "The agreement shown in the scrolling box on this step, which a customer must accept before paying. Markdown: headings, bold, lists and links. Leave it empty and the terms that ship in code are shown instead."
+          // No banned-terms guard here, unlike the headings above. Legal text
+          // needs the clinical words precisely to disclaim them — "this is not
+          // medical treatment", "we do not provide a diagnosis" — which is the
+          // same reason banned-terms.ts carves out the bare word "medical".
         },
         {
           name: "termsVersion",
           label: "Consent terms version",
           type: "string",
-          description: "Stamped on every consent record as proof of WHICH terms that customer agreed to, so change it whenever you change the terms above \u2014 a date like 2026-08-13 is ideal. Leave it empty and consents are recorded against the version that ships in code. Existing records are never rewritten."
+          description: "Stamped on every consent record as proof of WHICH terms that customer agreed to, so change it whenever you change the terms above \u2014 a date like 2026-08-13 is ideal. Leave it empty and consents are recorded against the version that ships in code. Existing records are never rewritten.",
+          ui: { validate: consentTermsVersion }
         }
       ]
     }
