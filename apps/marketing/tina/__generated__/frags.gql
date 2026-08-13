@@ -198,6 +198,13 @@ fragment PageParts on Page {
   }
 }
 
+fragment ModalParts on Modal {
+  __typename
+  step
+  title
+  subtitle
+}
+
 fragment PostParts on Post {
   __typename
   title

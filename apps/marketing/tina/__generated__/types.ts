@@ -84,6 +84,8 @@ export type Query = {
   document: DocumentNode;
   page: Page;
   pageConnection: PageConnection;
+  modal: Modal;
+  modalConnection: ModalConnection;
   post: Post;
   postConnection: PostConnection;
   project: Project;
@@ -134,6 +136,21 @@ export type QueryPageConnectionArgs = {
   last?: InputMaybe<Scalars['Float']['input']>;
   sort?: InputMaybe<Scalars['String']['input']>;
   filter?: InputMaybe<PageFilter>;
+};
+
+
+export type QueryModalArgs = {
+  relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryModalConnectionArgs = {
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<ModalFilter>;
 };
 
 
@@ -243,6 +260,7 @@ export type QueryFaqConnectionArgs = {
 
 export type DocumentFilter = {
   page?: InputMaybe<PageFilter>;
+  modal?: InputMaybe<ModalFilter>;
   post?: InputMaybe<PostFilter>;
   project?: InputMaybe<ProjectFilter>;
   author?: InputMaybe<AuthorFilter>;
@@ -289,7 +307,7 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = Page | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder;
+export type DocumentNode = Page | Modal | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder;
 
 export type PageBlocksHero = {
   __typename?: 'PageBlocksHero';
@@ -670,6 +688,35 @@ export type PageConnection = Connection & {
   pageInfo: PageInfo;
   totalCount: Scalars['Float']['output'];
   edges?: Maybe<Array<Maybe<PageConnectionEdges>>>;
+};
+
+export type Modal = Node & Document & {
+  __typename?: 'Modal';
+  step: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  subtitle?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type ModalFilter = {
+  step?: InputMaybe<StringFilter>;
+  title?: InputMaybe<StringFilter>;
+  subtitle?: InputMaybe<StringFilter>;
+};
+
+export type ModalConnectionEdges = {
+  __typename?: 'ModalConnectionEdges';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Modal>;
+};
+
+export type ModalConnection = Connection & {
+  __typename?: 'ModalConnection';
+  pageInfo: PageInfo;
+  totalCount: Scalars['Float']['output'];
+  edges?: Maybe<Array<Maybe<ModalConnectionEdges>>>;
 };
 
 export type PostAuthor = Author;
@@ -1204,6 +1251,8 @@ export type Mutation = {
   createFolder: DocumentNode;
   updatePage: Page;
   createPage: Page;
+  updateModal: Modal;
+  createModal: Modal;
   updatePost: Post;
   createPost: Post;
   updateProject: Project;
@@ -1263,6 +1312,18 @@ export type MutationUpdatePageArgs = {
 export type MutationCreatePageArgs = {
   relativePath: Scalars['String']['input'];
   params: PageMutation;
+};
+
+
+export type MutationUpdateModalArgs = {
+  relativePath: Scalars['String']['input'];
+  params: ModalMutation;
+};
+
+
+export type MutationCreateModalArgs = {
+  relativePath: Scalars['String']['input'];
+  params: ModalMutation;
 };
 
 
@@ -1351,6 +1412,7 @@ export type MutationCreateFaqArgs = {
 
 export type DocumentUpdateMutation = {
   page?: InputMaybe<PageMutation>;
+  modal?: InputMaybe<ModalMutation>;
   post?: InputMaybe<PostMutation>;
   project?: InputMaybe<ProjectMutation>;
   author?: InputMaybe<AuthorMutation>;
@@ -1363,6 +1425,7 @@ export type DocumentUpdateMutation = {
 
 export type DocumentMutation = {
   page?: InputMaybe<PageMutation>;
+  modal?: InputMaybe<ModalMutation>;
   post?: InputMaybe<PostMutation>;
   project?: InputMaybe<ProjectMutation>;
   author?: InputMaybe<AuthorMutation>;
@@ -1527,6 +1590,12 @@ export type PageMutation = {
   blocks?: InputMaybe<Array<InputMaybe<PageBlocksMutation>>>;
 };
 
+export type ModalMutation = {
+  step?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  subtitle?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type PostRelatedPostsMutation = {
   post?: InputMaybe<Scalars['String']['input']>;
 };
@@ -1682,6 +1751,8 @@ export type FaqMutation = {
 
 export type PagePartsFragment = { __typename: 'Page', title: string, description?: string | null, socialImage?: string | null, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksTestimonials', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, useReferences?: boolean | null, testimonialRefs?: Array<{ __typename: 'PageBlocksTestimonialsTestimonialRefs', testimonial?: { __typename: 'Testimonial', quote: string, authorName?: string | null, authorRole?: string | null, authorAvatar?: string | null, company?: string | null, companyLogo?: string | null, rating?: number | null, featured?: boolean | null, id: string, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null, items?: Array<{ __typename: 'PageBlocksTestimonialsItems', quote: string, authorName: string, authorRole?: string | null, company?: string | null, avatar?: string | null, rating?: number | null } | null> | null } | { __typename: 'PageBlocksGallery', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, columns?: string | null, gap?: string | null, items?: Array<{ __typename: 'PageBlocksGalleryItems', image?: string | null, alt?: string | null, caption?: string | null, video?: string | null, aspectRatio?: string | null } | null> | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksStats', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, animate?: boolean | null, items?: Array<{ __typename: 'PageBlocksStatsItems', value: string, label: string, icon?: string | null, description?: string | null, progress?: number | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', title: string, body?: string | null, icon?: string | null, image?: string | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null };
 
+export type ModalPartsFragment = { __typename: 'Modal', step: string, title?: string | null, subtitle?: string | null };
+
 export type PostPartsFragment = { __typename: 'Post', title: string, excerpt?: string | null, date: string, featuredImage?: string | null, category?: string | null, tags?: Array<string | null> | null, featured?: boolean | null, body?: any | null, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, relatedPosts?: Array<{ __typename: 'PostRelatedPosts', post?: { __typename: 'Post', title: string, excerpt?: string | null, date: string, featuredImage?: string | null, category?: string | null, tags?: Array<string | null> | null, featured?: boolean | null, body?: any | null, id: string, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, relatedPosts?: Array<{ __typename: 'PostRelatedPosts', post?: { __typename: 'Post', title: string, excerpt?: string | null, date: string, featuredImage?: string | null, category?: string | null, tags?: Array<string | null> | null, featured?: boolean | null, body?: any | null, id: string, relatedPosts?: Array<{ __typename: 'PostRelatedPosts' } | null> | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null };
 
 export type ProjectPartsFragment = { __typename: 'Project', title: string, description?: string | null, client?: string | null, date?: string | null, featuredImage?: string | null, category?: string | null, techStack?: Array<string | null> | null, liveUrl?: string | null, githubUrl?: string | null, featured?: boolean | null, body?: any | null, gallery?: Array<{ __typename: 'ProjectGallery', image?: string | null, alt?: string | null, caption?: string | null } | null> | null, testimonial?: { __typename: 'Testimonial', quote: string, authorName?: string | null, authorRole?: string | null, authorAvatar?: string | null, company?: string | null, companyLogo?: string | null, rating?: number | null, featured?: boolean | null, id: string, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null };
@@ -1714,6 +1785,25 @@ export type PageConnectionQueryVariables = Exact<{
 
 
 export type PageConnectionQuery = { __typename?: 'Query', pageConnection: { __typename?: 'PageConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'PageConnectionEdges', cursor: string, node?: { __typename: 'Page', id: string, title: string, description?: string | null, socialImage?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksTestimonials', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, useReferences?: boolean | null, testimonialRefs?: Array<{ __typename: 'PageBlocksTestimonialsTestimonialRefs', testimonial?: { __typename: 'Testimonial', quote: string, authorName?: string | null, authorRole?: string | null, authorAvatar?: string | null, company?: string | null, companyLogo?: string | null, rating?: number | null, featured?: boolean | null, id: string, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null, items?: Array<{ __typename: 'PageBlocksTestimonialsItems', quote: string, authorName: string, authorRole?: string | null, company?: string | null, avatar?: string | null, rating?: number | null } | null> | null } | { __typename: 'PageBlocksGallery', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, columns?: string | null, gap?: string | null, items?: Array<{ __typename: 'PageBlocksGalleryItems', image?: string | null, alt?: string | null, caption?: string | null, video?: string | null, aspectRatio?: string | null } | null> | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksStats', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, animate?: boolean | null, items?: Array<{ __typename: 'PageBlocksStatsItems', value: string, label: string, icon?: string | null, description?: string | null, progress?: number | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', title: string, body?: string | null, icon?: string | null, image?: string | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null } | null } | null> | null } };
+
+export type ModalQueryVariables = Exact<{
+  relativePath: Scalars['String']['input'];
+}>;
+
+
+export type ModalQuery = { __typename?: 'Query', modal: { __typename: 'Modal', id: string, step: string, title?: string | null, subtitle?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+
+export type ModalConnectionQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<ModalFilter>;
+}>;
+
+
+export type ModalConnectionQuery = { __typename?: 'Query', modalConnection: { __typename?: 'ModalConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ModalConnectionEdges', cursor: string, node?: { __typename: 'Modal', id: string, step: string, title?: string | null, subtitle?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
 export type PostQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -2047,6 +2137,14 @@ export const PagePartsFragmentDoc = gql`
       buttonText
     }
   }
+}
+    `;
+export const ModalPartsFragmentDoc = gql`
+    fragment ModalParts on Modal {
+  __typename
+  step
+  title
+  subtitle
 }
     `;
 export const PostPartsFragmentDoc = gql`
@@ -2453,6 +2551,63 @@ export const PageConnectionDocument = gql`
   }
 }
     ${PagePartsFragmentDoc}`;
+export const ModalDocument = gql`
+    query modal($relativePath: String!) {
+  modal(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...ModalParts
+  }
+}
+    ${ModalPartsFragmentDoc}`;
+export const ModalConnectionDocument = gql`
+    query modalConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: ModalFilter) {
+  modalConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...ModalParts
+      }
+    }
+  }
+}
+    ${ModalPartsFragmentDoc}`;
 export const PostDocument = gql`
     query post($relativePath: String!) {
   post(relativePath: $relativePath) {
@@ -2860,6 +3015,12 @@ export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) 
       },
     pageConnection(variables?: PageConnectionQueryVariables, options?: C): Promise<{data: PageConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: PageConnectionQueryVariables, query: string}> {
         return requester<{data: PageConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: PageConnectionQueryVariables, query: string}, PageConnectionQueryVariables>(PageConnectionDocument, variables, options);
+      },
+    modal(variables: ModalQueryVariables, options?: C): Promise<{data: ModalQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ModalQueryVariables, query: string}> {
+        return requester<{data: ModalQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ModalQueryVariables, query: string}, ModalQueryVariables>(ModalDocument, variables, options);
+      },
+    modalConnection(variables?: ModalConnectionQueryVariables, options?: C): Promise<{data: ModalConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ModalConnectionQueryVariables, query: string}> {
+        return requester<{data: ModalConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: ModalConnectionQueryVariables, query: string}, ModalConnectionQueryVariables>(ModalConnectionDocument, variables, options);
       },
     post(variables: PostQueryVariables, options?: C): Promise<{data: PostQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: PostQueryVariables, query: string}> {
         return requester<{data: PostQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: PostQueryVariables, query: string}, PostQueryVariables>(PostDocument, variables, options);

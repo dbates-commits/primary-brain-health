@@ -206,6 +206,14 @@ export const PagePartsFragmentDoc = gql`
   }
 }
     `;
+export const ModalPartsFragmentDoc = gql`
+    fragment ModalParts on Modal {
+  __typename
+  step
+  title
+  subtitle
+}
+    `;
 export const PostPartsFragmentDoc = gql`
     fragment PostParts on Post {
   __typename
@@ -610,6 +618,63 @@ export const PageConnectionDocument = gql`
   }
 }
     ${PagePartsFragmentDoc}`;
+export const ModalDocument = gql`
+    query modal($relativePath: String!) {
+  modal(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...ModalParts
+  }
+}
+    ${ModalPartsFragmentDoc}`;
+export const ModalConnectionDocument = gql`
+    query modalConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: ModalFilter) {
+  modalConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...ModalParts
+      }
+    }
+  }
+}
+    ${ModalPartsFragmentDoc}`;
 export const PostDocument = gql`
     query post($relativePath: String!) {
   post(relativePath: $relativePath) {
@@ -1016,6 +1081,12 @@ export function getSdk(requester) {
     },
     pageConnection(variables, options) {
       return requester(PageConnectionDocument, variables, options);
+    },
+    modal(variables, options) {
+      return requester(ModalDocument, variables, options);
+    },
+    modalConnection(variables, options) {
+      return requester(ModalConnectionDocument, variables, options);
     },
     post(variables, options) {
       return requester(PostDocument, variables, options);

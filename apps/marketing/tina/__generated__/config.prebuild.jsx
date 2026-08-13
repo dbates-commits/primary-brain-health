@@ -1862,6 +1862,74 @@ var faqCollection = {
   ]
 };
 
+// tina/fields/no-clinical-vocabulary.ts
+import { findBannedTerms } from "@pbh/copy";
+function noClinicalVocabulary(value) {
+  if (typeof value !== "string" || value.trim() === "") {
+    return void 0;
+  }
+  const hits = findBannedTerms(value, "modal");
+  if (hits.length === 0) {
+    return void 0;
+  }
+  const words = [...new Set(hits.map((hit) => hit.match))].join(", ");
+  return `Clinical wording isn\u2019t allowed on this screen \u2014 such as: ${words}. The booking modal sells a wellness assessment and a results review, not a consultation, diagnosis or treatment, and not care from a specialist, physician, clinician or neurologist. Reword the line and save again.`;
+}
+
+// tina/collections/modals.ts
+var modalsCollection = {
+  name: "modal",
+  label: "Modals",
+  path: "content/modals",
+  format: "json",
+  ui: {
+    // `_sys.filename` IS the step id, so this needs no lookup table. Tina's
+    // admin renders the route in an iframe beside the form.
+    router: ({ document }) => `/internal/modals/${document._sys.filename}`,
+    // Four steps, fixed. A fifth document would have no step to title and no
+    // route to open; a missing one would break the flow it names.
+    allowedActions: {
+      create: false,
+      delete: false,
+      createFolder: false,
+      createNestedFolder: false
+    },
+    // A rename would silently break both the router and the runtime lookup,
+    // which key off the filename.
+    filename: { readonly: true }
+    // Deliberately not `global: true`: a global form is skipped when Tina picks
+    // the active form, and this document's form being the active one is the
+    // entire point.
+  },
+  fields: [
+    {
+      name: "step",
+      label: "Step",
+      type: "string",
+      required: true,
+      // Both the label and the sort order in the collection list — Tina sorts
+      // by the `isTitle` field, so numbering these gives flow order instead of
+      // alphabetical (confirm, consent, details, payment).
+      isTitle: true,
+      description: "How this step is listed here, e.g. \u201C3 \xB7 Consent\u201D. Never shown to a customer."
+    },
+    {
+      name: "title",
+      label: "Title",
+      type: "string",
+      description: "The big heading at the top of this step. Leave empty to keep the wording that ships in code \u2014 the preview beside this form shows you what that is. It may not use clinical words (consultation, diagnosis, treatment, specialist, physician, clinician, neurologist, prescription): this is a wellness assessment, and saving is blocked if it does.",
+      ui: { validate: noClinicalVocabulary }
+    },
+    {
+      name: "subtitle",
+      label: "Subtitle",
+      type: "string",
+      description: "The line under the heading. Leave empty for the code wording, or for no subtitle at all where the step ships without one.",
+      ui: { component: "textarea", validate: noClinicalVocabulary }
+    }
+  ]
+};
+
 // tina/config.ts
 var branch = process.env.NEXT_PUBLIC_TINA_BRANCH || "main";
 var isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
@@ -1884,6 +1952,7 @@ var config_default = defineConfig({
   schema: {
     collections: [
       pageCollection,
+      modalsCollection,
       postCollection,
       projectCollection,
       authorCollection,
