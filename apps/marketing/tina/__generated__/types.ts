@@ -307,7 +307,7 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = Page | Modal | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder;
+export type DocumentNode = Page | ModalStep | ModalConsentStep | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder;
 
 export type PageBlocksHero = {
   __typename?: 'PageBlocksHero';
@@ -690,8 +690,8 @@ export type PageConnection = Connection & {
   edges?: Maybe<Array<Maybe<PageConnectionEdges>>>;
 };
 
-export type Modal = Node & Document & {
-  __typename?: 'Modal';
+export type ModalStep = Node & Document & {
+  __typename?: 'ModalStep';
   step: Scalars['String']['output'];
   title?: Maybe<Scalars['String']['output']>;
   subtitle?: Maybe<Scalars['String']['output']>;
@@ -700,10 +700,37 @@ export type Modal = Node & Document & {
   _values: Scalars['JSON']['output'];
 };
 
-export type ModalFilter = {
+export type ModalConsentStep = Node & Document & {
+  __typename?: 'ModalConsentStep';
+  step: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  subtitle?: Maybe<Scalars['String']['output']>;
+  terms?: Maybe<Scalars['JSON']['output']>;
+  termsVersion?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type Modal = ModalStep | ModalConsentStep;
+
+export type ModalStepFilter = {
   step?: InputMaybe<StringFilter>;
   title?: InputMaybe<StringFilter>;
   subtitle?: InputMaybe<StringFilter>;
+};
+
+export type ModalConsentStepFilter = {
+  step?: InputMaybe<StringFilter>;
+  title?: InputMaybe<StringFilter>;
+  subtitle?: InputMaybe<StringFilter>;
+  terms?: InputMaybe<RichTextFilter>;
+  termsVersion?: InputMaybe<StringFilter>;
+};
+
+export type ModalFilter = {
+  step?: InputMaybe<ModalStepFilter>;
+  consentStep?: InputMaybe<ModalConsentStepFilter>;
 };
 
 export type ModalConnectionEdges = {
@@ -1590,10 +1617,23 @@ export type PageMutation = {
   blocks?: InputMaybe<Array<InputMaybe<PageBlocksMutation>>>;
 };
 
-export type ModalMutation = {
+export type ModalStepMutation = {
   step?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   subtitle?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ModalConsentStepMutation = {
+  step?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  subtitle?: InputMaybe<Scalars['String']['input']>;
+  terms?: InputMaybe<Scalars['JSON']['input']>;
+  termsVersion?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ModalMutation = {
+  step?: InputMaybe<ModalStepMutation>;
+  consentStep?: InputMaybe<ModalConsentStepMutation>;
 };
 
 export type PostRelatedPostsMutation = {
@@ -1751,7 +1791,11 @@ export type FaqMutation = {
 
 export type PagePartsFragment = { __typename: 'Page', title: string, description?: string | null, socialImage?: string | null, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksTestimonials', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, useReferences?: boolean | null, testimonialRefs?: Array<{ __typename: 'PageBlocksTestimonialsTestimonialRefs', testimonial?: { __typename: 'Testimonial', quote: string, authorName?: string | null, authorRole?: string | null, authorAvatar?: string | null, company?: string | null, companyLogo?: string | null, rating?: number | null, featured?: boolean | null, id: string, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null, items?: Array<{ __typename: 'PageBlocksTestimonialsItems', quote: string, authorName: string, authorRole?: string | null, company?: string | null, avatar?: string | null, rating?: number | null } | null> | null } | { __typename: 'PageBlocksGallery', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, columns?: string | null, gap?: string | null, items?: Array<{ __typename: 'PageBlocksGalleryItems', image?: string | null, alt?: string | null, caption?: string | null, video?: string | null, aspectRatio?: string | null } | null> | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksStats', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, animate?: boolean | null, items?: Array<{ __typename: 'PageBlocksStatsItems', value: string, label: string, icon?: string | null, description?: string | null, progress?: number | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', title: string, body?: string | null, icon?: string | null, image?: string | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null };
 
-export type ModalPartsFragment = { __typename: 'Modal', step: string, title?: string | null, subtitle?: string | null };
+type ModalParts_ModalStep_Fragment = { __typename: 'ModalStep', step: string, title?: string | null, subtitle?: string | null };
+
+type ModalParts_ModalConsentStep_Fragment = { __typename: 'ModalConsentStep', step: string, title?: string | null, subtitle?: string | null, terms?: any | null, termsVersion?: string | null };
+
+export type ModalPartsFragment = ModalParts_ModalStep_Fragment | ModalParts_ModalConsentStep_Fragment;
 
 export type PostPartsFragment = { __typename: 'Post', title: string, excerpt?: string | null, date: string, featuredImage?: string | null, category?: string | null, tags?: Array<string | null> | null, featured?: boolean | null, body?: any | null, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, relatedPosts?: Array<{ __typename: 'PostRelatedPosts', post?: { __typename: 'Post', title: string, excerpt?: string | null, date: string, featuredImage?: string | null, category?: string | null, tags?: Array<string | null> | null, featured?: boolean | null, body?: any | null, id: string, author?: { __typename: 'Author', name: string, role?: string | null, avatar?: string | null, bio?: any | null, email?: string | null, id: string, social?: { __typename: 'AuthorSocial', twitter?: string | null, linkedin?: string | null, github?: string | null, website?: string | null } | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null, relatedPosts?: Array<{ __typename: 'PostRelatedPosts', post?: { __typename: 'Post', title: string, excerpt?: string | null, date: string, featuredImage?: string | null, category?: string | null, tags?: Array<string | null> | null, featured?: boolean | null, body?: any | null, id: string, relatedPosts?: Array<{ __typename: 'PostRelatedPosts' } | null> | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null };
 
@@ -1791,7 +1835,7 @@ export type ModalQueryVariables = Exact<{
 }>;
 
 
-export type ModalQuery = { __typename?: 'Query', modal: { __typename: 'Modal', id: string, step: string, title?: string | null, subtitle?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+export type ModalQuery = { __typename?: 'Query', modal: { __typename: 'ModalStep', id: string, step: string, title?: string | null, subtitle?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | { __typename: 'ModalConsentStep', id: string, step: string, title?: string | null, subtitle?: string | null, terms?: any | null, termsVersion?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
 
 export type ModalConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1803,7 +1847,7 @@ export type ModalConnectionQueryVariables = Exact<{
 }>;
 
 
-export type ModalConnectionQuery = { __typename?: 'Query', modalConnection: { __typename?: 'ModalConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ModalConnectionEdges', cursor: string, node?: { __typename: 'Modal', id: string, step: string, title?: string | null, subtitle?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+export type ModalConnectionQuery = { __typename?: 'Query', modalConnection: { __typename?: 'ModalConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'ModalConnectionEdges', cursor: string, node?: { __typename: 'ModalStep', id: string, step: string, title?: string | null, subtitle?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | { __typename: 'ModalConsentStep', id: string, step: string, title?: string | null, subtitle?: string | null, terms?: any | null, termsVersion?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
 export type PostQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -2142,9 +2186,18 @@ export const PagePartsFragmentDoc = gql`
 export const ModalPartsFragmentDoc = gql`
     fragment ModalParts on Modal {
   __typename
-  step
-  title
-  subtitle
+  ... on ModalStep {
+    step
+    title
+    subtitle
+  }
+  ... on ModalConsentStep {
+    step
+    title
+    subtitle
+    terms
+    termsVersion
+  }
 }
     `;
 export const PostPartsFragmentDoc = gql`

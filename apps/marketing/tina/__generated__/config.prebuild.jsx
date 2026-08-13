@@ -1864,11 +1864,46 @@ var faqCollection = {
 
 // tina/fields/no-clinical-vocabulary.ts
 import { findBannedTerms } from "@pbh/copy";
+
+// src/lib/rich-text.ts
+function richTextToPlainText(value) {
+  const collected = [];
+  const walk = (node) => {
+    if (typeof node === "string") {
+      collected.push(node);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+    if (!node || typeof node !== "object") {
+      return;
+    }
+    const record = node;
+    for (const key of ["text", "value", "alt", "title"]) {
+      if (typeof record[key] === "string") {
+        collected.push(record[key]);
+      }
+    }
+    walk(record.children);
+  };
+  walk(value);
+  return collected.join(" ");
+}
+
+// tina/fields/no-clinical-vocabulary.ts
 function noClinicalVocabulary(value) {
-  if (typeof value !== "string" || value.trim() === "") {
+  return check(typeof value === "string" ? value : "");
+}
+function noClinicalVocabularyInRichText(value) {
+  return check(richTextToPlainText(value));
+}
+function check(text) {
+  if (text.trim() === "") {
     return void 0;
   }
-  const hits = findBannedTerms(value, "modal");
+  const hits = findBannedTerms(text, "modal");
   if (hits.length === 0) {
     return void 0;
   }
@@ -1877,6 +1912,33 @@ function noClinicalVocabulary(value) {
 }
 
 // tina/collections/modals.ts
+var HEADER_FIELDS = [
+  {
+    name: "step",
+    label: "Step",
+    type: "string",
+    required: true,
+    // Both the label and the sort order in the collection list — Tina sorts
+    // by the `isTitle` field, so numbering these gives flow order instead of
+    // alphabetical (confirm, consent, details, payment).
+    isTitle: true,
+    description: "How this step is listed here, e.g. \u201C3 \xB7 Consent\u201D. Never shown to a customer."
+  },
+  {
+    name: "title",
+    label: "Title",
+    type: "string",
+    description: "The big heading at the top of this step. Leave empty to keep the wording that ships in code \u2014 the preview beside this form shows you what that is. It may not use clinical words (consultation, diagnosis, treatment, specialist, physician, clinician, neurologist, prescription): this is a wellness assessment, and saving is blocked if it does.",
+    ui: { validate: noClinicalVocabulary }
+  },
+  {
+    name: "subtitle",
+    label: "Subtitle",
+    type: "string",
+    description: "The line under the heading. Leave empty for the code wording, or for no subtitle at all where the step ships without one.",
+    ui: { component: "textarea", validate: noClinicalVocabulary }
+  }
+];
 var modalsCollection = {
   name: "modal",
   label: "Modals",
@@ -1901,31 +1963,31 @@ var modalsCollection = {
     // the active form, and this document's form being the active one is the
     // entire point.
   },
-  fields: [
+  templates: [
     {
       name: "step",
       label: "Step",
-      type: "string",
-      required: true,
-      // Both the label and the sort order in the collection list — Tina sorts
-      // by the `isTitle` field, so numbering these gives flow order instead of
-      // alphabetical (confirm, consent, details, payment).
-      isTitle: true,
-      description: "How this step is listed here, e.g. \u201C3 \xB7 Consent\u201D. Never shown to a customer."
+      fields: HEADER_FIELDS
     },
     {
-      name: "title",
-      label: "Title",
-      type: "string",
-      description: "The big heading at the top of this step. Leave empty to keep the wording that ships in code \u2014 the preview beside this form shows you what that is. It may not use clinical words (consultation, diagnosis, treatment, specialist, physician, clinician, neurologist, prescription): this is a wellness assessment, and saving is blocked if it does.",
-      ui: { validate: noClinicalVocabulary }
-    },
-    {
-      name: "subtitle",
-      label: "Subtitle",
-      type: "string",
-      description: "The line under the heading. Leave empty for the code wording, or for no subtitle at all where the step ships without one.",
-      ui: { component: "textarea", validate: noClinicalVocabulary }
+      name: "consentStep",
+      label: "Consent step",
+      fields: [
+        ...HEADER_FIELDS,
+        {
+          name: "terms",
+          label: "Consent terms",
+          type: "rich-text",
+          description: "The agreement shown in the scrolling box on this step, which a customer must accept before paying. Markdown: headings, bold, lists and links. Leave it empty and the terms that ship in code are shown instead.",
+          ui: { validate: noClinicalVocabularyInRichText }
+        },
+        {
+          name: "termsVersion",
+          label: "Consent terms version",
+          type: "string",
+          description: "Stamped on every consent record as proof of WHICH terms that customer agreed to, so change it whenever you change the terms above \u2014 a date like 2026-08-13 is ideal. Leave it empty and consents are recorded against the version that ships in code. Existing records are never rewritten."
+        }
+      ]
     }
   ]
 };

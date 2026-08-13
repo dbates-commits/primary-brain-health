@@ -200,9 +200,18 @@ fragment PageParts on Page {
 
 fragment ModalParts on Modal {
   __typename
-  step
-  title
-  subtitle
+  ... on ModalStep {
+    step
+    title
+    subtitle
+  }
+  ... on ModalConsentStep {
+    step
+    title
+    subtitle
+    terms
+    termsVersion
+  }
 }
 
 fragment PostParts on Post {

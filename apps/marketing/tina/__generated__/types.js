@@ -209,9 +209,18 @@ export const PagePartsFragmentDoc = gql`
 export const ModalPartsFragmentDoc = gql`
     fragment ModalParts on Modal {
   __typename
-  step
-  title
-  subtitle
+  ... on ModalStep {
+    step
+    title
+    subtitle
+  }
+  ... on ModalConsentStep {
+    step
+    title
+    subtitle
+    terms
+    termsVersion
+  }
 }
     `;
 export const PostPartsFragmentDoc = gql`

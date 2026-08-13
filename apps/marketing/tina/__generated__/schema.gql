@@ -109,7 +109,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Page | Modal | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder
+union DocumentNode = Page | ModalStep | ModalConsentStep | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder
 
 type PageBlocksHero {
   theme: String
@@ -471,7 +471,7 @@ type PageConnection implements Connection {
   edges: [PageConnectionEdges]
 }
 
-type Modal implements Node & Document {
+type ModalStep implements Node & Document {
   step: String!
   title: String
   subtitle: String
@@ -480,10 +480,36 @@ type Modal implements Node & Document {
   _values: JSON!
 }
 
-input ModalFilter {
+type ModalConsentStep implements Node & Document {
+  step: String!
+  title: String
+  subtitle: String
+  terms: JSON
+  termsVersion: String
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+union Modal = ModalStep | ModalConsentStep
+
+input ModalStepFilter {
   step: StringFilter
   title: StringFilter
   subtitle: StringFilter
+}
+
+input ModalConsentStepFilter {
+  step: StringFilter
+  title: StringFilter
+  subtitle: StringFilter
+  terms: RichTextFilter
+  termsVersion: StringFilter
+}
+
+input ModalFilter {
+  step: ModalStepFilter
+  consentStep: ModalConsentStepFilter
 }
 
 type ModalConnectionEdges {
@@ -1192,10 +1218,23 @@ input PageMutation {
   blocks: [PageBlocksMutation]
 }
 
-input ModalMutation {
+input ModalStepMutation {
   step: String
   title: String
   subtitle: String
+}
+
+input ModalConsentStepMutation {
+  step: String
+  title: String
+  subtitle: String
+  terms: JSON
+  termsVersion: String
+}
+
+input ModalMutation {
+  step: ModalStepMutation
+  consentStep: ModalConsentStepMutation
 }
 
 input PostRelatedPostsMutation {
