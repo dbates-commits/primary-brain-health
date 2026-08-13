@@ -1,5 +1,8 @@
-import type { Collection } from "tinacms";
-import { noClinicalVocabulary } from "../fields/no-clinical-vocabulary";
+import type { Collection, TinaField } from "tinacms";
+import {
+  noClinicalVocabulary,
+  noClinicalVocabularyInRichText,
+} from "../fields/no-clinical-vocabulary";
 
 /**
  * The headers of the booking modal's four steps — one document per step.
@@ -14,6 +17,42 @@ import { noClinicalVocabulary } from "../fields/no-clinical-vocabulary";
  * `src/components/booking/steps.ts`) and the filenames are what tie a document
  * to its step — hence no create, no delete, and no renaming.
  */
+/**
+ * The heading fields every step shares. Split out so the consent step can add
+ * its agreement to them without the other three carrying a legal-terms field
+ * they would never fill in.
+ */
+const HEADER_FIELDS: TinaField[] = [
+  {
+    name: "step",
+    label: "Step",
+    type: "string",
+    required: true,
+    // Both the label and the sort order in the collection list — Tina sorts
+    // by the `isTitle` field, so numbering these gives flow order instead of
+    // alphabetical (confirm, consent, details, payment).
+    isTitle: true,
+    description:
+      "How this step is listed here, e.g. \u201C3 \u00B7 Consent\u201D. Never shown to a customer.",
+  },
+  {
+    name: "title",
+    label: "Title",
+    type: "string",
+    description:
+      "The big heading at the top of this step. Leave empty to keep the wording that ships in code \u2014 the preview beside this form shows you what that is. It may not use clinical words (consultation, diagnosis, treatment, specialist, physician, clinician, neurologist, prescription): this is a wellness assessment, and saving is blocked if it does.",
+    ui: { validate: noClinicalVocabulary },
+  },
+  {
+    name: "subtitle",
+    label: "Subtitle",
+    type: "string",
+    description:
+      "The line under the heading. Leave empty for the code wording, or for no subtitle at all where the step ships without one.",
+    ui: { component: "textarea", validate: noClinicalVocabulary },
+  },
+];
+
 export const modalsCollection: Collection = {
   name: "modal",
   label: "Modals",
@@ -38,34 +77,33 @@ export const modalsCollection: Collection = {
     // the active form, and this document's form being the active one is the
     // entire point.
   },
-  fields: [
+  templates: [
     {
       name: "step",
       label: "Step",
-      type: "string",
-      required: true,
-      // Both the label and the sort order in the collection list — Tina sorts
-      // by the `isTitle` field, so numbering these gives flow order instead of
-      // alphabetical (confirm, consent, details, payment).
-      isTitle: true,
-      description:
-        "How this step is listed here, e.g. “3 · Consent”. Never shown to a customer.",
+      fields: HEADER_FIELDS,
     },
     {
-      name: "title",
-      label: "Title",
-      type: "string",
-      description:
-        "The big heading at the top of this step. Leave empty to keep the wording that ships in code — the preview beside this form shows you what that is. It may not use clinical words (consultation, diagnosis, treatment, specialist, physician, clinician, neurologist, prescription): this is a wellness assessment, and saving is blocked if it does.",
-      ui: { validate: noClinicalVocabulary },
-    },
-    {
-      name: "subtitle",
-      label: "Subtitle",
-      type: "string",
-      description:
-        "The line under the heading. Leave empty for the code wording, or for no subtitle at all where the step ships without one.",
-      ui: { component: "textarea", validate: noClinicalVocabulary },
+      name: "consentStep",
+      label: "Consent step",
+      fields: [
+        ...HEADER_FIELDS,
+        {
+          name: "terms",
+          label: "Consent terms",
+          type: "rich-text",
+          description:
+            "The agreement shown in the scrolling box on this step, which a customer must accept before paying. Markdown: headings, bold, lists and links. Leave it empty and the terms that ship in code are shown instead.",
+          ui: { validate: noClinicalVocabularyInRichText },
+        },
+        {
+          name: "termsVersion",
+          label: "Consent terms version",
+          type: "string",
+          description:
+            "Stamped on every consent record as proof of WHICH terms that customer agreed to, so change it whenever you change the terms above \u2014 a date like 2026-08-13 is ideal. Leave it empty and consents are recorded against the version that ships in code. Existing records are never rewritten.",
+        },
+      ],
     },
   ],
 };

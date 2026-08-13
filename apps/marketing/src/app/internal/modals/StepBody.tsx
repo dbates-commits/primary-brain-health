@@ -1,8 +1,10 @@
 "use client";
 
 import { ConsentForm, DetailsForm, PaymentStep } from "@pbh/booking";
+import { ConsentTerms } from "@/components/booking/ConsentTerms";
+import { hasRichTextContent } from "@/lib/rich-text";
 import { EmailConfirmationStep } from "@/components/booking/EmailConfirmationStep";
-import type { ModalStep } from "@/components/booking/steps";
+import type { ModalStep, ModalStepCopy } from "@/components/booking/steps";
 import {
   previewCheckout,
   previewConsent,
@@ -17,7 +19,14 @@ import {
  * a fifth step becomes a typecheck failure here rather than a panel that
  * renders its header over nothing.
  */
-export function StepBody({ step }: { step: ModalStep }) {
+export function StepBody({
+  step,
+  copy,
+}: {
+  step: ModalStep;
+  /** This step's document — the consent step renders its terms from it. */
+  copy?: ModalStepCopy | null;
+}) {
   switch (step) {
     case "confirm":
       // The only step that takes no action prop: it imports
@@ -42,6 +51,14 @@ export function StepBody({ step }: { step: ModalStep }) {
           track="wellness"
           onComplete={() => {}}
           showHeader={false}
+          // Undefined when the CMS holds no agreement, so ConsentForm shows
+          // the terms that ship in code — the same fallback a customer gets.
+          // An element that renders nothing would leave an empty box instead.
+          terms={
+            hasRichTextContent(copy?.terms) ? (
+              <ConsentTerms content={copy?.terms} />
+            ) : undefined
+          }
         />
       );
     case "payment":

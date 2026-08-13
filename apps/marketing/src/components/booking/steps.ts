@@ -35,6 +35,18 @@ export interface ModalStepCopy {
   _content_source?: { queryId: string; path: (number | string)[] };
   title?: string | null;
   subtitle?: string | null;
+  /**
+   * Consent step only: the agreement itself, as a rich-text syntax tree
+   * (`TinaMarkdown` renders it — see `ConsentTerms`). `unknown` because the
+   * shape is Tina's, and nothing here should be reaching into it.
+   */
+  terms?: unknown;
+  /**
+   * Consent step only: what gets stamped on the `consents` rows as proof of
+   * which agreement a customer accepted. Read server-side at submit time, never
+   * from the browser.
+   */
+  termsVersion?: string | null;
 }
 
 /** The four documents, keyed by step. Absent keys fall back to the code copy. */

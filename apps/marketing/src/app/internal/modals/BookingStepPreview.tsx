@@ -48,7 +48,7 @@ export function BookingStepPreview({
       {/* No bottom padding, as in the modal: it would inset where a sticky
           action bar pins. Each step supplies its own. */}
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8">
-        <StepBody step={step} />
+        <StepBody step={step} copy={copy} />
       </div>
     </div>
   );

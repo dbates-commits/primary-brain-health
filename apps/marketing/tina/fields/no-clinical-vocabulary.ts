@@ -1,4 +1,5 @@
 import { findBannedTerms } from "@pbh/copy";
+import { richTextToPlainText } from "../../src/lib/rich-text";
 
 /**
  * Tina `ui.validate` for the Modals collection's step headers.
@@ -23,10 +24,26 @@ import { findBannedTerms } from "@pbh/copy";
  * that never went through this form.
  */
 export function noClinicalVocabulary(value: unknown): string | undefined {
-  if (typeof value !== "string" || value.trim() === "") {
+  return check(typeof value === "string" ? value : "");
+}
+
+/**
+ * The same guard for a rich-text field, whose value is an MDX syntax tree
+ * rather than a string — the consent terms. Flattening loses the structure,
+ * which is exactly right here: a banned word is a banned word whether it lands
+ * in a heading, a list item or a link.
+ */
+export function noClinicalVocabularyInRichText(
+  value: unknown,
+): string | undefined {
+  return check(richTextToPlainText(value));
+}
+
+function check(text: string): string | undefined {
+  if (text.trim() === "") {
     return undefined;
   }
-  const hits = findBannedTerms(value, "modal");
+  const hits = findBannedTerms(text, "modal");
   if (hits.length === 0) {
     return undefined;
   }

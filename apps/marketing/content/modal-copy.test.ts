@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { findBannedTerms, type BannedTermHit } from "@pbh/copy";
 import { MODAL_STEPS } from "../src/components/booking/steps";
+import { richTextToPlainText } from "../src/lib/rich-text";
 
 /**
  * Compliance guard for the CMS-authored booking-modal step headers.
@@ -26,9 +27,22 @@ const MODALS_DIR = path.join(
 
 /**
  * The fields an editor can write that a customer then reads. `step` is the
- * admin's own list label and never renders on the site, so it isn't swept.
+ * admin's own list label and never renders on the site, so it isn't swept, and
+ * neither is `termsVersion` — a version string is a label, not prose.
+ *
+ * `terms` is rich text, so its value is a syntax tree rather than a string:
+ * `richTextToPlainText` flattens it to the words a customer would read.
  */
 const EDITABLE_FIELDS = ["title", "subtitle"] as const;
+const RICH_TEXT_FIELDS = ["terms"] as const;
+
+/** Which template each document must declare, since it decides its fields. */
+const TEMPLATE_BY_STEP: Record<string, string> = {
+  confirm: "step",
+  details: "step",
+  consent: "consentStep",
+  payment: "step",
+};
 
 function documentFiles(): string[] {
   return readdirSync(MODALS_DIR).filter((file) => file.endsWith(".json"));
@@ -45,6 +59,12 @@ function modalCopy(): Array<{ location: string; text: string }> {
       const value = document[field];
       if (typeof value === "string" && value.trim() !== "") {
         found.push({ location: `${file}: ${field}`, text: value });
+      }
+    }
+    for (const field of RICH_TEXT_FIELDS) {
+      const text = richTextToPlainText(document[field]);
+      if (text.trim() !== "") {
+        found.push({ location: `${file}: ${field}`, text });
       }
     }
   }
@@ -86,5 +106,18 @@ describe("booking modal step headers", () => {
     // which would leave the flow with a step nothing can title.
     const onDisk = documentFiles().map((file) => file.replace(/\.json$/, ""));
     expect(onDisk.sort()).toEqual([...MODAL_STEPS].sort());
+  });
+
+  it("declares the right template on each document", () => {
+    // The template decides which fields the admin offers, so a wrong value
+    // here doesn't fail loudly — it just quietly removes the consent terms
+    // field from the only step that has one.
+    const declared = Object.fromEntries(
+      documentFiles().map((file) => [
+        file.replace(/\.json$/, ""),
+        JSON.parse(readFileSync(path.join(MODALS_DIR, file), "utf8"))._template,
+      ]),
+    );
+    expect(declared).toEqual(TEMPLATE_BY_STEP);
   });
 });

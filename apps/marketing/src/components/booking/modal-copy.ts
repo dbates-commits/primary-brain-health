@@ -27,7 +27,15 @@ export async function getModalStepCopy(): Promise<ModalStepCopyMap> {
       // A document whose filename isn't a known step has nowhere to render;
       // ignoring it beats letting it shadow one that does.
       if (node && step && isModalStep(step)) {
-        copy[step] = { title: node.title, subtitle: node.subtitle };
+        copy[step] = {
+          title: node.title,
+          subtitle: node.subtitle,
+          // Only the consent step's template carries an agreement; the other
+          // three have no such fields to read.
+          ...(node.__typename === "ModalConsentStep"
+            ? { terms: node.terms, termsVersion: node.termsVersion }
+            : {}),
+        };
       }
     }
   } catch (error) {

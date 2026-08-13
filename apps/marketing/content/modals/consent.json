@@ -1,3 +1,4 @@
 {
-  "step": "3 · Consent"
+  "step": "3 · Consent",
+  "_template": "consentStep"
 }

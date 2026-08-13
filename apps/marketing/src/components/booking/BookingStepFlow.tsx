@@ -14,6 +14,8 @@ import {
 } from "@pbh/booking";
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
+import { ConsentTerms } from "./ConsentTerms";
+import { hasRichTextContent } from "@/lib/rich-text";
 import { MODAL_STEPS, type ModalStep, type ModalStepCopyMap } from "./steps";
 import { resolveStepHeaders } from "./step-headers";
 import { NavigatorNote } from "./NavigatorNote";
@@ -284,6 +286,15 @@ export function BookingStepFlow({
             track={track}
             onComplete={advance}
             showHeader={false}
+            // Undefined — not an element that renders nothing — when the CMS
+            // holds no agreement, because that is what makes `ConsentForm` fall
+            // back to the terms that ship in code. An empty element would leave
+            // a customer accepting a blank box.
+            terms={
+              hasRichTextContent(modalCopy?.consent?.terms) ? (
+                <ConsentTerms content={modalCopy?.consent?.terms} />
+              ) : undefined
+            }
           />
         )}
         {step === "payment" && (

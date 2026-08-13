@@ -1,3 +1,4 @@
 {
-  "step": "1 · Email Confirmation"
+  "step": "1 · Email Confirmation",
+  "_template": "step"
 }

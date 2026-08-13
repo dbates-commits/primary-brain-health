@@ -1,3 +1,4 @@
 {
-  "step": "4 · Payment"
+  "step": "4 · Payment",
+  "_template": "step"
 }

@@ -18,12 +18,23 @@ export async function recordConsentCore({
   agreed,
   ipHash,
   userAgent,
+  version,
 }: {
   userId: string;
   agreed: boolean;
   ipHash: string;
   userAgent: string | null;
+  /**
+   * Which terms this customer actually saw. Passed in by the app, which reads
+   * it from wherever the terms came from — the marketing app renders them from
+   * the CMS, so the version travels with them there. Falls back to
+   * `CONSENT_VERSION` for a host still rendering the code-owned terms.
+   *
+   * The rows are append-only, so this is the only chance to record it.
+   */
+  version?: string | null;
 }): Promise<ConsentState> {
+  const consentVersion = version?.trim() || CONSENT_VERSION;
   if (!userId) {
     return {
       status: "error",
@@ -44,14 +55,14 @@ export async function recordConsentCore({
       {
         userId,
         consentType: "wellness",
-        version: CONSENT_VERSION,
+        version: consentVersion,
         ipHash,
         userAgent,
       },
       {
         userId,
         consentType: "hipaa_npp",
-        version: CONSENT_VERSION,
+        version: consentVersion,
         ipHash,
         userAgent,
       },
@@ -63,7 +74,7 @@ export async function recordConsentCore({
       ipHash,
       metadata: {
         types: ["wellness", "hipaa_npp"],
-        version: CONSENT_VERSION,
+        version: consentVersion,
       },
     });
 

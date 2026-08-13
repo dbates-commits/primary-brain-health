@@ -13,6 +13,7 @@ import {
   type BookingResumeState,
 } from "@pbh/booking/server";
 import type { ConsentState, DetailsState, SignupState } from "@pbh/booking";
+import { getModalStepCopy } from "./modal-copy";
 
 /**
  * Real per-step server actions for the marketing booking modal (pbh-ggr.5),
@@ -76,11 +77,17 @@ export async function consentAction(
   }
 
   const requestHeaders = await headers();
+  // Re-read from the CMS rather than trusting a version posted by the browser:
+  // this row is the record of what was agreed to, so the client must not get a
+  // say in what it claims. Falls back to the code-owned version when the terms
+  // themselves come from code.
+  const modalCopy = await getModalStepCopy();
   return recordConsentCore({
     userId,
     agreed: formData.get("agreed") === "on",
     ipHash: hashIp(getClientIp(requestHeaders)),
     userAgent: requestHeaders.get("user-agent"),
+    version: modalCopy.consent?.termsVersion,
   });
 }
 
