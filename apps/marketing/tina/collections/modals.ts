@@ -1,8 +1,6 @@
 import type { Collection, TinaField } from "tinacms";
-import {
-  noClinicalVocabulary,
-  noClinicalVocabularyInRichText,
-} from "../fields/no-clinical-vocabulary";
+import { noClinicalVocabulary } from "../fields/no-clinical-vocabulary";
+import { consentTermsVersion } from "../fields/consent-terms-version";
 
 /**
  * The headers of the booking modal's four steps — one document per step.
@@ -94,7 +92,10 @@ export const modalsCollection: Collection = {
           type: "rich-text",
           description:
             "The agreement shown in the scrolling box on this step, which a customer must accept before paying. Markdown: headings, bold, lists and links. Leave it empty and the terms that ship in code are shown instead.",
-          ui: { validate: noClinicalVocabularyInRichText },
+          // No banned-terms guard here, unlike the headings above. Legal text
+          // needs the clinical words precisely to disclaim them — "this is not
+          // medical treatment", "we do not provide a diagnosis" — which is the
+          // same reason banned-terms.ts carves out the bare word "medical".
         },
         {
           name: "termsVersion",
@@ -102,6 +103,7 @@ export const modalsCollection: Collection = {
           type: "string",
           description:
             "Stamped on every consent record as proof of WHICH terms that customer agreed to, so change it whenever you change the terms above \u2014 a date like 2026-08-13 is ideal. Leave it empty and consents are recorded against the version that ships in code. Existing records are never rewritten.",
+          ui: { validate: consentTermsVersion },
         },
       ],
     },

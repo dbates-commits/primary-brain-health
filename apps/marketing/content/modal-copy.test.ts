@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { findBannedTerms, type BannedTermHit } from "@pbh/copy";
 import { MODAL_STEPS } from "../src/components/booking/steps";
-import { richTextToPlainText } from "../src/lib/rich-text";
 
 /**
  * Compliance guard for the CMS-authored booking-modal step headers.
@@ -26,15 +25,16 @@ const MODALS_DIR = path.join(
 );
 
 /**
- * The fields an editor can write that a customer then reads. `step` is the
- * admin's own list label and never renders on the site, so it isn't swept, and
- * neither is `termsVersion` — a version string is a label, not prose.
+ * The fields an editor can write that a customer then reads, and that the
+ * wellness vocabulary rule applies to. `step` is the admin's own list label and
+ * `termsVersion` is an identifier — neither is prose a customer reads.
  *
- * `terms` is rich text, so its value is a syntax tree rather than a string:
- * `richTextToPlainText` flattens it to the words a customer would read.
+ * `terms` is deliberately absent: legal text needs the clinical words in order
+ * to disclaim them ("this is not medical treatment"), so it carries no
+ * banned-terms guard in the admin either. Sweeping it here would fail the build
+ * over wording the CMS accepts.
  */
 const EDITABLE_FIELDS = ["title", "subtitle"] as const;
-const RICH_TEXT_FIELDS = ["terms"] as const;
 
 /** Which template each document must declare, since it decides its fields. */
 const TEMPLATE_BY_STEP: Record<string, string> = {
@@ -59,12 +59,6 @@ function modalCopy(): Array<{ location: string; text: string }> {
       const value = document[field];
       if (typeof value === "string" && value.trim() !== "") {
         found.push({ location: `${file}: ${field}`, text: value });
-      }
-    }
-    for (const field of RICH_TEXT_FIELDS) {
-      const text = richTextToPlainText(document[field]);
-      if (text.trim() !== "") {
-        found.push({ location: `${file}: ${field}`, text });
       }
     }
   }
