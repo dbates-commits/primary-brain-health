@@ -134,6 +134,13 @@
       "when": 1785767292098,
       "tag": "0018_right_payback",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1786626750340,
+      "tag": "0019_drop_password_hash",
+      "breakpoints": true
     }
   ]
 }
