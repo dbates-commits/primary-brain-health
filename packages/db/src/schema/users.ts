@@ -31,9 +31,6 @@ export const users = pgTable("users", {
   // a hint, or someone could show themselves the $449 flow and pay the $149
   // price. See ASSESSMENT_PACKAGES in @pbh/booking.
   selectedPackageKey: text("selected_package_key"),
-  // DEPRECATED (pbh-23g): auth has been passwordless (magic link) since PBH-119;
-  // nothing has written this for some time. A follow-up drops it.
-  passwordHash: text("password_hash"),
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.
   dateOfBirth: date("date_of_birth", { mode: "string" }),
   zip: text(),
