@@ -1,17 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   Button,
   FieldError,
   Label,
-  SegmentedControl,
   StepHeader,
   fieldClass,
-  labelClass,
 } from "@pbh/ui";
-import { copyFor, type Track } from "@pbh/copy";
-import { PATIENT_IDENTIFICATION_OPTIONS } from "./field-options";
 import { StickyActions } from "./StickyActions";
 import type { SignupAction, SignupResult, SignupState } from "./types";
 
@@ -19,7 +15,6 @@ const initialState: SignupState = { status: "idle" };
 
 /**
  * Default step copy, exported so a host rendering the header outside the form
- * (the booking modal renders headers in a fixed region above the scroll area)
  * can use the same wording as the inline case.
  */
 export const SIGNUP_HEADER = {
@@ -28,60 +23,50 @@ export const SIGNUP_HEADER = {
 } as const;
 
 /**
- * First/last/email account form. The per-step action is injected via `action`,
- * so the component stays host-agnostic (the modal passes its real `"use server"`
- * action; Storybook passes a stub). `showHeader`/`title`/`subtitle`/`submitLabel`
- * let the host render it with its own header treatment and CTA copy.
+ * First/last/email account form — the entry point to the whole booking flow.
+ * The per-step action is injected via `action`, so the component stays
+ * host-agnostic (the page passes its real `"use server"` action; Storybook
+ * passes a stub).
+ *
+ * It no longer asks who the assessment is for. The details step collects the
+ * patient's name instead, prefilled from what is entered here, so the common
+ * case (booking for yourself) answers the question by saying nothing.
  */
 export function SignupForm({
   action,
-  track,
   onComplete,
   showHeader = true,
   title = SIGNUP_HEADER.title,
   subtitle = SIGNUP_HEADER.subtitle,
   submitLabel = "Continue",
+  submitLabelShort,
+  submitColor = "primary",
+  sticky = true,
 }: {
   action: SignupAction;
-  /** Which product this signup is for — decides the wording, not the fields. */
-  track: Track;
   onComplete: (result: SignupResult) => void;
   showHeader?: boolean;
   title?: string;
   subtitle?: string;
   submitLabel?: string;
+  /** Shown below `sm` when the full label is too long for a narrow button. */
+  submitLabelShort?: string;
+  /**
+   * Submit fill. Primary in the modal, where it sits on the warm surface; the
+   * on-page card wants white, which is what the design specifies against that
+   * card's own white background — the shadow is what separates them.
+   */
+  submitColor?: "primary" | "white";
+  /**
+   * Pins the submit button to the bottom of a scrolling container. Right in the
+   * modal; wrong on the page, where the form sits in a card that doesn't scroll
+   * and the bar would stick to the viewport instead.
+   */
+  sticky?: boolean;
 }) {
-  const copy = copyFor({ track });
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
-
-  // Defaults to "Self": every design renders one pill selected, and a segmented
-  // control has no empty-state affordance, so leaving it unset reads as broken
-  // rather than as a question awaiting an answer.
-  const [patientIdentification, setPatientIdentification] = useState(
-    values?.patientIdentification || "Self",
-  );
-  const patientGroupRef = useRef<HTMLDivElement>(null);
-  const isForSomeoneElse = patientIdentification === "Someone else";
-
-  // React 19 auto-resets the <form> after a server action (requestFormReset),
-  // which clears the radio group. The controlled value is unchanged across the
-  // error re-render, so React won't re-assert it — restore `checked` from state
-  // here, after the commit/reset, to keep the user's answer.
-  useLayoutEffect(() => {
-    const group = patientGroupRef.current;
-    if (!group) {
-      return;
-    }
-    const radios = group.querySelectorAll<HTMLInputElement>('input[type="radio"]');
-    for (const radio of radios) {
-      const shouldBeChecked = radio.value === patientIdentification;
-      if (radio.checked !== shouldBeChecked) {
-        radio.checked = shouldBeChecked;
-      }
-    }
-  });
 
   // Advance the flow once the account exists. Guard against re-firing if this
   // component re-renders while still on the success state.
@@ -93,10 +78,32 @@ export function SignupForm({
         email: state.email,
         firstName: state.firstName,
         lastName: state.lastName,
-        patientIdentification: state.patientIdentification,
       });
     }
   }, [state, onComplete]);
+
+  const submit = (
+    <Button
+      type="submit"
+      color={submitColor}
+      className={
+        submitColor === "white"
+          ? "w-full shadow-[0_8px_12px_rgba(0,0,0,0.12)]"
+          : "w-full"
+      }
+    >
+      {pending ? (
+        "Creating account…"
+      ) : submitLabelShort ? (
+        <>
+          <span className="sm:hidden">{submitLabelShort}</span>
+          <span className="hidden sm:inline">{submitLabel}</span>
+        </>
+      ) : (
+        submitLabel
+      )}
+    </Button>
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -111,33 +118,6 @@ export function SignupForm({
           {/* Every group in this step is 32px apart (Figma 1181:1719) — the
               card's own gap. The 16px and 8px gaps live *inside* a group: 16px
               between the two name columns, 8px between a label and its input. */}
-          {/* Asked before the name fields because it decides whose details the
-              next step collects — and therefore how that step is worded. */}
-          <div>
-            <span className={labelClass}>
-              {copy.phrase("signup.patientQuestion")}
-            </span>
-            <div ref={patientGroupRef} className="mt-2">
-              <SegmentedControl
-                name="patientIdentification"
-                aria-label={copy.phrase("signup.patientQuestion")}
-                options={[...PATIENT_IDENTIFICATION_OPTIONS]}
-                value={patientIdentification}
-                onChange={(e) => setPatientIdentification(e.target.value)}
-              />
-            </div>
-            <FieldError
-              id="patientIdentification-error"
-              message={fieldErrors?.patientIdentification}
-            />
-          </div>
-
-          {/* Booking for someone else still collects the *buyer's* details here
-              — the account holder is who we verify and email. Saying so avoids
-              them entering the care recipient's name, which the next step asks
-              for separately (Figma 1181:1938). */}
-          {isForSomeoneElse && <p className={labelClass}>Please enter your personal information</p>}
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="firstName">First Name</Label>
@@ -197,11 +177,7 @@ export function SignupForm({
             </p>
           )}
 
-          <StickyActions>
-            <Button type="submit" color="primary" className="w-full">
-              {pending ? "Creating account…" : submitLabel}
-            </Button>
-          </StickyActions>
+          {sticky ? <StickyActions>{submit}</StickyActions> : submit}
         </fieldset>
       </form>
     </div>

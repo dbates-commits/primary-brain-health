@@ -1,4 +1,11 @@
-/** US states + DC, for the state-of-residence select. */
+/**
+ * US states + DC, for the state-of-residence select.
+ *
+ * Nothing imports this today: the details step dropped that field to match the
+ * design (`pbh-4by`). Kept because the RFP calls state of residence required for
+ * the primary-care handoff and the intake gate's eligibility check, so it may
+ * well come back — and the column is still on `users`. Inert data either way.
+ */
 export const US_STATES: ReadonlyArray<{ code: string; name: string }> = [
   { code: "AL", name: "Alabama" },
   { code: "AK", name: "Alaska" },

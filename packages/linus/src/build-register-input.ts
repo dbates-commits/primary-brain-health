@@ -10,9 +10,12 @@ import type { User } from "@pbh/db";
 import type { RegisterSubjectInput, SexAssignedAtBirth } from "./types";
 
 /**
- * Thrown when a booking is for someone else but no patient name was captured.
+ * Thrown when a legacy "Someone else" booking has no patient name on file.
  * Registering the buyer instead would attach the patient's assessment to the
  * wrong person, so this fails loudly rather than guessing.
+ *
+ * Unreachable for anything booked after the details step began collecting the
+ * patient's name unconditionally; it guards rows created before that.
  */
 export class MissingPatientNameError extends Error {
   constructor() {
@@ -53,21 +56,28 @@ export function buildRegisterInput(user: User): RegisterSubjectInput {
   }
 
   // The subject is whoever is being assessed, which is not always the account
-  // holder. On a "Someone else" booking every demographic on the row (DOB,
-  // gender, education) already describes the patient — so the name has to come
-  // from the patient columns too, or Linus receives a subject that is half buyer
-  // and half patient.
-  const isForSomeoneElse = user.patientIdentification === "Someone else";
-  if (isForSomeoneElse && !(user.patientFirstName && user.patientLastName)) {
+  // holder. Every demographic on the row (DOB, gender, education) describes the
+  // patient, so the name has to come from the patient columns too — otherwise
+  // Linus receives a subject that is half buyer and half patient.
+  //
+  // The details step now always writes those columns, prefilled with the account
+  // name, so they are set for every new booking. The `??` fallback covers rows
+  // created before that, where they are null and the account holder *was* the
+  // patient. The guard below catches the one legacy shape that would be wrong:
+  // a "Someone else" row that never reached the details step.
+  if (
+    user.patientIdentification === "Someone else" &&
+    !(user.patientFirstName && user.patientLastName)
+  ) {
     throw new MissingPatientNameError();
   }
 
-  // Email is deliberately the account holder's in both cases: it is the address
+  // Email is deliberately the account holder's in every case: it is the address
   // we have verified and the one the report should reach. The patient is
   // identified by name + date of birth, not by their inbox.
   const input: RegisterSubjectInput = {
-    firstName: isForSomeoneElse ? user.patientFirstName! : user.firstName,
-    lastName: isForSomeoneElse ? user.patientLastName! : user.lastName,
+    firstName: user.patientFirstName ?? user.firstName,
+    lastName: user.patientLastName ?? user.lastName,
     email: user.email,
     sexAssignedAtBirth: toSexAssignedAtBirth(user.gender),
     ageIndicator: { birthDate: user.dateOfBirth },

@@ -34,6 +34,11 @@ export const users = pgTable("users", {
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.
   dateOfBirth: date("date_of_birth", { mode: "string" }),
   zip: text(),
+  // DEPRECATED (pbh-4by): the details step dropped this field to match the
+  // design, so nothing writes it. Kept, not dropped: the RFP calls state of
+  // residence required for the primary-care handoff and the intake gate's
+  // eligibility check, existing rows hold real data, and re-instating it should
+  // be a form change rather than a migration.
   stateOfResidence: char("state_of_residence", { length: 2 }),
   // Intake-form fields (marketing consultation form). Nullable: the funnel
   // signup flow does not collect these.
@@ -46,14 +51,18 @@ export const users = pgTable("users", {
   phone: text(),
   gender: text(),
   educationLevel: text("education_level"),
-  // "Self" | "Someone else" — captured at signup, because it decides what every
-  // later question means.
+  // DEPRECATED (pbh-4by): signup no longer asks who the assessment is for — the
+  // details step's name fields arrive prefilled with the account name instead,
+  // so editing them IS the answer. Still read by the legacy branch of
+  // `buildRegisterInput`, and existing rows carry real meaning, so it stays
+  // until those are aged out.
   patientIdentification: text("patient_identification"),
-  // The person being assessed, set only when patientIdentification is
-  // "Someone else". Read this together with the flag above: when it is set, the
-  // demographic columns (dateOfBirth, gender, zip, phone, educationLevel)
-  // describe THIS person, not the account holder named by first_name/last_name.
-  // `buildRegisterInput` relies on that to register the right Linus subject.
+  // The person being assessed. Set on EVERY booking now (prefilled with the
+  // account holder's name); on older rows it is null whenever the buyer was the
+  // patient. The demographic columns (dateOfBirth, gender, zip, phone,
+  // educationLevel) always describe THIS person, not necessarily the account
+  // holder named by first_name/last_name — `buildRegisterInput` relies on that
+  // to register the right Linus subject.
   patientFirstName: text("patient_first_name"),
   patientLastName: text("patient_last_name"),
   // Linus Health subject id, set the first time we register this user as a

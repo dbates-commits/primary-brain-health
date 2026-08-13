@@ -17,7 +17,6 @@ import {
 } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
 import type { DetailsAction, DetailsState } from "./types";
-import { US_STATES } from "./us-states";
 import { EDUCATION_LEVELS, GENDER_OPTIONS } from "./field-options";
 
 const initialState: DetailsState = { status: "idle" };
@@ -38,33 +37,31 @@ function formatPhone(value: string): string {
 }
 
 /**
- * Header copy for the details step, exported so a host that renders the header
- * itself (e.g. the marketing modal, which pins it above the scroll area) uses the
- * same title/subtitle as the inline funnel step.
+ * Header copy for the details step (Figma 1642:3213), exported so a host that
+ * renders the header itself — the booking modal pins it above the scroll area —
+ * uses the same wording as the inline case.
+ *
+ * It no longer varies by who the booking is for. The name fields below carry
+ * that distinction now: they arrive prefilled with the account holder's name,
+ * and someone booking for a parent or spouse simply types over them.
  */
-export function detailsHeader(name: string, isForSomeoneElse = false) {
-  return {
-    title: name ? `Welcome, ${name}` : "Welcome",
-    // The subcopy carries the whole self/someone-else distinction. Every field
-    // below asks about the person being assessed, so this one line is what tells
-    // the buyer whose birthday and ZIP the form wants.
-    subtitle: isForSomeoneElse
-      ? "We need further information about the person receiving care. This all will help us interpret the results accurately."
-      : "We need further information about yourself. This all will help us interpret the results accurately.",
-  };
-}
+export const DETAILS_HEADER = {
+  title: "Welcome.",
+  subtitle:
+    "Please tell us about the person who’ll be taking the assessment. The assessment uses these details — like age and education — to give accurate, personalized results.",
+} as const;
 
 export function DetailsForm({
   action,
-  name,
-  patientIdentification,
+  firstName,
+  lastName,
   onComplete,
   showHeader = true,
 }: {
   action: DetailsAction;
-  name: string;
-  /** "Self" | "Someone else", answered at signup. */
-  patientIdentification: string;
+  /** Account holder's name, prefilled as the patient's — see DETAILS_HEADER. */
+  firstName: string;
+  lastName: string;
   onComplete: () => void;
   showHeader?: boolean;
 }) {
@@ -72,14 +69,10 @@ export function DetailsForm({
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
 
-  const isForSomeoneElse = patientIdentification === "Someone else";
-
-  const [stateOfResidence, setStateOfResidence] = useState("");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
 
-  const stateRef = useRef<HTMLSelectElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
   const educationRef = useRef<HTMLSelectElement>(null);
@@ -92,7 +85,6 @@ export function DetailsForm({
   useLayoutEffect(() => {
     const fields: [{ current: HTMLInputElement | HTMLSelectElement | null }, string][] =
       [
-        [stateRef, stateOfResidence],
         [phoneRef, phone],
         [genderRef, gender],
         [educationRef, educationLevel],
@@ -103,7 +95,6 @@ export function DetailsForm({
         el.value = value;
       }
     }
-
   });
 
   const advanced = useRef(false);
@@ -116,9 +107,7 @@ export function DetailsForm({
 
   return (
     <div className="flex flex-col gap-8">
-      {showHeader ? (
-        <StepHeader {...detailsHeader(name, isForSomeoneElse)} />
-      ) : null}
+      {showHeader ? <StepHeader {...DETAILS_HEADER} /> : null}
 
       {/* No hidden `userId`: the action reads it from the signed booking
           cookie, so the form carries profile data only. */}
@@ -128,66 +117,62 @@ export function DetailsForm({
           aria-busy={pending}
           className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
         >
-          {/* Only for someone-else bookings: the account holder is named at
-              signup, so this row names the person actually being assessed. It
-              leads the form because everything below describes that person. */}
-          {isForSomeoneElse && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="patientFirstName">First name</Label>
-                <input
-                  id="patientFirstName"
-                  name="patientFirstName"
-                  type="text"
-                  autoComplete="off"
-                  placeholder="Jane"
-                  required
-                  aria-required="true"
-                  aria-invalid={fieldErrors?.patientFirstName ? true : undefined}
-                  aria-describedby={
-                    fieldErrors?.patientFirstName
-                      ? "patientFirstName-error"
-                      : undefined
-                  }
-                  defaultValue={values?.patientFirstName ?? ""}
-                  className={fieldClass}
-                />
-                <FieldError
-                  id="patientFirstName-error"
-                  message={fieldErrors?.patientFirstName}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="patientLastName">Last name</Label>
-                <input
-                  id="patientLastName"
-                  name="patientLastName"
-                  type="text"
-                  autoComplete="off"
-                  placeholder="Doe"
-                  required
-                  aria-required="true"
-                  aria-invalid={fieldErrors?.patientLastName ? true : undefined}
-                  aria-describedby={
-                    fieldErrors?.patientLastName
-                      ? "patientLastName-error"
-                      : undefined
-                  }
-                  defaultValue={values?.patientLastName ?? ""}
-                  className={fieldClass}
-                />
-                <FieldError
-                  id="patientLastName-error"
-                  message={fieldErrors?.patientLastName}
-                />
-              </div>
+          {/* Leads the form because everything below describes this person.
+              Prefilled from the account, so booking for yourself is a no-op and
+              booking for someone else is an edit rather than a question. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="patientFirstName">First Name</Label>
+              <input
+                id="patientFirstName"
+                name="patientFirstName"
+                type="text"
+                autoComplete="off"
+                required
+                aria-required="true"
+                aria-invalid={fieldErrors?.patientFirstName ? true : undefined}
+                aria-describedby={
+                  fieldErrors?.patientFirstName
+                    ? "patientFirstName-error"
+                    : undefined
+                }
+                defaultValue={values?.patientFirstName ?? firstName}
+                className={fieldClass}
+              />
+              <FieldError
+                id="patientFirstName-error"
+                message={fieldErrors?.patientFirstName}
+              />
             </div>
-          )}
+
+            <div>
+              <Label htmlFor="patientLastName">Last Name</Label>
+              <input
+                id="patientLastName"
+                name="patientLastName"
+                type="text"
+                autoComplete="off"
+                required
+                aria-required="true"
+                aria-invalid={fieldErrors?.patientLastName ? true : undefined}
+                aria-describedby={
+                  fieldErrors?.patientLastName
+                    ? "patientLastName-error"
+                    : undefined
+                }
+                defaultValue={values?.patientLastName ?? lastName}
+                className={fieldClass}
+              />
+              <FieldError
+                id="patientLastName-error"
+                message={fieldErrors?.patientLastName}
+              />
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="dateOfBirth">Date of birth</Label>
+              <Label htmlFor="dateOfBirth">Birthday</Label>
               <input
                 id="dateOfBirth"
                 name="dateOfBirth"
@@ -238,7 +223,7 @@ export function DetailsForm({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="zip">ZIP code</Label>
+              <Label htmlFor="zip">ZIP Code</Label>
               <input
                 id="zip"
                 name="zip"
@@ -257,7 +242,7 @@ export function DetailsForm({
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone number</Label>
+              <Label htmlFor="phone">Phone Number</Label>
               <input
                 ref={phoneRef}
                 id="phone"
@@ -278,76 +263,34 @@ export function DetailsForm({
             </div>
           </div>
 
-          {/* State of residence is absent from the Figma frame, but the RFP
-              requires it for the primary-care handoff and the intake gate's
-              eligibility check, so it stays. Pairing it with education keeps the
-              two-up rhythm instead of leaving a stray full-width row — the one
-              deliberate layout divergence from the design. */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="stateOfResidence">State of residence</Label>
-              <Select
-                ref={stateRef}
-                id="stateOfResidence"
-                name="stateOfResidence"
-                autoComplete="address-level1"
-                required
-                aria-required="true"
-                aria-invalid={fieldErrors?.stateOfResidence ? true : undefined}
-                aria-describedby={
-                  fieldErrors?.stateOfResidence
-                    ? "stateOfResidence-error"
-                    : undefined
-                }
-                value={stateOfResidence}
-                onChange={(e) => setStateOfResidence(e.target.value)}
-              >
-                <option value="" disabled>
-                  Select a state
+          <div>
+            <Label htmlFor="educationLevel">Highest Level of education</Label>
+            <Select
+              ref={educationRef}
+              id="educationLevel"
+              name="educationLevel"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.educationLevel ? true : undefined}
+              aria-describedby={
+                fieldErrors?.educationLevel ? "educationLevel-error" : undefined
+              }
+              value={educationLevel}
+              onChange={(e) => setEducationLevel(e.target.value)}
+            >
+              <option value="" disabled>
+                Select an option
+              </option>
+              {EDUCATION_LEVELS.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.label}
                 </option>
-                {US_STATES.map((s) => (
-                  <option key={s.code} value={s.code}>
-                    {s.name}
-                  </option>
-                ))}
-              </Select>
-              <FieldError
-                id="stateOfResidence-error"
-                message={fieldErrors?.stateOfResidence}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="educationLevel">Highest level of education</Label>
-              <Select
-                ref={educationRef}
-                id="educationLevel"
-                name="educationLevel"
-                required
-                aria-required="true"
-                aria-invalid={fieldErrors?.educationLevel ? true : undefined}
-                aria-describedby={
-                  fieldErrors?.educationLevel
-                    ? "educationLevel-error"
-                    : undefined
-                }
-                value={educationLevel}
-                onChange={(e) => setEducationLevel(e.target.value)}
-              >
-                <option value="" disabled>
-                  Select
-                </option>
-                {EDUCATION_LEVELS.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </Select>
-              <FieldError
-                id="educationLevel-error"
-                message={fieldErrors?.educationLevel}
-              />
-            </div>
+              ))}
+            </Select>
+            <FieldError
+              id="educationLevel-error"
+              message={fieldErrors?.educationLevel}
+            />
           </div>
 
           {state.status === "error" && !fieldErrors && (
@@ -357,11 +300,7 @@ export function DetailsForm({
           )}
 
           <StickyActions>
-            <Button
-              type="submit"
-              color="primary"
-              className="w-full"
-            >
+            <Button type="submit" color="primary" className="w-full">
               {pending ? "Saving…" : "Submit"}
             </Button>
           </StickyActions>

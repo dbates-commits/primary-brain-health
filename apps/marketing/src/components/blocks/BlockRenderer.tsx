@@ -229,6 +229,13 @@ export function BlockRenderer({
               <BookingStepFlow
                 headline={block.headline}
                 subheadline={block.subheadline}
+                buttonText={block.buttonText ?? undefined}
+                buttonTextMobile={block.buttonTextMobile ?? undefined}
+                showIncludes={block.showIncludes ?? undefined}
+                tinaFields={{
+                  headline: getFieldPath(index, "headline"),
+                  subheadline: getFieldPath(index, "subheadline"),
+                }}
               />
             );
             break;

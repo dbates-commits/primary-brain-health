@@ -17,19 +17,20 @@ const meta = {
     docs: {
       description: {
         component:
-          'Step 3 — the demographics Linus needs to interpret a result. `patientIdentification` ' +
-          'carries over from signup and changes both the header copy and the fields: booking ' +
-          'for someone else adds a patient name row, because everything below describes the ' +
-          'person being assessed rather than the buyer. This is the longest step, so it is the ' +
-          'one where `StickyActions` earns its keep — scroll the panel and the submit stays put.',
+          'The demographics Linus needs to interpret a result (Figma 1642:3213). Every field ' +
+          'describes the person being assessed, and the name row leads the form prefilled with ' +
+          'the account holder&rsquo;s name — so booking for yourself is a no-op and booking for ' +
+          'a parent or spouse is an edit rather than a separate question. This is the longest ' +
+          'step, so it is where `StickyActions` earns its keep: scroll the panel and the submit ' +
+          'stays put.',
       },
     },
   },
   tags: ['autodocs'],
   args: {
     action: detailsSucceeds(),
-    name: 'Margaret',
-    patientIdentification: 'Self',
+    firstName: 'Margaret',
+    lastName: 'Hale',
     onComplete: fn(),
   },
   decorators: [
@@ -44,20 +45,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Booking for yourself — no patient name row. */
-export const Default: Story = {};
-
-/**
- * Booking for someone else: a patient name row leads the form and the subtitle
- * switches to "the person receiving care".
- */
-export const ForSomeoneElse: Story = {
-  args: { patientIdentification: 'Someone else' },
+/** Booking for yourself: the name arrives filled in and is left alone. */
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByLabelText('First Name')).toHaveValue('Margaret');
+    await expect(canvas.getByLabelText('Last Name')).toHaveValue('Hale');
+  },
 };
 
-/** No name yet — the header falls back to a bare "Welcome". */
-export const WithoutName: Story = {
-  args: { name: '' },
+/**
+ * Booking for someone else — which is not a separate mode, just typing over the
+ * prefilled name. Everything below then describes that person.
+ */
+export const EditedForSomeoneElse: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByLabelText('First Name');
+    await userEvent.clear(first);
+    await userEvent.type(first, 'Frederick');
+    await expect(first).toHaveValue('Frederick');
+  },
 };
 
 /**
@@ -71,7 +79,6 @@ export const FieldErrors: Story = {
       gender: 'Select a gender.',
       zip: 'Enter a 5-digit ZIP code.',
       phone: 'Enter a 10-digit phone number.',
-      stateOfResidence: 'Select a state of residence.',
       educationLevel: 'Select a level of education.',
     }),
   },
@@ -83,9 +90,6 @@ export const FieldErrors: Story = {
     });
     // The selects report through the same FieldError as the inputs.
     await expect(canvas.getByText('Select a gender.')).toBeInTheDocument();
-    await expect(
-      canvas.getByText('Select a state of residence.'),
-    ).toBeInTheDocument();
     await expect(
       canvas.getByText('Select a level of education.'),
     ).toBeInTheDocument();
@@ -104,7 +108,6 @@ export const SelectErrorsOnly: Story = {
   args: {
     action: detailsFieldErrors({
       gender: 'Select a gender.',
-      stateOfResidence: 'Select a state of residence.',
       educationLevel: 'Select a level of education.',
     }),
   },
@@ -135,7 +138,7 @@ export const FormLevelError: Story = {
 export const PhoneFormatting: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const phone = canvas.getByLabelText('Phone number');
+    const phone = canvas.getByLabelText('Phone Number');
     await userEvent.type(phone, '6175550142');
     await expect(phone).toHaveValue('(617) 555-0142');
   },
