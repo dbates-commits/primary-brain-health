@@ -1,0 +1,39 @@
+name: Unit tests
+
+# `turbo run test`: the wellness-copy guards (@pbh/copy, @pbh/booking) and the
+# sweep over CMS-authored booking-modal copy in apps/marketing/content.
+
+on:
+  pull_request:
+    branches: [main, staging]
+  # Not PR-only, deliberately: TinaCMS commits an editor's save straight to the
+  # branch with no PR, so a violation saved through the admin would never reach
+  # a pull_request run.
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+
+# One run per ref; cancel superseded runs.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test

@@ -8,6 +8,8 @@
     "start": "tinacms build && next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "//test": "Content sweeps only. The storybook project runs in a real browser and would pull Playwright's Chromium into CI — run it directly with `vitest run --project=storybook`.",
+    "test": "vitest run --project=content",
     "storybook": "storybook dev -p 6007",
     "build-storybook": "storybook build"
   },

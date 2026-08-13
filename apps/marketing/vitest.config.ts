@@ -15,6 +15,17 @@ export default defineConfig({
   test: {
     projects: [
       {
+        // Node-side sweeps over the CMS content on disk — no browser, no
+        // Storybook. `pnpm test` runs this project alone; see the note in
+        // package.json.
+        extends: true,
+        test: {
+          name: 'content',
+          environment: 'node',
+          include: ['content/**/*.test.ts'],
+        },
+      },
+      {
         extends: true,
         plugins: [
           // The plugin will run tests for the stories defined in your Storybook config

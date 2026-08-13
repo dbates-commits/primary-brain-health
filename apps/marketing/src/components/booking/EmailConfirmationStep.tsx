@@ -5,6 +5,15 @@ import { StickyActions } from "@pbh/booking";
 import { resendConfirmationAction } from "./actions";
 
 /**
+ * Header copy for this step, exported rather than inlined at the call site so
+ * all four modal steps offer a code-owned fallback of the same shape — see
+ * `resolveStepHeader`, which falls back to these whenever the Modals document
+ * is empty. The siblings are `DETAILS_HEADER`, `consentHeader()` and
+ * `PAYMENT_HEADER` in `@pbh/booking`.
+ */
+export const CONFIRM_HEADER = { title: "Email Confirmation" } as const;
+
+/**
  * Blocking step shown straight after signup (Figma 1088:2121): we've emailed a
  * confirmation link and the flow can't continue until it's clicked.
  *

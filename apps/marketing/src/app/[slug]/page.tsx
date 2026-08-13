@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { client } from "@tina/__generated__/client";
 import { PageClient } from "@/components/PageClient";
+import { getModalStepCopy } from "@/components/booking/modal-copy";
 import { Noto_Serif } from "next/font/google";
 
 const FALLBACK_OG_IMAGE = "/images/og-image.jpg";
@@ -92,6 +93,11 @@ export default async function DynamicPage({ params }: PageProps) {
     notFound();
   }
 
+  // See the note in app/page.tsx: modal step copy comes from its own
+  // collection, fetched here because everything below PageClient is a client
+  // component. Any page can carry the booking block, so both branches get it.
+  const modalCopy = await getModalStepCopy();
+
   if (resolvedParams.slug === "home-2") {
     return (
       <div className={`${notoSerif.variable} [&_h1]:font-[family-name:var(--font-noto-serif)] [&_h2]:font-[family-name:var(--font-noto-serif)] [&_h3]:font-[family-name:var(--font-noto-serif)] [&_p]:font-[family-name:var(--font-noto-serif)] [&_h1]:font-light [&_h2]:font-light [&_h3]:font-light`}>
@@ -99,6 +105,7 @@ export default async function DynamicPage({ params }: PageProps) {
           data={result.data}
           query={result.query}
           variables={result.variables}
+          modalCopy={modalCopy}
         />
       </div>
     );
@@ -109,6 +116,7 @@ export default async function DynamicPage({ params }: PageProps) {
       data={result.data}
       query={result.query}
       variables={result.variables}
+      modalCopy={modalCopy}
     />
   );
 }
