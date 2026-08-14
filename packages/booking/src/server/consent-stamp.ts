@@ -1,6 +1,10 @@
 import "server-only";
 
-import { signPayload, signatureMatches } from "./signing";
+import {
+  CONSENT_STAMP_DOMAIN,
+  signPayload,
+  signatureMatches,
+} from "./signing";
 
 /**
  * A signed record of WHICH terms were put in front of this customer, minted when
@@ -36,7 +40,7 @@ import { signPayload, signatureMatches } from "./signing";
  */
 export function createConsentStamp(version: string | null): string {
   const payload = version?.trim() ?? "";
-  return `${payload}.${signPayload(payload)}`;
+  return `${payload}.${signPayload(CONSENT_STAMP_DOMAIN, payload)}`;
 }
 
 /**
@@ -62,7 +66,10 @@ export function readConsentStamp(
   }
   const payload = value.slice(0, separator);
   const signature = value.slice(separator + 1);
-  if (!signatureMatches(payload, signature)) {
+  // Domain-tagged, so the booking-session cookie — same key, same
+  // dot-and-signature shape — can't be pasted in here and recorded as a
+  // version. See `CONSENT_STAMP_DOMAIN`.
+  if (!signatureMatches(CONSENT_STAMP_DOMAIN, payload, signature)) {
     return null;
   }
   return { version: payload === "" ? null : payload };

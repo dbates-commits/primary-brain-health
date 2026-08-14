@@ -1,6 +1,10 @@
 import "server-only";
 
-import { signPayload, signatureMatches } from "./signing";
+import {
+  BOOKING_SESSION_DOMAIN,
+  signPayload,
+  signatureMatches,
+} from "./signing";
 
 /**
  * The booking flow's identity cookie: signed, HttpOnly server-side proof that
@@ -59,7 +63,7 @@ export function bookingSessionCookieOptions(): BookingCookieOptions {
 export function createBookingSessionValue(userId: string): string {
   const expiry = Date.now() + BOOKING_SESSION_TTL_SECONDS * 1000;
   const payload = `${userId}.${expiry}`;
-  return `${payload}.${signPayload(payload)}`;
+  return `${payload}.${signPayload(BOOKING_SESSION_DOMAIN, payload)}`;
 }
 
 /**
@@ -82,7 +86,12 @@ export function readBookingSessionValue(
     return null;
   }
 
-  if (!signatureMatches(`${userId}.${expiryRaw}`, signature)) {
+  const signed = signatureMatches(
+    BOOKING_SESSION_DOMAIN,
+    `${userId}.${expiryRaw}`,
+    signature,
+  );
+  if (!signed) {
     return null;
   }
 

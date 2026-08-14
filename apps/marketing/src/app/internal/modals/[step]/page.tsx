@@ -6,18 +6,22 @@ import { BookingStepPreview } from "../BookingStepPreview";
 import { STEP_LIST, STEP_META } from "../step-registry";
 import { ModalStepClient } from "./ModalStepClient";
 
-// The document is read per request, so an editor's save shows on reload rather
-// than at the next build.
-export const dynamic = "force-dynamic";
+// Read at request time rather than at build, so an editor's save shows on
+// reload. Cached for a few seconds rather than fetched per request, because the
+// route is deliberately un-gated (see below): without this, anyone can spend a
+// TinaCloud content-API call per curl until the quota that also serves the real
+// pages is gone. Costs an editor nothing — the admin renders this in an iframe
+// where `useTina` is already streaming their unsaved edits live.
+export const revalidate = 10;
 
 export const metadata = {
   title: "Booking modal step — Primary Brain Health",
   robots: { index: false, follow: false },
 };
 
-// No `generateStaticParams`: under `force-dynamic` it would still run at build
-// time and have its result discarded, buying nothing but a build-time
-// dependency on the CMS.
+// No `generateStaticParams`: the four steps are cheap to render on first hit
+// and revalidate from there, and prerendering them would put a build-time
+// dependency on the CMS for a route no customer visits.
 
 /**
  * One booking-modal step, exactly as a customer sees it, with its own Tina form

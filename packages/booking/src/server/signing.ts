@@ -26,19 +26,51 @@ export function getBookingSecret(): string {
   return secret;
 }
 
-export function signPayload(payload: string): string {
-  return createHmac("sha256", getBookingSecret()).update(payload).digest("hex");
+/**
+ * What a signature is *for*, mixed into the signed bytes so a value minted for
+ * one purpose can't be presented as another.
+ *
+ * One key signs both messages, and their formats overlap: a session cookie is
+ * `<userId>.<expiryMs>.<hmac>`, and a consent stamp splits at its last dot too
+ * — so without this, a customer could paste their own cookie into the consent
+ * form and have `<userId>.<expiryMs>` recorded as the terms version on an
+ * append-only row.
+ *
+ * `BOOKING_SESSION_DOMAIN` is empty on purpose: it names the format that
+ * shipped before this separation existed, and tagging it would invalidate every
+ * cookie mid-flight, stranding customers partway through a booking. It doesn't
+ * need a tag to be safe — every *other* message has one, so nothing else
+ * verifies against it. Anything new gets a real tag.
+ */
+export const BOOKING_SESSION_DOMAIN = "";
+export const CONSENT_STAMP_DOMAIN = "consent-stamp";
+
+/**
+ * NUL, so a tag can't be spelled out of the payload's own leading characters.
+ */
+function tagged(domain: string, payload: string): string {
+  return domain === "" ? payload : `${domain}\0${payload}`;
+}
+
+export function signPayload(domain: string, payload: string): string {
+  return createHmac("sha256", getBookingSecret())
+    .update(tagged(domain, payload))
+    .digest("hex");
 }
 
 /**
- * Whether `signature` is the signature for `payload`.
+ * Whether `signature` is this domain's signature for `payload`.
  *
  * Compared with `timingSafeEqual` so a forgery can't be tuned byte by byte
  * against response timing. Length is checked first because `timingSafeEqual`
  * throws on a length mismatch.
  */
-export function signatureMatches(payload: string, signature: string): boolean {
+export function signatureMatches(
+  domain: string,
+  payload: string,
+  signature: string,
+): boolean {
   const a = Buffer.from(signature, "utf8");
-  const b = Buffer.from(signPayload(payload), "utf8");
+  const b = Buffer.from(signPayload(domain, payload), "utf8");
   return a.length === b.length && timingSafeEqual(a, b);
 }
