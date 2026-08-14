@@ -7,6 +7,7 @@ import {
   DetailsForm,
   ConsentForm,
   PaymentStep,
+  CONSENT_STAMP_FIELD,
   DEFAULT_PACKAGE_KEY,
   trackForPackage,
   type PackageKey,
@@ -15,7 +16,7 @@ import {
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
 import { ConsentTerms } from "./ConsentTerms";
-import { hasRichTextContent } from "@/lib/rich-text";
+import { resolveConsentTerms } from "./consent-copy";
 import { MODAL_STEPS, type ModalStep, type ModalStepCopyMap } from "./steps";
 import { resolveStepHeaders } from "./step-headers";
 import { NavigatorNote } from "./NavigatorNote";
@@ -24,6 +25,7 @@ import {
   signupAction,
   detailsAction,
   consentAction,
+  resendConfirmationAction,
   getBookingResumeState,
 } from "./actions";
 import {
@@ -89,6 +91,7 @@ export function BookingStepFlow({
   showIncludes,
   tinaFields,
   modalCopy,
+  consentStamp,
 }: {
   headline?: string;
   subheadline?: string;
@@ -102,6 +105,13 @@ export function BookingStepFlow({
    * falls back to the copy that ships in code; see `resolveStepHeaders`.
    */
   modalCopy?: ModalStepCopyMap;
+  /**
+   * The server's signed note of which agreement `modalCopy` renders, minted
+   * alongside it and handed back at submit so the consent row names the terms
+   * that were actually on screen. Travels with `modalCopy` or not at all — the
+   * two describe the same render.
+   */
+  consentStamp?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -133,6 +143,21 @@ export function BookingStepFlow({
       return signupAction(prev, formData);
     },
     [packageKey],
+  );
+
+  /**
+   * Carry the signed terms stamp into the consent submission, the same way
+   * `signupWithPackage` carries the package. It is the server's own statement
+   * round-tripped, not a client claim: `consentAction` verifies the signature
+   * and refuses anything it didn't sign, so binding it here can only tell the
+   * truth about which agreement this render put on screen.
+   */
+  const consentWithStamp = useCallback(
+    (prev: Parameters<typeof consentAction>[0], formData: FormData) => {
+      formData.set(CONSENT_STAMP_FIELD, consentStamp ?? "");
+      return consentAction(prev, formData);
+    },
+    [consentStamp],
   );
 
   /**
@@ -242,6 +267,11 @@ export function BookingStepFlow({
 
   const step = MODAL_STEPS[stepIndex];
 
+  // The agreement and the version naming it, resolved together — see
+  // `resolveConsentTerms`. Only `content` is needed here; the version rode out
+  // to the server that minted `consentStamp`.
+  const consentTerms = resolveConsentTerms(modalCopy?.consent);
+
   // Each step's header is rendered by the Modal in a fixed region above the
   // scroll area (so only the body scrolls), using the step's own exported copy.
   // CMS copy from the Modals collection where an editor has written some, the
@@ -270,7 +300,12 @@ export function BookingStepFlow({
         label={STEP_LABEL[step]}
         header={stepHeader}
       >
-        {step === "confirm" && <EmailConfirmationStep expired={expiredLink} />}
+        {step === "confirm" && (
+          <EmailConfirmationStep
+            expired={expiredLink}
+            resend={resendConfirmationAction}
+          />
+        )}
         {step === "details" && (
           <DetailsForm
             action={detailsAction}
@@ -282,7 +317,7 @@ export function BookingStepFlow({
         )}
         {step === "consent" && (
           <ConsentForm
-            action={consentAction}
+            action={consentWithStamp}
             track={track}
             onComplete={advance}
             showHeader={false}
@@ -291,8 +326,8 @@ export function BookingStepFlow({
             // back to the terms that ship in code. An empty element would leave
             // a customer accepting a blank box.
             terms={
-              hasRichTextContent(modalCopy?.consent?.terms) ? (
-                <ConsentTerms content={modalCopy?.consent?.terms} />
+              consentTerms.content ? (
+                <ConsentTerms content={consentTerms.content} />
               ) : undefined
             }
           />

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { signPayload, signatureMatches } from "./signing";
 
 /**
  * The booking flow's identity cookie: signed, HttpOnly server-side proof that
@@ -45,27 +45,6 @@ export interface BookingCookieOptions {
   maxAge: number;
 }
 
-/**
- * Env var name is unchanged from when this cookie was only a resume marker: it
- * is already set in every environment, and rotating it would strand every
- * in-flight booking for no security gain.
- */
-function getSecret(): string {
-  const secret = process.env.BOOKING_RESUME_SECRET;
-  if (!secret) {
-    throw new Error(
-      "Booking identity is not configured. Missing BOOKING_RESUME_SECRET. " +
-        "Locally, copy .env.example to .env.local and generate one with " +
-        "`openssl rand -base64 32`. On Vercel, set it per environment.",
-    );
-  }
-  return secret;
-}
-
-function sign(payload: string): string {
-  return createHmac("sha256", getSecret()).update(payload).digest("hex");
-}
-
 export function bookingSessionCookieOptions(): BookingCookieOptions {
   return {
     httpOnly: true,
@@ -80,15 +59,11 @@ export function bookingSessionCookieOptions(): BookingCookieOptions {
 export function createBookingSessionValue(userId: string): string {
   const expiry = Date.now() + BOOKING_SESSION_TTL_SECONDS * 1000;
   const payload = `${userId}.${expiry}`;
-  return `${payload}.${sign(payload)}`;
+  return `${payload}.${signPayload(payload)}`;
 }
 
 /**
  * Verify a cookie value and return the user id it vouches for, or null.
- *
- * Compared with `timingSafeEqual` so a forged cookie can't be tuned byte by byte
- * against response timing. Length is checked first because `timingSafeEqual`
- * throws on a length mismatch.
  */
 export function readBookingSessionValue(
   value: string | undefined,
@@ -107,10 +82,7 @@ export function readBookingSessionValue(
     return null;
   }
 
-  const expected = sign(`${userId}.${expiryRaw}`);
-  const a = Buffer.from(signature, "utf8");
-  const b = Buffer.from(expected, "utf8");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+  if (!signatureMatches(`${userId}.${expiryRaw}`, signature)) {
     return null;
   }
 

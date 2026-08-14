@@ -25,10 +25,11 @@ export async function recordConsentCore({
   ipHash: string;
   userAgent: string | null;
   /**
-   * Which terms this customer actually saw. Passed in by the app, which reads
-   * it from wherever the terms came from — the marketing app renders them from
-   * the CMS, so the version travels with them there. Falls back to
-   * `CONSENT_VERSION` for a host still rendering the code-owned terms.
+   * Which terms this customer actually saw. Decided where those terms are
+   * chosen, never re-derived here — the marketing app renders them from the CMS
+   * and carries the version forward on a signed stamp (`consent-stamp.ts`).
+   * Null means the code-owned terms were on screen, which `CONSENT_VERSION`
+   * describes.
    *
    * The rows are append-only, so this is the only chance to record it.
    */

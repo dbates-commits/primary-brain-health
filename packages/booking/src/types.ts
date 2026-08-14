@@ -88,6 +88,22 @@ export type DetailsAction = (
 export const CONSENT_REQUIRED_ERROR =
   "You must agree to the terms to continue.";
 
+/**
+ * The form field carrying the signed record of which terms were rendered — see
+ * `createConsentStamp` in `@pbh/booking/server`. Declared here rather than
+ * beside the signing, because the client binds it onto the submission and can't
+ * import a `server-only` module.
+ */
+export const CONSENT_STAMP_FIELD = "consentStamp";
+
+/**
+ * Shown when the stamp is missing or doesn't verify, which means the server
+ * cannot say which agreement was on screen. Refusing is the only honest answer:
+ * a consent row is append-only, so guessing a version here would be permanent.
+ */
+export const CONSENT_STAMP_ERROR =
+  "Please reload the page and review the terms again before continuing.";
+
 export type ConsentState =
   | { status: "idle" }
   | { status: "success" }

@@ -25,5 +25,6 @@ export * from "./resume";
 export * from "./booking-session";
 export * from "./details-core";
 export * from "./consent-core";
+export * from "./consent-stamp";
 export * from "./checkout-core";
 export * from "./webhook";

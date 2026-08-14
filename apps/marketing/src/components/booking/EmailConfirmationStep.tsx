@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { StickyActions } from "@pbh/booking";
-import { resendConfirmationAction } from "./actions";
 
 /**
  * Header copy for this step, exported rather than inlined at the call site so
@@ -20,19 +19,27 @@ export const CONFIRM_HEADER = { title: "Email Confirmation" } as const;
  * `expired` covers the customer arriving back from a link that had already been
  * used or had run out — same screen, different opening line, so a dead link
  * never reads as a dead end.
+ *
+ * `resend` is injected rather than imported, like every other step's action.
+ * Importing it directly made this the one step whose preview at
+ * `/internal/modals/confirm` still fired a real send — on a route that is
+ * deliberately reachable in production.
  */
 export function EmailConfirmationStep({
   expired = false,
+  resend,
 }: {
   expired?: boolean;
+  /** Re-send the confirmation email. Takes no argument: the server derives the
+   * recipient from the booking cookie, so it can't be aimed at another inbox. */
+  resend: () => Promise<{ ok: true }>;
 }) {
   const [pending, startTransition] = useTransition();
   const [resent, setResent] = useState(false);
 
   function handleResend() {
     startTransition(async () => {
-      // No recipient argument: the server derives it from the booking cookie.
-      await resendConfirmationAction();
+      await resend();
       // Always reported as sent. The action throttles silently, and saying
       // "too soon" would expose how recently a link went out.
       setResent(true);

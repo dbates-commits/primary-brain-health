@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { client } from "@tina/__generated__/client";
 import { PageClient } from "@/components/PageClient";
-import { getModalStepCopy } from "@/components/booking/modal-copy";
+import { getBookingModalProps } from "@/components/booking/modal-copy";
 
 const FALLBACK_OG_IMAGE = "/images/og-image.jpg";
 
@@ -79,14 +79,14 @@ export default async function Home() {
   // live-editable here — which costs nothing, because the modal only opens
   // after a real signup and so is never visible on this page anyway. The Modals
   // collection's own routes are where that copy is edited.
-  const modalCopy = await getModalStepCopy();
+  const bookingProps = await getBookingModalProps(result.data.page?.blocks);
 
   return (
     <PageClient
       data={result.data}
       query={result.query}
       variables={result.variables}
-      modalCopy={modalCopy}
+      {...bookingProps}
     />
   );
 }

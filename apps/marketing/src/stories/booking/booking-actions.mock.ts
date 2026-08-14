@@ -2,11 +2,12 @@
  * Storybook stand-in for `src/components/booking/actions.ts`.
  *
  * That module is `"use server"` and pulls in `next/headers` plus
- * `@pbh/booking/server` (database, Stripe, Resend). `EmailConfirmationStep`
- * imports `resendConfirmationAction` from it statically and has no prop seam
- * like the step forms do, so the only way to story it is to swap the module
- * out. `.storybook/main.ts` aliases the import to this file — Storybook builds
- * only; the app is untouched.
+ * `@pbh/booking/server` (database, Stripe, Resend), so no story can import it.
+ * `EmailConfirmationStep.stories.tsx` injects `resendConfirmationAction` from
+ * here as a prop; `.storybook/main.ts` also aliases the real module to this
+ * file, which catches anything that reaches it transitively — a story rendering
+ * the whole `BookingStepFlow`, say. Storybook builds only; the app is
+ * untouched.
  *
  * Keep the exported names in step with the real module. A drifted name fails
  * loudly at import rather than silently rendering the wrong thing.

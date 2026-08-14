@@ -2,7 +2,7 @@
 
 import { ConsentForm, DetailsForm, PaymentStep } from "@pbh/booking";
 import { ConsentTerms } from "@/components/booking/ConsentTerms";
-import { hasRichTextContent } from "@/lib/rich-text";
+import { resolveConsentTerms } from "@/components/booking/consent-copy";
 import { EmailConfirmationStep } from "@/components/booking/EmailConfirmationStep";
 import type { ModalStep, ModalStepCopy } from "@/components/booking/steps";
 import {
@@ -10,6 +10,7 @@ import {
   previewConsent,
   previewDetails,
   previewFinalize,
+  previewResend,
 } from "./preview-actions";
 
 /**
@@ -29,11 +30,7 @@ export function StepBody({
 }) {
   switch (step) {
     case "confirm":
-      // The only step that takes no action prop: it imports
-      // `resendConfirmationAction` directly, so the resend link here calls the
-      // real action. Harmless — it resolves the account from the booking cookie
-      // and no-ops without one — and not worth reshaping the component for.
-      return <EmailConfirmationStep />;
+      return <EmailConfirmationStep resend={previewResend} />;
     case "details":
       return (
         <DetailsForm
@@ -55,7 +52,7 @@ export function StepBody({
           // the terms that ship in code — the same fallback a customer gets.
           // An element that renders nothing would leave an empty box instead.
           terms={
-            hasRichTextContent(copy?.terms) ? (
+            resolveConsentTerms(copy).content ? (
               <ConsentTerms content={copy?.terms} />
             ) : undefined
           }

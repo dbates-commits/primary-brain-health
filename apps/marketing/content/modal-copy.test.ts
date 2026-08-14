@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { findBannedTerms, type BannedTermHit } from "@pbh/copy";
 import { MODAL_STEPS } from "../src/components/booking/steps";
+import { hasRichTextContent } from "../src/lib/rich-text";
 
 /**
  * Compliance guard for the CMS-authored booking-modal step headers.
@@ -100,6 +101,28 @@ describe("booking modal step headers", () => {
     // which would leave the flow with a step nothing can title.
     const onDisk = documentFiles().map((file) => file.replace(/\.json$/, ""));
     expect(onDisk.sort()).toEqual([...MODAL_STEPS].sort());
+  });
+
+  it("never carries a terms version with no terms to name", () => {
+    // A version is stamped on every `consents` row as proof of WHICH agreement
+    // was accepted, and those rows can't be corrected. `resolveConsentTerms`
+    // makes an orphan version inert at runtime, so this can't mislabel a
+    // consent — but a version sitting beside cleared terms means an editor
+    // believes it describes something, and the admin's `ui.validate` only
+    // enforces the pairing in the other direction (and never sees a hand-edited
+    // file or a TinaCloud save at all).
+    const orphans = documentFiles().filter((file) => {
+      const document: Record<string, unknown> = JSON.parse(
+        readFileSync(path.join(MODALS_DIR, file), "utf8"),
+      );
+      const version = document.termsVersion;
+      return (
+        typeof version === "string" &&
+        version.trim() !== "" &&
+        !hasRichTextContent(document.terms)
+      );
+    });
+    expect(orphans).toEqual([]);
   });
 
   it("declares the right template on each document", () => {

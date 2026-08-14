@@ -12,6 +12,11 @@ import { hasRichTextContent } from "../../src/lib/rich-text";
  * It is otherwise free-form. A date is the obvious choice and the description
  * says so, but a team that versions differently shouldn't be blocked — the
  * check is only that it reads as a label rather than a sentence.
+ *
+ * The reverse pairing — a version left behind after the terms are cleared — is
+ * deliberately not blocked here, since an editor may well write the version
+ * before the agreement. `resolveConsentTerms` drops such a version rather than
+ * recording it, and the content sweep flags one left on disk.
  */
 export function consentTermsVersion(
   value: unknown,

@@ -1,6 +1,9 @@
 import "server-only";
 
+import { createConsentStamp } from "@pbh/booking/server";
 import { client } from "@tina/__generated__/client";
+import { hasBookingBlock } from "./booking-block";
+import { resolveConsentTerms } from "./consent-copy";
 import { isModalStep, type ModalStepCopyMap } from "./steps";
 
 /**
@@ -16,8 +19,12 @@ import { isModalStep, type ModalStepCopyMap } from "./steps";
  * normal state — the documents start with nothing but their admin label. That
  * matters most on a preview deployment, where TinaCloud serves `main`'s indexed
  * schema and this query fails outright until the collection is merged.
+ *
+ * Deliberately not exported: reading the copy without minting the stamp beside
+ * it is how the recorded consent version drifts from the agreement on screen.
+ * `getBookingModalProps` is the way in.
  */
-export async function getModalStepCopy(): Promise<ModalStepCopyMap> {
+async function getModalStepCopy(): Promise<ModalStepCopyMap> {
   const copy: ModalStepCopyMap = {};
   try {
     const result = await client.queries.modalConnection();
@@ -42,4 +49,47 @@ export async function getModalStepCopy(): Promise<ModalStepCopyMap> {
     console.error("[modals] could not read the step copy:", error);
   }
   return copy;
+}
+
+/** What a page hands the booking flow, or nothing when it doesn't carry one. */
+export interface BookingModalProps {
+  modalCopy?: ModalStepCopyMap;
+  consentStamp?: string;
+}
+
+/**
+ * The booking flow's CMS props for one page.
+ *
+ * Skipped entirely for a page with no booking block: the consent agreement is a
+ * whole rich-text tree, and fetching it unconditionally serializes it into
+ * every page's RSC payload for nothing.
+ *
+ * The stamp is minted here, next to the read it describes, so the version
+ * recorded against a consent can only ever be the one belonging to the terms
+ * this render put on screen. Deriving it anywhere else — most of all at submit
+ * time — is what lets the two drift apart.
+ */
+export async function getBookingModalProps(
+  blocks: unknown,
+): Promise<BookingModalProps> {
+  if (!hasBookingBlock(blocks)) {
+    return {};
+  }
+
+  const modalCopy = await getModalStepCopy();
+  try {
+    return {
+      modalCopy,
+      consentStamp: createConsentStamp(
+        resolveConsentTerms(modalCopy.consent).version,
+      ),
+    };
+  } catch (error) {
+    // Only an unconfigured BOOKING_RESUME_SECRET gets here, which already
+    // breaks signup (it signs the booking cookie) long before anyone reaches
+    // consent. Rendering the page without a stamp keeps that a booking-flow
+    // failure rather than making the marketing site 500 for every visitor.
+    console.error("[modals] could not stamp the consent terms:", error);
+    return { modalCopy };
+  }
 }

@@ -39,11 +39,14 @@ export function BlockRenderer({
   blocks,
   data,
   modalCopy,
+  consentStamp,
 }: {
   blocks: Block[] | null | undefined;
   data?: PageData;
   /** Step headers for the booking modal; only the intakeForm block reads it. */
   modalCopy?: ModalStepCopyMap;
+  /** Signed record of the agreement `modalCopy` renders; travels with it. */
+  consentStamp?: string;
 }) {
   if (!blocks) {
     return null;
@@ -237,6 +240,7 @@ export function BlockRenderer({
                 buttonTextMobile={block.buttonTextMobile ?? undefined}
                 showIncludes={block.showIncludes ?? undefined}
                 modalCopy={modalCopy}
+                consentStamp={consentStamp}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),
                   subheadline: getFieldPath(index, "subheadline"),
