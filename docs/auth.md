@@ -41,13 +41,20 @@ limiting attempts limits the disclosure.
 
 | Limit | Ceiling | Window |
 |---|---|---|
-| Per IP | **10** attempts | 15 minutes |
+| Per IP | **5** attempts | 15 minutes |
 | Per address | **5** attempts | 15 minutes |
 
 The per-IP limit is the one that bites an enumeration sweep: it tries a
 different address every time, so it never approaches the per-address ceiling.
 The per-address limit is a separate concern — it stops one inbox being flooded
-with sign-in links from a spread of sources.
+with sign-in links from a spread of sources, which the per-IP limit does not
+see.
+
+The per-IP number started at 10 and was cut to 5 (Aug 2026): 10 in a
+quarter-hour is ~960 attempts a day from one address, a loose bound on the
+thing the throttle exists to stop. The floor on lowering it further is shared
+IPs — an office or household behind one NAT can genuinely have two or three
+people signing in at once, and they all count against one bucket.
 
 Counting happens in Postgres (`auth_rate_limits`), not Redis. There is no Redis
 here, and the argument above for keeping sessions in Neon applies equally to a

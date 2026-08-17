@@ -26,10 +26,17 @@ export const SIGNIN_WINDOW_SECONDS = 15 * 60;
 /**
  * Per-IP ceiling. The one that bites an enumeration sweep, which by definition
  * uses a different address every time and so never trips the per-email limit.
- * Ten in a quarter-hour is far beyond what a real person does — a customer who
- * mistypes their address twice and re-requests a link is at three.
+ *
+ * Five, not ten: ten in a quarter-hour is ~960 attempts a day from one address,
+ * which is a loose bound on the thing this exists to stop. Five still clears
+ * what a real person does — a customer who mistypes their address twice and
+ * re-requests a link is at three.
+ *
+ * The floor on lowering it further is shared IPs. An office or a household
+ * behind one NAT can genuinely have two or three people signing in in the same
+ * quarter-hour, and they all count against this single bucket.
  */
-export const SIGNIN_MAX_PER_IP = 10;
+export const SIGNIN_MAX_PER_IP = 5;
 
 /**
  * Per-address ceiling. Independent of the IP limit: it is what stops one
