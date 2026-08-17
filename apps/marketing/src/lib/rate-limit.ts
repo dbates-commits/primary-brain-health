@@ -36,13 +36,55 @@ export const SIGNIN_WINDOW_SECONDS = 15 * 60;
  * behind one NAT can genuinely have two or three people signing in in the same
  * quarter-hour, and they all count against this single bucket.
  */
-export const SIGNIN_MAX_PER_IP = 5;
+const DEFAULT_MAX_PER_IP = 5;
 
 /**
  * Per-address ceiling. Independent of the IP limit: it is what stops one
- * address being mailbombed with sign-in links from a spread of sources.
+ * address being mailbombed with sign-in links from a spread of sources, which
+ * the per-IP limit never sees.
  */
-export const SIGNIN_MAX_PER_EMAIL = 5;
+const DEFAULT_MAX_PER_EMAIL = 5;
+
+/**
+ * Read a ceiling from the environment, falling back to the shipped default.
+ *
+ * Every attempt is counted, successful sign-ins included — a magic link that
+ * actually sends costs a slot exactly like a probe does. That is right for
+ * production and miserable for testing: six login/logout rounds in a
+ * quarter-hour and you are locked out of your own work. So the ceilings can be
+ * raised locally and on previews.
+ *
+ * **The override is ignored in production.** A limit that can be relaxed by
+ * setting a variable is a limit that will eventually be relaxed by accident,
+ * and this one is the bound on account enumeration. `VERCEL_ENV` is the same
+ * production signal used by `robots.ts` and `@pbh/linus`.
+ */
+function readLimit(name: string, fallback: number): number {
+  if (process.env.VERCEL_ENV === "production") {
+    return fallback;
+  }
+  const raw = process.env[name];
+  if (!raw) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    console.warn(
+      `[login] ignoring ${name}="${raw}" — expected a positive integer.`,
+    );
+    return fallback;
+  }
+  return parsed;
+}
+
+export const SIGNIN_MAX_PER_IP = readLimit(
+  "SIGNIN_MAX_PER_IP",
+  DEFAULT_MAX_PER_IP,
+);
+export const SIGNIN_MAX_PER_EMAIL = readLimit(
+  "SIGNIN_MAX_PER_EMAIL",
+  DEFAULT_MAX_PER_EMAIL,
+);
 
 export type SignInAttemptResult =
   | { allowed: true }

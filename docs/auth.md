@@ -80,6 +80,22 @@ Details worth knowing before changing it:
   and swept on each check; the audit row is the record.
 - **A malformed address costs nothing** — it is rejected before the throttle,
   because it never reaches the oracle.
+- **Every attempt counts, successes included.** A magic link that actually
+  sends costs a slot exactly like a probe does; only the format check is free.
+  Signing out is free too, but the next sign-in needs a new link, so repeated
+  login/logout rounds burn the window fast.
+
+Which makes testing painful, so both ceilings can be raised outside production
+via `SIGNIN_MAX_PER_IP` and `SIGNIN_MAX_PER_EMAIL`. **The overrides are ignored
+when `VERCEL_ENV=production`** — these bound account enumeration, and a limit
+that can be relaxed with a variable will eventually be relaxed by accident.
+
+Two things to know when a limit fires unexpectedly:
+
+- **Locally there is no `x-forwarded-for`**, so every request falls into a
+  single `ip:hash("unknown")` bucket.
+- **A shared egress IP is one bucket.** Everyone testing a preview from the
+  same office counts against each other.
 
 ## Why Auth.js and not Clerk
 
