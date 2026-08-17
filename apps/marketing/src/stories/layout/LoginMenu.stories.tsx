@@ -47,12 +47,18 @@ export const Closed: Story = {
   },
 };
 
-/** Opened from the trigger, with focus landed in the email field. */
+/**
+ * Opened from the trigger, with focus landed in the email field. The panel
+ * fades and scales in over 200ms, so visibility is awaited rather than asserted
+ * on the frame the click lands — it mounts at `opacity-0`.
+ */
 export const Open: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Login' }));
-    await expect(canvas.getByRole('dialog', { name: 'Login' })).toBeVisible();
+    await waitFor(async () => {
+      await expect(canvas.getByRole('dialog', { name: 'Login' })).toBeVisible();
+    });
     await expect(canvas.getByRole('textbox', { name: 'Email' })).toHaveFocus();
   },
 };
@@ -79,7 +85,10 @@ export const DoneDismisses: Story = {
       { timeout: 5000 },
     );
     await userEvent.click(canvas.getByRole('button', { name: 'Done' }));
-    await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
+    // The panel stays mounted for the length of the exit transition.
+    await waitFor(async () => {
+      await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     await expect(trigger).toHaveFocus();
   },
 };
@@ -91,7 +100,9 @@ export const EscapeCloses: Story = {
     const trigger = canvas.getByRole('button', { name: 'Login' });
     await userEvent.click(trigger);
     await userEvent.keyboard('{Escape}');
-    await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(async () => {
+      await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     await expect(trigger).toHaveFocus();
   },
 };

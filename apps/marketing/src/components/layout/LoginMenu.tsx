@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { PhosphorIcon } from "@pbh/ui";
+import { PhosphorIcon, cn } from "@pbh/ui";
 import { requestLoginLinkInline } from "@/app/login/actions";
 import { LoginPanel } from "./LoginPanel";
+import { usePopoverTransition } from "./use-popover-transition";
 
 /**
  * The `Login ⌄` header item and the panel it opens (Figma 1988:10483 for the
@@ -20,6 +21,7 @@ import { LoginPanel } from "./LoginPanel";
  */
 export function LoginMenu() {
   const [open, setOpen] = useState(false);
+  const { mounted, shown } = usePopoverTransition(open);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
@@ -94,18 +96,29 @@ export function LoginMenu() {
         <PhosphorIcon name="CaretDown" size={16} aria-hidden="true" />
       </button>
 
-      {open && (
+      {mounted && (
         <LoginPanel
           id={panelId}
           role="dialog"
           aria-label="Login"
+          // Out of the tab order and unclickable while it animates away — it
+          // outlives `open` by the length of the transition.
+          inert={!open}
           action={requestLoginLinkInline}
           onDone={() => close({ restoreFocus: true })}
-          // Anchored 20px right of the trigger and 16px below it, which is
-          // where the panel sits against the nav in 1988:9756 — its right edge
-          // lands short of the "Book a Consultation" button rather than flush
-          // with the trigger. Verified against the rendered box, not the class.
-          className="absolute top-full -right-5 z-50 mt-4 w-[470px]"
+          className={cn(
+            // Anchored 20px right of the trigger and 16px below it, which is
+            // where the panel sits against the nav in 1988:9756 — its right
+            // edge lands short of the "Book a Consultation" button rather than
+            // flush with the trigger. Verified against the rendered box, not
+            // the class.
+            "absolute top-full -right-5 z-50 mt-4 w-[470px]",
+            // Same 200ms ease-out as the booking modal, but scaled from the
+            // top-right so it reads as opening *out of* the trigger rather
+            // than growing from its own middle.
+            "origin-top-right transition duration-200 ease-out motion-reduce:transition-none",
+            shown ? "scale-100 opacity-100" : "scale-95 opacity-0",
+          )}
         />
       )}
     </div>

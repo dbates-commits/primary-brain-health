@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { UserMenu } from "@/components/layout/UserMenu";
 
 const meta = {
@@ -45,13 +45,18 @@ export const Closed: Story = {
   },
 };
 
-/** Opened, with focus landed on the first item. */
+/**
+ * Opened, with focus landed on the first item. The menu fades and scales in
+ * over 200ms, so visibility is awaited rather than asserted on the frame the
+ * click lands — it mounts at `opacity-0`.
+ */
 export const Open: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: /David/ }));
-    const menu = canvas.getByRole('menu', { name: 'Account' });
-    await expect(menu).toBeVisible();
+    await waitFor(async () => {
+      await expect(canvas.getByRole('menu', { name: 'Account' })).toBeVisible();
+    });
     await expect(canvas.getAllByRole('menuitem')).toHaveLength(3);
     await expect(canvas.getByRole('menuitem', { name: 'Dashboard' })).toHaveFocus();
   },
@@ -64,7 +69,10 @@ export const EscapeCloses: Story = {
     const trigger = canvas.getByRole('button', { name: /David/ });
     await userEvent.click(trigger);
     await userEvent.keyboard('{Escape}');
-    await expect(canvas.queryByRole('menu')).not.toBeInTheDocument();
+    // The menu stays mounted for the length of the exit transition.
+    await waitFor(async () => {
+      await expect(canvas.queryByRole('menu')).not.toBeInTheDocument();
+    });
     await expect(trigger).toHaveFocus();
   },
 };

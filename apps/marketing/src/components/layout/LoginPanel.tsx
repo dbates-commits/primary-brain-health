@@ -41,6 +41,8 @@ export function LoginPanel({
   id?: string;
   role?: "dialog";
   "aria-label"?: string;
+  /** Set while the popover animates out, so a closing panel isn't tabbable. */
+  inert?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [email, setEmail] = useState("");

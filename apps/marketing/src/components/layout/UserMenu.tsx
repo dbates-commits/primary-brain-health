@@ -2,9 +2,10 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { PhosphorIcon } from "@pbh/ui";
+import { PhosphorIcon, cn } from "@pbh/ui";
 import { signOutAction } from "@/app/welcome/sign-out";
 import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
+import { usePopoverTransition } from "./use-popover-transition";
 
 /**
  * The signed-in account menu in the header (Figma 1917:7795 for the trigger,
@@ -17,6 +18,7 @@ import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
  */
 export function UserMenu({ firstName }: { firstName: string }) {
   const [open, setOpen] = useState(false);
+  const { mounted, shown } = usePopoverTransition(open);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
@@ -98,12 +100,21 @@ export function UserMenu({ firstName }: { firstName: string }) {
         />
       </button>
 
-      {open && (
+      {mounted && (
         <div
           id={menuId}
           role="menu"
           aria-label="Account"
-          className="absolute top-full right-0 z-50 mt-1.5 flex flex-col rounded-xl border border-neutral-350 bg-white p-1 drop-shadow-[0px_8px_12px_rgba(0,0,0,0.08)]"
+          // Out of the tab order while it animates away — it outlives `open`
+          // by the length of the transition.
+          inert={!open}
+          className={cn(
+            "absolute top-full right-0 z-50 mt-1.5 flex flex-col rounded-xl border border-neutral-350 bg-white p-1 drop-shadow-[0px_8px_12px_rgba(0,0,0,0.08)]",
+            // Same 200ms ease-out as the booking modal, scaled from the
+            // top-right so it opens out of the trigger it hangs from.
+            "origin-top-right transition duration-200 ease-out motion-reduce:transition-none",
+            shown ? "scale-100 opacity-100" : "scale-95 opacity-0",
+          )}
         >
           {USER_MENU_LINKS.map((item) => (
             <Link
