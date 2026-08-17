@@ -4,6 +4,12 @@ Passwordless magic-link sign-in, Auth.js v5 (NextAuth) with database sessions in
 Neon. Implemented in `apps/marketing/src/auth.ts` and `src/lib/auth-*.ts`; the
 routes are `/login`, `/login/check-email` and `/api/auth/[...nextauth]`.
 
+Two entry points, one action. The full-page form at `/login` and the header
+popover (`components/layout/LoginMenu`) both call `sendLoginLink` in
+`src/app/login/actions.ts`, so they can never give different answers for the
+same address. `/login` navigates to the check-your-email page on success; the
+popover reports success in place.
+
 Sign-in is the *alternative* entry, not the main one: a customer who has just
 paid gets a session minted directly by the checkout action (see
 [`booking-flow.md`](./booking-flow.md)). The magic link is how someone comes back
@@ -12,9 +18,23 @@ later, once the 2h booking cookie has expired.
 **Login-only.** Accounts are created by the booking flow, never by a magic link.
 That is enforced twice: the `signIn` callback rejects an address with no account
 before a `verification_tokens` row is minted, and `adapter.createUser` throws.
-`sendMagicLinkEmail` also refuses to email an unknown address, and the caller
-swallows the rejection so the response is identical either way — nothing here
-reveals who is registered.
+`sendMagicLinkEmail` also refuses to email an unknown address.
+
+**Sign-in discloses whether an address has an account.** An unregistered address
+gets "Not an active user. Try checking spelling or another email."; a registered
+one gets the sent state. This is a deliberate product decision (Aug 2026), taken
+from the login designs — Figma `1988:10890` draws the error, and the trade was
+put to the team before it was built. It reverses the earlier behaviour, where
+the caller swallowed the `AccessDenied` rejection so the two responses were
+identical and nothing revealed who was registered.
+
+What that costs, so it is on the record: the sign-in form is an account-
+enumeration oracle. Anyone can test an address against the customer list, and
+for a brain-health service the mere fact of being a customer is sensitive.
+There is currently **no rate limiting** on `sendLoginLink` — nothing throttles
+an attacker walking a list of addresses through it. Per-IP and per-address
+throttling is the mitigation that ought to accompany this; until it lands, the
+disclosure is unbounded.
 
 ## Why Auth.js and not Clerk
 

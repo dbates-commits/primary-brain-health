@@ -7,9 +7,12 @@ export const metadata = {
 };
 
 /**
- * Shown after a magic-link request (Auth.js `verifyRequest` page). Intentionally
- * generic: it says the same thing whether or not the address has an account, so
- * it never reveals who's registered.
+ * Shown after a magic-link request (Auth.js `verifyRequest` page).
+ *
+ * Only a registered address reaches this screen — an unregistered one is turned
+ * back at the form with "Not an active user" (see `../actions.ts` and the
+ * disclosure note in `docs/auth.md`), so the copy no longer hedges about
+ * whether an account matched.
  */
 export default function CheckEmailPage() {
   return (
@@ -21,9 +24,8 @@ export default function CheckEmailPage() {
               Check your email
             </Heading>
             <p className="text-on-surface-variant">
-              If an account matches that address, we&rsquo;ve sent a secure
-              sign-in link. Open it on this device to continue — it expires in
-              15 minutes and can only be used once.
+              We&rsquo;ve sent a secure sign-in link. Open it on this device to
+              continue — it expires in 15 minutes and can only be used once.
             </p>
           </div>
 

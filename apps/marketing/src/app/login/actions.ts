@@ -7,22 +7,30 @@ import { isValidEmail, normalizeEmail } from "@pbh/booking/server";
 
 export type LoginState =
   | { status: "idle" }
+  | { status: "sent"; email: string }
   | { status: "error"; message: string; email: string };
 
 /**
- * Request a magic-link sign-in. Validates the email, then hands off to Auth.js
- * (`redirect: false` so it processes the send but returns instead of throwing a
- * redirect) and forwards to the check-your-email page.
- *
- * The response is identical whether or not the email has an account:
- * `sendMagicLinkEmail` simply sends nothing for an unknown address, so this
- * never reveals whether someone is registered.
+ * Shown when the address has no account. This one message is the reason the
+ * sign-in response is no longer identical for registered and unregistered
+ * addresses: it tells an anonymous caller which is which, so anyone can test an
+ * email against the customer list. That is a product decision, taken from the
+ * design (Figma 1988:10890) — see the "Login-only" section of `docs/auth.md`,
+ * which records the trade and the throttling that ought to go with it.
  */
-export async function requestMagicLink(
-  _prev: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
-  const email = normalizeEmail(String(formData.get("email") ?? ""));
+const UNREGISTERED_MESSAGE =
+  "Not an active user. Try checking spelling or another email.";
+
+/**
+ * Validate an address and send it a magic link. Shared by both entry points —
+ * the `/login` page and the header popover — so the two can never drift into
+ * different answers for the same address.
+ *
+ * Never throws for the unregistered case; that comes back as an error state
+ * like any other.
+ */
+async function sendLoginLink(rawEmail: string): Promise<LoginState> {
+  const email = normalizeEmail(rawEmail);
   if (!isValidEmail(email)) {
     return { status: "error", email, message: "Enter a valid email address." };
   }
@@ -39,19 +47,49 @@ export async function requestMagicLink(
     });
   } catch (err) {
     // AccessDenied is our own login-only rejection from the `signIn` callback
-    // (see auth.ts) — the address has no account. Fall through to the same
-    // check-your-email page a registered address gets, so the response never
-    // reveals who is registered. Anything else is a real provider/config
-    // failure; keep its message generic so it leaks nothing either.
-    const isUnregistered = err instanceof AuthError && err.type === "AccessDenied";
-    if (!isUnregistered) {
-      return {
-        status: "error",
-        email,
-        message: "We couldn't start sign-in just now. Please try again.",
-      };
-    }
+    // (see auth.ts) — the address has no account. Anything else is a real
+    // provider/config failure; keep its message generic so it leaks nothing
+    // about the address or our configuration.
+    const isUnregistered =
+      err instanceof AuthError && err.type === "AccessDenied";
+    return {
+      status: "error",
+      email,
+      message: isUnregistered
+        ? UNREGISTERED_MESSAGE
+        : "We couldn't start sign-in just now. Please try again.",
+    };
+  }
+
+  return { status: "sent", email };
+}
+
+/**
+ * Request a magic-link sign-in from the full-page form at `/login`, which
+ * navigates to the check-your-email page on success. The header popover uses
+ * {@link requestLoginLinkInline} instead and stays put.
+ */
+export async function requestMagicLink(
+  _prev: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
+  const result = await sendLoginLink(String(formData.get("email") ?? ""));
+  if (result.status !== "sent") {
+    return result;
   }
 
   redirect("/login/check-email");
+}
+
+/**
+ * Request a magic-link sign-in from the header popover (Figma 1988:9756). Same
+ * work as {@link requestMagicLink}, but it reports success as state instead of
+ * navigating — the whole point of signing in from the nav is not leaving the
+ * page you were reading.
+ */
+export async function requestLoginLinkInline(
+  _prev: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
+  return sendLoginLink(String(formData.get("email") ?? ""));
 }

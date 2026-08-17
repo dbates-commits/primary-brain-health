@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@pbh/ui/utils";
-import { Button } from "@pbh/ui";
+import { Button, PhosphorIcon } from "@pbh/ui";
+import { requestLoginLinkInline } from "@/app/login/actions";
+import { LoginMenu } from "./LoginMenu";
+import { LoginPanel } from "./LoginPanel";
 
 interface NavItem {
   label: string;
@@ -12,6 +15,7 @@ interface NavItem {
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -84,7 +88,9 @@ export function Header() {
     const timer = setTimeout(() => {
       allIds.forEach((id) => {
         const el = document.getElementById(id);
-        if (el) observer.observe(el);
+        if (el) {
+          observer.observe(el);
+        }
       });
     }, 100);
 
@@ -135,6 +141,10 @@ export function Header() {
                 {item.label}
               </a>
             ))}
+
+            {/* Not part of `nav`: that array feeds the IntersectionObserver
+                below, and Login is a popover, not a scroll anchor. */}
+            <LoginMenu />
           </div>
 
           {/* CTA Button */}
@@ -206,6 +216,34 @@ export function Header() {
                   {item.label}
                 </a>
               ))}
+
+              {/* Same panel as the desktop popover, disclosed inline — the
+                  drawer is already an overlay, so nesting a second one in it
+                  would be one layer too many. */}
+              <button
+                type="button"
+                onClick={() => setLoginOpen((v) => !v)}
+                aria-expanded={loginOpen}
+                className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-primary"
+              >
+                Login
+                <PhosphorIcon
+                  name="CaretDown"
+                  size={16}
+                  aria-hidden="true"
+                  className={cn(
+                    "transition-transform",
+                    loginOpen && "rotate-180",
+                  )}
+                />
+              </button>
+              {loginOpen && (
+                <LoginPanel
+                  action={requestLoginLinkInline}
+                  onDone={() => setLoginOpen(false)}
+                />
+              )}
+
               <Button
                 href="/#intake"
                 onClick={handleConsultationClick}
