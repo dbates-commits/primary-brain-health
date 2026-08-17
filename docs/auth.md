@@ -30,11 +30,49 @@ identical and nothing revealed who was registered.
 
 What that costs, so it is on the record: the sign-in form is an account-
 enumeration oracle. Anyone can test an address against the customer list, and
-for a brain-health service the mere fact of being a customer is sensitive.
-There is currently **no rate limiting** on `sendLoginLink` — nothing throttles
-an attacker walking a list of addresses through it. Per-IP and per-address
-throttling is the mitigation that ought to accompany this; until it lands, the
-disclosure is unbounded.
+for a brain-health service the mere fact of being a customer is sensitive. What
+keeps that bounded is the throttle below — the disclosure is per-attempt, so
+limiting attempts limits the disclosure.
+
+## Sign-in throttling
+
+`sendLoginLink` is rate-limited per IP and per address, in
+`apps/marketing/src/lib/rate-limit.ts`.
+
+| Limit | Ceiling | Window |
+|---|---|---|
+| Per IP | **10** attempts | 15 minutes |
+| Per address | **5** attempts | 15 minutes |
+
+The per-IP limit is the one that bites an enumeration sweep: it tries a
+different address every time, so it never approaches the per-address ceiling.
+The per-address limit is a separate concern — it stops one inbox being flooded
+with sign-in links from a spread of sources.
+
+Counting happens in Postgres (`auth_rate_limits`), not Redis. There is no Redis
+here, and the argument above for keeping sessions in Neon applies equally to a
+table of hashes with a fifteen-minute lifespan: one data posture, no
+third-party residency to audit. Per-attempt writes are the cost; at this volume
+they are noise. Reach for a dedicated store if that stops being true.
+
+Details worth knowing before changing it:
+
+- **Buckets are hashed**, with the same keyed hash as `audit_log.ip_hash`
+  (`hashIdentifier`, keyed by `IP_HASH_SECRET`). The raw column would otherwise
+  become a list of addresses people typed into a brain-health site, most of
+  which have no account and never consented to anything.
+- **It fails open.** If the database is unreachable the attempt is allowed —
+  sign-in needs the database anyway, so a failure there was going to fail the
+  request regardless, and failing closed would turn a database blip into a
+  total sign-in outage.
+- **The refusal says nothing.** Not which limit was hit, not how long is left.
+  "You've tried this address five times" hands back the signal the throttle
+  exists to withhold.
+- **A refusal is audited** as `signin_rate_limited`, with the hashed IP and
+  which limit tripped. The `auth_rate_limits` rows themselves are disposable
+  and swept on each check; the audit row is the record.
+- **A malformed address costs nothing** — it is rejected before the throttle,
+  because it never reaches the oracle.
 
 ## Why Auth.js and not Clerk
 

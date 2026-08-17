@@ -141,6 +141,13 @@
       "when": 1786626750340,
       "tag": "0019_drop_password_hash",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1786991064935,
+      "tag": "0020_faulty_betty_ross",
+      "breakpoints": true
     }
   ]
 }

@@ -32,16 +32,26 @@ export function getClientIp(headers: Headers): string | null {
 }
 
 /**
- * Deterministic SHA-256 hash of the IP (same IP → same hash, so we can spot
- * repeat sources without storing the raw address). Keyed with HMAC when
- * `IP_HASH_SECRET` is configured. A null IP hashes a sentinel so the NOT NULL
- * `consents.ip_hash` / `audit_log.ip_hash` columns are always satisfiable.
+ * Deterministic SHA-256 hash of an identifying value — same input, same hash,
+ * so repeat sources can be spotted without the value itself being stored.
+ * Keyed with HMAC when `IP_HASH_SECRET` is configured.
+ *
+ * Named for the property that matters rather than for IPs: the sign-in
+ * throttle hashes email addresses through here too, and one keyed hash is
+ * easier to reason about (and to rotate) than two.
  */
-export function hashIp(ip: string | null): string {
-  const value = ip ?? "unknown";
+export function hashIdentifier(value: string): string {
   const secret = process.env.IP_HASH_SECRET;
   if (secret) {
     return createHmac("sha256", secret).update(value).digest("hex");
   }
   return createHash("sha256").update(value).digest("hex");
+}
+
+/**
+ * Hash of the client IP. A null IP hashes a sentinel so the NOT NULL
+ * `consents.ip_hash` / `audit_log.ip_hash` columns are always satisfiable.
+ */
+export function hashIp(ip: string | null): string {
+  return hashIdentifier(ip ?? "unknown");
 }

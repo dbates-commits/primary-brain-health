@@ -19,6 +19,10 @@ export type AuditEventType =
   | "magic_link_sent"
   | "login"
   | "logout"
+  // A sign-in request refused by the throttle. Worth a row of its own: it is
+  // the signal that someone is walking addresses through the form, and the
+  // rate-limit table it comes from is swept every fifteen minutes.
+  | "signin_rate_limited"
   // Booking email confirmation: the link sent at signup, and its redemption.
   // `email_verified` is the record that this address was proven to be reachable
   // by the person who booked.
