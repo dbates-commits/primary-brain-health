@@ -127,7 +127,7 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | Confirm | `EmailConfirmationStep` | `GET /booking/confirm` | `consumeBookingConfirmation` | `consumed_at`, `users.email_verified`; audit `email_verified` |
 | Resume | `BookingStepFlow` (on mount) | `getBookingResumeState` | `resolveBookingResumeState` | — (read only) |
 | Details | `DetailsForm` | `detailsAction` | `completeProfileCore` | `users` demographics (DOB, zip, phone, gender, education) + the patient's name |
-| Consent | `ConsentForm` | `consentAction` | `recordConsentCore` | two `consents` rows — `wellness` + `hipaa_npp` — with `ip_hash` + `user_agent` |
+| Consent | `ConsentForm` | `consentAction` | `recordConsentCore` | two `consents` rows — `wellness` + `hipaa_npp` — with `ip_hash`, `user_agent` and the terms `version` |
 | Payment | `PaymentStep` | `createAssessmentCheckoutSession` | `createCheckoutSessionCore` | audit `payment_pending`; Stripe Session |
 | Fulfilment | — | `finalizeCheckoutSession` | `recordSucceededPayment` | `payments` row incl. `package_key`; audit `payment_succeeded` |
 | Sign-in | — | `finalizeCheckoutSession` | `createSessionForUser` | `sessions` row; audit `login` (`method: post-payment`) |
@@ -150,6 +150,25 @@ not the key the client re-sends — is what `createCheckoutSessionCore` charges.
 Trusting the client would let someone drive the $449 flow while checking out at
 the $149 price, and fulfilment would accept it, since it validates the amount
 against whichever package the client named.
+
+### Which terms were agreed to
+
+The agreement on the consent step is CMS-editable (the `Modals` collection's
+`consent` document), and each `consents` row carries the version naming the text
+that customer accepted. Those rows are append-only, so there is no correcting a
+wrong one.
+
+The version therefore travels with the terms rather than being looked up again:
+`resolveConsentTerms` returns the two together — a version with no terms beside
+it is dropped, not recorded — and the page that renders them mints a signed
+`consentStamp` naming them. `consentAction` reads that stamp instead of
+re-querying the CMS, so a submission is always recorded against the words that
+were actually on screen, however stale the render. A stamp that is missing or
+doesn't verify is refused (`CONSENT_STAMP_ERROR`) rather than falling back to a
+guess.
+
+Empty means the terms that ship in code, described by `CONSENT_VERSION` — the
+normal state, since the CMS document starts empty.
 
 ### The welcome screen
 
@@ -226,17 +245,23 @@ reports are read in the Engagement App, which owns notifying about them.
 
 ---
 
-## Three tokens, easily confused
+## Four signed values, easily confused
 
 | Token | Signed with | TTL | Single-use via |
 |---|---|---|---|
 | Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` |
 | Booking cookie (`pbh_booking_session`) | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry |
+| Consent stamp (`consentStamp` form field) | `BOOKING_RESUME_SECRET`, domain-tagged | none, by design | no — it is a label, not an authorization |
 | Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` |
 
-There used to be a fourth — the cross-app payment handoff, signed with
+There used to be another — the cross-app payment handoff, signed with
 `AUTH_HANDOFF_SECRET`. It existed only to carry a session across an origin
 boundary that no longer exists.
+
+The stamp and the cookie share a key, so each is signed over a domain tag
+(`signing.ts`) — their formats both end in `.<hmac>`, and without the tag a
+customer could paste their own cookie into the consent form and have it recorded
+as the terms version.
 
 ### Session lifetimes
 

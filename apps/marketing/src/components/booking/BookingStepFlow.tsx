@@ -7,9 +7,7 @@ import {
   DetailsForm,
   ConsentForm,
   PaymentStep,
-  DETAILS_HEADER,
-  consentHeader,
-  PAYMENT_HEADER,
+  CONSENT_STAMP_FIELD,
   DEFAULT_PACKAGE_KEY,
   trackForPackage,
   type PackageKey,
@@ -17,12 +15,17 @@ import {
 } from "@pbh/booking";
 import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
+import { ConsentTerms } from "./ConsentTerms";
+import { resolveConsentTerms } from "./consent-copy";
+import { MODAL_STEPS, type ModalStep, type ModalStepCopyMap } from "./steps";
+import { resolveStepHeaders } from "./step-headers";
 import { NavigatorNote } from "./NavigatorNote";
 import { EmailConfirmationStep } from "./EmailConfirmationStep";
 import {
   signupAction,
   detailsAction,
   consentAction,
+  resendConfirmationAction,
   getBookingResumeState,
 } from "./actions";
 import {
@@ -38,9 +41,6 @@ import {
  * Payment is the last step it owns: a paid customer is sent to `/welcome`, so
  * there is no in-modal confirmation step (see `WELCOME_PATH`).
  */
-const MODAL_STEPS = ["confirm", "details", "consent", "payment"] as const;
-type ModalStep = (typeof MODAL_STEPS)[number];
-
 const STEP_LABEL: Record<ModalStep, string> = {
   confirm: "Confirm your email",
   details: "Complete your details",
@@ -90,6 +90,8 @@ export function BookingStepFlow({
   buttonTextMobile,
   showIncludes,
   tinaFields,
+  modalCopy,
+  consentStamp,
 }: {
   headline?: string;
   subheadline?: string;
@@ -97,6 +99,19 @@ export function BookingStepFlow({
   buttonTextMobile?: string;
   showIncludes?: boolean;
   tinaFields?: { headline?: string; subheadline?: string };
+  /**
+   * Step headers from the Modals collection. Modal-only — unlike every other
+   * prop here it is deliberately not forwarded to `BookingSection`. Each step
+   * falls back to the copy that ships in code; see `resolveStepHeaders`.
+   */
+  modalCopy?: ModalStepCopyMap;
+  /**
+   * The server's signed note of which agreement `modalCopy` renders, minted
+   * alongside it and handed back at submit so the consent row names the terms
+   * that were actually on screen. Travels with `modalCopy` or not at all — the
+   * two describe the same render.
+   */
+  consentStamp?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -128,6 +143,21 @@ export function BookingStepFlow({
       return signupAction(prev, formData);
     },
     [packageKey],
+  );
+
+  /**
+   * Carry the signed terms stamp into the consent submission, the same way
+   * `signupWithPackage` carries the package. It is the server's own statement
+   * round-tripped, not a client claim: `consentAction` verifies the signature
+   * and refuses anything it didn't sign, so binding it here can only tell the
+   * truth about which agreement this render put on screen.
+   */
+  const consentWithStamp = useCallback(
+    (prev: Parameters<typeof consentAction>[0], formData: FormData) => {
+      formData.set(CONSENT_STAMP_FIELD, consentStamp ?? "");
+      return consentAction(prev, formData);
+    },
+    [consentStamp],
   );
 
   /**
@@ -237,18 +267,17 @@ export function BookingStepFlow({
 
   const step = MODAL_STEPS[stepIndex];
 
+  // The agreement and the version naming it, resolved together — see
+  // `resolveConsentTerms`. Only `content` is needed here; the version rode out
+  // to the server that minted `consentStamp`.
+  const consentTerms = resolveConsentTerms(modalCopy?.consent);
+
   // Each step's header is rendered by the Modal in a fixed region above the
   // scroll area (so only the body scrolls), using the step's own exported copy.
-  const stepHeader =
-    step === "confirm" ? (
-      <StepHeader title="Email Confirmation" />
-    ) : step === "details" ? (
-      <StepHeader {...DETAILS_HEADER} />
-    ) : step === "consent" ? (
-      <StepHeader {...consentHeader(track)} />
-    ) : step === "payment" ? (
-      <StepHeader {...PAYMENT_HEADER} />
-    ) : undefined;
+  // CMS copy from the Modals collection where an editor has written some, the
+  // step's exported constant otherwise — keyed off MODAL_STEPS, so a renamed
+  // step is a typecheck failure rather than a silently missing header.
+  const stepHeader = <StepHeader {...resolveStepHeaders(modalCopy, track)[step]} />;
 
   return (
     <>
@@ -271,7 +300,12 @@ export function BookingStepFlow({
         label={STEP_LABEL[step]}
         header={stepHeader}
       >
-        {step === "confirm" && <EmailConfirmationStep expired={expiredLink} />}
+        {step === "confirm" && (
+          <EmailConfirmationStep
+            expired={expiredLink}
+            resend={resendConfirmationAction}
+          />
+        )}
         {step === "details" && (
           <DetailsForm
             action={detailsAction}
@@ -283,10 +317,19 @@ export function BookingStepFlow({
         )}
         {step === "consent" && (
           <ConsentForm
-            action={consentAction}
+            action={consentWithStamp}
             track={track}
             onComplete={advance}
             showHeader={false}
+            // Undefined — not an element that renders nothing — when the CMS
+            // holds no agreement, because that is what makes `ConsentForm` fall
+            // back to the terms that ship in code. An empty element would leave
+            // a customer accepting a blank box.
+            terms={
+              consentTerms.content ? (
+                <ConsentTerms content={consentTerms.content} />
+              ) : undefined
+            }
           />
         )}
         {step === "payment" && (

@@ -6,13 +6,20 @@ import {
   createAccountCore,
   getClientIp,
   hashIp,
+  readConsentStamp,
   recordConsentCore,
   resendBookingConfirmation,
   resolveBookingResumeState,
   resolveBookingUserId,
   type BookingResumeState,
 } from "@pbh/booking/server";
-import type { ConsentState, DetailsState, SignupState } from "@pbh/booking";
+import {
+  CONSENT_STAMP_ERROR,
+  CONSENT_STAMP_FIELD,
+  type ConsentState,
+  type DetailsState,
+  type SignupState,
+} from "@pbh/booking";
 
 /**
  * Real per-step server actions for the marketing booking modal (pbh-ggr.5),
@@ -75,12 +82,23 @@ export async function consentAction(
     return { status: "error", message: NO_BOOKING_SESSION };
   }
 
+  // Which agreement was on screen, as this server said when it rendered the
+  // step — not as the browser claims, and not as a fresh CMS read guesses. The
+  // stamp is signed, so a value the browser edited fails to verify; a value we
+  // can't verify means we don't know what was read, and a row we can't correct
+  // later is no place to guess.
+  const stamp = readConsentStamp(formData.get(CONSENT_STAMP_FIELD));
+  if (!stamp) {
+    return { status: "error", message: CONSENT_STAMP_ERROR };
+  }
+
   const requestHeaders = await headers();
   return recordConsentCore({
     userId,
     agreed: formData.get("agreed") === "on",
     ipHash: hashIp(getClientIp(requestHeaders)),
     userAgent: requestHeaders.get("user-agent"),
+    version: stamp.version,
   });
 }
 

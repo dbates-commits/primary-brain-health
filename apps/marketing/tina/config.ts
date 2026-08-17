@@ -7,6 +7,7 @@ import { testimonialCollection } from "./collections/testimonial";
 import { globalCtaCollection } from "./collections/globalCta";
 import { settingsCollection } from "./collections/settings";
 import { faqCollection } from "./collections/faq";
+import { modalsCollection } from "./collections/modals";
 
 // Which branch TinaCloud reads/indexes content from. Feature branches are not
 // indexed on TinaCloud, so deploys (incl. Vercel previews) default to the
@@ -37,6 +38,7 @@ export default defineConfig({
   schema: {
     collections: [
       pageCollection,
+      modalsCollection,
       postCollection,
       projectCollection,
       authorCollection,

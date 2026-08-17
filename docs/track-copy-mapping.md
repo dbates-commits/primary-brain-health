@@ -183,6 +183,18 @@ fails on a banned-term regex (`specialist`, `diagnos*`, `physician`,
 unwritten, which is why the marketing chrome can say "Book a Consultation" in
 about ten places while the guard stays green — tracked on pbh-tyd.
 
+One slice of the content half now exists: the **Modals** collection
+(`content/modals/*.json` — the booking modal's four step headers) is guarded
+twice, by a Tina `ui.validate` that blocks the save in the admin
+(`apps/marketing/tina/fields/no-clinical-vocabulary.ts`) and by a sweep over the
+documents themselves (`apps/marketing/content/modal-copy.test.ts`), since a
+TinaCloud save commits to the branch without a PR. It is scoped to those
+documents on purpose: widening the glob is pbh-tyd's job, and doing it here
+would have turned the pre-existing "Consultation" copy into a red build on day
+one. Note that copy is wellness-only by construction — `resolveStepHeader`
+ignores it on the clinical track, because a field that cannot hold
+"consultation" cannot hold the clinical consent subtitle either.
+
 **It must cover the `upgrade.*` slice under the wellness track.** That slice
 renders on a wellness-coded purchase and its entire purpose is to make the
 clinical product appealing — it is precisely where someone will reach for

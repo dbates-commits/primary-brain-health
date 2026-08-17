@@ -198,6 +198,22 @@ fragment PageParts on Page {
   }
 }
 
+fragment ModalParts on Modal {
+  __typename
+  ... on ModalStep {
+    step
+    title
+    subtitle
+  }
+  ... on ModalConsentStep {
+    step
+    title
+    subtitle
+    terms
+    termsVersion
+  }
+}
+
 fragment PostParts on Post {
   __typename
   title

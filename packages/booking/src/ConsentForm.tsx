@@ -1,6 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { Button, Checkbox, FieldError, StepHeader } from "@pbh/ui";
 import { copyFor, type Track } from "@pbh/copy";
 import { StickyActions } from "./StickyActions";
@@ -64,12 +71,22 @@ export function ConsentForm({
   track,
   onComplete,
   showHeader = true,
+  terms,
 }: {
   action: ConsentAction;
   /** Which product is being consented to — decides the wording. */
   track: Track;
   onComplete: () => void;
   showHeader?: boolean;
+  /**
+   * The agreement itself, rendered by the host — the marketing app passes the
+   * CMS-authored terms through `TinaMarkdown`. Rendered rather than raw so this
+   * package stays free of a CMS dependency and the funnel can render its own.
+   *
+   * Omitted (or absent from the CMS) falls back to the placeholder sections
+   * below, so this step can never present an empty agreement.
+   */
+  terms?: ReactNode;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -135,24 +152,28 @@ export function ConsentForm({
           className="h-[337px] w-full overflow-y-auto rounded-md border border-neutral-200 bg-neutral-50 py-6 pl-6 pr-10 [scrollbar-color:var(--color-neutral-300)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-primary [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300"
         >
           <div className="flex flex-col gap-6">
-            <p className="text-sm leading-normal text-neutral-600">
-              {TERMS_INTRO}
-            </p>
-
-            {LEGAL_SECTIONS.map((section) => (
-              <div key={section.title} className="flex flex-col gap-2">
-                <p className="text-sm font-bold text-neutral-900">
-                  {section.title}
-                </p>
+            {terms ?? (
+              <>
                 <p className="text-sm leading-normal text-neutral-600">
-                  {section.body}
+                  {TERMS_INTRO}
                 </p>
-              </div>
-            ))}
 
-            <p className="text-[13px] italic text-neutral-400">
-              {TERMS_UPDATED}
-            </p>
+                {LEGAL_SECTIONS.map((section) => (
+                  <div key={section.title} className="flex flex-col gap-2">
+                    <p className="text-sm font-bold text-neutral-900">
+                      {section.title}
+                    </p>
+                    <p className="text-sm leading-normal text-neutral-600">
+                      {section.body}
+                    </p>
+                  </div>
+                ))}
+
+                <p className="text-[13px] italic text-neutral-400">
+                  {TERMS_UPDATED}
+                </p>
+              </>
+            )}
           </div>
         </div>
 

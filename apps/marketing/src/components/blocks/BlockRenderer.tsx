@@ -8,6 +8,7 @@ import { FAQ } from "@/components/blocks/FAQ";
 import { Gallery } from "@/components/blocks/Gallery";
 import { Testimonials } from "@/components/blocks/Testimonials";
 import { BookingStepFlow } from "@/components/booking";
+import type { ModalStepCopyMap } from "@/components/booking/steps";
 import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
 import { StackSections } from "@/components/blocks/StackSections";
 import { BenefitsList } from "@/components/blocks/BenefitsList";
@@ -37,9 +38,15 @@ const BOOKING_ANCHOR_ID = "intake";
 export function BlockRenderer({
   blocks,
   data,
+  modalCopy,
+  consentStamp,
 }: {
   blocks: Block[] | null | undefined;
   data?: PageData;
+  /** Step headers for the booking modal; only the intakeForm block reads it. */
+  modalCopy?: ModalStepCopyMap;
+  /** Signed record of the agreement `modalCopy` renders; travels with it. */
+  consentStamp?: string;
 }) {
   if (!blocks) {
     return null;
@@ -232,6 +239,8 @@ export function BlockRenderer({
                 buttonText={block.buttonText ?? undefined}
                 buttonTextMobile={block.buttonTextMobile ?? undefined}
                 showIncludes={block.showIncludes ?? undefined}
+                modalCopy={modalCopy}
+                consentStamp={consentStamp}
                 tinaFields={{
                   headline: getFieldPath(index, "headline"),
                   subheadline: getFieldPath(index, "subheadline"),

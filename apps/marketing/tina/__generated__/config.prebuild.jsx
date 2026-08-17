@@ -1862,6 +1862,153 @@ var faqCollection = {
   ]
 };
 
+// tina/fields/no-clinical-vocabulary.ts
+import { findBannedTerms } from "@pbh/copy";
+function noClinicalVocabulary(value) {
+  return check(typeof value === "string" ? value : "");
+}
+function check(text) {
+  if (text.trim() === "") {
+    return void 0;
+  }
+  const hits = findBannedTerms(text, "modal");
+  if (hits.length === 0) {
+    return void 0;
+  }
+  const words = [...new Set(hits.map((hit) => hit.match))].join(", ");
+  return `Clinical wording isn\u2019t allowed on this screen \u2014 such as: ${words}. The booking modal sells a wellness assessment and a results review, not a consultation, diagnosis or treatment, and not care from a specialist, physician, clinician or neurologist. Reword the line and save again.`;
+}
+
+// src/lib/rich-text.ts
+function richTextToPlainText(value) {
+  const collected = [];
+  const walk = (node) => {
+    if (typeof node === "string") {
+      collected.push(node);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+    if (!node || typeof node !== "object") {
+      return;
+    }
+    const record = node;
+    for (const key of ["text", "value", "alt", "title"]) {
+      if (typeof record[key] === "string") {
+        collected.push(record[key]);
+      }
+    }
+    walk(record.children);
+  };
+  walk(value);
+  return collected.join(" ");
+}
+function hasRichTextContent(value) {
+  return richTextToPlainText(value).trim() !== "";
+}
+
+// tina/fields/consent-terms-version.ts
+function consentTermsVersion(value, allValues) {
+  const version = typeof value === "string" ? value.trim() : "";
+  if (version === "") {
+    return hasRichTextContent(allValues?.terms) ? "Set a version whenever the consent terms are written here, e.g. 2026-08-13. It is recorded against every customer who accepts these terms, and those records can't be corrected later." : void 0;
+  }
+  if (/\s/.test(version)) {
+    return "Use a single token with no spaces, e.g. 2026-08-13 \u2014 this is an identifier stored on consent records, not a description.";
+  }
+  if (version.length > 40) {
+    return "Keep the version under 40 characters.";
+  }
+  return void 0;
+}
+
+// tina/collections/modals.ts
+var HEADER_FIELDS = [
+  {
+    name: "step",
+    label: "Step",
+    type: "string",
+    required: true,
+    // Both the label and the sort order in the collection list — Tina sorts
+    // by the `isTitle` field, so numbering these gives flow order instead of
+    // alphabetical (confirm, consent, details, payment).
+    isTitle: true,
+    description: "How this step is listed here, e.g. \u201C3 \xB7 Consent\u201D. Never shown to a customer."
+  },
+  {
+    name: "title",
+    label: "Title",
+    type: "string",
+    description: "The big heading at the top of this step. Leave empty to keep the wording that ships in code \u2014 the preview beside this form shows you what that is. It may not use clinical words (consultation, diagnosis, treatment, specialist, physician, clinician, neurologist, prescription): this is a wellness assessment, and saving is blocked if it does.",
+    ui: { validate: noClinicalVocabulary }
+  },
+  {
+    name: "subtitle",
+    label: "Subtitle",
+    type: "string",
+    description: "The line under the heading. Leave empty for the code wording, or for no subtitle at all where the step ships without one.",
+    ui: { component: "textarea", validate: noClinicalVocabulary }
+  }
+];
+var modalsCollection = {
+  name: "modal",
+  label: "Modals",
+  path: "content/modals",
+  format: "json",
+  ui: {
+    // `_sys.filename` IS the step id, so this needs no lookup table. Tina's
+    // admin renders the route in an iframe beside the form.
+    router: ({ document }) => `/internal/modals/${document._sys.filename}`,
+    // Four steps, fixed. A fifth document would have no step to title and no
+    // route to open; a missing one would break the flow it names.
+    allowedActions: {
+      create: false,
+      delete: false,
+      createFolder: false,
+      createNestedFolder: false
+    },
+    // A rename would silently break both the router and the runtime lookup,
+    // which key off the filename.
+    filename: { readonly: true }
+    // Deliberately not `global: true`: a global form is skipped when Tina picks
+    // the active form, and this document's form being the active one is the
+    // entire point.
+  },
+  templates: [
+    {
+      name: "step",
+      label: "Step",
+      fields: HEADER_FIELDS
+    },
+    {
+      name: "consentStep",
+      label: "Consent step",
+      fields: [
+        ...HEADER_FIELDS,
+        {
+          name: "terms",
+          label: "Consent terms",
+          type: "rich-text",
+          description: "The agreement shown in the scrolling box on this step, which a customer must accept before paying. Markdown: headings, bold, lists and links. Leave it empty and the terms that ship in code are shown instead."
+          // No banned-terms guard here, unlike the headings above. Legal text
+          // needs the clinical words precisely to disclaim them — "this is not
+          // medical treatment", "we do not provide a diagnosis" — which is the
+          // same reason banned-terms.ts carves out the bare word "medical".
+        },
+        {
+          name: "termsVersion",
+          label: "Consent terms version",
+          type: "string",
+          description: "Stamped on every consent record as proof of WHICH terms that customer agreed to, so change it whenever you change the terms above \u2014 a date like 2026-08-13 is ideal. Leave it empty and consents are recorded against the version that ships in code. Existing records are never rewritten.",
+          ui: { validate: consentTermsVersion }
+        }
+      ]
+    }
+  ]
+};
+
 // tina/config.ts
 var branch = process.env.NEXT_PUBLIC_TINA_BRANCH || "main";
 var isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
@@ -1884,6 +2031,7 @@ var config_default = defineConfig({
   schema: {
     collections: [
       pageCollection,
+      modalsCollection,
       postCollection,
       projectCollection,
       authorCollection,
