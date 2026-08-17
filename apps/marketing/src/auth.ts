@@ -224,11 +224,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       //    participant id. None of it is needed to render a page, and shipping
       //    it to the browser is at odds with keeping this tier PHI-light.
       //
-      // `user.id` is the only field either app reads (see `session?.user?.id`
-      // in the assessments, welcome and login routes), so that is all we send.
+      // `user.id` is what every route reads (see `session?.user?.id` in the
+      // assessments, welcome and login routes). `firstName` is the one addition
+      // to that floor: the header greets the signed-in customer by name
+      // (Figma 1917:7795), and the menu is rendered client-side, so the name
+      // has to reach the browser somehow. It is added one field at a time and
+      // on purpose — do not widen this to the adapter's user object, and think
+      // twice before adding anything from the clinical columns.
+      // The Drizzle adapter hands the whole `users` row to this callback, so
+      // `firstName` is there at runtime. `AdapterUser` is Auth.js's own fixed
+      // shape and knows nothing about our columns, hence the assertion — the
+      // same reason the schema is asserted above.
+      const { firstName } = user as typeof user & { firstName: string };
+
       return {
         expires: session.expires,
-        user: { id: user.id },
+        user: { id: user.id, firstName },
       };
     },
   },

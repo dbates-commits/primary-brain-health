@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Gilda_Display, Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/layout/AuthProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollRevealInit } from "@/components/ScrollRevealInit";
@@ -66,8 +67,10 @@ export const metadata: Metadata = {
 /**
  * Never call `auth()` here or in `Header` — it reads cookies, which would opt
  * every page into dynamic rendering and take the Tina-driven pages off the CDN.
- * A sign-out affordance, if one is ever wanted, belongs in a client component
- * reading `/api/auth/session`.
+ *
+ * The header's account menu is the client component that note anticipated: it
+ * reads `/api/auth/session` through `AuthProvider`, which is scoped to the
+ * header for exactly this reason.
  */
 export default function RootLayout({
   children,
@@ -90,7 +93,9 @@ export default function RootLayout({
       >
         <ScrollToTop />
         <ScrollRevealInit />
-        <Header />
+        <AuthProvider>
+          <Header />
+        </AuthProvider>
         <main className="pt-20">{children}</main>
         <Footer />
       </body>

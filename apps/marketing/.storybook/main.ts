@@ -15,6 +15,8 @@ const LOGIN_ACTIONS_MOCK = resolve(
   here,
   '../src/stories/layout/login-actions.mock.ts',
 );
+const SIGN_OUT = resolve(here, '../src/app/welcome/sign-out');
+const SIGN_OUT_MOCK = resolve(here, '../src/stories/layout/sign-out.mock.ts');
 
 /**
  * Resolve an import specifier to an absolute path the same way the app does,
@@ -74,6 +76,9 @@ const config: StorybookConfig = {
         }
         if (target === LOGIN_ACTIONS) {
           return LOGIN_ACTIONS_MOCK;
+        }
+        if (target === SIGN_OUT) {
+          return SIGN_OUT_MOCK;
         }
         return null;
       },

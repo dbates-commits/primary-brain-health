@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { cn } from "@pbh/ui/utils";
 import { Button, PhosphorIcon } from "@pbh/ui";
 import { requestLoginLinkInline } from "@/app/login/actions";
+import { signOutAction } from "@/app/welcome/sign-out";
 import { LoginMenu } from "./LoginMenu";
 import { LoginPanel } from "./LoginPanel";
+import { UserMenu } from "./UserMenu";
+import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
 
 interface NavItem {
   label: string;
@@ -19,6 +24,10 @@ export function Header() {
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  // Client-side (see `AuthProvider`): until the session request lands, `status`
+  // is "loading" and the header shows its signed-out state.
+  const { data: session } = useSession();
+  const firstName = session?.user?.firstName;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -143,8 +152,8 @@ export function Header() {
             ))}
 
             {/* Not part of `nav`: that array feeds the IntersectionObserver
-                below, and Login is a popover, not a scroll anchor. */}
-            <LoginMenu />
+                below, and neither of these is a scroll anchor. */}
+            {firstName ? <UserMenu firstName={firstName} /> : <LoginMenu />}
           </div>
 
           {/* CTA Button */}
@@ -217,31 +226,59 @@ export function Header() {
                 </a>
               ))}
 
-              {/* Same panel as the desktop popover, disclosed inline — the
-                  drawer is already an overlay, so nesting a second one in it
-                  would be one layer too many. */}
-              <button
-                type="button"
-                onClick={() => setLoginOpen((v) => !v)}
-                aria-expanded={loginOpen}
-                className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-primary"
-              >
-                Login
-                <PhosphorIcon
-                  name="CaretDown"
-                  size={16}
-                  aria-hidden="true"
-                  className={cn(
-                    "transition-transform",
-                    loginOpen && "rotate-180",
+              {/* Signed in, the drawer lists the account items flat. The
+                  desktop dropdown exists to keep the nav row short, which is
+                  not a problem the drawer has. */}
+              {firstName ? (
+                <>
+                  {USER_MENU_LINKS.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(userMenuItemClass, "w-full px-0")}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <form action={signOutAction}>
+                    <button
+                      type="submit"
+                      className={cn(userMenuItemClass, "w-full px-0")}
+                    >
+                      Logout
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  {/* Same panel as the desktop popover, disclosed inline — the
+                      drawer is already an overlay, so nesting a second one in
+                      it would be one layer too many. */}
+                  <button
+                    type="button"
+                    onClick={() => setLoginOpen((v) => !v)}
+                    aria-expanded={loginOpen}
+                    className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-primary"
+                  >
+                    Login
+                    <PhosphorIcon
+                      name="CaretDown"
+                      size={16}
+                      aria-hidden="true"
+                      className={cn(
+                        "transition-transform",
+                        loginOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                  {loginOpen && (
+                    <LoginPanel
+                      action={requestLoginLinkInline}
+                      onDone={() => setLoginOpen(false)}
+                    />
                   )}
-                />
-              </button>
-              {loginOpen && (
-                <LoginPanel
-                  action={requestLoginLinkInline}
-                  onDone={() => setLoginOpen(false)}
-                />
+                </>
               )}
 
               <Button
