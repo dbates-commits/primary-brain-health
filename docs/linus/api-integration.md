@@ -3,21 +3,19 @@
 How the site integrates the [Linus Health Public API](./Linus%20Health%20Public%20API.pdf):
 what we call, what we persist, and when.
 
-> ## ⚠️ Currently not wired up
+> ## ⚠️ One caller: the Stripe webhook
 >
-> **Nothing in this repo calls the Linus API.** As of `pbh-ek8` the payment path
-> records the payment, signs the customer in and sends them to `/welcome` — it no
-> longer registers or enrolls anyone. Linus outages were stranding paying
-> customers on the payment step with `Couldn't register with Linus (status 503)`,
-> and how clients should be registered is an open question.
+> **Registration runs in `/api/stripe/webhook` and nowhere else** (`pbh-73g`). A
+> succeeded `payment_intent` records the payment and then registers + enrolls the
+> payer; the customer-facing finalize deliberately calls no Linus API, because
+> doing it inline is what stranded paying customers on the payment step with
+> `Couldn't register with Linus (status 503)` (`pbh-ek8`). The customer is on
+> `/welcome` before any of this happens.
 >
-> Everything below describes code that is still in the tree and still correct,
-> but has **no callers**: `packages/linus/`,
-> `packages/booking/src/server/register-and-enroll.ts`, and the
-> `users.linus_participant_id` / `users.linus_registration_claimed_at` /
-> `linus_enrollments` storage. It is kept as the reference for whatever the next
-> registration approach turns out to be. Read it as "how this worked", not "what
-> happens today".
+> A transient failure (Linus 5xx/429, DB, a concurrent registration in flight)
+> returns 500 so Stripe redelivers — that redelivery *is* the retry. A permanent
+> one (no date of birth, no patient name, a Linus 4xx) is logged and
+> acknowledged, since no redelivery would fix it.
 
 ## Overview
 
@@ -29,7 +27,7 @@ and Bearer token); nothing touches the client bundle.
 The integration lives in:
 
 - `packages/linus/` — the API client, env/config, and the register payload builder.
-- `packages/booking/src/server/register-and-enroll.ts` — the register/enroll engine. It used to run on the payment path and in the Stripe webhook; both call sites are gone (see the warning above).
+- `packages/booking/src/server/register-and-enroll.ts` — the register/enroll engine, called from the Stripe webhook only (see the note above).
 - `packages/db/src/schema/` — the `users` and `linus_enrollments` tables.
 
 > Report **delivery** is no longer ours: with `apps/app` retired (August 2026),
@@ -49,8 +47,8 @@ sequenceDiagram
   participant DB as Postgres
   participant L as Linus API
 
-  Note over B,L: ① Payment step — finalizeCheckoutSession (or the Stripe webhook)
-  B->>A: Payment completes (userId from the booking cookie)
+  Note over B,L: ① Stripe webhook — payment_intent.succeeded
+  B->>A: Payment completes (userId from the intent metadata)
   A->>L: POST /oauth/token
   L-->>A: access_token (cached in-module)
   opt no stored participantId
@@ -169,21 +167,21 @@ values, so this mapping is mostly pass-through.
 
 ### `users.linus_participant_id`
 
-Set **once**, on the **payment step**: `finalizeCheckoutSession`
-(`apps/marketing/src/components/booking/payment/actions.ts`) calls
-`registerAndEnrollUserById(userId)`, and the Stripe webhook does the same as a
-backstop. If the user has no `participantId` yet,
+Set **once**, from the **Stripe webhook**: `handleSucceeded`
+(`packages/booking/src/server/webhook.ts`) calls
+`registerAndEnrollUserById(userId, { retryOnContention: true })` after the
+payment is recorded. If the user has no `participantId` yet,
 `registerAndEnrollUser` (`register-and-enroll.ts`) calls `registerSubject` and
 writes the returned id to the unique `linus_participant_id` column. A concurrent
 double-submit can hit the unique constraint; we catch that and re-read the stored
 id instead of failing.
 
-Payment was the *only* registration point, and it no longer registers either
-(see the warning at the top): **nothing sets this column any more.** The retired
-`/assessments` page used to re-run the resolver on every load with
-`{ allowRegister: false }`, which also gave a deferred registration a second
-chance to complete; then the webhook's `retryOnContention` retry was the only
-recovery; now there is none. See the known gaps in
+A succeeded payment is the *only* registration point. The retired `/assessments`
+page used to re-run the resolver on every load with `{ allowRegister: false }`,
+which gave a deferred registration a second chance to complete; today the
+webhook's `retryOnContention` retry is the only recovery, so a registration that
+outlives Stripe's redeliveries leaves a paid row with no participant id and
+nothing notices (`pbh-3cy`). See the known gaps in
 [`../booking-flow.md`](../booking-flow.md).
 
 ### `linus_enrollments` rows
