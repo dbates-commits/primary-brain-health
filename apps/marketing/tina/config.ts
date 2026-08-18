@@ -17,9 +17,9 @@ import { modalsCollection } from "./collections/modals";
 // Staging tried that and it did not work: TinaCloud never indexed `staging`
 // (Index Branches reports success, the branch never appears), so every content
 // query 404'd and every page fell back to the "create your home page content"
-// screen. The override is removed until Tina fixes it, which means staging
-// *reads* production content — so `src/proxy.ts` 404s the admin off production
-// to make sure nothing can write it from there.
+// screen. The override is removed until Tina fixes it, which means staging both
+// reads and edits `main` — the admin there is the production CMS wearing a
+// different hostname.
 const branch = process.env.NEXT_PUBLIC_TINA_BRANCH || "main";
 
 const isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
