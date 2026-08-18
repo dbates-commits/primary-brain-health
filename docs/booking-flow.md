@@ -3,10 +3,11 @@
 How a customer goes from the signup form on the marketing home page to a paid
 account handed off to the Linus Engagement App, and what is written along the way.
 
-> **Linus registration is currently switched off** (pbh-ek8). The payment path
-> calls no Linus API: it records the payment, signs the customer in, and sends
-> them to `/welcome`. `@pbh/linus` and `register-and-enroll.ts` are still in the
-> tree but have no callers. See [Known gaps](#known-gaps).
+> **Linus registration happens in the Stripe webhook only** (pbh-73g). The
+> customer-facing path records the payment, signs the customer in and sends them
+> to `/welcome` without calling Linus; the webhook then registers + enrolls the
+> payer out of band. That split is deliberate — an inline call is what stranded
+> paying customers on the payment step during a Linus outage (pbh-ek8).
 
 Kept next to the code on purpose: when the flow changes this should change in the
 same PR, and it should be obvious when it hasn't.
@@ -19,7 +20,7 @@ Everything the customer touches is `apps/marketing`: the booking section, the
 whole booking modal, Stripe Checkout, sign-in, the welcome screen, and the
 **only** Stripe webhook endpoint. It uses `@pbh/db` (one Neon database),
 `@pbh/booking/server` (every write path), `@pbh/emails` and `@pbh/payments`.
-(`@pbh/linus` is still a dependency, but nothing on a request path imports it.)
+(`@pbh/linus` is reached only from the webhook, never from a page render.)
 
 There used to be a second app (`apps/app`) holding the post-payment product —
 `/assessments`, report downloads, and its own Auth.js session. It was retired in
@@ -207,9 +208,18 @@ the exactly-once signal that gates the audit row and the receipt email — so a
 redelivered event doesn't double-charge the audit log or email the customer
 twice.
 
-The webhook used to also register + enroll the payer and **throw** on failure so
-Stripe redelivered. That turned a Linus outage into a stream of 500s on the
-endpoint, and is gone with the rest of the Linus call sites (pbh-ek8).
+The webhook — and only the webhook — then registers + enrolls the payer with
+Linus (`registerAndEnrollUserById`, `retryOnContention: true`). It runs on every
+delivery, not just `firstWrite`, because it is idempotent and a delivery that
+recorded the payment but died before registering must still be covered.
+
+Failure handling splits on the state's `retryable` flag, which is what keeps this
+from repeating pbh-ek8: a transient failure (Linus 5xx/429, DB, a concurrent
+registration still in flight) **throws** → 500 → Stripe redelivers, which is the
+recovery mechanism; a permanent one (no date of birth, no patient name, a Linus
+4xx) is logged and acknowledged, because three days of redeliveries will not make
+that subject valid. Either way the customer is already on `/welcome` and sees
+none of it.
 
 > The webhook is deliberately the **only** endpoint. Stripe endpoints are
 > account-scoped and Stripe fans every event out to all of them, so a second one
@@ -298,10 +308,11 @@ Each of these has actually happened:
 | No email arrives; flow stalls at the confirmation modal | `RESEND_API_KEY` unset — sends become logged no-ops and the confirmation URL is printed to the server console instead. This is how local testing works |
 | Session silently never found | Cookie-name mismatch: Auth.js derives the `__Secure-` prefix from the request protocol, not `NODE_ENV` |
 
-Retired, kept for the record: `"Couldn't register with Linus (status …)"` after
-payment used to strand a paying customer on the payment step — a 500 meant an
-`education` value outside Linus's set (`pbh-a0n`), a 503 meant Linus itself was
-down. The payment path no longer calls Linus, so neither can happen (`pbh-ek8`).
+`"Couldn't register with Linus (status …)"` no longer reaches a customer — it is
+logged by the webhook instead. A 500 means an `education` value outside Linus's
+set (`pbh-a0n`) and a 503 means Linus itself is down; the 503 is retried by
+Stripe's redeliveries, the 500 is not (it is a permanent 4xx-class data problem
+from our side and needs the row fixed).
 
 ---
 
@@ -309,18 +320,13 @@ down. The payment path no longer calls Linus, so neither can happen (`pbh-ek8`).
 
 Documented so nobody mistakes them for intent:
 
-- **Nobody is registered with Linus.** This is the live one (`pbh-ek8`). A paying
-  customer now gets a `payments` row, a session and the welcome screen, and no
-  Linus subject or enrollment at all — so nothing on the other side of the "Go to
-  your app" link knows about them, and the "assessment ready" email is never
-  sent. Deliberate: registration failures were stranding paying customers on the
-  payment step, and how clients should be registered is an open question. The
-  code to do it (`packages/linus/`, `register-and-enroll.ts`, the
-  `linus_participant_id` / `linus_enrollments` columns) is untouched and
-  callerless, waiting on that decision.
-- **Comprehensive ($449) provisions exactly what Basic ($149) does** — nothing,
-  at present, and the same three Linus campaigns whenever registration comes
-  back. There is no per-package fulfilment, and the consent copy is still the
+- **A registration that never succeeds is only a log line.** The webhook retries
+  transient failures through Stripe's redeliveries, but once those are exhausted
+  (or the failure is permanent — no DOB, a Linus 4xx) the customer holds a paid
+  row with no `linus_participant_id` and nothing notices. Needs an alert or a
+  reconciliation job over that state; tracked on `pbh-3cy`.
+- **Comprehensive ($449) provisions exactly what Basic ($149) does** — the same
+  three Linus campaigns. There is no per-package fulfilment, and the consent copy is still the
   wellness + HIPAA NPP text rather than anything written for a diagnostic
   service. Tracked on `pbh-eaj`.
 - **No rate limiting on `requestMagicLink`** — an unauthenticated action that

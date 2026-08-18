@@ -7,6 +7,7 @@ import {
   recordRefundedPayment,
   recordSucceededPayment,
 } from "./fulfill";
+import { registerAndEnrollUserById } from "./register-and-enroll";
 
 /**
  * Stripe webhook handler — the authoritative fulfillment path, mounted once, at
@@ -16,14 +17,17 @@ import {
  *
  * The client-confirm action (the booking flow's finalize) is the fast path for
  * the happy case; this is the backstop that still records the payment when the
- * browser never makes it back (tab closed, connection dropped), and the only
- * path that reacts to async lifecycle events (failures, refunds).
+ * browser never makes it back (tab closed, connection dropped), the only path
+ * that reacts to async lifecycle events (failures, refunds), and the only place
+ * anything registers with Linus (pbh-73g).
  *
  * Response contract Stripe relies on:
  *  - 400 → bad/again-unverifiable signature. Stripe does NOT retry (correct: a
  *    signature won't become valid later).
- *  - 5xx / thrown → Stripe retries with backoff, which is what an unexpected
- *    handler failure gets; every write here is idempotent, so a retry is safe.
+ *  - 5xx / thrown → Stripe retries with backoff. An unexpected handler failure
+ *    gets this, and so does a *transient* Linus failure, deliberately: the
+ *    redelivery is how registration recovers. Every write here is idempotent,
+ *    so a retry is safe.
  *  - 2xx → done.
  *
  * The route that calls this must run on the Node.js runtime and be non-cached
@@ -85,14 +89,27 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
 }
 
 /**
- * Record the succeeded payment. Re-fetches the intent with the latest charge
- * expanded so we capture card brand/last4 (the thin event payload doesn't
- * include them), which also re-reads live state as defense in depth.
+ * Record the succeeded payment, then register + enroll the payer with Linus.
+ * Re-fetches the intent with the latest charge expanded so we capture card
+ * brand/last4 (the thin event payload doesn't include them), which also re-reads
+ * live state as defense in depth.
  *
- * Recording the payment is now the whole job: this used to also register and
- * enroll the payer with Linus and throw on failure so Stripe redelivered, which
- * turned a Linus outage into a stream of 500s here (pbh-ek8). Registration is on
- * hold until we settle how clients get registered.
+ * Registration lives here and nowhere else. Doing it inline on the customer's
+ * finalize is what dead-ended paying customers on the payment step during a
+ * Linus outage (pbh-ek8); out here the customer is already on /welcome and a
+ * retry costs them nothing.
+ *
+ * It runs on every delivery rather than only the first write — it is idempotent
+ * (the participant id and enrollment rows are stored, and a registration claim
+ * elects a single registrar), so a delivery that recorded the payment but died
+ * before registering is still covered.
+ *
+ * Failure handling is split on `retryable` so an outage recovers but a subject
+ * that can never be built doesn't burn three days of redeliveries:
+ *  - transient (Linus 5xx/429, DB, a concurrent registration still in flight) →
+ *    throw, so the caller 500s and Stripe redelivers.
+ *  - permanent (no date of birth, no patient name, a Linus 4xx) → log and
+ *    acknowledge. The payment stands; the account needs a human.
  */
 async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
   const full = await getStripe().paymentIntents.retrieve(intent.id, {
@@ -101,7 +118,27 @@ async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
 
   const recorded = await recordSucceededPayment(full);
   if (recorded.status === "rejected") {
-    // Not our payment / failed re-verification — acknowledge and move on.
+    // Not our payment / failed re-verification — acknowledge without registering.
     console.warn(`Stripe webhook: skipped ${full.id} (${recorded.reason})`);
+    return;
+  }
+
+  // retryOnContention: concurrent deliveries of the same event can race on a
+  // first-time registration. The DB claim guarantees only one of them calls
+  // Linus; the loser fails here so Stripe redelivers and it picks up the stored
+  // participant id, rather than silently skipping enrollment.
+  const enrolled = await registerAndEnrollUserById(recorded.userId, {
+    retryOnContention: true,
+  });
+  if (enrolled.status === "error") {
+    const context = `user ${recorded.userId} after payment ${full.id}: ${enrolled.message}`;
+    if (!enrolled.retryable) {
+      // Nothing a redelivery would fix. The payment is safely recorded, so
+      // acknowledge and leave the account for a human to sort out.
+      console.error(`Linus registration permanently failed for ${context}`);
+      return;
+    }
+    // Surface as a retryable failure so Stripe redelivers and we re-attempt.
+    throw new Error(`Linus registration failed for ${context}`);
   }
 }

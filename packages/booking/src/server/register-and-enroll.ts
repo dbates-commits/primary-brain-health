@@ -4,14 +4,17 @@ import "server-only";
  * Core register / enroll / list logic. Server-only — it touches the DB and the
  * Linus client.
  *
- * ⚠️ DORMANT: nothing calls anything in this file (pbh-ek8). It used to run on
- * the payment path — the checkout action and the Stripe webhook backstop — but a
- * Linus outage there stranded paying customers on the payment step with
- * "Couldn't register with Linus (status 503)", so both call sites were removed
- * and the flow now ends at `/welcome`. Kept intact, not deleted, as the
- * reference for whatever the next registration approach is; the DB columns it
- * writes (`users.linus_participant_id`, `linus_enrollments`) are still in the
- * schema. See `docs/linus/api-integration.md`.
+ * The one caller that registers is the Stripe webhook (pbh-73g): a succeeded
+ * payment registers the payer as a Linus subject and enrolls them. It is
+ * deliberately NOT called from the customer-facing finalize any more — a Linus
+ * 503 there stranded paying customers on the payment step with "Couldn't
+ * register with Linus (status 503)" (pbh-ek8) — so registration now happens out
+ * of band, where a retry costs the customer nothing.
+ *
+ * Every error state carries `retryable`, which tells the webhook whether to ask
+ * Stripe for a redelivery (transient) or acknowledge and log (a subject that
+ * will never be valid, e.g. no date of birth). See
+ * `docs/linus/api-integration.md`.
  */
 
 import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
@@ -26,6 +29,7 @@ import {
   LinusApiError,
   listEnrollments,
   MissingDateOfBirthError,
+  MissingPatientNameError,
   registerSubject,
 } from "@pbh/linus";
 import { isPgError, PgErrorCode } from "./db-errors";
@@ -76,7 +80,7 @@ export type LinusState =
       participantId: string;
       enrollments: EnrollmentView[];
     }
-  | { status: "error"; email: string; message: string };
+  | { status: "error"; email: string; message: string; retryable: boolean };
 
 /**
  * Probe whether one enrollment's report is ready. We never serve the PDF — that
@@ -147,6 +151,26 @@ async function markReportReady(
         eq(linusEnrollments.campaignId, campaignId),
       ),
     );
+}
+
+/**
+ * Is another attempt at this worth making? Transient by default: a redelivery
+ * is cheap and every write here is idempotent, so the only "no" cases are the
+ * ones where the same input can only fail the same way again — a subject we
+ * can't build (no DOB / no patient name) and a Linus 4xx that isn't a timeout
+ * or a rate limit.
+ */
+function isRetryableError(err: unknown): boolean {
+  if (
+    err instanceof MissingDateOfBirthError ||
+    err instanceof MissingPatientNameError
+  ) {
+    return false;
+  }
+  if (err instanceof LinusApiError) {
+    return err.status >= 500 || err.status === 408 || err.status === 429;
+  }
+  return true;
 }
 
 /** Turn a Linus/config error into a user-facing message. */
@@ -257,7 +281,7 @@ async function storeParticipantId(
 type RegistrationOutcome =
   | { type: "registered"; participantId: string }
   | { type: "deferred" }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string; retryable: boolean };
 
 /**
  * Register a first-time user as a Linus subject exactly once, even when the
@@ -282,7 +306,11 @@ async function ensureRegistered(
       return { type: "registered", participantId: existing };
     }
     return retryOnContention
-      ? { type: "error", message: "Registration is already in progress; will retry." }
+      ? {
+          type: "error",
+          message: "Registration is already in progress; will retry.",
+          retryable: true,
+        }
       : { type: "deferred" };
   }
 
@@ -299,7 +327,7 @@ async function ensureRegistered(
       err instanceof MissingDateOfBirthError
         ? err.message
         : describeError(err, "register");
-    return { type: "error", message };
+    return { type: "error", message, retryable: isRetryableError(err) };
   }
 
   try {
@@ -308,7 +336,11 @@ async function ensureRegistered(
       participantId: await storeParticipantId(user.id, participantId),
     };
   } catch (err) {
-    return { type: "error", message: describeError(err, "register") };
+    return {
+      type: "error",
+      message: describeError(err, "register"),
+      retryable: true,
+    };
   }
 }
 
@@ -356,12 +388,18 @@ export async function registerAndEnrollUser(
         status: "error",
         email,
         message: "You're not registered for any assessments yet.",
+        retryable: false,
       };
     }
 
     const outcome = await ensureRegistered(user, retryOnContention);
     if (outcome.type === "error") {
-      return { status: "error", email, message: outcome.message };
+      return {
+        status: "error",
+        email,
+        message: outcome.message,
+        retryable: outcome.retryable,
+      };
     }
     if (outcome.type === "deferred") {
       // The charge succeeded but a concurrent caller is still registering. Return
@@ -400,7 +438,12 @@ export async function registerAndEnrollUser(
       enrollments,
     };
   } catch (err) {
-    return { status: "error", email, message: describeError(err, "enroll") };
+    return {
+      status: "error",
+      email,
+      message: describeError(err, "enroll"),
+      retryable: isRetryableError(err),
+    };
   }
 }
 
@@ -556,7 +599,12 @@ export async function runRegisterAndEnroll(
 ): Promise<LinusState> {
   const email = rawEmail.trim();
   if (!email) {
-    return { status: "error", email, message: "Enter an email address." };
+    return {
+      status: "error",
+      email,
+      message: "Enter an email address.",
+      retryable: false,
+    };
   }
   const [user] = await db
     .select()
@@ -568,6 +616,7 @@ export async function runRegisterAndEnroll(
       status: "error",
       email,
       message: "No account was found for that email address.",
+      retryable: false,
     };
   }
   return registerAndEnrollUser(user, { allowRegister: false });
@@ -588,6 +637,7 @@ export async function registerAndEnrollUserById(
       status: "error",
       email: "",
       message: "We couldn't find your account.",
+      retryable: false,
     };
   }
   const [user] = await db
@@ -600,6 +650,7 @@ export async function registerAndEnrollUserById(
       status: "error",
       email: "",
       message: "We couldn't find your account.",
+      retryable: false,
     };
   }
   return registerAndEnrollUser(user, options);

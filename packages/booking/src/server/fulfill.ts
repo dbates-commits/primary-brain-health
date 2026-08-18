@@ -8,9 +8,9 @@ import "server-only";
  * PaymentIntent — Stripe redelivers events and the two paths routinely race —
  * so each write is guarded to be a no-op after the first effective one.
  *
- * These functions ONLY touch the `payments` mirror + `audit_log`. Enrollment
- * used to be left to the callers so it ran once per path; nothing enrolls
- * anybody today (pbh-ek8), so recording the payment is the whole job.
+ * These functions ONLY touch the `payments` mirror + `audit_log`. Linus
+ * registration/enrollment is the webhook's job alone (pbh-73g) and is not done
+ * here, so the client-confirm path can never dead-end on a Linus outage.
  */
 
 import { and, eq, ne } from "drizzle-orm";
