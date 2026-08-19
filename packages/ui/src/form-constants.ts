@@ -8,8 +8,8 @@
  *
  * Covers four of the five states in Figma's Text Field (1629:69):
  *
- * - Default — the placeholder, `on-surface-variant`.
- * - Filled  — typed text, `on-surface-warm`. The design distinguishes the two
+ * - Default — the placeholder, `ink` (Figma `text/default`).
+ * - Filled  — typed text, `ink-warm-dark`. The design distinguishes the two
  *             by colour, which falls out of placeholder-vs-value for free.
  * - Error   — driven by `aria-invalid`, which every form in the funnel already
  *             sets but nothing previously rendered. A RING, not a border:
@@ -34,7 +34,7 @@
  * not vanish the moment you click into the field to fix it. Verified in-browser.
  */
 export const fieldBaseClass =
-  "h-12 w-full rounded-lg bg-surface-container-low px-3.5 text-sm text-on-surface-warm placeholder:text-on-surface-variant disabled:text-neutral-400 disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-neutral-350";
+  "h-12 w-full rounded-lg bg-background-warm px-3.5 text-body-sm text-text-warm-dark placeholder:text-text-default disabled:text-text-disabled disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-border-default";
 
 /**
  * Filled input style for a field placed directly under a {@link "./Label"}.
@@ -50,4 +50,4 @@ export const fieldClass = `mt-2 ${fieldBaseClass}`;
  * auto-height with vertical padding instead of the fixed 48px row.
  */
 export const textareaClass =
-  "mt-2 w-full rounded-lg bg-surface-container-low px-3.5 py-3 text-sm text-on-surface-warm placeholder:text-on-surface-variant disabled:text-neutral-400 disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-neutral-350";
+  "mt-2 w-full rounded-lg bg-background-warm px-3.5 py-3 text-body-sm text-text-warm-dark placeholder:text-text-default disabled:text-text-disabled disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-border-default";

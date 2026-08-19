@@ -16,8 +16,8 @@ export function EmailButton({ href, children }: EmailButtonProps) {
 }
 
 const buttonStyle: React.CSSProperties = {
-  backgroundColor: emailColors.primary,
-  color: emailColors.onPrimary,
+  backgroundColor: emailColors.brandDefault,
+  color: emailColors.brandOnBrand,
   fontFamily: emailFontStack,
   fontSize: "15px",
   fontWeight: 600,

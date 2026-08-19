@@ -12,9 +12,9 @@ import { DEFAULT_PACKAGE } from "@pbh/booking";
  */
 export function BookingIncludesPanel() {
   return (
-    <div className="flex h-full flex-col gap-10 rounded-xl bg-primary-container-high p-5">
+    <div className="flex h-full flex-col gap-10 rounded-xl bg-brand-850 p-5">
       <div className="flex flex-col gap-4">
-        <h3 className="font-headline text-xl font-thin leading-none text-white">
+        <h3 className="font-headline text-xl font-thin leading-none text-brand-on-brand">
           Includes
         </h3>
         <ul className="flex flex-col gap-4">
@@ -25,9 +25,9 @@ export function BookingIncludesPanel() {
                 aria-hidden="true"
                 size={24}
                 weight="regular"
-                className="shrink-0 text-white"
+                className="shrink-0 text-brand-on-brand"
               />
-              <span className="text-on-primary-container">{item.text}</span>
+              <span className="text-text-inverse-secondary">{item.text}</span>
             </li>
           ))}
         </ul>
@@ -36,13 +36,13 @@ export function BookingIncludesPanel() {
       {/* Pushed to the bottom so the price sits against the panel's base
           however many bullets the package has. */}
       <div className="mt-auto flex flex-col gap-4">
-        <hr className="border-t border-white/20" />
-        <p className="font-headline text-5xl font-thin leading-none text-white">
+        <hr className="border-t border-brand-on-brand/20" />
+        <p className="font-headline text-5xl font-thin leading-none text-brand-on-brand">
           {DEFAULT_PACKAGE.displayPrice}
         </p>
-        <p className="text-xs leading-normal text-on-primary-container">
+        <p className="text-xs leading-normal text-text-inverse-secondary">
           This service may be eligible for{" "}
-          <span className="text-white">HSA/FSA reimbursement</span>, depending on
+          <span className="text-brand-on-brand">HSA/FSA reimbursement</span>, depending on
           your plan. We can provide documentation to support submission.
         </p>
       </div>

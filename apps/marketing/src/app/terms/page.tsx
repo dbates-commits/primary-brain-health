@@ -9,16 +9,16 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <main className="pt-12 pb-24 px-6">
-      <article className="max-w-3xl mx-auto [&_p]:text-lg [&_p]:leading-[2] [&_p]:text-primary/90 [&_p]:mb-8 [&_h2]:mt-16 [&_h2]:mb-6 [&_li]:text-lg [&_li]:leading-[1.8] [&_li]:text-on-surface-variant">
+      <article className="max-w-3xl mx-auto [&_p]:text-lg [&_p]:leading-[2] [&_p]:text-brand-default/90 [&_p]:mb-8 [&_h2]:mt-16 [&_h2]:mb-6 [&_li]:text-lg [&_li]:leading-[1.8] [&_li]:text-text-default">
         {/* Header */}
         <header className="mb-16">
-          <span className="text-secondary text-xs font-semibold uppercase tracking-[0.2em] mb-4 block font-body">
+          <span className="text-aqua-default text-xs font-semibold uppercase tracking-[0.2em] mb-4 block font-body">
             Legal Documentation
           </span>
-          <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-on-surface tracking-tight mb-6">
+          <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-grey-850 tracking-tight mb-6">
             Terms &amp; Conditions
           </h1>
-          <div className="flex items-center gap-2 text-on-surface-variant text-sm">
+          <div className="flex items-center gap-2 text-text-default text-sm">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -38,7 +38,7 @@ export default function TermsPage() {
 
         {/* Content */}
         <section>
-          <h2 className="font-headline text-3xl font-bold text-on-surface">
+          <h2 className="font-headline text-3xl font-bold text-grey-850">
             1. Acceptance of Terms
           </h2>
           <p>
@@ -57,7 +57,7 @@ export default function TermsPage() {
             evolving protocols.
           </p>
 
-          <h2 className="font-headline text-3xl font-bold text-on-surface">
+          <h2 className="font-headline text-3xl font-bold text-grey-850">
             2. Use of Service
           </h2>
           <p>
@@ -81,7 +81,7 @@ export default function TermsPage() {
             </li>
           </ul>
 
-          <h2 className="font-headline text-3xl font-bold text-on-surface">
+          <h2 className="font-headline text-3xl font-bold text-grey-850">
             3. User Responsibilities
           </h2>
           <p>
@@ -98,7 +98,7 @@ export default function TermsPage() {
             of our service interface is strictly prohibited.
           </p>
 
-          <h2 className="font-headline text-3xl font-bold text-on-surface">
+          <h2 className="font-headline text-3xl font-bold text-grey-850">
             4. Limitation of Liability
           </h2>
           <p>
@@ -107,13 +107,13 @@ export default function TermsPage() {
             indirect, incidental, special, or consequential damages resulting
             from the use or inability to use our cognitive services.
           </p>
-          <p className="!italic !text-on-surface-variant border-l-2 border-secondary/30 pl-6 py-2">
+          <p className="!italic !text-text-default border-l-2 border-aqua-default/30 pl-6 py-2">
             The total liability of Primary Brain Health for any claim arising out of or
             relating to these terms shall not exceed the amount paid by the user
             for the specific consultation or service cycle in question.
           </p>
 
-          <h2 className="font-headline text-3xl font-bold text-on-surface">
+          <h2 className="font-headline text-3xl font-bold text-grey-850">
             5. Governing Law
           </h2>
           <p>
@@ -133,11 +133,11 @@ export default function TermsPage() {
 
         {/* Contact CTA */}
         <div className="mt-24 pt-12 text-center border-t border-outline-variant/20">
-          <p className="!text-base text-on-surface-variant mb-4">
+          <p className="!text-base text-text-default mb-4">
             Have questions regarding these terms?
           </p>
           <a
-            className="font-body font-bold text-secondary inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="font-body font-bold text-aqua-default inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
             href="mailto:legal@primarybrainhealth.com"
           >
             <svg

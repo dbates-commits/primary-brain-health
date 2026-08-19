@@ -55,7 +55,7 @@ export function LoginPanel({
     <div
       {...rest}
       className={cn(
-        "flex flex-col gap-5 rounded-xl bg-white p-8",
+        "flex flex-col gap-5 rounded-xl bg-background-default p-8",
         "drop-shadow-[0px_4px_12px_rgba(0,0,0,0.24)]",
         className,
       )}
@@ -64,7 +64,7 @@ export function LoginPanel({
         <Heading as="h2" size="sm">
           {state.status === "sent" ? "Email Confirmation" : "Login"}
         </Heading>
-        <p className="text-base text-on-surface">
+        <p className="text-base text-grey-850">
           {state.status === "sent"
             ? "We’ve sent you an email. Please check your inbox in order to login."
             : "Enter the email you used to create the account."}

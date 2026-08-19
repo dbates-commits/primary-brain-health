@@ -36,8 +36,8 @@ export function PaymentReceiptEmail({
       heading={`Thanks for your payment, ${firstName}`}
     >
       <Text style={paragraphStyle}>
-        We&apos;ve received your payment for the Primary Brain Health cognitive
-        assessment. Here&apos;s your receipt:
+        We&apos;ve received your payment for the Primary Brain Health cognitive assessment.
+        Here&apos;s your receipt:
       </Text>
       <Section style={receiptStyle}>
         <Row>
@@ -53,9 +53,7 @@ export function PaymentReceiptEmail({
             <Text style={receiptLabelStyle}>Amount</Text>
           </Column>
           <Column align="right">
-            <Text style={receiptValueStyle}>
-              {formatAmount(amountCents, currency)}
-            </Text>
+            <Text style={receiptValueStyle}>{formatAmount(amountCents, currency)}</Text>
           </Column>
         </Row>
         {card ? (
@@ -81,8 +79,7 @@ export function PaymentReceiptEmail({
         <EmailButton href={assessmentsUrl}>Go to your assessments</EmailButton>
       </Section>
       <Text style={mutedStyle}>
-        Keep this email for your records. If anything looks wrong, reply and
-        we&apos;ll sort it out.
+        Keep this email for your records. If anything looks wrong, reply and we&apos;ll sort it out.
       </Text>
     </EmailLayout>
   );
@@ -101,7 +98,7 @@ PaymentReceiptEmail.PreviewProps = {
 export default PaymentReceiptEmail;
 
 const receiptStyle: React.CSSProperties = {
-  backgroundColor: emailColors.surfaceContainer,
+  backgroundColor: emailColors.warm100,
   borderRadius: "12px",
   padding: "8px 20px",
   margin: "0 0 20px",
@@ -112,7 +109,7 @@ const receiptLabelStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "13px",
   lineHeight: "20px",
-  color: emailColors.onSurfaceVariant,
+  color: emailColors.textDefault,
 };
 
 const receiptValueStyle: React.CSSProperties = {
@@ -121,5 +118,5 @@ const receiptValueStyle: React.CSSProperties = {
   fontSize: "13px",
   fontWeight: 600,
   lineHeight: "20px",
-  color: emailColors.onSurface,
+  color: emailColors.grey850,
 };

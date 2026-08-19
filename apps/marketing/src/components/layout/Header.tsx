@@ -125,7 +125,7 @@ export function Header() {
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300",
         scrolled
-          ? "bg-surface/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]"
+          ? "bg-background-default/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(0,0,0,0.06)]"
           : "bg-transparent shadow-none"
       )}
     >
@@ -154,8 +154,8 @@ export function Header() {
                 className={cn(
                   "font-body text-base font-semibold tracking-tight transition-all",
                   activeHash === item.link
-                    ? "text-secondary"
-                    : "text-on-surface/70 hover:text-on-surface"
+                    ? "text-aqua-default"
+                    : "text-grey-850/70 hover:text-grey-850"
                 )}
               >
                 {item.label}
@@ -182,7 +182,7 @@ export function Header() {
 
         {/* Mobile Menu Button */}
         <button
-          className="lg:hidden p-2 text-primary"
+          className="lg:hidden p-2 text-brand-default"
           onClick={() => {
             if (mobileMenuOpen) {
               closeMobileMenu();
@@ -230,7 +230,7 @@ export function Header() {
         )}
       >
         <div className="overflow-hidden">
-          <div className="bg-surface/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
+          <div className="bg-background-default/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
             <div className="flex flex-col gap-4">
               {nav.map((item) => (
                 <a
@@ -240,8 +240,8 @@ export function Header() {
                   className={cn(
                     "font-body text-base font-semibold py-2",
                     activeHash === item.link
-                      ? "text-secondary"
-                      : "text-on-surface/70"
+                      ? "text-aqua-default"
+                      : "text-grey-850/70"
                   )}
                 >
                   {item.label}
@@ -281,7 +281,7 @@ export function Header() {
                     type="button"
                     onClick={() => setLoginOpen((v) => !v)}
                     aria-expanded={loginOpen}
-                    className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-primary"
+                    className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-brand-default"
                   >
                     Login
                     <PhosphorIcon

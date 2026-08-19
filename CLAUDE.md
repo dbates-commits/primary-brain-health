@@ -53,6 +53,7 @@ This repo uses **beads** (`bd`) for issue tracking, stored in `.beads/`. Use `bd
 Tina CMS is the content layer. Schema definitions in `tina/collections/` and `tina/blocks/` generate GraphQL types into `tina/__generated__/`. Content lives as MDX/JSON files in `content/`.
 
 **Rendering flow**:
+
 1. Server Component calls `client.queries.page({ relativePath })` from `tina/__generated__/client`
 2. Passes `{ data, query, variables }` to `<PageClient>` (client component)
 3. `PageClient` wraps with `useTina()` hook for live visual editing
@@ -73,25 +74,64 @@ Block components receive a `variant` prop for layout variations and `tinaFields`
 ### Hero Component
 
 The hero lives under `src/components/blocks/Hero/`:
+
 - `Hero.tsx` — entry point, renders `HeroFullImage`
 - `HeroFullImage.tsx` — full-bleed video hero with overlay text
 - `hero-utils.tsx` — shared types (`HeroProps`), constants (`TRUST_AVATARS`), and helpers (`highlightBrainHealth`)
 
 ### Design System
 
-Theme is called "The Cognitive Sanctuary", defined as CSS custom properties in `packages/tokens/theme.css` (`@pbh/tokens`) and wired into Tailwind 4 via `@theme inline`. Each app imports it from its `globals.css` (`@import "@pbh/tokens/theme.css";`). App-specific `@font-face` declarations and keyframes stay in the app's own `globals.css`.
+**Figma is the source of truth.** `packages/tokens/theme.css` (`@pbh/tokens`) mirrors
+the `Primitives`, `Colors` and `Fonts` collections of Figma file
+`SppKdzsaH6rQ14u90UpNSq`, under Figma's own variable names, and wires them into
+Tailwind 4 via `@theme inline`. Each app imports it from its `globals.css`
+(`@import "@pbh/tokens/theme.css";`). App-specific `@font-face` declarations and
+keyframes stay in the app's own `globals.css`.
 
-- **Primary**: `#041632` (dark navy)
-- **Secondary**: `#446558` (forest green)
-- **Surface**: `#fbf9f4` (warm off-white) with 7 surface-level variants
-- **Error**: `#ba1a1a`
-- **Fonts**: Manrope (headlines, `font-headline`), Inter (body, `font-body`)
+The sync is manual — the Figma plan tier is `starter`, so the Variables REST API is
+unavailable and the only programmatic access is the Plugin API via the Figma MCP
+server, which needs the desktop app open. The steps are in `theme.css`'s header.
 
-Use design token classes (`text-primary`, `bg-surface`, `text-on-surface-variant`, etc.) rather than raw hex values.
+Token names are Figma's variable paths with `/` replaced by `-`, so a Figma variable
+name is greppable in the code:
+
+| Figma variable       | code token                   | utility                 |
+| -------------------- | ---------------------------- | ----------------------- |
+| `background/default` | `--color-background-default` | `bg-background-default` |
+| `text/default`       | `--color-text-default`       | `text-text-default`     |
+| `border/subtle`      | `--color-border-subtle`      | `border-border-subtle`  |
+| `brand/on-brand`     | `--color-brand-on-brand`     | `text-brand-on-brand`   |
+
+The stutter is unavoidable: Tailwind 4 has a single `--color-*` namespace, and `default`
+is a leaf name in **five** Figma groups (`background`, `border`, `brand`, `teal`, `text`),
+`subtle` in four, `brand` in three. `--color-default` can only hold one value, so
+`bg-default` and `text-default` would paint the same colour.
+
+Two groups are renamed, and only because Tailwind already ships those names:
+
+| Figma              | code     | why                               |
+| ------------------ | -------- | --------------------------------- |
+| `colors/neutral/*` | `grey-*` | Tailwind owns `--color-neutral-*` |
+| `teal/*`           | `aqua-*` | Tailwind owns `--color-teal-*`    |
+
+Figma defines 15 neutral steps and 4 teal steps; any other step — `bg-neutral-800`,
+`text-teal-500` — still compiles, silently, to a stock Tailwind colour with nothing to do
+with the brand. **Map by value, never by index**: `grey-*` uses Figma's step numbers,
+which do not match the pre-2026-08 code ramp.
+
+- **Brand**: `#006e8a` (dark teal) · **Aqua**: `#009ea1` · **Body text**: `#45474d`
+- **Fonts**: Larken (headlines, `font-headline`), Inter (body, `font-body`); type scale
+  `text-caption` / `text-body-sm` / `text-body` / `text-body-lg` / `text-h5`…`text-display`
+- `cn()` is `extendTailwindMerge`-configured with that scale — without it, tailwind-merge
+  reads `text-caption` as a colour and silently drops it next to `text-text-label`
+
+Use token classes rather than raw hex. Values Figma has no variable for, and the open
+questions for the designer, are listed in [`docs/design-tokens-gaps.md`](docs/design-tokens-gaps.md).
 
 ### Path Aliases
 
 Scoped to each app (e.g. within `apps/marketing/`):
+
 - `@/*` → `src/*`
 - `@tina/*` → `tina/*`
 

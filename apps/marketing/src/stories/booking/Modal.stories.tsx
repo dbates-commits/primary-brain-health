@@ -56,7 +56,7 @@ export const Open: Story = {
     children: (
       <div className="flex flex-col gap-4 pb-6 sm:pb-10">
         <StepHeader title="Welcome." subtitle="A step that renders its own header." />
-        <p className="text-sm text-on-surface-variant">
+        <p className="text-sm text-text-default">
           Short enough that nothing scrolls. Dismiss it and reopen from the
           button behind.
         </p>
@@ -77,7 +77,7 @@ export const WithPinnedHeader: Story = {
     children: (
       <div className="flex flex-col gap-4 pb-6 sm:pb-10">
         {PARAGRAPHS.map((n) => (
-          <p key={n} className="text-sm leading-relaxed text-on-surface-variant">
+          <p key={n} className="text-sm leading-relaxed text-text-default">
             Paragraph {n + 1}. Scroll and watch the header hold its position.
           </p>
         ))}
@@ -102,7 +102,7 @@ export const Closed: Story = {
 /** Escape dismisses it, and the dialog really leaves the DOM. */
 export const ClosesOnEscape: Story = {
   args: {
-    children: <p className="pb-6 text-sm text-on-surface-variant">Press Escape.</p>,
+    children: <p className="pb-6 text-sm text-text-default">Press Escape.</p>,
   },
   play: async ({ args }) => {
     // The dialog is portalled onto document.body, so it is outside canvasElement.
@@ -121,7 +121,7 @@ export const ClosesOnEscape: Story = {
 /** The close button does the same. */
 export const ClosesOnCloseButton: Story = {
   args: {
-    children: <p className="pb-6 text-sm text-on-surface-variant">Use the ✕.</p>,
+    children: <p className="pb-6 text-sm text-text-default">Use the ✕.</p>,
   },
   play: async ({ args }) => {
     const body = within(document.body);
@@ -139,7 +139,7 @@ export const ClosesOnCloseButton: Story = {
 export const ClosesOnBackdropClick: Story = {
   args: {
     children: (
-      <p className="pb-6 text-sm text-on-surface-variant">
+      <p className="pb-6 text-sm text-text-default">
         Click the dimmed area outside the panel.
       </p>
     ),
@@ -163,7 +163,7 @@ export const ClosesOnBackdropClick: Story = {
 /** Reopening after a dismissal — the trigger regains focus, then reopens. */
 export const ReopensFromTrigger: Story = {
   args: {
-    children: <p className="pb-6 text-sm text-on-surface-variant">Close, then reopen.</p>,
+    children: <p className="pb-6 text-sm text-text-default">Close, then reopen.</p>,
   },
   play: async ({ canvasElement }) => {
     const body = within(document.body);

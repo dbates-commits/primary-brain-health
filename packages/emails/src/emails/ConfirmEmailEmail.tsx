@@ -26,20 +26,18 @@ export function ConfirmEmailEmail({ confirmUrl }: ConfirmEmailEmailProps) {
       heading="Email confirmation."
     >
       <Text style={paragraphStyle}>
-        Someone has tried to create an assessment booking in our platform with
-        this email.
+        Someone has tried to create an assessment booking in our platform with this email.
       </Text>
       <Text style={paragraphStyle}>
-        If this is you or someone in your personal circle, confirm your email by
-        clicking{" "}
+        If this is you or someone in your personal circle, confirm your email by clicking{" "}
         <Link href={confirmUrl} style={linkStyle}>
           this link
         </Link>{" "}
         or by pressing the button below.
       </Text>
       <Text style={paragraphStyle}>
-        If this was not you or any of your circle members, no action is needed —
-        the booking cannot continue until the address is confirmed.
+        If this was not you or any of your circle members, no action is needed — the booking cannot
+        continue until the address is confirmed.
       </Text>
       <Section style={ctaSectionStyle}>
         <EmailButton href={confirmUrl}>Continue to Assessment</EmailButton>
@@ -49,7 +47,7 @@ export function ConfirmEmailEmail({ confirmUrl }: ConfirmEmailEmailProps) {
 }
 
 const linkStyle: React.CSSProperties = {
-  color: emailColors.primary,
+  color: emailColors.brandDefault,
   textDecoration: "underline",
 };
 

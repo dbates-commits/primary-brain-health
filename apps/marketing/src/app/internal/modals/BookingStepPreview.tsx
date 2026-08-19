@@ -37,7 +37,7 @@ export function BookingStepPreview({
     // `StickyActions` need a real scroll container above them or the buttons
     // land in the wrong place. A preview under different geometry would be
     // reviewing a screen that doesn't exist.
-    <div className="mx-auto flex h-[min(38rem,calc(100dvh-8rem))] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-sm">
+    <div className="mx-auto flex h-[min(38rem,calc(100dvh-8rem))] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-sm">
       <div className="shrink-0 px-6 pb-4 pt-6 sm:px-8 sm:pb-8 sm:pt-8">
         <StepHeader
           title={header.title}

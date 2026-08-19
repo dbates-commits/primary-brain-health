@@ -17,12 +17,12 @@ export const metadata = {
  */
 export default function ModalsIndexPage() {
   return (
-    <div className="min-h-screen bg-surface-container-low px-4 py-10">
+    <div className="min-h-screen bg-background-warm px-4 py-10">
       <div className="mx-auto max-w-4xl">
-        <h1 className="font-headline text-3xl text-on-surface">
+        <h1 className="font-headline text-3xl text-grey-850">
           Booking modal steps
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
+        <p className="mt-2 max-w-2xl text-sm text-text-default">
           The four steps inside the booking modal, in the order a customer meets
           them. Open one to see it exactly as it renders, and — from the Tina
           admin — to edit its heading beside it. Everything else on these
@@ -33,12 +33,12 @@ export default function ModalsIndexPage() {
             <li key={item.step}>
               <Link
                 href={`/internal/modals/${item.step}`}
-                className="block rounded-2xl bg-surface p-6 shadow-sm transition-colors hover:bg-surface-container-low"
+                className="block rounded-2xl bg-background-default p-6 shadow-sm transition-colors hover:bg-background-warm"
               >
-                <span className="font-headline text-xl text-on-surface">
+                <span className="font-headline text-xl text-grey-850">
                   {item.name}
                 </span>
-                <span className="mt-1 block max-w-2xl text-sm text-on-surface-variant">
+                <span className="mt-1 block max-w-2xl text-sm text-text-default">
                   {item.when}
                 </span>
               </Link>

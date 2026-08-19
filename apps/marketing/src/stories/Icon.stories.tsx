@@ -50,7 +50,7 @@ export const Default: Story = {
   args: {
     name: 'check',
     size: 'md',
-    className: 'text-primary',
+    className: 'text-brand-default',
   },
 };
 
@@ -58,11 +58,11 @@ export const Default: Story = {
 export const AllIcons: Story = {
   args: { name: 'check' },
   render: () => (
-    <div className="grid grid-cols-6 gap-6 bg-surface p-8 text-primary">
+    <div className="grid grid-cols-6 gap-6 bg-background-default p-8 text-brand-default">
       {ICON_NAMES.map((name) => (
         <div key={name} className="flex flex-col items-center gap-2">
           <Icon name={name} size="lg" />
-          <span className="text-xs text-on-surface-variant">{name}</span>
+          <span className="text-xs text-text-default">{name}</span>
         </div>
       ))}
     </div>
@@ -73,11 +73,11 @@ export const AllIcons: Story = {
 export const AllSizes: Story = {
   args: { name: 'rocket' },
   render: () => (
-    <div className="flex items-end gap-8 bg-surface p-8 text-primary">
+    <div className="flex items-end gap-8 bg-background-default p-8 text-brand-default">
       {(['sm', 'md', 'lg', 'xl'] as const).map((size) => (
         <div key={size} className="flex flex-col items-center gap-2">
           <Icon name="rocket" size={size} />
-          <span className="text-xs text-on-surface-variant">{size}</span>
+          <span className="text-xs text-text-default">{size}</span>
         </div>
       ))}
     </div>
@@ -88,11 +88,11 @@ export const AllSizes: Story = {
 export const InheritsColor: Story = {
   args: { name: 'heart' },
   render: () => (
-    <div className="flex gap-8 bg-surface p-8">
-      <Icon name="heart" size="lg" className="text-primary" />
-      <Icon name="heart" size="lg" className="text-secondary" />
+    <div className="flex gap-8 bg-background-default p-8">
+      <Icon name="heart" size="lg" className="text-brand-default" />
+      <Icon name="heart" size="lg" className="text-aqua-default" />
       <Icon name="heart" size="lg" className="text-error" />
-      <Icon name="heart" size="lg" className="text-on-surface-variant" />
+      <Icon name="heart" size="lg" className="text-text-default" />
     </div>
   ),
 };

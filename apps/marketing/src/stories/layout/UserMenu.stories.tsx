@@ -23,7 +23,7 @@ const meta = {
   args: { firstName: 'David' },
   decorators: [
     (Story) => (
-      <div className="min-h-[260px] bg-surface p-10">
+      <div className="min-h-[260px] bg-background-default p-10">
         <div className="flex justify-end">
           <Story />
         </div>

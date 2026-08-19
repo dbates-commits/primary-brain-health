@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth bg-[#EFF6F9]">
+    <html lang="en" className="scroll-smooth bg-background-brand-subtle">
       <head>
         {/* Adobe Fonts (Typekit) — delivers "larken" + "indivisible" */}
         <link
@@ -89,7 +89,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://use.typekit.net/qrz4jhn.css" />
       </head>
       <body
-        className={`${gildaDisplay.variable} ${inter.variable} font-body antialiased bg-white text-on-surface`}
+        className={`${gildaDisplay.variable} ${inter.variable} font-body antialiased bg-background-default text-grey-850`}
       >
         <ScrollToTop />
         <ScrollRevealInit />

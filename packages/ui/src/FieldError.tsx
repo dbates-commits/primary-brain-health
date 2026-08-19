@@ -9,7 +9,7 @@ export function FieldError({ id, message }: { id?: string; message?: string }) {
     return null;
   }
   return (
-    <p id={id} role="alert" className="animate-error-in mt-1 text-sm text-error">
+    <p id={id} role="alert" className="animate-error-in mt-1 text-body-sm text-error">
       {message}
     </p>
   );

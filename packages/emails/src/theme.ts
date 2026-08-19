@@ -1,36 +1,31 @@
 import { siteBaseUrl } from "./base-url";
 
 /**
- * Email-safe rendition of "The Cognitive Sanctuary" design tokens.
+ * Email-safe rendition of the design tokens.
  *
  * Email clients can't consume CSS custom properties or Tailwind classes, so
- * the brand values from `@pbh/tokens/theme.css` are mirrored here as literal
- * hex strings for inline styles. If a token changes there, update it here too
- * — theme.css stays the source of truth.
+ * the values from `@pbh/tokens/theme.css` are mirrored here as literal hex
+ * strings for inline styles. Both sides are synced by hand from Figma
+ * (SppKdzsaH6rQ14u90UpNSq) — if a token changes there, update it here too.
+ * Only the values the templates actually use are mirrored.
  */
 export const emailColors = {
-  /** --color-primary — Dark Teal */
-  primary: "#006e8a",
-  /** --color-primary-container */
-  primaryContainer: "#004d61",
-  /** --color-on-primary */
-  onPrimary: "#ffffff",
-  /** --color-secondary — Aqua accent */
-  secondary: "#009ea1",
-  /** --color-surface */
-  surface: "#ffffff",
-  /** --color-surface-container-low — page background behind the card */
-  surfaceContainerLow: "#f5f3ee",
-  /** --color-surface-container */
-  surfaceContainer: "#f0eee9",
-  /** --color-on-surface — primary text */
-  onSurface: "#1b1c19",
-  /** --color-on-surface-variant — secondary text */
-  onSurfaceVariant: "#44474d",
-  /** --color-outline-variant — hairline borders */
+  /** --color-brand-default — Figma `brand/default` */
+  brandDefault: "#006e8a",
+  /** --color-brand-on-brand — Figma `brand/on-brand` */
+  brandOnBrand: "#ffffff",
+  /** --color-background-default — Figma `background/default` */
+  backgroundDefault: "#ffffff",
+  /** --color-background-warm — Figma `background/warm`; page bg behind the card */
+  backgroundWarm: "#f5f3ee",
+  /** --color-warm-100 — CODE-ONLY, no Figma variable */
+  warm100: "#f0eee9",
+  /** --color-grey-850 — Figma primitive `colors/neutral/850`; primary text */
+  grey850: "#1b1c19",
+  /** --color-text-default — Figma `text/default`; secondary text */
+  textDefault: "#45474d",
+  /** --color-outline-variant — CODE-ONLY, no Figma variable; hairline borders */
   outlineVariant: "#c5c6ce",
-  /** --color-error */
-  error: "#ba1a1a",
 } as const;
 
 /**

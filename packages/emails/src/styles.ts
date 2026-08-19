@@ -8,7 +8,7 @@ export const headingStyle: React.CSSProperties = {
   fontSize: "24px",
   fontWeight: 700,
   lineHeight: "32px",
-  color: emailColors.onSurface,
+  color: emailColors.grey850,
 };
 
 export const paragraphStyle: React.CSSProperties = {
@@ -16,7 +16,7 @@ export const paragraphStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "15px",
   lineHeight: "24px",
-  color: emailColors.onSurface,
+  color: emailColors.grey850,
 };
 
 export const mutedStyle: React.CSSProperties = {
@@ -24,7 +24,7 @@ export const mutedStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "13px",
   lineHeight: "20px",
-  color: emailColors.onSurfaceVariant,
+  color: emailColors.textDefault,
 };
 
 export const ctaSectionStyle: React.CSSProperties = {

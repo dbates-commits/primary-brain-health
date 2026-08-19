@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-[#EFF6F9] w-full rounded-t-[1.25rem]">
+    <footer className="bg-background-brand-subtle w-full rounded-t-[1.25rem]">
       <div className="flex flex-col md:flex-row justify-between items-start gap-12 py-20 px-8 md:px-24 max-w-[1400px] mx-auto">
         {/* Brand */}
         <div className="max-w-sm">
@@ -15,7 +15,7 @@ export function Footer() {
               className="h-10 w-auto"
             />
           </a>
-          <p className="text-on-surface/70 text-sm leading-relaxed mb-6">
+          <p className="text-grey-850/70 text-sm leading-relaxed mb-6">
             A clinical leader in cognitive longevity and proactive brain care.
             Virtual-first, evidence-based, patient-centered.
           </p>
@@ -24,14 +24,14 @@ export function Footer() {
         {/* Link Columns */}
         <div className="grid grid-cols-2 gap-12">
           <div className="space-y-4">
-            <h5 className="font-body font-bold text-primary text-sm uppercase tracking-widest">
+            <h5 className="font-body font-bold text-brand-default text-sm uppercase tracking-widest">
               Menu
             </h5>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#what-you-gain"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   What You Gain
                 </a>
@@ -39,7 +39,7 @@ export function Footer() {
               <li>
                 <a
                   href="#how-it-works"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   How It Works
                 </a>
@@ -47,7 +47,7 @@ export function Footer() {
               <li>
                 <a
                   href="#intake"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   Get Assessed
                 </a>
@@ -55,7 +55,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/faqs"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   FAQs
                 </Link>
@@ -63,14 +63,14 @@ export function Footer() {
             </ul>
           </div>
           <div className="space-y-4">
-            <h5 className="font-body font-bold text-primary text-sm uppercase tracking-widest">
+            <h5 className="font-body font-bold text-brand-default text-sm uppercase tracking-widest">
               Support
             </h5>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/contact"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   Contact
                 </Link>
@@ -78,7 +78,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   Terms &amp; Conditions
                 </Link>
@@ -86,7 +86,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-on-surface/70 hover:text-on-surface transition-colors text-sm"
+                  className="text-grey-850/70 hover:text-grey-850 transition-colors text-sm"
                 >
                   Privacy Policy
                 </Link>
@@ -98,13 +98,13 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-outline-variant/10 px-8 md:px-24 py-8 flex flex-col md:flex-row justify-between items-center gap-4 max-w-[1400px] mx-auto">
-        <span className="text-on-surface/70 text-sm">
+        <span className="text-grey-850/70 text-sm">
           &copy; {new Date().getFullYear()} Primary Brain Health. All rights
           reserved.
         </span>
         <a
           href="mailto:contact@primarybrainhealth.com"
-          className="flex items-center gap-2 text-on-surface/70 hover:text-on-surface text-sm transition-colors"
+          className="flex items-center gap-2 text-grey-850/70 hover:text-grey-850 text-sm transition-colors"
         >
           <svg
             className="w-4 h-4"

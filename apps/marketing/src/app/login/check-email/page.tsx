@@ -23,16 +23,16 @@ export default function CheckEmailPage() {
             <Heading as="h1" size="lg" className="mb-2">
               Check your email
             </Heading>
-            <p className="text-on-surface-variant">
+            <p className="text-text-default">
               We&rsquo;ve sent a secure sign-in link. Open it on this device to
               continue — it expires in 15 minutes and can only be used once.
             </p>
           </div>
 
           <Card variant="bordered">
-            <p className="text-sm text-on-surface-variant">
+            <p className="text-sm text-text-default">
               Didn&rsquo;t get it? Check your spam folder, or{" "}
-              <Link href="/login" className="text-primary underline">
+              <Link href="/login" className="text-brand-default underline">
                 request a new link
               </Link>
               .

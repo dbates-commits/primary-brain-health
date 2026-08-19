@@ -38,15 +38,13 @@ export function AssessmentReadyEmail({
         ))}
       </Section>
       <Text style={paragraphStyle}>
-        Find a quiet spot, free of distractions, and take your time — there&apos;s
-        no need to rush.
+        Find a quiet spot, free of distractions, and take your time — there&apos;s no need to rush.
       </Text>
       <Section style={ctaSectionStyle}>
         <EmailButton href={assessmentsUrl}>Start your assessment</EmailButton>
       </Section>
       <Text style={mutedStyle}>
-        Your progress is saved as you go, so you can sign back in and resume if
-        you need a break.
+        Your progress is saved as you go, so you can sign back in and resume if you need a break.
       </Text>
     </EmailLayout>
   );
@@ -64,7 +62,7 @@ AssessmentReadyEmail.PreviewProps = {
 export default AssessmentReadyEmail;
 
 const listStyle: React.CSSProperties = {
-  backgroundColor: emailColors.surfaceContainer,
+  backgroundColor: emailColors.warm100,
   borderRadius: "12px",
   padding: "12px 20px",
   margin: "0 0 20px",
@@ -76,10 +74,10 @@ const listItemStyle: React.CSSProperties = {
   fontSize: "14px",
   fontWeight: 600,
   lineHeight: "22px",
-  color: emailColors.onSurface,
+  color: emailColors.grey850,
 };
 
 const durationStyle: React.CSSProperties = {
   fontWeight: 400,
-  color: emailColors.onSurfaceVariant,
+  color: emailColors.textDefault,
 };

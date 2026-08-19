@@ -29,11 +29,7 @@ export function Heading({
 }: HeadingProps) {
   return (
     <Tag
-      className={cn(
-        "font-headline font-normal text-on-surface",
-        sizeStyles[size],
-        className
-      )}
+      className={cn("font-headline font-normal text-grey-850", sizeStyles[size], className)}
       data-tina-field={tinaField}
       data-scroll-item={scrollItem}
     >

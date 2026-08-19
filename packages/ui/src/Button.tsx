@@ -32,8 +32,7 @@ export function Button({
 
   // No `pointer-events-none` here: it would suppress the `cursor-not-allowed`
   // hover cursor. Clicks are already blocked by the native `disabled` attribute.
-  const disabledStyles =
-    "opacity-50 cursor-not-allowed active:scale-100 hover:brightness-100";
+  const disabledStyles = "opacity-50 cursor-not-allowed active:scale-100 hover:brightness-100";
 
   // `md` is the only size the design system defines — Figma's Button (609:785)
   // has a single size at 24px horizontal / 16px vertical padding.
@@ -43,38 +42,33 @@ export function Button({
   // 51px — so padding alone does not reconcile it. `sm` and `lg` have no
   // counterpart in the design and are left as-is.
   const sizeStyles = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-4 text-base leading-[normal]",
+    sm: "px-4 py-2 text-body-sm",
+    md: "px-6 py-4 text-body leading-[normal]",
     lg: "px-8 py-4 text-lg",
   };
 
   const variantColorStyles = {
     solid: {
-      primary:
-        "bg-primary text-on-primary hover:brightness-110 focus:ring-primary",
-      secondary:
-        "bg-secondary text-on-secondary hover:brightness-110 focus:ring-secondary",
+      primary: "bg-brand-default text-brand-on-brand hover:brightness-110 focus:ring-brand-default",
+      secondary: "bg-aqua-default text-text-inverse hover:brightness-110 focus:ring-aqua-default",
       // Figma's Button `Type=Secondary`: bg `button/secondary/bg-color` #ffffff,
       // label `button/secondary/text-color` #45474d — which is
-      // `on-surface-variant`, not `on-surface` (#1b1c19).
-      white:
-        "bg-white text-on-surface-variant hover:bg-surface-container-low focus:ring-outline",
-      dark: "bg-on-surface text-surface hover:brightness-125 focus:ring-on-surface",
+      // `ink` (Figma `text/default`), not `ink-strong` (#1b1c19).
+      white: "bg-background-default text-text-default hover:bg-background-warm focus:ring-outline",
+      dark: "bg-grey-850 text-background-default hover:brightness-125 focus:ring-grey-850",
     },
     outline: {
-      primary:
-        "border-2 border-primary text-primary hover:bg-primary/5 focus:ring-primary",
-      secondary:
-        "border-2 border-secondary text-secondary hover:bg-secondary/5 focus:ring-secondary",
+      primary: "border-2 border-brand-default text-brand-default hover:bg-brand-default/5 focus:ring-brand-default",
+      secondary: "border-2 border-aqua-default text-aqua-default hover:bg-aqua-default/5 focus:ring-aqua-default",
       white:
-        "border-2 border-white text-white hover:bg-white/10 focus:ring-white",
-      dark: "border-2 border-on-surface text-on-surface hover:bg-on-surface/5 focus:ring-on-surface",
+        "border-2 border-text-inverse text-text-inverse hover:bg-text-inverse/10 focus:ring-text-inverse",
+      dark: "border-2 border-grey-850 text-grey-850 hover:bg-grey-850/5 focus:ring-grey-850",
     },
     ghost: {
-      primary: "text-primary hover:bg-primary/5 focus:ring-primary",
-      secondary: "text-secondary hover:bg-secondary/5 focus:ring-secondary",
-      white: "text-white hover:bg-white/10 focus:ring-white",
-      dark: "text-on-surface hover:bg-on-surface/5 focus:ring-on-surface",
+      primary: "text-brand-default hover:bg-brand-default/5 focus:ring-brand-default",
+      secondary: "text-aqua-default hover:bg-aqua-default/5 focus:ring-aqua-default",
+      white: "text-text-inverse hover:bg-text-inverse/10 focus:ring-text-inverse",
+      dark: "text-grey-850 hover:bg-grey-850/5 focus:ring-grey-850",
     },
   };
 
@@ -83,20 +77,14 @@ export function Button({
     sizeStyles[size],
     variantColorStyles[variant][color],
     disabled && disabledStyles,
-    className
+    className,
   );
 
   // A disabled link is meaningless, so render a real <button disabled> even
   // when an href is supplied.
   if (href && !disabled) {
     return (
-      <Link
-        href={href}
-        onClick={onClick}
-        className={styles}
-        data-tina-field={tinaField}
-        {...rest}
-      >
+      <Link href={href} onClick={onClick} className={styles} data-tina-field={tinaField} {...rest}>
         {children}
       </Link>
     );
