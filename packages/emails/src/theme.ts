@@ -63,9 +63,35 @@ export function emailHeroImageUrl(): string {
   return emailAssetUrl("welcome-hero-bg.jpg");
 }
 
-/** Absolute, HTTPS-safe URL for a file under the site's public/email-assets. */
+/**
+ * Absolute, HTTPS-safe URL for a file under the site's public/email-assets.
+ *
+ * Except under `pnpm email`, where the marketing app isn't running and the
+ * absolute localhost:3000 URL would 404 — every image in the preview would
+ * render as a broken box. There the react-email dev server serves the same
+ * files itself (see `isReactEmailPreview`), so we hand back a root-relative
+ * `/static/<file>` URL that resolves against whichever port the preview
+ * landed on. Real sends never take this branch: mail clients can't resolve a
+ * relative URL, and nothing sets these variables outside the preview CLI.
+ */
 function emailAssetUrl(file: string): string {
+  if (isReactEmailPreview()) {
+    return `/static/${file}`;
+  }
   return ensureSecureUrl(`${siteBaseUrl()}/email-assets/${file}`);
+}
+
+/**
+ * True when the template is being rendered by the `email dev` preview server.
+ *
+ * The CLI injects a set of `REACT_EMAIL_INTERNAL_*` variables into the process
+ * it renders templates in; this is the one naming the emails directory, which
+ * is also the directory the server serves `/static` out of. Checking an env
+ * var the CLI owns beats sniffing NODE_ENV — the marketing app runs these same
+ * templates in development too, and there the absolute URL is correct.
+ */
+function isReactEmailPreview(): boolean {
+  return Boolean(process.env.REACT_EMAIL_INTERNAL_EMAILS_DIR_ABSOLUTE_PATH);
 }
 
 /**
