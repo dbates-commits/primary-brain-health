@@ -1,8 +1,8 @@
 import "server-only";
 
 import { and, count, gt, inArray, lt } from "drizzle-orm";
-import { authRateLimits, db } from "@pbh/db";
-import { hashIdentifier } from "@pbh/booking/server";
+import { authRateLimits, db, writeAuditLog } from "@pbh/db";
+import { hashIdentifier, hashIp } from "@pbh/booking/server";
 
 /**
  * Throttle for the magic-link sign-in form.
@@ -93,10 +93,19 @@ export type SignInAttemptResult =
 /**
  * Record a sign-in attempt and report whether it is over a limit.
  *
- * Records first, then counts, so the attempt being judged is included — and so
- * that hammering the form keeps the window rolling forward rather than letting
- * an attacker wait out a fixed bucket. Both limits are checked; the IP one is
- * reported first because it is the one an enumeration sweep hits.
+ * **Counts before it writes, and writes nothing when it refuses.** The obvious
+ * ordering — record, then count, so the attempt being judged is included and
+ * hammering the form keeps the window rolling forward — hands an attacker a
+ * permanent lockout: a refused attempt would still land a row in the *email*
+ * bucket, so one already-throttled IP could keep any address pinned above its
+ * ceiling forever, at a cost of one free request a minute, and the victim could
+ * never obtain a sign-in link from anywhere. Refusing without writing means the
+ * only thing that fills a bucket is an attempt that was actually spent, so a
+ * lockout costs the attacker real budget from a real address and expires with
+ * the window.
+ *
+ * The IP ceiling is checked first, and short-circuits: an IP that is already
+ * over its own limit never gets to touch the email bucket at all.
  *
  * **Fails open.** If the database is unreachable the attempt is allowed, which
  * sounds worse than it is: sign-in already needs the database to look up the
@@ -121,10 +130,6 @@ export async function consumeSignInAttempt({
     // the window, and doing it here keeps it bounded without a scheduled job.
     await db.delete(authRateLimits).where(lt(authRateLimits.createdAt, since));
 
-    await db
-      .insert(authRateLimits)
-      .values([{ bucket: ipBucket }, { bucket: emailBucket }]);
-
     const rows = await db
       .select({ bucket: authRateLimits.bucket, attempts: count() })
       .from(authRateLimits)
@@ -139,15 +144,49 @@ export async function consumeSignInAttempt({
     const attemptsFor = (bucket: string) =>
       rows.find((r) => r.bucket === bucket)?.attempts ?? 0;
 
-    if (attemptsFor(ipBucket) > SIGNIN_MAX_PER_IP) {
+    // `>=`, not `>`: the row for this attempt has not been written yet, so a
+    // bucket already sitting at its ceiling means this one is over it.
+    if (attemptsFor(ipBucket) >= SIGNIN_MAX_PER_IP) {
       return { allowed: false, limit: "ip" };
     }
-    if (attemptsFor(emailBucket) > SIGNIN_MAX_PER_EMAIL) {
+    if (attemptsFor(emailBucket) >= SIGNIN_MAX_PER_EMAIL) {
       return { allowed: false, limit: "email" };
     }
+
+    await db
+      .insert(authRateLimits)
+      .values([{ bucket: ipBucket }, { bucket: emailBucket }]);
+
     return { allowed: true };
   } catch (err) {
     console.error("[login] rate-limit check failed, allowing:", err);
     return { allowed: true };
+  }
+}
+
+/**
+ * Record that a sign-in attempt was refused.
+ *
+ * The `auth_rate_limits` rows are disposable — swept the moment they age out —
+ * so the audit row is the only lasting trace that a limit fired. Shared by both
+ * callers of {@link consumeSignInAttempt} (the login server action and the
+ * Auth.js sign-in route) so a refusal looks the same in the trail whichever
+ * door it came through.
+ *
+ * Never throws: a failed audit write must not turn a throttled request into a
+ * 500, which would itself be a signal.
+ */
+export async function auditThrottledSignIn(
+  ip: string | null,
+  limit: "ip" | "email",
+): Promise<void> {
+  try {
+    await writeAuditLog({
+      eventType: "signin_rate_limited",
+      ipHash: hashIp(ip),
+      metadata: { limit },
+    });
+  } catch (err) {
+    console.error("[login] audit write for throttled sign-in failed:", err);
   }
 }

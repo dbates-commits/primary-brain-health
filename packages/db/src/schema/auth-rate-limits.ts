@@ -29,9 +29,15 @@ export const authRateLimits = pgTable(
       .notNull()
       .defaultNow(),
   },
-  // Every read is "how many rows for these buckets since T", and the sweep is
-  // "everything older than T" — both served by this index.
-  (t) => [index("auth_rate_limits_bucket_created_at_idx").on(t.bucket, t.createdAt)],
+  // Two shapes, two indexes. The count is "how many rows for these buckets
+  // since T", which wants `bucket` leading; the sweep is "everything older than
+  // T", which cannot use that index at all — `created_at` is not its leading
+  // column, so the delete would fall back to a sequential scan on every single
+  // sign-in attempt, growing with the table rather than with the window.
+  (t) => [
+    index("auth_rate_limits_bucket_created_at_idx").on(t.bucket, t.createdAt),
+    index("auth_rate_limits_created_at_idx").on(t.createdAt),
+  ],
 );
 
 export type AuthRateLimit = typeof authRateLimits.$inferSelect;

@@ -37,7 +37,10 @@ limiting attempts limits the disclosure.
 ## Sign-in throttling
 
 `sendLoginLink` is rate-limited per IP and per address, in
-`apps/marketing/src/lib/rate-limit.ts`.
+`apps/marketing/src/lib/rate-limit.ts`. So is Auth.js's own
+`POST /api/auth/signin/:provider`, in the route handler: it reaches the same
+`signIn` callback and discloses the same thing by which page it redirects to, so
+guarding only the server action would have guarded only the door our UI uses.
 
 | Limit | Ceiling | Window |
 |---|---|---|
@@ -67,7 +70,21 @@ Details worth knowing before changing it:
 - **Buckets are hashed**, with the same keyed hash as `audit_log.ip_hash`
   (`hashIdentifier`, keyed by `IP_HASH_SECRET`). The raw column would otherwise
   become a list of addresses people typed into a brain-health site, most of
-  which have no account and never consented to anything.
+  which have no account and never consented to anything. **`IP_HASH_SECRET` has
+  to be set in every scope.** Without it `hashIdentifier` falls back to plain
+  SHA-256, and an email address has a small enough keyspace that a dictionary
+  walks it — the bucket becomes that list again, just encoded. Any deployed boot
+  without the secret throws (`assertIdentifierHashSecret`, called from
+  `instrumentation.ts`); local only logs, loudly. Each scope has its own key —
+  production, preview and development do not share one, so a digest from one
+  environment cannot be lined up against another.
+- **A refused attempt writes nothing.** The count happens before the insert, and
+  a refusal returns without recording. The other ordering is the tempting one —
+  it keeps the window rolling forward under a hammering — but it lets one
+  already-throttled IP keep filling a victim's *email* bucket for free, and so
+  lock that address out of sign-in permanently. The IP ceiling is also checked
+  first and short-circuits, so an IP over its own limit never touches the email
+  bucket at all.
 - **It fails open.** If the database is unreachable the attempt is allowed —
   sign-in needs the database anyway, so a failure there was going to fail the
   request regardless, and failing closed would turn a database blip into a
@@ -81,7 +98,8 @@ Details worth knowing before changing it:
 - **A malformed address costs nothing** — it is rejected before the throttle,
   because it never reaches the oracle.
 - **Every attempt counts, successes included.** A magic link that actually
-  sends costs a slot exactly like a probe does; only the format check is free.
+  sends costs a slot exactly like a probe does; the format check is free, and so
+  is an attempt that was refused.
   Signing out is free too, but the next sign-in needs a new link, so repeated
   login/logout rounds burn the window fast.
 

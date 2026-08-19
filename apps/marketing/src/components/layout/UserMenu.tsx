@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { PhosphorIcon, cn } from "@pbh/ui";
-import { signOutAction } from "@/app/welcome/sign-out";
+import { useSignOut } from "@/lib/use-sign-out";
 import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
 import { usePopoverTransition } from "./use-popover-transition";
 
@@ -22,6 +22,7 @@ export function UserMenu({ firstName }: { firstName: string }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
+  const { signOut, pending: signingOut } = useSignOut();
 
   const initial = firstName.trim().charAt(0).toUpperCase();
 
@@ -32,13 +33,19 @@ export function UserMenu({ firstName }: { firstName: string }) {
     }
   }
 
+  /** The menu's items, in DOM order — what the arrow keys move between. */
+  function menuItems(): HTMLElement[] {
+    return Array.from(
+      wrapperRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ??
+        [],
+    );
+  }
+
   useEffect(() => {
     if (!open) {
       return;
     }
-    wrapperRef.current
-      ?.querySelector<HTMLElement>('[role="menu"] a, [role="menu"] button')
-      ?.focus();
+    menuItems()[0]?.focus();
   }, [open]);
 
   useEffect(() => {
@@ -49,7 +56,34 @@ export function UserMenu({ firstName }: { firstName: string }) {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
         close({ restoreFocus: true });
+        return;
       }
+
+      // `aria-haspopup="menu"` promises arrow-key navigation, so provide it:
+      // a menu that can only be walked with Tab is lying about what it is.
+      const items = menuItems();
+      if (items.length === 0) {
+        return;
+      }
+      const current = items.indexOf(document.activeElement as HTMLElement);
+      let next: number | null = null;
+      if (e.key === "ArrowDown") {
+        next = current < 0 ? 0 : (current + 1) % items.length;
+      } else if (e.key === "ArrowUp") {
+        next =
+          current < 0
+            ? items.length - 1
+            : (current - 1 + items.length) % items.length;
+      } else if (e.key === "Home") {
+        next = 0;
+      } else if (e.key === "End") {
+        next = items.length - 1;
+      }
+      if (next === null) {
+        return;
+      }
+      e.preventDefault();
+      items[next]?.focus();
     }
 
     function onPointerDown(e: PointerEvent) {
@@ -128,14 +162,23 @@ export function UserMenu({ firstName }: { firstName: string }) {
             </Link>
           ))}
 
-          {/* Logout goes through the same server action as the welcome screen,
-              which revokes the database session rather than just dropping the
-              cookie — a signed-out session has to be dead everywhere. */}
-          <form action={signOutAction}>
-            <button type="submit" role="menuitem" className={userMenuItemClass}>
-              Logout
-            </button>
-          </form>
+          {/* Logout goes through the same hook as the welcome screen, which
+              revokes the database session rather than just dropping the cookie
+              — a signed-out session has to be dead everywhere — and then leaves
+              with a document load so the header stops showing this menu.
+
+              A button rather than a form: `role="menuitem"` has to be owned by
+              the `role="menu"`, and a wrapping element breaks that ownership,
+              so assistive tech would not count Logout among the menu's items. */}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={signOut}
+            disabled={signingOut}
+            className={userMenuItemClass}
+          >
+            Logout
+          </button>
         </div>
       )}
     </div>

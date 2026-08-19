@@ -4,14 +4,8 @@ import { AuthError } from "next-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
-import { consumeSignInAttempt } from "@/lib/rate-limit";
-import { writeAuditLog } from "@pbh/db";
-import {
-  getClientIp,
-  hashIp,
-  isValidEmail,
-  normalizeEmail,
-} from "@pbh/booking/server";
+import { auditThrottledSignIn, consumeSignInAttempt } from "@/lib/rate-limit";
+import { getClientIp, isValidEmail, normalizeEmail } from "@pbh/booking/server";
 
 export type LoginState =
   | { status: "idle" }
@@ -50,15 +44,7 @@ async function sendLoginLink(rawEmail: string): Promise<LoginState> {
   const ip = getClientIp(await headers());
   const attempt = await consumeSignInAttempt({ ip, email });
   if (!attempt.allowed) {
-    try {
-      await writeAuditLog({
-        eventType: "signin_rate_limited",
-        ipHash: hashIp(ip),
-        metadata: { limit: attempt.limit },
-      });
-    } catch (err) {
-      console.error("[login] audit write for throttled sign-in failed:", err);
-    }
+    await auditThrottledSignIn(ip, attempt.limit);
     // Deliberately says nothing about which limit was hit or how long is left.
     // "You've tried this address 5 times" would hand back exactly the signal
     // the throttle exists to withhold.

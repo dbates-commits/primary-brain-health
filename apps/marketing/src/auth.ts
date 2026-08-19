@@ -195,8 +195,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * the send would still leave a token row behind for every unknown address.
      * Rejecting here runs first and stops the token being created at all.
      *
-     * `requestMagicLink` swallows the resulting AccessDenied and shows the same
-     * check-your-email page either way, so this stays non-enumerating.
+     * The resulting AccessDenied is **not** swallowed any more: since Aug 2026
+     * the form tells the caller that the address has no account (Figma
+     * `1988:10890`), which makes sign-in an enumeration oracle by design. What
+     * bounds it is the throttle in `lib/rate-limit.ts`, applied on both doors
+     * into this callback — the login server action and the Auth.js sign-in
+     * route. See the disclosure note in `docs/auth.md` before widening either.
      */
     async signIn({ user, email }) {
       if (!email?.verificationRequest) {

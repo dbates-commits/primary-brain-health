@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { cn } from "@pbh/ui/utils";
 import { Button, PhosphorIcon } from "@pbh/ui";
 import { requestLoginLinkInline } from "@/app/login/actions";
-import { signOutAction } from "@/app/welcome/sign-out";
+import { useSignOut } from "@/lib/use-sign-out";
 import { LoginMenu } from "./LoginMenu";
 import { LoginPanel } from "./LoginPanel";
 import { UserMenu } from "./UserMenu";
@@ -28,6 +28,17 @@ export function Header() {
   // is "loading" and the header shows its signed-out state.
   const { data: session } = useSession();
   const firstName = session?.user?.firstName;
+  const { signOut, pending: signingOut } = useSignOut();
+
+  /**
+   * Close the drawer, collapsing the login panel with it. The drawer is
+   * animated shut rather than unmounted, so a panel left disclosed would still
+   * be there — invisible and zero-height — the next time it opens.
+   */
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
+    setLoginOpen(false);
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -52,7 +63,7 @@ export function Header() {
   function handleConsultationClick(
     e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
   ) {
-    setMobileMenuOpen(false);
+    closeMobileMenu();
     // On the homepage, Next.js Link no-ops when the URL hash already matches
     // (e.g. user previously clicked here, then scrolled away). Intercept and
     // scroll manually so the CTA always brings the user to #intake.
@@ -172,7 +183,13 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           className="lg:hidden p-2 text-primary"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => {
+            if (mobileMenuOpen) {
+              closeMobileMenu();
+            } else {
+              setMobileMenuOpen(true);
+            }
+          }}
           aria-label="Toggle menu"
         >
           <svg
@@ -202,6 +219,11 @@ export function Header() {
 
       {/* Mobile Menu */}
       <div
+        // `inert`, not just `overflow-hidden`: the drawer collapses to zero
+        // height rather than unmounting, so without this its links — and the
+        // sign-in form inside it — stay tabbable and exposed to screen readers
+        // while invisible. Tabbing off the logo would walk into a hidden form.
+        inert={!mobileMenuOpen}
         className={cn(
           "lg:hidden grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
           mobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
@@ -214,7 +236,7 @@ export function Header() {
                 <a
                   key={item.link}
                   href={item.link}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                   className={cn(
                     "font-body text-base font-semibold py-2",
                     activeHash === item.link
@@ -235,20 +257,20 @@ export function Header() {
                     <Link
                       key={item.label}
                       href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                       className={cn(userMenuItemClass, "w-full px-0")}
                     >
                       {item.label}
                     </Link>
                   ))}
-                  <form action={signOutAction}>
-                    <button
-                      type="submit"
-                      className={cn(userMenuItemClass, "w-full px-0")}
-                    >
-                      Logout
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    disabled={signingOut}
+                    className={cn(userMenuItemClass, "w-full px-0")}
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>
