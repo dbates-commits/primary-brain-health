@@ -1,0 +1,313 @@
+"use client";
+
+import { useActionState, useLayoutEffect, useRef, useState } from "react";
+import { EDUCATION_LEVELS, GENDER_OPTIONS } from "@pbh/booking";
+import { Button, FieldError, Label, Select, fieldClass, formatPhone } from "@pbh/ui";
+import {
+  readProfileValues,
+  sameProfileValues,
+  type ProfileAction,
+  type ProfileInitialValues,
+  type ProfileState,
+  type ProfileValues,
+} from "@/lib/profile-values";
+
+const initialState: ProfileState = { status: "idle" };
+
+/**
+ * The Profile Information form (Figma 2092:13144).
+ *
+ * The action is injected rather than imported so Storybook can render this with
+ * a stub — the same seam `DetailsForm` uses, and the reason `.storybook/main.ts`
+ * needs no alias for it.
+ *
+ * Figma's newsletter checkbox and its extra rule are deliberately absent.
+ */
+export function ProfileForm({
+  action,
+  initial,
+}: {
+  action: ProfileAction;
+  initial: ProfileInitialValues;
+}) {
+  const [state, formAction, pending] = useActionState(action, initialState);
+  const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
+  const values = state.status === "idle" ? undefined : state.values;
+
+  const [phone, setPhone] = useState(initial.phone);
+  const [gender, setGender] = useState(initial.gender);
+  const [educationLevel, setEducationLevel] = useState(initial.educationLevel);
+
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const genderRef = useRef<HTMLSelectElement>(null);
+  const educationRef = useRef<HTMLSelectElement>(null);
+
+  /**
+   * Save is inert until something is actually different — Figma draws it
+   * `brand/muted` in that state (2092:13168).
+   *
+   * One delegated handler rather than seven `onChange`s: React's synthetic
+   * `onChange` is `input` for text fields and `change` for `<select>`, and both
+   * bubble to the form, so the selects and the date input are covered for free.
+   * It reads the DOM, so controlled and uncontrolled fields report identically,
+   * and the disabled email is excluded by the same native rule that keeps it
+   * out of the submission.
+   *
+   * `dirty` is derived during render rather than stored, so a successful save
+   * clears it without an effect: the saved values become what we compare
+   * against, and the last snapshot already equals them. It also *compares*
+   * rather than latching a flag, so typing a character and deleting it returns
+   * the button to pristine.
+   *
+   * A failed save leaves `persisted` at `initial` — nothing was written — so
+   * the customer's edits still read as unsaved and Save stays live for a retry.
+   */
+  const [snapshot, setSnapshot] = useState<ProfileValues | null>(null);
+  const persisted = state.status === "success" ? state.values : initial;
+  const dirty = snapshot !== null && !sameProfileValues(snapshot, persisted);
+
+  function handleChange(event: React.ChangeEvent<HTMLFormElement>) {
+    setSnapshot(readProfileValues(new FormData(event.currentTarget)));
+  }
+
+  // React 19 auto-resets the <form> after a server action (requestFormReset).
+  // `form.reset()` restores each option's `selected` *attribute* while React
+  // sets the *property*, so a reset yanks both <select>s back to their first
+  // option and clears the phone field, whichever value is selected. The
+  // controlled values are unchanged across the re-render, so React doesn't
+  // re-assert them — re-apply each here, after the commit. Same fix as
+  // `DetailsForm`, verified in-browser there.
+  useLayoutEffect(() => {
+    const fields: [
+      { current: HTMLInputElement | HTMLSelectElement | null },
+      string,
+    ][] = [
+      [phoneRef, phone],
+      [genderRef, gender],
+      [educationRef, educationLevel],
+    ];
+    for (const [ref, value] of fields) {
+      const el = ref.current;
+      if (el && el.value !== value) {
+        el.value = value;
+      }
+    }
+  });
+
+  return (
+    <form action={formAction} noValidate onChange={handleChange} className="mt-6">
+      <fieldset
+        disabled={pending}
+        aria-busy={pending}
+        className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
+      >
+        {/* Figma's four rows of two, as eight cells in one grid — 20px gaps
+            both ways, collapsing to a single column below `sm`. */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="firstName">First Name</Label>
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              autoComplete="given-name"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.firstName ? true : undefined}
+              aria-describedby={fieldErrors?.firstName ? "firstName-error" : undefined}
+              defaultValue={values?.firstName ?? initial.firstName}
+              className={fieldClass}
+            />
+            <FieldError id="firstName-error" message={fieldErrors?.firstName} />
+          </div>
+
+          <div>
+            <Label htmlFor="lastName">Last Name</Label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              autoComplete="family-name"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.lastName ? true : undefined}
+              aria-describedby={fieldErrors?.lastName ? "lastName-error" : undefined}
+              defaultValue={values?.lastName ?? initial.lastName}
+              className={fieldClass}
+            />
+            <FieldError id="lastName-error" message={fieldErrors?.lastName} />
+          </div>
+
+          {/* The account address is not editable here. Two independent reasons
+              it can never be submitted: `disabled` (browsers exclude disabled
+              controls from FormData) and no `name` at all. The dimmed label is
+              the Figma Disabled variant's label colour; its tan fill is not
+              applied — see the note in the PR. */}
+          <div>
+            <Label htmlFor="email" className="text-text-secondary">
+              Email
+            </Label>
+            <input
+              id="email"
+              type="email"
+              disabled
+              defaultValue={initial.email}
+              className={fieldClass}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone">Phone Number</Label>
+            <input
+              ref={phoneRef}
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="(555) 000-0000"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.phone ? true : undefined}
+              aria-describedby={fieldErrors?.phone ? "phone-error" : undefined}
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+              className={fieldClass}
+            />
+            <FieldError id="phone-error" message={fieldErrors?.phone} />
+          </div>
+
+          {/* Figma labels this "Year of Birth". We render the booking details
+              step's field instead: `users.date_of_birth` is a full date that
+              Linus needs as a `birthDate`, so a year-only control would have to
+              fabricate a month and day or read-modify-write around the existing
+              value on every save. */}
+          <div>
+            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+            <input
+              id="dateOfBirth"
+              name="dateOfBirth"
+              type="date"
+              autoComplete="bday"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.dateOfBirth ? true : undefined}
+              aria-describedby={fieldErrors?.dateOfBirth ? "dateOfBirth-error" : undefined}
+              defaultValue={values?.dateOfBirth ?? initial.dateOfBirth}
+              className={fieldClass}
+            />
+            <FieldError id="dateOfBirth-error" message={fieldErrors?.dateOfBirth} />
+          </div>
+
+          <div>
+            <Label htmlFor="gender">Gender</Label>
+            <Select
+              ref={genderRef}
+              id="gender"
+              name="gender"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.gender ? true : undefined}
+              aria-describedby={fieldErrors?.gender ? "gender-error" : undefined}
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+            >
+              <option value="" disabled>
+                Select
+              </option>
+              {GENDER_OPTIONS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
+            </Select>
+            <FieldError id="gender-error" message={fieldErrors?.gender} />
+          </div>
+
+          <div>
+            <Label htmlFor="zip">ZIP Code</Label>
+            <input
+              id="zip"
+              name="zip"
+              type="text"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              maxLength={5}
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.zip ? true : undefined}
+              aria-describedby={fieldErrors?.zip ? "zip-error" : undefined}
+              defaultValue={values?.zip ?? initial.zip}
+              className={fieldClass}
+            />
+            <FieldError id="zip-error" message={fieldErrors?.zip} />
+          </div>
+
+          <div>
+            <Label htmlFor="educationLevel">Highest Level of Education</Label>
+            <Select
+              ref={educationRef}
+              id="educationLevel"
+              name="educationLevel"
+              required
+              aria-required="true"
+              aria-invalid={fieldErrors?.educationLevel ? true : undefined}
+              aria-describedby={
+                fieldErrors?.educationLevel ? "educationLevel-error" : undefined
+              }
+              value={educationLevel}
+              onChange={(e) => setEducationLevel(e.target.value)}
+            >
+              <option value="" disabled>
+                Select
+              </option>
+              {EDUCATION_LEVELS.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.label}
+                </option>
+              ))}
+            </Select>
+            <FieldError
+              id="educationLevel-error"
+              message={fieldErrors?.educationLevel}
+            />
+          </div>
+        </div>
+
+        <hr className="border-t border-border-subtle" />
+
+        {state.status === "error" && !fieldErrors && (
+          <p role="alert" className="animate-error-in text-sm text-error">
+            {state.message}
+          </p>
+        )}
+
+        <div className="flex items-center gap-4">
+          <Button
+            type="submit"
+            color="primary"
+            disabled={pending || !dirty}
+            // Figma draws the pristine button `brand/muted` — pale but fully
+            // opaque, not the 50% wash `Button` gives every other disabled
+            // button. `cn` is tailwind-merge and `className` lands last, so both
+            // overrides win while `cursor-not-allowed` survives. Left off while
+            // pending, so an in-flight save keeps the standard wash and the two
+            // states stay distinct.
+            className={dirty ? undefined : "bg-brand-muted opacity-100 hover:brightness-100"}
+          >
+            {pending ? "Saving…" : "Save Changes"}
+          </Button>
+
+          {/* Figma confirms with a toast (2092:13191), which is out of scope.
+              The button going pale again is the visual confirmation; this is the
+              part a screen reader can perceive. */}
+          {state.status === "success" && (
+            <p role="status" className="font-body text-sm text-secondary">
+              Changes saved.
+            </p>
+          )}
+        </div>
+      </fieldset>
+    </form>
+  );
+}

@@ -5,6 +5,7 @@ export * from "./Checkbox";
 export * from "./Container";
 export * from "./Eyebrow";
 export * from "./FieldError";
+export * from "./format-phone";
 export * from "./form-constants";
 export * from "./Heading";
 export * from "./Icon";

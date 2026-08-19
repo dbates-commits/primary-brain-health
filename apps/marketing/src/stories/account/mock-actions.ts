@@ -1,0 +1,82 @@
+/**
+ * Stand-in server actions for the account-card stories.
+ *
+ * `ProfileForm` takes its `"use server"` action as a prop, which is the seam
+ * that lets these stories render the real component without pulling
+ * `next/headers` or the database into the Vite bundle. Mirrors
+ * `stories/booking/mock-actions.ts`.
+ *
+ * The delay is deliberate and finite: `useActionState` only reports `pending`
+ * while the promise is unsettled, so a story that wants to show the disabled
+ * fieldset needs a round-trip to observe — and the Vitest browser run needs it
+ * to end.
+ */
+
+import {
+  readProfileValues,
+  type ProfileAction,
+  type ProfileValues,
+} from "@/lib/profile-values";
+
+/** Long enough to see the pending state, short enough not to stall the test run. */
+export const ACTION_DELAY_MS = 600;
+
+/** Used by the "Submitting" story, which parks the form in its pending state. */
+export const SLOW_ACTION_DELAY_MS = 4000;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+export function profileSucceeds(delayMs = ACTION_DELAY_MS): ProfileAction {
+  return async (_prev, formData) => {
+    await delay(delayMs);
+    return { status: "success", values: readProfileValues(formData) };
+  };
+}
+
+export function profileFieldErrors(
+  fieldErrors: Record<string, string>,
+  delayMs = ACTION_DELAY_MS,
+): ProfileAction {
+  return async (_prev, formData) => {
+    await delay(delayMs);
+    return {
+      status: "error",
+      message: "Please fix the fields below.",
+      fieldErrors,
+      values: readProfileValues(formData),
+    };
+  };
+}
+
+export function profileFails(
+  message: string,
+  delayMs = ACTION_DELAY_MS,
+): ProfileAction {
+  return async (_prev, formData) => {
+    await delay(delayMs);
+    return { status: "error", message, values: readProfileValues(formData) };
+  };
+}
+
+/**
+ * Succeeds, and hands the raw submitted keys to the caller.
+ *
+ * `readProfileValues` would paper over the thing the email stories are checking
+ * — it only looks for the seven fields it knows about — so this reports what
+ * the browser actually put in the payload.
+ */
+export function profileSpy(
+  onSubmit: (keys: string[], values: ProfileValues) => void,
+  delayMs = ACTION_DELAY_MS,
+): ProfileAction {
+  return async (_prev, formData) => {
+    await delay(delayMs);
+    const values = readProfileValues(formData);
+    onSubmit([...formData.keys()], values);
+    return { status: "success", values };
+  };
+}

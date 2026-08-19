@@ -75,6 +75,18 @@
      `border/default`; kept apart so the two can move independently. */
   --color-border-subtle: #d9d9d9;
 
+  /* Figma `text/secondary` — the sub-copy under an account-card heading
+     (2092:13144), and the label of a field that is permanently locked rather
+     than merely busy. Cooler and lighter than `on-surface-variant` (#44474d),
+     which stays the colour of body text. */
+  --color-text-secondary: #6f706e;
+
+  /* Figma `brand/muted` — a pale tint of `primary`, drawn on the Save button
+     while nothing has been edited (2092:13168). A state, not a role: it says
+     "this button has nothing to do yet", so it lives at the one call site that
+     means that rather than becoming a `Button` colour anyone can reach for. */
+  --color-brand-muted: #afd2e3;
+
   /* On-surface */
   --color-on-surface: #1b1c19;
   --color-on-surface-variant: #44474d;
@@ -161,6 +173,8 @@
   --color-surface-variant: var(--color-surface-variant);
   --color-background-brand-subtle: var(--color-background-brand-subtle);
   --color-border-subtle: var(--color-border-subtle);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-brand-muted: var(--color-brand-muted);
   --color-on-surface: var(--color-on-surface);
   --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);

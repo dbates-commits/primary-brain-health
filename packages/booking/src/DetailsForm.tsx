@@ -14,27 +14,13 @@ import {
   Select,
   StepHeader,
   fieldClass,
+  formatPhone,
 } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
 import type { DetailsAction, DetailsState } from "./types";
 import { EDUCATION_LEVELS, GENDER_OPTIONS } from "./field-options";
 
 const initialState: DetailsState = { status: "idle" };
-
-/** Format up to 10 digits as `(XXX) XXX-XXXX`, mirroring the intake form. */
-function formatPhone(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 10);
-  const area = digits.slice(0, 3);
-  const prefix = digits.slice(3, 6);
-  const line = digits.slice(6, 10);
-  if (digits.length <= 3) {
-    return area;
-  }
-  if (digits.length <= 6) {
-    return `(${area}) ${prefix}`;
-  }
-  return `(${area}) ${prefix}-${line}`;
-}
 
 /**
  * Header copy for the details step (Figma 1642:3213), exported so a host that

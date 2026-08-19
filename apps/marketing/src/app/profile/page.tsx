@@ -50,7 +50,7 @@ export default async function ProfilePage() {
         <div className="mt-8 grid grid-cols-1 items-start gap-5 lg:mt-10 lg:grid-cols-[minmax(0,484fr)_minmax(0,836fr)] lg:gap-10">
           <PlanCard />
           <div className="flex flex-col gap-5">
-            <ProfileInformationCard />
+            <ProfileInformationCard userId={session.user.id} />
             <PaymentDetailsCard />
             <DeleteAccountCard />
           </div>

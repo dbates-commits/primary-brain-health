@@ -1,20 +1,44 @@
+import { Heading } from "@pbh/ui";
+import { getProfileValues } from "@/lib/profile";
 import { AccountCard } from "./AccountCard";
+import { ProfileForm } from "./ProfileForm";
+import { saveProfileAction } from "./actions";
 
 /**
- * TODO: Profile Information — Figma 2092:13144. Heading and sub-copy over a
- * rule, then a two-column grid of eight text fields (first/last name, email,
- * phone, year of birth, gender, ZIP, education), a second rule, the "receive
- * newsletters" checkbox, a third rule, and Save Changes.
+ * Profile Information (Figma 2092:13144) — the demographics a customer's
+ * assessment is built from.
  *
- * Stub: this card's slot in the grid is final. Everything inside, `min-h-*`
- * included, goes when the real card lands.
+ * This card owns the header and the rule under it; `ProfileForm` owns the
+ * field grid, the second rule and the button. Figma's newsletter checkbox and
+ * its extra rule are deliberately absent, which is why the card's natural
+ * height is 620px rather than the frame's 692.
+ *
+ * No Storybook story: this is an async server component that reaches the
+ * database. `Account/ProfileForm` is where the UI is exercised.
  */
-export function ProfileInformationCard() {
+export async function ProfileInformationCard({ userId }: { userId: string }) {
+  const initial = await getProfileValues(userId);
+
   return (
-    <AccountCard className="min-h-[692px]">
-      <p className="font-body text-base text-on-surface-variant">
-        Profile Information — coming soon.
+    <AccountCard>
+      <Heading as="h2" size="md" className="leading-[1.06] md:text-[2rem]">
+        Profile Information
+      </Heading>
+      <p className="mt-2 font-body text-base leading-[1.2] text-text-secondary">
+        Update your personal details used for assessments and clinical
+        consultations.
       </p>
+      <hr className="mt-6 border-t border-border-subtle" />
+
+      {initial ? (
+        <ProfileForm action={saveProfileAction} initial={initial} />
+      ) : (
+        // Unreachable in practice — a session implies a row — but the read is
+        // honestly nullable rather than asserted.
+        <p className="mt-6 font-body text-base text-on-surface-variant">
+          We couldn&rsquo;t load your profile. Please refresh and try again.
+        </p>
+      )}
     </AccountCard>
   );
 }
