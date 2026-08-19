@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="bg-[#EFF6F9] w-full rounded-t-[1.25rem]">
+    <footer className="bg-background-brand-subtle w-full rounded-t-[1.25rem]">
       <div className="flex flex-col md:flex-row justify-between items-start gap-12 py-20 px-8 md:px-24 max-w-[1400px] mx-auto">
         {/* Brand */}
         <div className="max-w-sm">

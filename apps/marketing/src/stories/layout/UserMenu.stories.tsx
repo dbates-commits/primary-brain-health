@@ -12,8 +12,9 @@ const meta = {
         component:
           'The signed-in account menu (Figma 1917:7795 for the trigger, 1917:7808 for the ' +
           'dropdown). Replaces the Login item in the header once a session resolves. ' +
-          'Dashboard and Profile are `#` placeholders — neither screen exists yet — and ' +
-          'Logout submits the same server action as the welcome screen, which revokes the ' +
+          'Profile links to `/profile`; Dashboard is still a `#` placeholder, because ' +
+          'that screen has not been built. Logout submits the same server action as the ' +
+          'welcome screen, which revokes the ' +
           'database session rather than just dropping the cookie. ' +
           'That action is swapped for a stand-in by `.storybook/main.ts`.',
       },
