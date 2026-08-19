@@ -18,6 +18,16 @@ interface NavItem {
   link: string;
 }
 
+/**
+ * The full nav, and what the IntersectionObserver below watches. Module-level
+ * so the observer's `[]`-dep effect can't capture a list that has since been
+ * filtered down for a signed-in visitor.
+ */
+const NAV_ITEMS: NavItem[] = [
+  { label: "FAQs", link: "/faqs" },
+  { label: "Contact", link: "/contact" },
+];
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -79,13 +89,16 @@ export function Header() {
     }
   }
 
-  const nav: NavItem[] = [
-    { label: "FAQs", link: "/faqs" },
-    { label: "Contact", link: "/contact" },
-  ];
+  /**
+   * Signed in, the nav collapses to Contact (Figma 2092:13082). A customer who
+   * has already booked has no use for FAQs or the acquisition CTA below.
+   */
+  const visibleNav = firstName
+    ? NAV_ITEMS.filter((item) => item.link === "/contact")
+    : NAV_ITEMS;
 
   useEffect(() => {
-    const navIds = nav.map((item) => item.link.slice(1));
+    const navIds = NAV_ITEMS.map((item) => item.link.slice(1));
     const allIds = [...navIds, "intake"];
 
     const observer = new IntersectionObserver(
@@ -146,8 +159,16 @@ export function Header() {
         {/* Right side: nav + CTA (grouped so they right-align together) */}
         <div className="flex items-center gap-10">
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
-            {nav.map((item) => (
+          <div
+            className={cn(
+              "hidden lg:flex items-center",
+              // Signed out the CTA is the last item, so the links sit 32px
+              // apart inside the group; signed in the account menu *is* the
+              // last group, and the spacing is the nav's own 40px.
+              firstName ? "gap-10" : "gap-8"
+            )}
+          >
+            {visibleNav.map((item) => (
               <a
                 key={item.link}
                 href={item.link}
@@ -167,17 +188,20 @@ export function Header() {
             {firstName ? <UserMenu firstName={firstName} /> : <LoginMenu />}
           </div>
 
-          {/* CTA Button */}
-          <Button
-            href="/#intake"
-            onClick={handleConsultationClick}
-            variant="solid"
-            color="primary"
-            size="md"
-            className="hidden lg:inline-flex"
-          >
-            Book a Consultation
-          </Button>
+          {/* CTA Button. Not rendered for a signed-in customer — they have
+              already booked (Figma 2092:13082). */}
+          {!firstName && (
+            <Button
+              href="/#intake"
+              onClick={handleConsultationClick}
+              variant="solid"
+              color="primary"
+              size="md"
+              className="hidden lg:inline-flex"
+            >
+              Book a Consultation
+            </Button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -232,7 +256,7 @@ export function Header() {
         <div className="overflow-hidden">
           <div className="bg-surface/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
             <div className="flex flex-col gap-4">
-              {nav.map((item) => (
+              {visibleNav.map((item) => (
                 <a
                   key={item.link}
                   href={item.link}
@@ -303,16 +327,18 @@ export function Header() {
                 </>
               )}
 
-              <Button
-                href="/#intake"
-                onClick={handleConsultationClick}
-                variant="solid"
-                color="primary"
-                size="md"
-                className="text-center mt-2"
-              >
-                Book a Consultation
-              </Button>
+              {!firstName && (
+                <Button
+                  href="/#intake"
+                  onClick={handleConsultationClick}
+                  variant="solid"
+                  color="primary"
+                  size="md"
+                  className="text-center mt-2"
+                >
+                  Book a Consultation
+                </Button>
+              )}
             </div>
           </div>
         </div>
