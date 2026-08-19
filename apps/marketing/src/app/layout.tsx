@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth bg-[#EFF6F9]">
+    <html lang="en" className="scroll-smooth bg-background-brand-subtle">
       <head>
         {/* Adobe Fonts (Typekit) — delivers "larken" + "indivisible" */}
         <link

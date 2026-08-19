@@ -62,6 +62,19 @@
   --color-surface-dim: #dbdad5;
   --color-surface-variant: #e4e2dd;
 
+  /* Figma `background/brand-subtle` — the ground the signed-in screens sit on
+     (Account Settings, 2092:13081). Not part of the warm `surface` hierarchy
+     above: it is the brand's pale blue, and the page, the footer and the
+     document root all share it so the header and footer blend into the page
+     rather than banding against it. */
+  --color-background-brand-subtle: #eff6f9;
+
+  /* Figma `border/subtle` — the hairline around each card on the account page
+     (2092:13108, 2092:13144) and the rules inside them. One step off
+     `neutral-350` (#d8d8d8), which is the *different* Figma variable
+     `border/default`; kept apart so the two can move independently. */
+  --color-border-subtle: #d9d9d9;
+
   /* On-surface */
   --color-on-surface: #1b1c19;
   --color-on-surface-variant: #44474d;
@@ -146,6 +159,8 @@
   --color-surface-container-lowest: var(--color-surface-container-lowest);
   --color-surface-dim: var(--color-surface-dim);
   --color-surface-variant: var(--color-surface-variant);
+  --color-background-brand-subtle: var(--color-background-brand-subtle);
+  --color-border-subtle: var(--color-border-subtle);
   --color-on-surface: var(--color-on-surface);
   --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);

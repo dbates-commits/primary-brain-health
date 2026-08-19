@@ -2,14 +2,13 @@
  * The account menu's navigation items (Figma 1917:7808), shared by the desktop
  * dropdown and the mobile drawer so the two can't drift.
  *
- * Both hrefs are placeholders. Neither screen exists yet: `/dashboard` has
- * never been built, and the Account Settings page drawn in the same Figma node
- * (1917:7790) is still a design. They are deliberately in-page fragments rather
- * than routes that would 404 — point them at the real pages as those land.
+ * `Dashboard` is still a placeholder — that screen has never been built, and an
+ * in-page fragment is deliberate: a real route would 404. Point it at the page
+ * when it lands, the way `Profile` now points at `/profile`.
  */
 export const USER_MENU_LINKS = [
   { label: "Dashboard", href: "#dashboard" },
-  { label: "Profile", href: "#profile" },
+  { label: "Profile", href: "/profile" },
 ] as const;
 
 /**
