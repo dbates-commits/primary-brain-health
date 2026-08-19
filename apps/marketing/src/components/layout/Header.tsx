@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { cn } from "@pbh/ui/utils";
-import { Button } from "@pbh/ui";
+import { Button, PhosphorIcon } from "@pbh/ui";
+import { requestLoginLinkInline } from "@/app/login/actions";
+import { useSignOut } from "@/lib/use-sign-out";
+import { LoginMenu } from "./LoginMenu";
+import { LoginPanel } from "./LoginPanel";
+import { UserMenu } from "./UserMenu";
+import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
 
 interface NavItem {
   label: string;
@@ -12,9 +20,25 @@ interface NavItem {
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  // Client-side (see `AuthProvider`): until the session request lands, `status`
+  // is "loading" and the header shows its signed-out state.
+  const { data: session } = useSession();
+  const firstName = session?.user?.firstName;
+  const { signOut, pending: signingOut } = useSignOut();
+
+  /**
+   * Close the drawer, collapsing the login panel with it. The drawer is
+   * animated shut rather than unmounted, so a panel left disclosed would still
+   * be there — invisible and zero-height — the next time it opens.
+   */
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
+    setLoginOpen(false);
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -39,7 +63,7 @@ export function Header() {
   function handleConsultationClick(
     e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
   ) {
-    setMobileMenuOpen(false);
+    closeMobileMenu();
     // On the homepage, Next.js Link no-ops when the URL hash already matches
     // (e.g. user previously clicked here, then scrolled away). Intercept and
     // scroll manually so the CTA always brings the user to #intake.
@@ -84,7 +108,9 @@ export function Header() {
     const timer = setTimeout(() => {
       allIds.forEach((id) => {
         const el = document.getElementById(id);
-        if (el) observer.observe(el);
+        if (el) {
+          observer.observe(el);
+        }
       });
     }, 100);
 
@@ -135,6 +161,10 @@ export function Header() {
                 {item.label}
               </a>
             ))}
+
+            {/* Not part of `nav`: that array feeds the IntersectionObserver
+                below, and neither of these is a scroll anchor. */}
+            {firstName ? <UserMenu firstName={firstName} /> : <LoginMenu />}
           </div>
 
           {/* CTA Button */}
@@ -153,7 +183,13 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           className="lg:hidden p-2 text-primary"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => {
+            if (mobileMenuOpen) {
+              closeMobileMenu();
+            } else {
+              setMobileMenuOpen(true);
+            }
+          }}
           aria-label="Toggle menu"
         >
           <svg
@@ -183,6 +219,11 @@ export function Header() {
 
       {/* Mobile Menu */}
       <div
+        // `inert`, not just `overflow-hidden`: the drawer collapses to zero
+        // height rather than unmounting, so without this its links — and the
+        // sign-in form inside it — stay tabbable and exposed to screen readers
+        // while invisible. Tabbing off the logo would walk into a hidden form.
+        inert={!mobileMenuOpen}
         className={cn(
           "lg:hidden grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
           mobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
@@ -195,7 +236,7 @@ export function Header() {
                 <a
                   key={item.link}
                   href={item.link}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                   className={cn(
                     "font-body text-base font-semibold py-2",
                     activeHash === item.link
@@ -206,6 +247,62 @@ export function Header() {
                   {item.label}
                 </a>
               ))}
+
+              {/* Signed in, the drawer lists the account items flat. The
+                  desktop dropdown exists to keep the nav row short, which is
+                  not a problem the drawer has. */}
+              {firstName ? (
+                <>
+                  {USER_MENU_LINKS.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={closeMobileMenu}
+                      className={cn(userMenuItemClass, "w-full px-0")}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    disabled={signingOut}
+                    className={cn(userMenuItemClass, "w-full px-0")}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Same panel as the desktop popover, disclosed inline — the
+                      drawer is already an overlay, so nesting a second one in
+                      it would be one layer too many. */}
+                  <button
+                    type="button"
+                    onClick={() => setLoginOpen((v) => !v)}
+                    aria-expanded={loginOpen}
+                    className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-primary"
+                  >
+                    Login
+                    <PhosphorIcon
+                      name="CaretDown"
+                      size={16}
+                      aria-hidden="true"
+                      className={cn(
+                        "transition-transform",
+                        loginOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                  {loginOpen && (
+                    <LoginPanel
+                      action={requestLoginLinkInline}
+                      onDone={() => setLoginOpen(false)}
+                    />
+                  )}
+                </>
+              )}
+
               <Button
                 href="/#intake"
                 onClick={handleConsultationClick}

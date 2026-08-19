@@ -4,6 +4,12 @@ Passwordless magic-link sign-in, Auth.js v5 (NextAuth) with database sessions in
 Neon. Implemented in `apps/marketing/src/auth.ts` and `src/lib/auth-*.ts`; the
 routes are `/login`, `/login/check-email` and `/api/auth/[...nextauth]`.
 
+Two entry points, one action. The full-page form at `/login` and the header
+popover (`components/layout/LoginMenu`) both call `sendLoginLink` in
+`src/app/login/actions.ts`, so they can never give different answers for the
+same address. `/login` navigates to the check-your-email page on success; the
+popover reports success in place.
+
 Sign-in is the *alternative* entry, not the main one: a customer who has just
 paid gets a session minted directly by the checkout action (see
 [`booking-flow.md`](./booking-flow.md)). The magic link is how someone comes back
@@ -12,9 +18,102 @@ later, once the 2h booking cookie has expired.
 **Login-only.** Accounts are created by the booking flow, never by a magic link.
 That is enforced twice: the `signIn` callback rejects an address with no account
 before a `verification_tokens` row is minted, and `adapter.createUser` throws.
-`sendMagicLinkEmail` also refuses to email an unknown address, and the caller
-swallows the rejection so the response is identical either way — nothing here
-reveals who is registered.
+`sendMagicLinkEmail` also refuses to email an unknown address.
+
+**Sign-in discloses whether an address has an account.** An unregistered address
+gets "Not an active user. Try checking spelling or another email."; a registered
+one gets the sent state. This is a deliberate product decision (Aug 2026), taken
+from the login designs — Figma `1988:10890` draws the error, and the trade was
+put to the team before it was built. It reverses the earlier behaviour, where
+the caller swallowed the `AccessDenied` rejection so the two responses were
+identical and nothing revealed who was registered.
+
+What that costs, so it is on the record: the sign-in form is an account-
+enumeration oracle. Anyone can test an address against the customer list, and
+for a brain-health service the mere fact of being a customer is sensitive. What
+keeps that bounded is the throttle below — the disclosure is per-attempt, so
+limiting attempts limits the disclosure.
+
+## Sign-in throttling
+
+`sendLoginLink` is rate-limited per IP and per address, in
+`apps/marketing/src/lib/rate-limit.ts`. So is Auth.js's own
+`POST /api/auth/signin/:provider`, in the route handler: it reaches the same
+`signIn` callback and discloses the same thing by which page it redirects to, so
+guarding only the server action would have guarded only the door our UI uses.
+
+| Limit | Ceiling | Window |
+|---|---|---|
+| Per IP | **5** attempts | 15 minutes |
+| Per address | **5** attempts | 15 minutes |
+
+The per-IP limit is the one that bites an enumeration sweep: it tries a
+different address every time, so it never approaches the per-address ceiling.
+The per-address limit is a separate concern — it stops one inbox being flooded
+with sign-in links from a spread of sources, which the per-IP limit does not
+see.
+
+The per-IP number started at 10 and was cut to 5 (Aug 2026): 10 in a
+quarter-hour is ~960 attempts a day from one address, a loose bound on the
+thing the throttle exists to stop. The floor on lowering it further is shared
+IPs — an office or household behind one NAT can genuinely have two or three
+people signing in at once, and they all count against one bucket.
+
+Counting happens in Postgres (`auth_rate_limits`), not Redis. There is no Redis
+here, and the argument above for keeping sessions in Neon applies equally to a
+table of hashes with a fifteen-minute lifespan: one data posture, no
+third-party residency to audit. Per-attempt writes are the cost; at this volume
+they are noise. Reach for a dedicated store if that stops being true.
+
+Details worth knowing before changing it:
+
+- **Buckets are hashed**, with the same keyed hash as `audit_log.ip_hash`
+  (`hashIdentifier`, keyed by `IP_HASH_SECRET`). The raw column would otherwise
+  become a list of addresses people typed into a brain-health site, most of
+  which have no account and never consented to anything. **`IP_HASH_SECRET` has
+  to be set in every scope.** Without it `hashIdentifier` falls back to plain
+  SHA-256, and an email address has a small enough keyspace that a dictionary
+  walks it — the bucket becomes that list again, just encoded. Any deployed boot
+  without the secret throws (`assertIdentifierHashSecret`, called from
+  `instrumentation.ts`); local only logs, loudly. Each scope has its own key —
+  production, preview and development do not share one, so a digest from one
+  environment cannot be lined up against another.
+- **A refused attempt writes nothing.** The count happens before the insert, and
+  a refusal returns without recording. The other ordering is the tempting one —
+  it keeps the window rolling forward under a hammering — but it lets one
+  already-throttled IP keep filling a victim's *email* bucket for free, and so
+  lock that address out of sign-in permanently. The IP ceiling is also checked
+  first and short-circuits, so an IP over its own limit never touches the email
+  bucket at all.
+- **It fails open.** If the database is unreachable the attempt is allowed —
+  sign-in needs the database anyway, so a failure there was going to fail the
+  request regardless, and failing closed would turn a database blip into a
+  total sign-in outage.
+- **The refusal says nothing.** Not which limit was hit, not how long is left.
+  "You've tried this address five times" hands back the signal the throttle
+  exists to withhold.
+- **A refusal is audited** as `signin_rate_limited`, with the hashed IP and
+  which limit tripped. The `auth_rate_limits` rows themselves are disposable
+  and swept on each check; the audit row is the record.
+- **A malformed address costs nothing** — it is rejected before the throttle,
+  because it never reaches the oracle.
+- **Every attempt counts, successes included.** A magic link that actually
+  sends costs a slot exactly like a probe does; the format check is free, and so
+  is an attempt that was refused.
+  Signing out is free too, but the next sign-in needs a new link, so repeated
+  login/logout rounds burn the window fast.
+
+Which makes testing painful, so both ceilings can be raised outside production
+via `SIGNIN_MAX_PER_IP` and `SIGNIN_MAX_PER_EMAIL`. **The overrides are ignored
+when `VERCEL_ENV=production`** — these bound account enumeration, and a limit
+that can be relaxed with a variable will eventually be relaxed by accident.
+
+Two things to know when a limit fires unexpectedly:
+
+- **Locally there is no `x-forwarded-for`**, so every request falls into a
+  single `ip:hash("unknown")` bucket.
+- **A shared egress IP is one bucket.** Everyone testing a preview from the
+  same office counts against each other.
 
 ## Why Auth.js and not Clerk
 

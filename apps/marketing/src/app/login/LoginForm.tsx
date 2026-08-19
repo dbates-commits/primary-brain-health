@@ -9,8 +9,10 @@ const initialState: LoginState = { status: "idle" };
 /**
  * Passwordless sign-in: enter your email, we send a one-time magic link. No
  * password, no account created here — the link authenticates an existing
- * account (created in the booking flow). On submit we forward to
- * /login/check-email whether or not the address is registered.
+ * account (created in the booking flow). A registered address forwards to
+ * /login/check-email; an unregistered one stays here and says so, which is a
+ * deliberate product decision and an enumeration oracle — see the disclosure
+ * note in `docs/auth.md`.
  *
  * `initialEmail` prefills the field — the marketing booking flow hands paid users
  * here with `?email=…` after they've already paid + enrolled, so they only need

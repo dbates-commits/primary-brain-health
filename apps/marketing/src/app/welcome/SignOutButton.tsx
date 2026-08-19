@@ -1,21 +1,23 @@
 "use client";
 
 import { Button } from "@pbh/ui";
-import { signOutAction } from "./sign-out";
+import { useSignOut } from "@/lib/use-sign-out";
 
-/** Submits the sign-out server action, revoking the current session. */
+/** Revokes the current session, then leaves for the home page. */
 export function SignOutButton() {
+  const { signOut, pending } = useSignOut();
+
   return (
-    <form action={signOutAction}>
-      <Button
-        type="submit"
-        variant="ghost"
-        color="secondary"
-        size="sm"
-        className="w-full"
-      >
-        Sign out
-      </Button>
-    </form>
+    <Button
+      type="button"
+      onClick={signOut}
+      disabled={pending}
+      variant="ghost"
+      color="secondary"
+      size="sm"
+      className="w-full"
+    >
+      Sign out
+    </Button>
   );
 }
