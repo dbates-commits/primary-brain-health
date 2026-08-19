@@ -39,7 +39,7 @@ const meta = {
     (Story) => (
       // The header is `fixed`, so the frame needs height of its own for it to
       // sit against, and a ground to read on.
-      <div className="min-h-[420px] bg-background-default">
+      <div className="min-h-[420px] bg-surface">
         <Story />
       </div>
     ),
