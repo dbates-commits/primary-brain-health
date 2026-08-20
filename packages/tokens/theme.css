@@ -87,6 +87,12 @@
      means that rather than becoming a `Button` colour anyone can reach for. */
   --color-brand-muted: #afd2e3;
 
+  /* Figma's toast ground (2092:13191) — a near-black with a blue cast, darker
+     and cooler than `inverse-surface` (#30312e), which is the theme's own
+     inverted ground. Bound to no Figma variable; the toast is drawn in raw hex
+     there, so this is the name we give it. */
+  --color-toast-surface: #1f262e;
+
   /* On-surface */
   --color-on-surface: #1b1c19;
   --color-on-surface-variant: #44474d;
@@ -175,6 +181,7 @@
   --color-border-subtle: var(--color-border-subtle);
   --color-text-secondary: var(--color-text-secondary);
   --color-brand-muted: var(--color-brand-muted);
+  --color-toast-surface: var(--color-toast-surface);
   --color-on-surface: var(--color-on-surface);
   --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);

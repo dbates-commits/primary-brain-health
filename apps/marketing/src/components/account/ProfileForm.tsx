@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useLayoutEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EDUCATION_LEVELS, GENDER_OPTIONS } from "@pbh/booking";
-import { Button, FieldError, Label, Select, fieldClass, formatPhone } from "@pbh/ui";
+import { Button, FieldError, Label, Select, Toast, fieldClass, formatPhone } from "@pbh/ui";
 import {
   readProfileValues,
   sameProfileValues,
@@ -13,6 +13,15 @@ import {
 } from "@/lib/profile-values";
 
 const initialState: ProfileState = { status: "idle" };
+
+/**
+ * How long the confirmation toast stays up: long enough to read, short enough
+ * that it is gone before the customer looks back at the header it covers.
+ */
+const TOAST_MS = 4000;
+
+/** Must match `.animate-toast-out` in `globals.css` — see the effect below. */
+const TOAST_EXIT_MS = 200;
 
 /**
  * The Profile Information form (Figma 2092:13144).
@@ -69,6 +78,43 @@ export function ProfileForm({
   function handleChange(event: React.ChangeEvent<HTMLFormElement>) {
     setSnapshot(readProfileValues(new FormData(event.currentTarget)));
   }
+
+  /**
+   * The confirmation toast (Figma 2092:13191): in, a hold, then out.
+   *
+   * Two pieces of state rather than a boolean because a component cannot
+   * animate its own unmount — the toast has to stay mounted for the exit, so
+   * `leaving` is the phase where it is still on screen but on its way off.
+   *
+   * It latches the success *object*, not `status`: `useActionState` hands back
+   * a fresh one per submit, so saving twice restarts the sequence from the top
+   * instead of letting the first toast expire on the second save's watch. The
+   * latch is set during render — the supported way to react to changed input —
+   * rather than in an effect, which would cost a second render pass.
+   *
+   * The unmount is a timer, not `onAnimationEnd`: under
+   * `prefers-reduced-motion` the animation is `none` and that event never
+   * fires, which would leave the toast up forever.
+   */
+  const [toastFor, setToastFor] = useState<ProfileState | null>(null);
+  const [toastLeaving, setToastLeaving] = useState(false);
+
+  if (state.status === "success" && state !== toastFor) {
+    setToastFor(state);
+    setToastLeaving(false);
+  }
+
+  useEffect(() => {
+    if (toastFor === null) {
+      return;
+    }
+    const leave = setTimeout(() => setToastLeaving(true), TOAST_MS);
+    const drop = setTimeout(() => setToastFor(null), TOAST_MS + TOAST_EXIT_MS);
+    return () => {
+      clearTimeout(leave);
+      clearTimeout(drop);
+    };
+  }, [toastFor]);
 
   // React 19 auto-resets the <form> after a server action (requestFormReset).
   // `form.reset()` restores each option's `selected` *attribute* while React
@@ -282,32 +328,33 @@ export function ProfileForm({
           </p>
         )}
 
-        <div className="flex items-center gap-4">
-          <Button
-            type="submit"
-            color="primary"
-            disabled={pending || !dirty}
-            // Figma draws the pristine button `brand/muted` — pale but fully
-            // opaque, not the 50% wash `Button` gives every other disabled
-            // button. `cn` is tailwind-merge and `className` lands last, so both
-            // overrides win while `cursor-not-allowed` survives. Left off while
-            // pending, so an in-flight save keeps the standard wash and the two
-            // states stay distinct.
-            className={dirty ? undefined : "bg-brand-muted opacity-100 hover:brightness-100"}
-          >
-            {pending ? "Saving…" : "Save Changes"}
-          </Button>
-
-          {/* Figma confirms with a toast (2092:13191), which is out of scope.
-              The button going pale again is the visual confirmation; this is the
-              part a screen reader can perceive. */}
-          {state.status === "success" && (
-            <p role="status" className="font-body text-sm text-secondary">
-              Changes saved.
-            </p>
-          )}
-        </div>
+        <Button
+          type="submit"
+          color="primary"
+          disabled={pending || !dirty}
+          // Figma draws the pristine button `brand/muted` — pale but fully
+          // opaque, not the 50% wash `Button` gives every other disabled
+          // button. `cn` is tailwind-merge and `className` lands last, so both
+          // overrides win while `cursor-not-allowed` survives. Left off while
+          // pending, so an in-flight save keeps the standard wash and the two
+          // states stay distinct.
+          className={dirty ? undefined : "bg-brand-muted opacity-100 hover:brightness-100"}
+        >
+          {pending ? "Saving…" : "Save Changes"}
+        </Button>
       </fieldset>
+
+      {/* Figma pins the toast to the top of the page, centred, 28px down
+          (2092:13191) — which puts it over the fixed header, hence a z-index
+          above the header's `z-50`. `pointer-events-none` so it can never
+          swallow a click meant for the nav underneath. It sits inside the form
+          only because that is this component's root; `fixed` takes it out of
+          the flow either way. */}
+      {toastFor !== null && (
+        <div className="pointer-events-none fixed inset-x-0 top-7 z-[60] flex justify-center px-4">
+          <Toast message="Changes saved successfully" leaving={toastLeaving} />
+        </div>
+      )}
     </form>
   );
 }

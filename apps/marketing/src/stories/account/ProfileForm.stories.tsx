@@ -51,6 +51,8 @@ const meta = {
           'Figma labels the birth field "Year of Birth"; we render the booking step\'s date ' +
           'input instead, because `users.date_of_birth` is a full date Linus needs as a ' +
           '`birthDate`. The newsletter checkbox in the frame is out of scope. ' +
+          'A save raises the confirmation toast (2092:13191), pinned to the top of the page ' +
+          'and gone after four seconds. ' +
           'The action is a prop, so these stories drive the real component with stubs.',
       },
     },
@@ -197,7 +199,9 @@ export const SavedResetsDirty: Story = {
     await userEvent.type(zip, '90210');
     await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }));
 
-    await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('Changes saved.'));
+    await waitFor(() =>
+      expect(canvas.getByRole('status')).toHaveTextContent('Changes saved successfully'),
+    );
 
     // The edit survived the reset — inputs, selects and the phone alike.
     await expect(zip).toHaveValue('90210');
@@ -209,6 +213,24 @@ export const SavedResetsDirty: Story = {
     const save = canvas.getByRole('button', { name: 'Save Changes' });
     await waitFor(() => expect(save).toBeDisabled());
     await expect(save).toHaveClass(/bg-brand-muted/);
+  },
+};
+
+/**
+ * The toast is what confirms a save (Figma 2092:13191). It is `fixed`, so it
+ * renders over the story's own frame rather than inside the card.
+ */
+export const SavedShowsToast: Story = {
+  args: { action: profileSucceeds() },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await userEvent.type(canvas.getByLabelText('First Name'), 'son');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }));
+
+    const toast = await waitFor(() => canvas.getByRole('status'));
+    await expect(toast).toHaveTextContent('Changes saved successfully');
+    await expect(toast).toHaveClass(/bg-toast-surface/);
   },
 };
 

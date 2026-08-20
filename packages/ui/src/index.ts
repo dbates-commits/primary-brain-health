@@ -15,4 +15,6 @@ export * from "./Section";
 export * from "./SegmentedControl";
 export * from "./Select";
 export * from "./StepHeader";
+export * from "./SuccessCircleIcon";
+export * from "./Toast";
 export { cn } from "./utils";
