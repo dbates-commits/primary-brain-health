@@ -22,7 +22,7 @@ export function phoneDigits(value: string): string {
   return value.replace(/\D/g, "");
 }
 
-/** The seven validated fields, under canonical names — see `nameKeys` below. */
+/** The seven validated fields. */
 export interface ProfileFieldValues {
   firstName: string;
   lastName: string;
@@ -33,27 +33,17 @@ export interface ProfileFieldValues {
   educationLevel: string;
 }
 
-/**
- * Field-level errors, keyed by form field name. Empty means valid.
- *
- * `nameKeys` exists because the booking step submits the *patient* pair
- * (`patientFirstName` / `patientLastName`) while the account card submits the
- * account holder's — the same rule, a different input to hang the message on.
- */
+/** Field-level errors, keyed by form field name. Empty means valid. */
 export function validateProfileFields(
   values: ProfileFieldValues,
-  nameKeys: { first: string; last: string } = {
-    first: "firstName",
-    last: "lastName",
-  },
 ): Record<string, string> {
   const fieldErrors: Record<string, string> = {};
 
   if (!values.firstName) {
-    fieldErrors[nameKeys.first] = "Enter a first name.";
+    fieldErrors.firstName = "Enter a first name.";
   }
   if (!values.lastName) {
-    fieldErrors[nameKeys.last] = "Enter a last name.";
+    fieldErrors.lastName = "Enter a last name.";
   }
   if (!values.dateOfBirth) {
     fieldErrors.dateOfBirth = "Enter your date of birth.";

@@ -3,28 +3,11 @@
  * alignment, `users.gender` and `users.educationLevel` already store canonical
  * Linus enum values, so this is mostly pass-through.
  *
- * The one piece of real logic is *who* the subject is — see `buildRegisterInput`.
+ * The subject is the account holder — see `buildRegisterInput`.
  */
 
 import type { User } from "@pbh/db";
 import type { RegisterSubjectInput, SexAssignedAtBirth } from "./types";
-
-/**
- * Thrown when a legacy "Someone else" booking has no patient name on file.
- * Registering the buyer instead would attach the patient's assessment to the
- * wrong person, so this fails loudly rather than guessing.
- *
- * Unreachable for anything booked after the details step began collecting the
- * patient's name unconditionally; it guards rows created before that.
- */
-export class MissingPatientNameError extends Error {
-  constructor() {
-    super(
-      "This booking is for someone else but has no patient name on file, so " +
-        "the Linus subject can't be identified. Complete the details step first.",
-    );
-  }
-}
 
 /** Thrown when a user has no DOB, which Linus requires (healthcare use case). */
 export class MissingDateOfBirthError extends Error {
@@ -55,29 +38,14 @@ export function buildRegisterInput(user: User): RegisterSubjectInput {
     throw new MissingDateOfBirthError();
   }
 
-  // The subject is whoever is being assessed, which is not always the account
-  // holder. Every demographic on the row (DOB, gender, education) describes the
-  // patient, so the name has to come from the patient columns too — otherwise
-  // Linus receives a subject that is half buyer and half patient.
-  //
-  // The details step now always writes those columns, prefilled with the account
-  // name, so they are set for every new booking. The `??` fallback covers rows
-  // created before that, where they are null and the account holder *was* the
-  // patient. The guard below catches the one legacy shape that would be wrong:
-  // a "Someone else" row that never reached the details step.
-  if (
-    user.patientIdentification === "Someone else" &&
-    !(user.patientFirstName && user.patientLastName)
-  ) {
-    throw new MissingPatientNameError();
-  }
-
-  // Email is deliberately the account holder's in every case: it is the address
-  // we have verified and the one the report should reach. The patient is
-  // identified by name + date of birth, not by their inbox.
+  // The subject is the account holder: the funnel sells an assessment to the
+  // person taking it, and every demographic on the row (DOB, gender, education)
+  // describes them. The second name pair this used to prefer (`patient_*`) was
+  // dropped in migration 0022 — one person, one name. The email is that
+  // person's too: the address we verified, and where the report should land.
   const input: RegisterSubjectInput = {
-    firstName: user.patientFirstName ?? user.firstName,
-    lastName: user.patientLastName ?? user.lastName,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     sexAssignedAtBirth: toSexAssignedAtBirth(user.gender),
     ageIndicator: { birthDate: user.dateOfBirth },

@@ -28,8 +28,8 @@ export const previewDetails: DetailsAction = async (_prev, formData) => ({
   // Echoed back so the fields keep what was typed, exactly as the real action
   // does on a validation failure.
   values: {
-    patientFirstName: String(formData.get("patientFirstName") ?? ""),
-    patientLastName: String(formData.get("patientLastName") ?? ""),
+    firstName: String(formData.get("firstName") ?? ""),
+    lastName: String(formData.get("lastName") ?? ""),
     dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
     zip: String(formData.get("zip") ?? ""),
     phone: String(formData.get("phone") ?? ""),

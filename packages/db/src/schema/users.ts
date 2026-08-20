@@ -48,23 +48,21 @@ export const users = pgTable("users", {
   // diagnoses, or treatment history into it — PHI that would breach the
   // data-minimisation boundary this schema exists to hold. Clinical narrative
   // belongs in Linus, never here.
+  //
+  // These demographics — and `first_name` / `last_name` with them — describe the
+  // account holder, who is the person assessed. There is no second name pair:
+  // `patient_first_name` / `patient_last_name` were dropped in 0022 because the
+  // funnel registers the buyer as the Linus subject, and a second pair only
+  // gave the same person two names that could disagree.
   phone: text(),
   gender: text(),
   educationLevel: text("education_level"),
-  // DEPRECATED (pbh-4by): signup no longer asks who the assessment is for — the
-  // details step's name fields arrive prefilled with the account name instead,
-  // so editing them IS the answer. Still read by the legacy branch of
-  // `buildRegisterInput`, and existing rows carry real meaning, so it stays
-  // until those are aged out.
+  // DEPRECATED (pbh-4by): signup no longer asks who the assessment is for, and
+  // nothing reads this any more — the patient/account distinction it belonged to
+  // was retired with `patient_first_name` / `patient_last_name` (0022). Kept
+  // rather than dropped only because existing rows hold a real answer; drop it
+  // once those are aged out.
   patientIdentification: text("patient_identification"),
-  // The person being assessed. Set on EVERY booking now (prefilled with the
-  // account holder's name); on older rows it is null whenever the buyer was the
-  // patient. The demographic columns (dateOfBirth, gender, zip, phone,
-  // educationLevel) always describe THIS person, not necessarily the account
-  // holder named by first_name/last_name — `buildRegisterInput` relies on that
-  // to register the right Linus subject.
-  patientFirstName: text("patient_first_name"),
-  patientLastName: text("patient_last_name"),
   // Linus Health subject id, set the first time we register this user as a
   // subject. Persisted so we never re-register (which would create a duplicate
   // Linus subject) — once set, we reuse it and skip straight to enrollment.

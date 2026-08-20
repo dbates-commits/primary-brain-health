@@ -7,12 +7,11 @@ import type { DetailsState, DetailsValues } from "../types";
 
 /**
  * Complete the partial account created at signup: set the remaining profile
- * fields (the patient's name, DOB, ZIP, and the intake details) on the existing
- * `users` row.
+ * fields (name, DOB, ZIP, and the intake details) on the existing `users` row.
  *
- * Every field here describes the person being assessed. The name arrives
- * prefilled with the account holder's, so it is the buyer unless they edited it
- * — which is the only place we ask who the assessment is for.
+ * Every field here describes the account holder, who is the person assessed.
+ * The name arrives prefilled from signup and is written back because the
+ * customer may have corrected it.
  *
  * `userId` is resolved by the app wrapper (via the identity seam), not trusted
  * from the form — see `resolveBookingUserId`.
@@ -26,14 +25,12 @@ export async function completeProfileCore(
   const phone = String(formData.get("phone") ?? "").trim();
   const gender = String(formData.get("gender") ?? "").trim();
   const educationLevel = String(formData.get("educationLevel") ?? "").trim();
-  const patientFirstName = String(
-    formData.get("patientFirstName") ?? "",
-  ).trim();
-  const patientLastName = String(formData.get("patientLastName") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
 
   const values: DetailsValues = {
-    patientFirstName,
-    patientLastName,
+    firstName,
+    lastName,
     dateOfBirth,
     zip,
     phone,
@@ -49,21 +46,9 @@ export async function completeProfileCore(
     };
   }
 
-  // The same rules the account settings card enforces on these seven columns
-  // — see `profile-rules.ts`. The name pair is the patient's here, so the
-  // messages hang off the `patient*` inputs.
-  const fieldErrors = validateProfileFields(
-    {
-      firstName: patientFirstName,
-      lastName: patientLastName,
-      dateOfBirth,
-      zip,
-      phone,
-      gender,
-      educationLevel,
-    },
-    { first: "patientFirstName", last: "patientLastName" },
-  );
+  // The same rules the account settings card enforces on these seven columns —
+  // see `profile-rules.ts`.
+  const fieldErrors = validateProfileFields(values);
 
   if (Object.keys(fieldErrors).length > 0) {
     return {
@@ -83,8 +68,8 @@ export async function completeProfileCore(
         phone,
         gender,
         educationLevel,
-        patientFirstName,
-        patientLastName,
+        firstName,
+        lastName,
       })
       .where(eq(users.id, userId))
       .returning({ id: users.id });

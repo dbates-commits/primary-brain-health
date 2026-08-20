@@ -60,8 +60,8 @@ export async function detailsAction(
       status: "error",
       message: NO_BOOKING_SESSION,
       values: {
-        patientFirstName: String(formData.get("patientFirstName") ?? ""),
-        patientLastName: String(formData.get("patientLastName") ?? ""),
+        firstName: String(formData.get("firstName") ?? ""),
+        lastName: String(formData.get("lastName") ?? ""),
         dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
         zip: String(formData.get("zip") ?? ""),
         phone: String(formData.get("phone") ?? ""),

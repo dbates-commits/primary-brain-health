@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { validateProfileFields } from "@pbh/booking";
 import { db, users } from "@pbh/db";
 import { readProfileValues, type ProfileState } from "./profile-values";
@@ -17,31 +17,11 @@ import { readProfileValues, type ProfileState } from "./profile-values";
  * `userId` is resolved by the action wrapper from the Auth.js session, never
  * trusted from the form.
  *
- * **The two name pairs.** `users` keeps `first_name` (the account holder) and
- * `patient_first_name` (the person assessed), and they are not always the same
- * person: the details step arrives prefilled with the account name, and someone
- * booking for a parent or spouse types over it. Both pairs are live —
- * `buildRegisterInput` registers the Linus subject as
- * `patientFirstName ?? firstName`, and `resolveBookingResume` prefills the
- * details step from the patient pair.
- *
- * This card edits the *account holder's* name, so the patient pair is mirrored
- * only when it is the same name — either unset (a legacy row where the buyer
- * was the patient) or still equal to the account name. That keeps the common
- * self-booking case in step with Linus without overwriting a patient who is
- * somebody else: a customer who booked for their mother and later fixes their
- * own ZIP must not silently rename the subject.
- *
- * The condition is evaluated in the UPDATE rather than by reading the row
- * first, so there is no window between the read and the write. Postgres
- * evaluates the right-hand side of `SET` against the *old* row, which is what
- * makes comparing against `first_name` here mean "before this save".
- *
- * The demographic columns are a looser version of the same problem: they
- * describe the patient, and this card presents them as the account holder's.
- * That is the existing behaviour of the whole card, not something this write
- * decides, but it is the next thing to reckon with if booking for someone else
- * becomes common.
+ * There is one name here, not two. `patient_first_name` /
+ * `patient_last_name` were dropped in migration 0022: the funnel registers the
+ * account holder as the Linus subject, so a second pair only gave one person
+ * two names that could disagree — and this card, editing the account pair,
+ * could rename a subject by writing them in step.
  *
  * TODO(linus): this writes Neon only. `registerAndEnrollUser` sends the name,
  * `sexAssignedAtBirth`, `education` and `ageIndicator.birthDate` to Linus once,
@@ -86,12 +66,6 @@ export async function saveProfileCore(
       .set({
         firstName: values.firstName,
         lastName: values.lastName,
-        patientFirstName: sql`case when (${users.patientFirstName} is null and ${users.patientLastName} is null)
-            or (${users.patientFirstName} = ${users.firstName} and ${users.patientLastName} = ${users.lastName})
-          then ${values.firstName} else ${users.patientFirstName} end`,
-        patientLastName: sql`case when (${users.patientFirstName} is null and ${users.patientLastName} is null)
-            or (${users.patientFirstName} = ${users.firstName} and ${users.patientLastName} = ${users.lastName})
-          then ${values.lastName} else ${users.patientLastName} end`,
         dateOfBirth: values.dateOfBirth,
         phone: values.phone,
         zip: values.zip,

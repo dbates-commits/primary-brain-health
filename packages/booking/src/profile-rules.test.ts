@@ -48,18 +48,10 @@ describe("validateProfileFields", () => {
     );
   });
 
-  /** The booking step hangs the same rule off its `patient*` inputs. */
-  it("keys the name errors by the caller's field names", () => {
-    const blank = { ...VALID, firstName: "", lastName: "" };
-    expect(validateProfileFields(blank)).toEqual({
+  it("requires both names", () => {
+    expect(validateProfileFields({ ...VALID, firstName: "", lastName: "" })).toEqual({
       firstName: "Enter a first name.",
       lastName: "Enter a last name.",
-    });
-    expect(
-      validateProfileFields(blank, { first: "patientFirstName", last: "patientLastName" }),
-    ).toEqual({
-      patientFirstName: "Enter a first name.",
-      patientLastName: "Enter a last name.",
     });
   });
 });

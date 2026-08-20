@@ -53,8 +53,8 @@ function signupValues(formData: FormData): SignupValues {
 
 function detailsValues(formData: FormData): DetailsValues {
   return {
-    patientFirstName: text(formData, "patientFirstName"),
-    patientLastName: text(formData, "patientLastName"),
+    firstName: text(formData, "firstName"),
+    lastName: text(formData, "lastName"),
     dateOfBirth: text(formData, "dateOfBirth"),
     zip: text(formData, "zip"),
     phone: text(formData, "phone"),

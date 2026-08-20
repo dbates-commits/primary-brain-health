@@ -219,13 +219,9 @@ export function BookingStepFlow({
         router.replace(WELCOME_PATH);
         return;
       }
-      // Prefer the patient's name where the details step already captured one,
-      // so someone who booked for a parent doesn't find their own name back in
-      // the field they corrected.
-      setContext({
-        firstName: resumed.patientFirstName ?? resumed.firstName,
-        lastName: resumed.patientLastName ?? resumed.lastName,
-      });
+      // The name as the row holds it, so a correction made in the details step
+      // is what comes back rather than what signup first captured.
+      setContext({ firstName: resumed.firstName, lastName: resumed.lastName });
       // The account exists, so the on-page form behind the modal would only
       // fail on the unique-email constraint if it were left submittable.
       setSignedUp(true);
