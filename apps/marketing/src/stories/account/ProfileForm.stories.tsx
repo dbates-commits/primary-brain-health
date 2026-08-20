@@ -292,6 +292,36 @@ export const FailedSaveKeepsThePersistedBaseline: Story = {
   },
 };
 
+/**
+ * `onSaved` fires once per successful save and never on a failure — this is
+ * what `ProfileFormWithSession` hangs the session refresh on, so the header
+ * stops greeting the customer by the name they just changed.
+ */
+const savedSpy = fn();
+
+export const NotifiesOnSave: Story = {
+  args: {
+    action: profileSucceedsThenFails('Something went wrong saving your details.'),
+    onSaved: savedSpy,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByLabelText('First Name');
+    const save = () => canvas.getByRole('button', { name: 'Save Changes' });
+    savedSpy.mockClear();
+
+    await userEvent.type(first, 'son');
+    await userEvent.click(save());
+    await waitFor(() => expect(savedSpy).toHaveBeenCalledTimes(1));
+
+    // The failed second save leaves the count alone.
+    await userEvent.type(first, 'x');
+    await userEvent.click(save());
+    await waitFor(() => expect(canvas.getByRole('alert')).toBeInTheDocument());
+    await expect(savedSpy).toHaveBeenCalledTimes(1);
+  },
+};
+
 /** Per-field messages, the invalid ring, and the input kept for a retry. */
 export const FieldErrors: Story = {
   args: {

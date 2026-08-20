@@ -35,9 +35,18 @@ const TOAST_EXIT_MS = 200;
 export function ProfileForm({
   action,
   initial,
+  onSaved,
 }: {
   action: ProfileAction;
   initial: ProfileInitialValues;
+  /**
+   * Fired once per successful save. `ProfileFormWithSession` uses it to
+   * refresh the Auth.js session, since the header greets the customer by the
+   * name this form just changed. Injected rather than reached for here for the
+   * same reason `action` is: it keeps `useSession` — and the provider it
+   * requires — out of the component the stories render.
+   */
+  onSaved?: () => void;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -120,10 +129,19 @@ export function ProfileForm({
     setToastLeaving(false);
   }
 
+  // Through a ref so an inline `onSaved` — a new function identity every render
+  // — cannot make the effect below re-fire and re-request the session in a loop.
+  // Kept current in its own effect, which runs before that one.
+  const onSavedRef = useRef(onSaved);
+  useEffect(() => {
+    onSavedRef.current = onSaved;
+  });
+
   useEffect(() => {
     if (shown === null) {
       return;
     }
+    onSavedRef.current?.();
     const leave = setTimeout(() => setToastLeaving(true), TOAST_MS);
     const hide = setTimeout(() => setToastVisible(false), TOAST_MS + TOAST_EXIT_MS);
     return () => {

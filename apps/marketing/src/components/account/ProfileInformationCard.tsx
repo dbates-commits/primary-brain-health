@@ -1,7 +1,7 @@
 import { Heading } from "@pbh/ui";
 import { getProfileValues } from "@/lib/profile";
 import { AccountCard } from "./AccountCard";
-import { ProfileForm } from "./ProfileForm";
+import { ProfileFormWithSession } from "./ProfileFormWithSession";
 import { saveProfileAction } from "./actions";
 
 /**
@@ -9,7 +9,8 @@ import { saveProfileAction } from "./actions";
  * assessment is built from.
  *
  * This card owns the header and the rule under it; `ProfileForm` owns the
- * field grid, the second rule and the button. Figma's newsletter checkbox and
+ * field grid, the second rule and the button, and `ProfileFormWithSession` sits
+ * between them to refresh the session a save invalidates. Figma's newsletter checkbox and
  * its extra rule are deliberately absent, which is why the card's natural
  * height is 620px rather than the frame's 692.
  *
@@ -31,7 +32,7 @@ export async function ProfileInformationCard({ userId }: { userId: string }) {
       <hr className="mt-6 border-t border-border-subtle" />
 
       {initial ? (
-        <ProfileForm action={saveProfileAction} initial={initial} />
+        <ProfileFormWithSession action={saveProfileAction} initial={initial} />
       ) : (
         // Unreachable in practice — a session implies a row — but the read is
         // honestly nullable rather than asserted.
