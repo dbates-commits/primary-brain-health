@@ -12,6 +12,7 @@ export { PaymentStep, PAYMENT_HEADER } from "./PaymentStep";
 export { StickyActions } from "./StickyActions";
 export * from "./types";
 export * from "./field-options";
+export * from "./profile-rules";
 export * from "./packages";
 export * from "./track";
 export * from "./us-states";

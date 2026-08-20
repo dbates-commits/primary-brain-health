@@ -1,4 +1,10 @@
-import { EDUCATION_LEVEL_VALUES, GENDER_VALUES } from "@pbh/booking";
+import {
+  EDUCATION_LEVEL_VALUES,
+  GENDER_VALUES,
+  phoneDigits,
+} from "@pbh/booking";
+
+export { phoneDigits };
 
 /**
  * The contract between the profile form, its server action and the Storybook
@@ -67,10 +73,6 @@ export function readProfileValues(formData: FormData): ProfileValues {
     zip: text(formData, "zip"),
     educationLevel: text(formData, "educationLevel"),
   };
-}
-
-export function phoneDigits(value: string): string {
-  return value.replace(/\D/g, "");
 }
 
 /**

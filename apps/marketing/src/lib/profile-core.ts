@@ -1,15 +1,9 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
-import { EDUCATION_LEVEL_VALUES, GENDER_VALUES } from "@pbh/booking";
+import { validateProfileFields } from "@pbh/booking";
 import { db, users } from "@pbh/db";
-import {
-  phoneDigits,
-  readProfileValues,
-  type ProfileState,
-} from "./profile-values";
-
-const ZIP_RE = /^\d{5}$/;
+import { readProfileValues, type ProfileState } from "./profile-values";
 
 /**
  * Save the Profile Information card (Figma 2092:13144).
@@ -17,8 +11,8 @@ const ZIP_RE = /^\d{5}$/;
  * The sibling of `completeProfileCore` in `@pbh/booking/server`: the same seven
  * demographic columns, the same rules, the same failure shape. The difference
  * is only that this edits a completed profile where that one finishes a partial
- * account. Rules are duplicated rather than shared for now — sharing them means
- * refactoring a file on the paid booking path, which is its own change.
+ * account. The rules themselves live in `@pbh/booking`'s `profile-rules.ts`, so
+ * the two surfaces cannot drift.
  *
  * `userId` is resolved by the action wrapper from the Auth.js session, never
  * trusted from the form.
@@ -57,38 +51,7 @@ export async function saveProfileCore(
     };
   }
 
-  const fieldErrors: Record<string, string> = {};
-  if (!values.firstName) {
-    fieldErrors.firstName = "Enter a first name.";
-  }
-  if (!values.lastName) {
-    fieldErrors.lastName = "Enter a last name.";
-  }
-  if (!values.dateOfBirth) {
-    fieldErrors.dateOfBirth = "Enter your date of birth.";
-  } else {
-    const dob = new Date(values.dateOfBirth);
-    if (Number.isNaN(dob.getTime())) {
-      fieldErrors.dateOfBirth = "Enter a valid date.";
-    } else if (dob > new Date()) {
-      fieldErrors.dateOfBirth = "Date of birth can't be in the future.";
-    }
-  }
-  if (phoneDigits(values.phone).length !== 10) {
-    fieldErrors.phone = "Enter a 10-digit phone number.";
-  }
-  if (!ZIP_RE.test(values.zip)) {
-    fieldErrors.zip = "Enter a 5-digit ZIP code.";
-  }
-  // Load-bearing beyond form hygiene: both values go to Linus verbatim, and
-  // `field-options.ts` records that an out-of-set `education` fails the whole
-  // registration with a 500 rather than a validation error.
-  if (!GENDER_VALUES.has(values.gender)) {
-    fieldErrors.gender = "Select your gender.";
-  }
-  if (!EDUCATION_LEVEL_VALUES.has(values.educationLevel)) {
-    fieldErrors.educationLevel = "Select your highest level of education.";
-  }
+  const fieldErrors = validateProfileFields(values);
 
   if (Object.keys(fieldErrors).length > 0) {
     return {

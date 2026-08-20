@@ -2,15 +2,8 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 import { db, users } from "@pbh/db";
-import { EDUCATION_LEVEL_VALUES, GENDER_VALUES } from "../field-options";
+import { validateProfileFields } from "../profile-rules";
 import type { DetailsState, DetailsValues } from "../types";
-
-const ZIP_RE = /^\d{5}$/;
-
-/** Count the digits in a (possibly formatted) phone string. */
-function phoneDigits(value: string): string {
-  return value.replace(/\D/g, "");
-}
 
 /**
  * Complete the partial account created at signup: set the remaining profile
@@ -56,38 +49,21 @@ export async function completeProfileCore(
     };
   }
 
-  const fieldErrors: Record<string, string> = {};
-  if (!dateOfBirth) {
-    fieldErrors.dateOfBirth = "Enter your date of birth.";
-  } else {
-    const dob = new Date(dateOfBirth);
-    if (Number.isNaN(dob.getTime())) {
-      fieldErrors.dateOfBirth = "Enter a valid date.";
-    } else if (dob > new Date()) {
-      fieldErrors.dateOfBirth = "Date of birth can't be in the future.";
-    }
-  }
-  if (!ZIP_RE.test(zip)) {
-    fieldErrors.zip = "Enter a 5-digit ZIP code.";
-  }
-  if (phoneDigits(phone).length !== 10) {
-    fieldErrors.phone = "Enter a 10-digit phone number.";
-  }
-  if (!GENDER_VALUES.has(gender)) {
-    fieldErrors.gender = "Select your gender.";
-  }
-  if (!EDUCATION_LEVEL_VALUES.has(educationLevel)) {
-    fieldErrors.educationLevel = "Select your highest level of education.";
-  }
-  // Always required now: the fields are prefilled rather than conditional, so
-  // an empty one means the customer cleared it. No pre-SELECT to decide this —
-  // the UPDATE's empty result below already proves whether the row exists.
-  if (!patientFirstName) {
-    fieldErrors.patientFirstName = "Enter a first name.";
-  }
-  if (!patientLastName) {
-    fieldErrors.patientLastName = "Enter a last name.";
-  }
+  // The same rules the account settings card enforces on these seven columns
+  // — see `profile-rules.ts`. The name pair is the patient's here, so the
+  // messages hang off the `patient*` inputs.
+  const fieldErrors = validateProfileFields(
+    {
+      firstName: patientFirstName,
+      lastName: patientLastName,
+      dateOfBirth,
+      zip,
+      phone,
+      gender,
+      educationLevel,
+    },
+    { first: "patientFirstName", last: "patientLastName" },
+  );
 
   if (Object.keys(fieldErrors).length > 0) {
     return {
