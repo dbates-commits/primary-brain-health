@@ -80,3 +80,23 @@ export function profileSpy(
     return { status: "success", values };
   };
 }
+
+/**
+ * Succeeds once, then fails — the sequence that proves the dirty baseline
+ * follows what the database accepted rather than what the page loaded.
+ */
+export function profileSucceedsThenFails(
+  message: string,
+  delayMs = ACTION_DELAY_MS,
+): ProfileAction {
+  let saved = false;
+  return async (_prev, formData) => {
+    await delay(delayMs);
+    const values = readProfileValues(formData);
+    if (saved) {
+      return { status: "error", message, values };
+    }
+    saved = true;
+    return { status: "success", values };
+  };
+}

@@ -43,7 +43,10 @@ export function ProfileForm({
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "idle" ? undefined : state.values;
 
-  const [phone, setPhone] = useState(initial.phone);
+  // Through the formatter, not raw: a row written before `formatPhone` existed
+  // (or by the marketing intake form) holds bare digits, and seeding those
+  // would both render unformatted and re-save the old format on the next edit.
+  const [phone, setPhone] = useState(formatPhone(initial.phone));
   const [gender, setGender] = useState(initial.gender);
   const [educationLevel, setEducationLevel] = useState(initial.educationLevel);
 
@@ -62,17 +65,21 @@ export function ProfileForm({
    * and the disabled email is excluded by the same native rule that keeps it
    * out of the submission.
    *
-   * `dirty` is derived during render rather than stored, so a successful save
-   * clears it without an effect: the saved values become what we compare
-   * against, and the last snapshot already equals them. It also *compares*
-   * rather than latching a flag, so typing a character and deleting it returns
-   * the button to pristine.
+   * `dirty` *compares* rather than latching a flag, so typing a character and
+   * deleting it returns the button to pristine, and a successful save clears it
+   * without an effect: the saved values become `persisted` and the last
+   * snapshot already equals them.
    *
-   * A failed save leaves `persisted` at `initial` — nothing was written — so
-   * the customer's edits still read as unsaved and Save stays live for a retry.
+   * `persisted` is what the database last accepted, carried in state rather
+   * than read off the current action result — that result is an error after a
+   * failed save, and falling back to `initial` there would strand an earlier
+   * save. (Save "Dave", fail a second save, retype "David": comparing against
+   * `initial` says pristine and disables Save while the row still holds
+   * "Dave".) A failed save simply leaves it where it was, which is exactly the
+   * "nothing was written, keep Save live for a retry" behaviour.
    */
   const [snapshot, setSnapshot] = useState<ProfileValues | null>(null);
-  const persisted = state.status === "success" ? state.values : initial;
+  const [persisted, setPersisted] = useState<ProfileValues>(initial);
   const dirty = snapshot !== null && !sameProfileValues(snapshot, persisted);
 
   function handleChange(event: React.ChangeEvent<HTMLFormElement>) {
@@ -82,9 +89,15 @@ export function ProfileForm({
   /**
    * The confirmation toast (Figma 2092:13191): in, a hold, then out.
    *
-   * Two pieces of state rather than a boolean because a component cannot
-   * animate its own unmount — the toast has to stay mounted for the exit, so
-   * `leaving` is the phase where it is still on screen but on its way off.
+   * Three pieces of state, and they are not interchangeable. `shown` is the
+   * save the toast belongs to and is **never cleared** — it is what makes this
+   * fire once per save. Clearing it on hide would leave the render-time
+   * condition below true again on the very next render (`state` is still that
+   * same success object, `shown` is now empty), re-latching in a loop that puts
+   * the toast back on screen every few seconds for as long as the page is open.
+   * `visible` and `leaving` carry the phases instead: a component cannot
+   * animate its own unmount, so `leaving` is the phase where the toast is still
+   * mounted but on its way off.
    *
    * It latches the success *object*, not `status`: `useActionState` hands back
    * a fresh one per submit, so saving twice restarts the sequence from the top
@@ -92,29 +105,32 @@ export function ProfileForm({
    * latch is set during render — the supported way to react to changed input —
    * rather than in an effect, which would cost a second render pass.
    *
-   * The unmount is a timer, not `onAnimationEnd`: under
-   * `prefers-reduced-motion` the animation is `none` and that event never
-   * fires, which would leave the toast up forever.
+   * The hide is a timer, not `onAnimationEnd`: under `prefers-reduced-motion`
+   * the animation is `none` and that event never fires, which would leave the
+   * toast up forever.
    */
-  const [toastFor, setToastFor] = useState<ProfileState | null>(null);
+  const [shown, setShown] = useState<ProfileState | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
   const [toastLeaving, setToastLeaving] = useState(false);
 
-  if (state.status === "success" && state !== toastFor) {
-    setToastFor(state);
+  if (state.status === "success" && state !== shown) {
+    setShown(state);
+    setPersisted(state.values);
+    setToastVisible(true);
     setToastLeaving(false);
   }
 
   useEffect(() => {
-    if (toastFor === null) {
+    if (shown === null) {
       return;
     }
     const leave = setTimeout(() => setToastLeaving(true), TOAST_MS);
-    const drop = setTimeout(() => setToastFor(null), TOAST_MS + TOAST_EXIT_MS);
+    const hide = setTimeout(() => setToastVisible(false), TOAST_MS + TOAST_EXIT_MS);
     return () => {
       clearTimeout(leave);
-      clearTimeout(drop);
+      clearTimeout(hide);
     };
-  }, [toastFor]);
+  }, [shown]);
 
   // React 19 auto-resets the <form> after a server action (requestFormReset).
   // `form.reset()` restores each option's `selected` *attribute* while React
@@ -350,7 +366,7 @@ export function ProfileForm({
           swallow a click meant for the nav underneath. It sits inside the form
           only because that is this component's root; `fixed` takes it out of
           the flow either way. */}
-      {toastFor !== null && (
+      {toastVisible && (
         <div className="pointer-events-none fixed inset-x-0 top-7 z-[60] flex justify-center px-4">
           <Toast message="Changes saved successfully" leaving={toastLeaving} />
         </div>

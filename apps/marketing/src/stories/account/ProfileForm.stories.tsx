@@ -9,6 +9,7 @@ import {
   profileFieldErrors,
   profileSpy,
   profileSucceeds,
+  profileSucceedsThenFails,
 } from './mock-actions';
 
 /** The filled profile drawn in Figma 2092:13144. */
@@ -231,6 +232,63 @@ export const SavedShowsToast: Story = {
     const toast = await waitFor(() => canvas.getByRole('status'));
     await expect(toast).toHaveTextContent('Changes saved successfully');
     await expect(toast).toHaveClass(/bg-toast-surface/);
+  },
+};
+
+/**
+ * The toast shows **once** per save and stays gone.
+ *
+ * The regression this guards: latching the success object and then clearing
+ * that latch on hide leaves the render-time condition true again on the next
+ * render, so the toast reappears every few seconds for as long as the page is
+ * open. Slow by design — it has to outlive the four-second hold.
+ */
+export const ToastShowsOnlyOnce: Story = {
+  args: { action: profileSucceeds() },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await userEvent.type(canvas.getByLabelText('First Name'), 'son');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }));
+    await waitFor(() => expect(canvas.getByRole('status')).toBeInTheDocument());
+
+    // Gone after the hold plus the exit, and still gone a beat later — a
+    // re-latch would have put it straight back.
+    await waitFor(() => expect(canvas.queryByRole('status')).toBeNull(), { timeout: 8000 });
+    await new Promise((resolve) => setTimeout(resolve, 750));
+    await expect(canvas.queryByRole('status')).toBeNull();
+  },
+};
+
+/**
+ * A failed save does not lose an earlier successful one. Save, fail a second
+ * save, then retype the original value: the baseline is what the database last
+ * accepted, not what the page loaded, so Save stays live.
+ */
+export const FailedSaveKeepsThePersistedBaseline: Story = {
+  args: { action: profileSucceedsThenFails('Something went wrong saving your details.') },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByLabelText('First Name');
+    const save = () => canvas.getByRole('button', { name: 'Save Changes' });
+
+    // A successful save moves the baseline off `initial`.
+    await userEvent.clear(first);
+    await userEvent.type(first, 'Dave');
+    await userEvent.click(save());
+    await waitFor(() => expect(save()).toBeDisabled());
+
+    // The next save fails, so nothing is written…
+    await userEvent.clear(first);
+    await userEvent.type(first, 'Davey');
+    await userEvent.click(save());
+    await waitFor(() => expect(canvas.getByRole('alert')).toBeInTheDocument());
+
+    // …and typing the *loaded* value back in is still an unsaved edit, because
+    // the row holds "Dave".
+    await userEvent.clear(first);
+    await userEvent.type(first, 'David');
+    await expect(save()).toBeEnabled();
   },
 };
 
