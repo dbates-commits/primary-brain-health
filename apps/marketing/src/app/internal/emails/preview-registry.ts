@@ -1,6 +1,7 @@
 import {
   AccountDeactivatedEmail,
   AssessmentReadyEmail,
+  PaymentFailedEmail,
   PaymentReceiptEmail,
   PaymentRefundedEmail,
   WelcomeEmail,
@@ -44,6 +45,14 @@ export const emailPreviews: EmailPreview[] = [
     trigger:
       "Sent when a user's assessments are first enrolled. NOT CURRENTLY SENT — nothing registers or enrolls anyone (pbh-ek8); kept because the template is what that send will use.",
     element: AssessmentReadyEmail(AssessmentReadyEmail.PreviewProps),
+  },
+  {
+    slug: "payment-failed",
+    name: "Payment failed",
+    subject: "Your payment didn't go through",
+    trigger:
+      "Sent when a payment attempt fails. NOT CURRENTLY SENT — the Stripe webhook doesn't yet handle the failure event; the template is what that send will use.",
+    element: PaymentFailedEmail(PaymentFailedEmail.PreviewProps),
   },
   {
     slug: "payment-refunded",
