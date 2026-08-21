@@ -18,6 +18,7 @@ import { db, users, writeAuditLog } from "@pbh/db";
 import {
   AssessmentReadyEmail,
   ConfirmEmailEmail,
+  PaymentFailedEmail,
   PaymentReceiptEmail,
   PaymentRefundedEmail,
   renderEmail,
@@ -211,6 +212,35 @@ export async function sendPaymentReceiptEmail(
         // by the time most people open it — /welcome would just bounce them to
         // a sign-in wall.
         assessmentsUrl: assessmentsUrl(),
+      }),
+  );
+}
+
+/** Payment first recorded as failed → decline notice with resume CTA. */
+export async function sendPaymentFailedEmail(
+  userId: string,
+  payment: {
+    amountCents: number;
+    currency: string;
+    cardBrand?: string | null;
+    cardLast4?: string | null;
+  },
+): Promise<SendEmailResult> {
+  return sendTemplate(
+    "payment-failed",
+    userId,
+    "Your payment didn't go through",
+    (recipient) =>
+      PaymentFailedEmail({
+        firstName: recipient.firstName,
+        amountCents: payment.amountCents,
+        currency: payment.currency,
+        cardBrand: payment.cardBrand,
+        cardLast4: payment.cardLast4,
+        failedOn: new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
+          new Date(),
+        ),
+        updatePaymentUrl: `${siteBaseUrl()}/?booking=resume`,
       }),
   );
 }

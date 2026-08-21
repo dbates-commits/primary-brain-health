@@ -19,6 +19,7 @@ import { db, payments, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry } from "@pbh/payments";
 import { getPackage, resolvePackageKey } from "../packages";
 import {
+  sendPaymentFailedEmail,
   sendPaymentReceiptEmail,
   sendPaymentRefundedEmail,
 } from "./send-email";
@@ -141,6 +142,8 @@ export async function recordFailedPayment(
     return { status: "rejected", reason: "intent has no userId metadata" };
   }
 
+  const card = cardFromIntent(intent);
+
   const written = await db
     .insert(payments)
     .values({
@@ -171,6 +174,14 @@ export async function recordFailedPayment(
         amountCents: intent.amount,
         reason: intent.last_payment_error?.message ?? null,
       },
+    });
+    // firstWrite is the exactly-once signal, so the decline email goes out here
+    // (never throws — see send-email.ts).
+    await sendPaymentFailedEmail(userId, {
+      amountCents: intent.amount,
+      currency: intent.currency,
+      cardBrand: card?.brand ?? null,
+      cardLast4: card?.last4 ?? null,
     });
   }
 

@@ -241,6 +241,7 @@ Emails carry links only — never assessment results or report content.
 | Confirm your email | `email-verification.ts` | signup |
 | Welcome | `email-verification.ts` | confirmation redeemed |
 | Payment receipt | `fulfill.ts` | first `succeeded` write |
+| Payment failed | `fulfill.ts` | first `failed` write |
 | Payment refunded | `fulfill.ts` | `charge.refunded` |
 | Magic link | `apps/marketing/src/auth.ts` | `/login` request |
 
