@@ -48,9 +48,18 @@ export default async function ProfilePage() {
             at 1440, and `items-start` leaves the plan card at its own height
             rather than stretching it down the right column. */}
         <div className="mt-8 grid grid-cols-1 items-start gap-5 lg:mt-10 lg:grid-cols-[minmax(0,484fr)_minmax(0,836fr)] lg:gap-10">
-          <PlanCard />
+          {/* The plan follows the customer down the much taller right column,
+              which is the point of a two-column split this lopsided. Sticky
+              only from `lg`: stacked, it is just the first card and pinning it
+              would cover the ones below. `top-24` clears the fixed header
+              (80px) with the same 16px of air the page has above it, and it
+              works because the grid is `items-start` — a stretched item is as
+              tall as its track and has nowhere to travel. */}
+          <div className="lg:sticky lg:top-24">
+            <PlanCard />
+          </div>
           <div className="flex flex-col gap-5">
-            <ProfileInformationCard />
+            <ProfileInformationCard userId={session.user.id} />
             <PaymentDetailsCard />
             <DeleteAccountCard />
           </div>

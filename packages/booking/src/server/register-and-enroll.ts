@@ -29,7 +29,6 @@ import {
   LinusApiError,
   listEnrollments,
   MissingDateOfBirthError,
-  MissingPatientNameError,
   registerSubject,
 } from "@pbh/linus";
 import { isPgError, PgErrorCode } from "./db-errors";
@@ -157,14 +156,11 @@ async function markReportReady(
  * Is another attempt at this worth making? Transient by default: a redelivery
  * is cheap and every write here is idempotent, so the only "no" cases are the
  * ones where the same input can only fail the same way again — a subject we
- * can't build (no DOB / no patient name) and a Linus 4xx that isn't a timeout
+ * can't build (no DOB) and a Linus 4xx that isn't a timeout
  * or a rate limit.
  */
 function isRetryableError(err: unknown): boolean {
-  if (
-    err instanceof MissingDateOfBirthError ||
-    err instanceof MissingPatientNameError
-  ) {
+  if (err instanceof MissingDateOfBirthError) {
     return false;
   }
   if (err instanceof LinusApiError) {

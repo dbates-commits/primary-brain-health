@@ -51,12 +51,12 @@ export type SignupAction = (
 
 export type DetailsValues = {
   /**
-   * Who is actually being assessed. Prefilled from the account name, and edited
-   * when someone books on another person's behalf — which is the only place we
-   * ask, since the demographics below describe the patient, not the buyer.
+   * The account holder, who is the person assessed. Prefilled from signup and
+   * editable here because a name typed into a checkout box is worth a second
+   * look — not because it may be somebody else's.
    */
-  patientFirstName: string;
-  patientLastName: string;
+  firstName: string;
+  lastName: string;
   dateOfBirth: string;
   zip: string;
   phone: string;

@@ -14,7 +14,7 @@ what we call, what we persist, and when.
 >
 > A transient failure (Linus 5xx/429, DB, a concurrent registration in flight)
 > returns 500 so Stripe redelivers — that redelivery *is* the retry. A permanent
-> one (no date of birth, no patient name, a Linus 4xx) is logged and
+> one (no date of birth, a Linus 4xx) is logged and
 > acknowledged, since no redelivery would fix it.
 
 ## Overview

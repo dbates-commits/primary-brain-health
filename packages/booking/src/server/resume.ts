@@ -16,16 +16,9 @@ export type BookingResumeStep =
   | "done";
 
 export interface BookingResumeState {
-  /**
-   * Account holder's name, and the patient's if the details step already
-   * captured one. The client prefills the details step with
-   * `patientFirstName ?? firstName`, so a customer who typed someone else's
-   * name sees it again rather than their own.
-   */
+  /** Account holder's name — what the details step prefills with. */
   firstName: string;
   lastName: string;
-  patientFirstName: string | null;
-  patientLastName: string | null;
   /** The package chosen at signup, so payment charges what they picked. */
   packageKey: PackageKey;
   step: BookingResumeStep;
@@ -52,8 +45,6 @@ export async function resolveBookingResumeState(
       id: users.id,
       firstName: users.firstName,
       lastName: users.lastName,
-      patientFirstName: users.patientFirstName,
-      patientLastName: users.patientLastName,
       emailVerified: users.emailVerified,
       dateOfBirth: users.dateOfBirth,
       selectedPackageKey: users.selectedPackageKey,
@@ -71,8 +62,6 @@ export async function resolveBookingResumeState(
   const base = {
     firstName: user.firstName,
     lastName: user.lastName,
-    patientFirstName: user.patientFirstName,
-    patientLastName: user.patientLastName,
     packageKey: resolvePackageKey(user.selectedPackageKey),
   };
 

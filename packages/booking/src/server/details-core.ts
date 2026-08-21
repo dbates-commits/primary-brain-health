@@ -2,24 +2,16 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 import { db, users } from "@pbh/db";
-import { EDUCATION_LEVEL_VALUES, GENDER_VALUES } from "../field-options";
+import { validateProfileFields } from "../profile-rules";
 import type { DetailsState, DetailsValues } from "../types";
-
-const ZIP_RE = /^\d{5}$/;
-
-/** Count the digits in a (possibly formatted) phone string. */
-function phoneDigits(value: string): string {
-  return value.replace(/\D/g, "");
-}
 
 /**
  * Complete the partial account created at signup: set the remaining profile
- * fields (the patient's name, DOB, ZIP, and the intake details) on the existing
- * `users` row.
+ * fields (name, DOB, ZIP, and the intake details) on the existing `users` row.
  *
- * Every field here describes the person being assessed. The name arrives
- * prefilled with the account holder's, so it is the buyer unless they edited it
- * — which is the only place we ask who the assessment is for.
+ * Every field here describes the account holder, who is the person assessed.
+ * The name arrives prefilled from signup and is written back because the
+ * customer may have corrected it.
  *
  * `userId` is resolved by the app wrapper (via the identity seam), not trusted
  * from the form — see `resolveBookingUserId`.
@@ -33,14 +25,12 @@ export async function completeProfileCore(
   const phone = String(formData.get("phone") ?? "").trim();
   const gender = String(formData.get("gender") ?? "").trim();
   const educationLevel = String(formData.get("educationLevel") ?? "").trim();
-  const patientFirstName = String(
-    formData.get("patientFirstName") ?? "",
-  ).trim();
-  const patientLastName = String(formData.get("patientLastName") ?? "").trim();
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
 
   const values: DetailsValues = {
-    patientFirstName,
-    patientLastName,
+    firstName,
+    lastName,
     dateOfBirth,
     zip,
     phone,
@@ -56,38 +46,9 @@ export async function completeProfileCore(
     };
   }
 
-  const fieldErrors: Record<string, string> = {};
-  if (!dateOfBirth) {
-    fieldErrors.dateOfBirth = "Enter your date of birth.";
-  } else {
-    const dob = new Date(dateOfBirth);
-    if (Number.isNaN(dob.getTime())) {
-      fieldErrors.dateOfBirth = "Enter a valid date.";
-    } else if (dob > new Date()) {
-      fieldErrors.dateOfBirth = "Date of birth can't be in the future.";
-    }
-  }
-  if (!ZIP_RE.test(zip)) {
-    fieldErrors.zip = "Enter a 5-digit ZIP code.";
-  }
-  if (phoneDigits(phone).length !== 10) {
-    fieldErrors.phone = "Enter a 10-digit phone number.";
-  }
-  if (!GENDER_VALUES.has(gender)) {
-    fieldErrors.gender = "Select your gender.";
-  }
-  if (!EDUCATION_LEVEL_VALUES.has(educationLevel)) {
-    fieldErrors.educationLevel = "Select your highest level of education.";
-  }
-  // Always required now: the fields are prefilled rather than conditional, so
-  // an empty one means the customer cleared it. No pre-SELECT to decide this —
-  // the UPDATE's empty result below already proves whether the row exists.
-  if (!patientFirstName) {
-    fieldErrors.patientFirstName = "Enter a first name.";
-  }
-  if (!patientLastName) {
-    fieldErrors.patientLastName = "Enter a last name.";
-  }
+  // The same rules the account settings card enforces on these seven columns —
+  // see `profile-rules.ts`.
+  const fieldErrors = validateProfileFields(values);
 
   if (Object.keys(fieldErrors).length > 0) {
     return {
@@ -107,8 +68,8 @@ export async function completeProfileCore(
         phone,
         gender,
         educationLevel,
-        patientFirstName,
-        patientLastName,
+        firstName,
+        lastName,
       })
       .where(eq(users.id, userId))
       .returning({ id: users.id });

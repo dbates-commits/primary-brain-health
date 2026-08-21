@@ -14,6 +14,7 @@ import {
   Select,
   StepHeader,
   fieldClass,
+  formatPhone,
 } from "@pbh/ui";
 import { StickyActions } from "./StickyActions";
 import type { DetailsAction, DetailsState } from "./types";
@@ -21,29 +22,13 @@ import { EDUCATION_LEVELS, GENDER_OPTIONS } from "./field-options";
 
 const initialState: DetailsState = { status: "idle" };
 
-/** Format up to 10 digits as `(XXX) XXX-XXXX`, mirroring the intake form. */
-function formatPhone(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 10);
-  const area = digits.slice(0, 3);
-  const prefix = digits.slice(3, 6);
-  const line = digits.slice(6, 10);
-  if (digits.length <= 3) {
-    return area;
-  }
-  if (digits.length <= 6) {
-    return `(${area}) ${prefix}`;
-  }
-  return `(${area}) ${prefix}-${line}`;
-}
-
 /**
  * Header copy for the details step (Figma 1642:3213), exported so a host that
  * renders the header itself — the booking modal pins it above the scroll area —
  * uses the same wording as the inline case.
  *
- * It no longer varies by who the booking is for. The name fields below carry
- * that distinction now: they arrive prefilled with the account holder's name,
- * and someone booking for a parent or spouse simply types over them.
+ * It no longer varies by who the booking is for: the assessment is taken by the
+ * account holder, and the name fields below are theirs, prefilled from signup.
  */
 export const DETAILS_HEADER = {
   title: "Welcome.",
@@ -59,7 +44,7 @@ export function DetailsForm({
   showHeader = true,
 }: {
   action: DetailsAction;
-  /** Account holder's name, prefilled as the patient's — see DETAILS_HEADER. */
+  /** Account holder's name, from signup — prefilled into the fields below. */
   firstName: string;
   lastName: string;
   onComplete: () => void;
@@ -117,56 +102,45 @@ export function DetailsForm({
           aria-busy={pending}
           className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
         >
-          {/* Leads the form because everything below describes this person.
-              Prefilled from the account, so booking for yourself is a no-op and
-              booking for someone else is an edit rather than a question. */}
+          {/* Leads the form because everything below describes this person:
+              the account holder, prefilled from signup. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="patientFirstName">First Name</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <input
-                id="patientFirstName"
-                name="patientFirstName"
+                id="firstName"
+                name="firstName"
                 type="text"
-                autoComplete="off"
+                autoComplete="given-name"
                 required
                 aria-required="true"
-                aria-invalid={fieldErrors?.patientFirstName ? true : undefined}
+                aria-invalid={fieldErrors?.firstName ? true : undefined}
                 aria-describedby={
-                  fieldErrors?.patientFirstName
-                    ? "patientFirstName-error"
-                    : undefined
+                  fieldErrors?.firstName ? "firstName-error" : undefined
                 }
-                defaultValue={values?.patientFirstName ?? firstName}
+                defaultValue={values?.firstName ?? firstName}
                 className={fieldClass}
               />
-              <FieldError
-                id="patientFirstName-error"
-                message={fieldErrors?.patientFirstName}
-              />
+              <FieldError id="firstName-error" message={fieldErrors?.firstName} />
             </div>
 
             <div>
-              <Label htmlFor="patientLastName">Last Name</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <input
-                id="patientLastName"
-                name="patientLastName"
+                id="lastName"
+                name="lastName"
                 type="text"
-                autoComplete="off"
+                autoComplete="family-name"
                 required
                 aria-required="true"
-                aria-invalid={fieldErrors?.patientLastName ? true : undefined}
+                aria-invalid={fieldErrors?.lastName ? true : undefined}
                 aria-describedby={
-                  fieldErrors?.patientLastName
-                    ? "patientLastName-error"
-                    : undefined
+                  fieldErrors?.lastName ? "lastName-error" : undefined
                 }
-                defaultValue={values?.patientLastName ?? lastName}
+                defaultValue={values?.lastName ?? lastName}
                 className={fieldClass}
               />
-              <FieldError
-                id="patientLastName-error"
-                message={fieldErrors?.patientLastName}
-              />
+              <FieldError id="lastName-error" message={fieldErrors?.lastName} />
             </div>
           </div>
 

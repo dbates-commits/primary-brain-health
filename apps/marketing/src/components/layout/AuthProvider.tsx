@@ -14,9 +14,11 @@ import type { ReactNode } from "react";
  * the pages stay static; the cost is that the header renders its signed-out
  * state for the moment before that request lands.
  *
- * Scoped to the header rather than the whole tree: nothing else needs it, and a
- * client boundary around `children` in the layout would be a much wider blast
- * radius for no gain.
+ * Wraps the header *and* the page below it. The account settings form is the
+ * second consumer — it refreshes the session after a save, and the header reads
+ * the name that save changed, so the two have to share one cache. Passing the
+ * pages through as `children` keeps them server-rendered: a client component
+ * renders its `children` slot, it does not pull that subtree into the client.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   return <SessionProvider>{children}</SessionProvider>;

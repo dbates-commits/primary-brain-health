@@ -127,7 +127,7 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | — | — | — | `sendBookingConfirmation` | `booking_email_verifications`; audit `email_verification_sent` |
 | Confirm | `EmailConfirmationStep` | `GET /booking/confirm` | `consumeBookingConfirmation` | `consumed_at`, `users.email_verified`; audit `email_verified` |
 | Resume | `BookingStepFlow` (on mount) | `getBookingResumeState` | `resolveBookingResumeState` | — (read only) |
-| Details | `DetailsForm` | `detailsAction` | `completeProfileCore` | `users` demographics (DOB, zip, phone, gender, education) + the patient's name |
+| Details | `DetailsForm` | `detailsAction` | `completeProfileCore` | `users` demographics (DOB, zip, phone, gender, education) + the account holder's name |
 | Consent | `ConsentForm` | `consentAction` | `recordConsentCore` | two `consents` rows — `wellness` + `hipaa_npp` — with `ip_hash`, `user_agent` and the terms `version` |
 | Payment | `PaymentStep` | `createAssessmentCheckoutSession` | `createCheckoutSessionCore` | audit `payment_pending`; Stripe Session |
 | Fulfilment | — | `finalizeCheckoutSession` | `recordSucceededPayment` | `payments` row incl. `package_key`; audit `payment_succeeded` |
@@ -136,12 +136,15 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 
 ### Who is being assessed
 
-Nobody is asked. The details step's name fields arrive prefilled with the account
-holder's, and someone booking for a parent or spouse types over them — so the
-common case answers by saying nothing, and the demographics below those fields
-always describe whoever is named there. `users.patient_identification` is the
-retired question (`pbh-4by`); `buildRegisterInput` falls back to the account name
-for rows that predate this.
+The account holder, always. Nobody is asked, and there is no second name on the
+row to ask about: `users.patient_first_name` / `patient_last_name` were dropped
+in migration 0022, because one person with two names is a pair that can disagree
+— and the account settings card, which edits the account name, could rename a
+Linus subject by writing them in step. The details step's name fields are the
+account holder's own, prefilled from signup and written back in case they were
+corrected, and `buildRegisterInput` registers that name.
+`users.patient_identification` is the retired question (`pbh-4by`), now read by
+nothing and kept only for the rows that answered it.
 
 ### The chosen package
 
@@ -216,8 +219,7 @@ recorded the payment but died before registering must still be covered.
 Failure handling splits on the state's `retryable` flag, which is what keeps this
 from repeating pbh-ek8: a transient failure (Linus 5xx/429, DB, a concurrent
 registration still in flight) **throws** → 500 → Stripe redelivers, which is the
-recovery mechanism; a permanent one (no date of birth, no patient name, a Linus
-4xx) is logged and acknowledged, because three days of redeliveries will not make
+recovery mechanism; a permanent one (no date of birth, a Linus 4xx) is logged and acknowledged, because three days of redeliveries will not make
 that subject valid. Either way the customer is already on `/welcome` and sees
 none of it.
 

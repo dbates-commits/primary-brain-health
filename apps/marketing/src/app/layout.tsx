@@ -93,10 +93,16 @@ export default function RootLayout({
       >
         <ScrollToTop />
         <ScrollRevealInit />
+        {/* One provider around both, not one per consumer: the account settings
+            form refreshes the session after a save, and the header greets the
+            customer by the name that save changed. Two providers would be two
+            independent caches, and the header would keep the stale name. The
+            pages inside stay server-rendered — `children` is passed through a
+            client component as a slot, not rendered by it. */}
         <AuthProvider>
           <Header />
+          <main className="pt-20">{children}</main>
         </AuthProvider>
-        <main className="pt-20">{children}</main>
         <Footer />
       </body>
     </html>
