@@ -44,6 +44,9 @@ export function Header() {
   // `inert`, and focusing an inert node drops focus to `<body>` in silence.
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const loginRowRef = useRef<HTMLButtonElement>(null);
+  // The desktop fallback: at `lg` the hamburger and the drawer's rows are all
+  // `lg:hidden`, so the logo is the only control from this nav still on screen.
+  const logoRef = useRef<HTMLAnchorElement>(null);
 
   /**
    * Close the drawer and the login modal together. The drawer is animated shut
@@ -81,14 +84,22 @@ export function Header() {
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1024px)");
     const onChange = () => {
-      if (desktop.matches) {
-        closeMobileMenu();
+      if (!desktop.matches) {
+        return;
+      }
+      // Focus has to be placed, not just dropped: with the modal open it is
+      // inside a portal that is about to go, and the two deliberate exits
+      // above both aim at controls that are `lg:hidden` at this width.
+      const focusWasInTheModal = loginModalOpen;
+      closeMobileMenu();
+      if (focusWasInTheModal) {
+        logoRef.current?.focus();
       }
     };
     onChange();
     desktop.addEventListener("change", onChange);
     return () => desktop.removeEventListener("change", onChange);
-  }, []);
+  }, [loginModalOpen]);
 
   function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -178,6 +189,7 @@ export function Header() {
       <div className="flex justify-between items-center gap-10 py-5 px-6 lg:px-10 max-w-[90rem] mx-auto">
         {/* Logo */}
         <a
+          ref={logoRef}
           href="/"
           onClick={handleLogoClick}
           className="flex items-center"

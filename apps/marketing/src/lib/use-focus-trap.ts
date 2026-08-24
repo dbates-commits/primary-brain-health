@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
@@ -39,6 +39,17 @@ export function useFocusTrap({
   onEscape,
   initialFocus,
 }: FocusTrapOptions): void {
+  // Held in a ref, and deliberately not a dependency below. Callers pass a
+  // handler rebuilt on every render, so keying the effect on it would re-run
+  // the whole block — including the one-shot focus move — on any re-render of
+  // the component that owns the overlay. `useSession` refetching when the
+  // window regains focus is enough to do it, which would yank focus off
+  // whatever the user had just tabbed to.
+  const onEscapeRef = useRef(onEscape);
+  useEffect(() => {
+    onEscapeRef.current = onEscape;
+  }, [onEscape]);
+
   useEffect(() => {
     if (!active) {
       return;
@@ -57,7 +68,7 @@ export function useFocusTrap({
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onEscape();
+        onEscapeRef.current();
         return;
       }
       if (e.key !== "Tab") {
@@ -67,6 +78,21 @@ export function useFocusTrap({
       const items = focusables();
       if (items.length === 0) {
         e.preventDefault();
+        return;
+      }
+
+      // Focus can be sitting outside the trap without either edge being
+      // active: `LoginPanel` disables its fieldset while the action is in
+      // flight, which blurs the field the user was in and leaves
+      // `activeElement` on `<body>`. Cycling only at the edges would let the
+      // next Tab walk into the page behind an opaque overlay.
+      if (
+        container &&
+        !container.contains(document.activeElement) &&
+        document.activeElement !== container
+      ) {
+        e.preventDefault();
+        items[0].focus();
         return;
       }
 
@@ -85,5 +111,5 @@ export function useFocusTrap({
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [active, containerRef, onEscape, initialFocus]);
+  }, [active, containerRef, initialFocus]);
 }

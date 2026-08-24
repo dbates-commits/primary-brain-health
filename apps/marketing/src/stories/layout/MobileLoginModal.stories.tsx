@@ -109,6 +109,32 @@ export const EscapeGoesBack: Story = {
   },
 };
 
+/**
+ * Tab still lands inside the layer after focus has been lost to `<body>`.
+ *
+ * That is not a contrived state: `LoginPanel` disables its fieldset while the
+ * action is in flight, which blurs the field the user was in. A trap that only
+ * cycles at its two edges would let the next Tab walk into the page behind an
+ * opaque overlay — the logo and the drawer rows are all still focusable, since
+ * the drawer stays open underneath by design.
+ */
+export const TrapSurvivesLostFocus: Story = {
+  play: async () => {
+    const body = screen();
+    await waitFor(async () => {
+      await expect(body.getByRole('dialog', { name: 'Login' })).toBeVisible();
+    });
+
+    (document.activeElement as HTMLElement | null)?.blur();
+    await expect(document.body).toHaveFocus();
+
+    await userEvent.keyboard('{Tab}');
+    await expect(
+      body.getByRole('dialog', { name: 'Login' }).contains(document.activeElement),
+    ).toBe(true);
+  },
+};
+
 /** Sent: the confirmation replaces the form in place and the layer stays up. */
 export const Sent: Story = {
   play: async ({ args }) => {
