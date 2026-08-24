@@ -188,10 +188,12 @@ customer whose post-payment session mint failed, or who closed the modal and cam
 back, for the cookie's 2h life. It grants nothing beyond rendering an external
 link.
 
-The CTA target is `NEXT_PUBLIC_ENGAGEMENT_APP_URL`. Unset, the screen renders the
-confirmation with **no button** — a dead button reads as a bug to someone who
-just paid. Being `NEXT_PUBLIC_*`, it is inlined at build time: changing it needs a
-redeploy, not just an env edit.
+The screen offers two paths — "Talk to a Brain Health Coach" and "Start with
+Assessments" (Figma 1988:7030). **Both CTAs are `#` placeholders**: scheduling
+and the assessments hand-off are not wired up yet. The Engagement App link that
+used to live here, targeting `NEXT_PUBLIC_ENGAGEMENT_APP_URL`, is gone;
+`EngagementAppCta.tsx` is still on disk, unused. Restoring a real destination
+here is what makes this screen a hand-off again.
 
 ---
 
@@ -306,7 +308,7 @@ Each of these has actually happened:
 |---|---|
 | Signup or `/booking/confirm` throws | `BOOKING_RESUME_SECRET` missing — it signs the booking cookie |
 | Every step after signup says "We couldn't find your booking" | The `pbh_booking_session` cookie is absent, expired (2h), or signed with a different `BOOKING_RESUME_SECRET` than the one reading it |
-| Welcome screen has no button | `NEXT_PUBLIC_ENGAGEMENT_APP_URL` unset — or set *after* the build, since it is inlined at build time |
+| Welcome screen's buttons do nothing | Expected — both are `#` until scheduling and the assessments hand-off land |
 | No email arrives; flow stalls at the confirmation modal | `RESEND_API_KEY` unset — sends become logged no-ops and the confirmation URL is printed to the server console instead. This is how local testing works |
 | Session silently never found | Cookie-name mismatch: Auth.js derives the `__Secure-` prefix from the request protocol, not `NODE_ENV` |
 

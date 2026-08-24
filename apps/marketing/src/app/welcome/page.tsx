@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { WelcomeActions } from "@/components/welcome/WelcomeActions";
 
 export const metadata = {
-  title: "You're all set",
+  title: "Choose how to start",
   robots: { index: false, follow: false },
 };
 
