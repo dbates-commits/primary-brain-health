@@ -1,28 +1,25 @@
+import { getCurrentPlan } from "@/lib/plan";
 import { AccountCard } from "./AccountCard";
+import { PlanSummary } from "./PlanSummary";
 
 /**
- * TODO: Current Plan — Figma 2092:13108. The `CURRENT PLAN` eyebrow with its
- * `Active` badge, the price, the plan name, a rule, and the "What's Included"
- * checklist.
+ * Current Plan (Figma 1917:7817) — what this customer bought, and what it
+ * includes.
  *
- * Note the 28px padding (`p-7`), not the 32px the other three use — that is the
- * design, not a slip.
+ * The async half: it reads, `PlanSummary` renders. `p-7 md:p-7`, not the bare
+ * `p-7` the stub carried — `AccountCard`'s base is `p-6 md:p-8`, and
+ * tailwind-merge resolves the unprefixed pair while leaving `md:p-8` standing,
+ * so a lone `p-7` gives the design's 28px below `md` and 32px above it.
  *
- * Copy warning for whoever builds this: Figma's checklist says "Clinician review
- * of results" and "Brain Health Assessment & Consultation", and both
- * `clinician` and `consultation` match `CLINICAL_ONLY_PATTERNS` in
- * `packages/copy/src/banned-terms.ts`. This card needs track-aware copy from
- * `@pbh/copy`, not the literal Figma strings.
- *
- * Stub: this card's slot in the grid is final. Everything inside, `min-h-*`
- * included, goes when the real card lands.
+ * No Storybook story: an async server component that reaches the database.
+ * `Account/PlanSummary` is where the UI is exercised.
  */
-export function PlanCard() {
+export async function PlanCard({ userId }: { userId: string }) {
+  const plan = await getCurrentPlan(userId);
+
   return (
-    <AccountCard className="min-h-[417px] p-7">
-      <p className="font-body text-base text-on-surface-variant">
-        Current Plan — coming soon.
-      </p>
+    <AccountCard className="p-7 md:p-7">
+      <PlanSummary plan={plan} />
     </AccountCard>
   );
 }
