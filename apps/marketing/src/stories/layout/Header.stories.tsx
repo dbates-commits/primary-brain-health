@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import { Header } from "@/components/layout/Header";
@@ -22,6 +22,13 @@ const meta = {
     layout: 'fullscreen',
     // `usePathname` — the App Router hooks throw without this.
     nextjs: { appDirectory: true },
+    // Named here so the mobile stories below can opt in; the rest run at the
+    // default desktop size.
+    viewport: {
+      options: {
+        phone: { name: 'Phone', styles: { width: '402px', height: '874px' } },
+      },
+    },
     docs: {
       description: {
         component:
@@ -72,6 +79,75 @@ export const SignedOut: Story = {
     await expect(
       canvas.getAllByRole('link', { name: 'Book a Consultation' }).length,
     ).toBeGreaterThan(0);
+  },
+};
+
+/**
+ * The mobile drawer→login→drawer handshake (Figma 2155:12505 → 2155:12230), at
+ * a real phone size. This is the only place the two surfaces are exercised
+ * together: the drawer stays open *underneath* the modal, which is what makes
+ * the back arrow an uncover rather than a re-open.
+ *
+ * Queried through `document.body`, because the modal is portalled out of the
+ * story root.
+ */
+export const MobileLoginFlow: Story = {
+  globals: { viewport: { value: 'phone' } },
+  decorators: [
+    (Story) => (
+      <SessionProvider session={null} refetchOnWindowFocus={false}>
+        <Story />
+      </SessionProvider>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(document.body);
+
+    const menuButton = canvas.getByRole('button', { name: 'Toggle menu' });
+    await userEvent.click(menuButton);
+    // With the drawer open the hamburger *is* an X. Where it sits now is where
+    // the modal's X has to sit, or the icon jumps as one replaces the other.
+    const drawerX = menuButton.getBoundingClientRect();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Login' }));
+
+    // It fades in over 200ms, so visibility is awaited rather than asserted on
+    // the frame the click lands — it mounts at `opacity-0`.
+    await waitFor(async () => {
+      await expect(body.getByRole('dialog', { name: 'Login' })).toBeVisible();
+    });
+
+    // Measured, not eyeballed: the modal's row is built from the header row's
+    // own classes, and this assertion is what holds that true. Rounded to the
+    // pixel — a sub-pixel difference is not a visible jump.
+    const modalX = body
+      .getByRole('button', { name: 'Close' })
+      .getBoundingClientRect();
+    await expect(Math.round(modalX.left)).toBe(Math.round(drawerX.left));
+    await expect(Math.round(modalX.top)).toBe(Math.round(drawerX.top));
+    await expect(Math.round(modalX.width)).toBe(Math.round(drawerX.width));
+    await expect(Math.round(modalX.height)).toBe(Math.round(drawerX.height));
+
+    // Back: the layer goes, the drawer is still open behind it, and the row
+    // that opened it has focus again.
+    await userEvent.click(body.getByRole('button', { name: 'Back to menu' }));
+    await waitFor(async () => {
+      await expect(body.queryByRole('dialog', { name: 'Login' })).toBeNull();
+    });
+    await expect(canvas.getByRole('button', { name: 'Login' })).toHaveFocus();
+
+    // X: the whole stack goes, and focus lands on the hamburger — not on the
+    // Login row, which is inert inside a closed drawer by then.
+    await userEvent.click(canvas.getByRole('button', { name: 'Login' }));
+    await waitFor(async () => {
+      await expect(body.getByRole('dialog', { name: 'Login' })).toBeVisible();
+    });
+    await userEvent.click(body.getByRole('button', { name: 'Close' }));
+    await waitFor(async () => {
+      await expect(body.queryByRole('dialog', { name: 'Login' })).toBeNull();
+    });
+    await expect(menuButton).toHaveFocus();
   },
 };
 
