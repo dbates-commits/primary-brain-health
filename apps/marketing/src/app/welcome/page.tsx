@@ -1,13 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getEntitledTrack, resolveBookingUserId } from "@pbh/booking/server";
-import { Button, Container, Section } from "@pbh/ui";
+import { Container, Heading, Section } from "@pbh/ui";
 import { auth } from "@/auth";
-import { EngagementAppCta } from "@/components/welcome/EngagementAppCta";
-import { SignOutButton } from "./SignOutButton";
+import { WelcomeActions } from "@/components/welcome/WelcomeActions";
 
 export const metadata = {
-  title: "You're all set",
+  title: "Choose how to start",
   robots: { index: false, follow: false },
 };
 
@@ -15,10 +14,9 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 /**
- * The terminal screen: payment is done and the only thing left is the link out
- * to the Linus Engagement App. The booking modal sends the customer straight
- * here once payment succeeds, and it is also where a returning customer lands
- * after a magic-link sign-in.
+ * The screen after payment: the customer picks how to begin (Figma 1988:7030).
+ * The booking modal sends them straight here once payment succeeds, and it is
+ * also where a returning customer lands after a magic-link sign-in.
  *
  * Identity comes from either an Auth.js session (the magic-link path) or the
  * booking cookie — the latter covers a customer whose post-payment session mint
@@ -36,7 +34,6 @@ export const dynamic = "force-dynamic";
  */
 export default async function WelcomePage() {
   const session = await auth();
-  const signedIn = Boolean(session?.user?.id);
   const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
 
   if (!userId) {
@@ -47,14 +44,25 @@ export default async function WelcomePage() {
   }
 
   return (
-    <Section className="py-24">
-      <Container size="narrow">
-        <div className="flex flex-col gap-6">
-          <EngagementAppCta />
-          <Button href="/" variant="ghost" className="w-full">
-            Back to Primary Brain Health
-          </Button>
-          {signedIn ? <SignOutButton /> : null}
+    // 80px section padding and a 40px gap between the header block and the
+    // cards, per the design's Section frame (1988:7032).
+    <Section className="py-20">
+      <Container>
+        <div className="flex flex-col items-center gap-10">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <Heading as="h1" size="lg">
+              Choose How to Start
+            </Heading>
+            {/* `text-secondary` in the token set is the teal accent, not a
+                muted body colour — section descriptions across the site use
+                `on-surface-variant`, which is what the design's #495e55 reads
+                as here. */}
+            <p className="max-w-[1000px] font-body text-xl text-on-surface-variant">
+              You&rsquo;ve taken an important step for your brain health.
+              Here&rsquo;s the path most people follow.
+            </p>
+          </div>
+          <WelcomeActions />
         </div>
       </Container>
     </Section>
