@@ -4,7 +4,6 @@ import { getEntitledTrack, resolveBookingUserId } from "@pbh/booking/server";
 import { Container, Heading, Section } from "@pbh/ui";
 import { auth } from "@/auth";
 import { WelcomeActions } from "@/components/welcome/WelcomeActions";
-import { SignOutButton } from "./SignOutButton";
 
 export const metadata = {
   title: "You're all set",
@@ -35,7 +34,6 @@ export const dynamic = "force-dynamic";
  */
 export default async function WelcomePage() {
   const session = await auth();
-  const signedIn = Boolean(session?.user?.id);
   const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
 
   if (!userId) {
@@ -65,7 +63,6 @@ export default async function WelcomePage() {
             </p>
           </div>
           <WelcomeActions />
-          {signedIn ? <SignOutButton /> : null}
         </div>
       </Container>
     </Section>
