@@ -27,7 +27,13 @@ export type AuditEventType =
   // `email_verified` is the record that this address was proven to be reachable
   // by the person who booked.
   | "email_verification_sent"
-  | "email_verified";
+  | "email_verified"
+  // Account lifecycle: a deletion request filed from the account page. Nothing
+  // is erased when this is written — `users.deactivated_at` is stamped and the
+  // account is locked out, and the erasure itself is an operator routine. This
+  // row is the durable record of when the customer asked. The metadata never
+  // carries the address; see the data-minimisation note in `schema/users.ts`.
+  | "account_deactivated";
 
 export interface AuditEntry {
   eventType: AuditEventType;

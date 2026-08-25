@@ -24,6 +24,20 @@ export const PrimarySolid: Story = {
   },
 };
 
+/**
+ * The destructive action — Delete Account and its modal's confirm. White on
+ * `--color-danger` is 5.4:1, which passes WCAG AA for normal text and fails
+ * AAA; that is Figma's red and it is not lightened here.
+ */
+export const DangerSolid: Story = {
+  args: {
+    children: 'Delete Account',
+    variant: 'solid',
+    color: 'danger',
+    size: 'md',
+  },
+};
+
 export const SecondarySolid: Story = {
   args: {
     children: 'Learn More',

@@ -1,9 +1,9 @@
 /**
  * Stand-in server actions for the account-card stories.
  *
- * `ProfileForm` takes its `"use server"` action as a prop, which is the seam
- * that lets these stories render the real component without pulling
- * `next/headers` or the database into the Vite bundle. Mirrors
+ * `ProfileForm` and `DeleteAccountPanel` take their `"use server"` actions as
+ * props, which is the seam that lets these stories render the real components
+ * without pulling `next/headers` or the database into the Vite bundle. Mirrors
  * `stories/booking/mock-actions.ts`.
  *
  * The delay is deliberate and finite: `useActionState` only reports `pending`
@@ -12,6 +12,7 @@
  * to end.
  */
 
+import type { DeleteAccountAction } from "@/lib/delete-account-state";
 import {
   readProfileValues,
   type ProfileAction,
@@ -98,5 +99,41 @@ export function profileSucceedsThenFails(
     }
     saved = true;
     return { status: "success", values };
+  };
+}
+
+/** Files the request successfully. The panel then signs out, which stories stub. */
+export function deleteAccountSucceeds(
+  delayMs = ACTION_DELAY_MS,
+): DeleteAccountAction {
+  return async () => {
+    await delay(delayMs);
+    return { status: "success" };
+  };
+}
+
+export function deleteAccountFails(
+  message: string,
+  delayMs = ACTION_DELAY_MS,
+): DeleteAccountAction {
+  return async () => {
+    await delay(delayMs);
+    return { status: "error", message };
+  };
+}
+
+/**
+ * Succeeds, and reports the raw submitted keys. The confirmation checkbox is
+ * re-checked on the server, so a story wants to prove it actually reached the
+ * payload rather than only that the button was enabled.
+ */
+export function deleteAccountSpy(
+  onSubmit: (keys: string[]) => void,
+  delayMs = ACTION_DELAY_MS,
+): DeleteAccountAction {
+  return async (_prev, formData) => {
+    await delay(delayMs);
+    onSubmit([...formData.keys()]);
+    return { status: "success" };
   };
 }

@@ -114,6 +114,45 @@ environment down.
 - **A dedicated staging branch.** `staging` currently deploys into the Preview
   scope and therefore shares the preview branch with every PR.
 
+## Account deactivation
+
+The Delete Account card on `/profile` **files a request; it does not erase
+anything.** Pressing it stamps `users.deactivated_at` and locks the account out.
+Every column keeps its value.
+
+What the request does, in order (`apps/marketing/src/lib/deactivate-account-core.ts`):
+
+1. Stamps `users.deactivated_at`, guarded on `IS NULL` so a double-submit or a
+   replayed POST can only win once. Neon's HTTP driver has no interactive
+   transaction, so this one statement is the atomic point.
+2. Deletes every `sessions` row for the user — all devices, not just this one.
+3. Deletes `verification_tokens` for that address, and unconsumed
+   `booking_email_verifications` rows. Both are live credentials. **Consumed**
+   verification rows are kept, as evidence of when the address was confirmed.
+4. Writes an `account_deactivated` audit row (no address in the metadata) and
+   sends `AccountDeactivatedEmail`.
+
+Sign-in is closed by `findAuthUserByEmail`, which stops treating a deactivated
+address as an account — so both the magic-link callback and the send path refuse
+it, and the login form's "Not an active user" message becomes literally true.
+
+**Nothing is anonymized or deleted, on purpose.** `payments`, `consents`,
+`linus_enrollments` and `audit_log` all reference `users` with `ON DELETE no
+action`; `consents` and `audit_log` are append-only, and `audit_log` is on the
+six-year clock in Open decisions below. A hard `DELETE FROM users` throws today,
+and anonymizing the row in place would destroy evidence those tables exist to
+hold while still leaving their rows behind.
+
+The erasure itself is therefore an **operator-run routine**, and
+`deactivated_at IS NOT NULL` is its worklist. Two things are still open: nobody
+owns that routine or an SLA for it yet, and the Linus subject is untouched —
+`@pbh/linus` has no deactivate endpoint, so a customer's name, birth date, sex
+and education survive on Linus's side. `users.linus_participant_id` is kept
+precisely so that backfill remains possible.
+
+An operator *can* reverse a deactivation by clearing the column; there is no
+self-serve undo.
+
 ## Open decisions
 
 - **PBH counsel sign-off on HIPAA posture** — the conservative-reading

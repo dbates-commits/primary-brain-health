@@ -5,7 +5,7 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement | HTMLAncho
   children: React.ReactNode;
   href?: string;
   variant?: "solid" | "outline" | "ghost";
-  color?: "primary" | "secondary" | "white" | "dark";
+  color?: "primary" | "secondary" | "white" | "dark" | "danger";
   size?: "sm" | "md" | "lg";
   className?: string;
   disabled?: boolean;
@@ -60,6 +60,12 @@ export function Button({
       white:
         "bg-white text-on-surface-variant hover:bg-surface-container-low focus:ring-outline",
       dark: "bg-on-surface text-surface hover:brightness-125 focus:ring-on-surface",
+      // The destructive action — Delete Account and its modal's confirm
+      // (Figma 1988:12282, 2060:7053). A role, not a state, which is why it
+      // lives here and `brand-muted` does not: it says "this button destroys
+      // something" wherever it appears. See the note on `--color-danger` in
+      // @pbh/tokens for why it is neither `error` nor `accent-pink`.
+      danger: "bg-danger text-on-danger hover:brightness-110 focus:ring-danger",
     },
     outline: {
       primary:
@@ -69,12 +75,15 @@ export function Button({
       white:
         "border-2 border-white text-white hover:bg-white/10 focus:ring-white",
       dark: "border-2 border-on-surface text-on-surface hover:bg-on-surface/5 focus:ring-on-surface",
+      danger:
+        "border-2 border-danger text-danger hover:bg-danger/5 focus:ring-danger",
     },
     ghost: {
       primary: "text-primary hover:bg-primary/5 focus:ring-primary",
       secondary: "text-secondary hover:bg-secondary/5 focus:ring-secondary",
       white: "text-white hover:bg-white/10 focus:ring-white",
       dark: "text-on-surface hover:bg-on-surface/5 focus:ring-on-surface",
+      danger: "text-danger hover:bg-danger/5 focus:ring-danger",
     },
   };
 

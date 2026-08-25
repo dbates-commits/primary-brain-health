@@ -81,6 +81,19 @@ export const users = pgTable("users", {
   welcomeSeenAt: timestamp("welcome_seen_at", {
     withTimezone: true,
   }),
+  // Set when the customer files a deletion request from the account page. The
+  // row and every value in it are kept: `payments`, `consents` and `audit_log`
+  // all reference this table with ON DELETE no action and are retention-bearing
+  // (the first two append-only, the last on a six-year HIPAA clock), so there is
+  // nothing here we are free to erase on request. The erasure itself is an
+  // operator-run routine for now, and `deactivated_at IS NOT NULL` is its
+  // worklist.
+  //
+  // This single column carries the whole state. It locks sign-in — see
+  // `findAuthUserByEmail`, which stops treating the address as an account — and
+  // it makes the stamping UPDATE its own idempotency claim, so a double-submit
+  // or a replayed POST can only win once. See `deactivate-account-core.ts`.
+  deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
