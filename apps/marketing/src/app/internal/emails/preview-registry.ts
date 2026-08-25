@@ -66,7 +66,7 @@ export const emailPreviews: EmailPreview[] = [
     name: "Account deactivated",
     subject: "Your account has been deactivated",
     trigger:
-      "Sent when an account deactivation request is processed. Copy is placeholder pending Linus-attorney-approved language; the in-app flow isn't built yet.",
+      "Sent when someone files a deletion request from the account page. Copy is placeholder pending Linus-attorney-approved language — and note the request only stamps `deactivated_at`; the erasure it describes is an operator routine.",
     element: AccountDeactivatedEmail(AccountDeactivatedEmail.PreviewProps),
   },
 ];

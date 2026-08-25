@@ -61,7 +61,7 @@ export default async function ProfilePage() {
           <div className="flex flex-col gap-5">
             <ProfileInformationCard userId={session.user.id} />
             <PaymentDetailsCard />
-            <DeleteAccountCard />
+            <DeleteAccountCard userId={session.user.id} />
           </div>
         </div>
       </div>
