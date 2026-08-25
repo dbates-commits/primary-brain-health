@@ -36,7 +36,7 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
             <p className="font-headline text-[2.5rem] font-thin leading-none text-on-surface-variant">
               {plan.price}
             </p>
-            <Heading as="h2" size="sm" className="text-2xl">
+            <Heading as="h2" size="sm" className="text-2xl font-thin">
               {plan.name}
             </Heading>
           </div>
