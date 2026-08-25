@@ -56,7 +56,7 @@ export default async function ProfilePage() {
               works because the grid is `items-start` — a stretched item is as
               tall as its track and has nowhere to travel. */}
           <div className="lg:sticky lg:top-24">
-            <PlanCard />
+            <PlanCard userId={session.user.id} />
           </div>
           <div className="flex flex-col gap-5">
             <ProfileInformationCard userId={session.user.id} />

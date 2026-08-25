@@ -1,5 +1,10 @@
 export { renderEmail, type RenderedEmail } from "./render";
 export { siteBaseUrl } from "./base-url";
+// Money formatting started here because the receipt emails needed it, but it is
+// not email-specific: the account page's Current Plan card renders the same
+// charge. Exported rather than copied so one Intl configuration decides how an
+// amount reads everywhere.
+export { formatAmount, formatCard } from "./format";
 
 export { WelcomeEmail, type WelcomeEmailProps } from "./emails/WelcomeEmail";
 export {

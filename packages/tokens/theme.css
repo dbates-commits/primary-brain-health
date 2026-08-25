@@ -128,6 +128,13 @@
      from `error` (#ba1a1a), which the design reserves for message text. */
   --color-accent-pink: #d6007f;
 
+  /* Figma `accent/green`, the label on the account page's `Active` plan badge,
+     over a pale ground the design leaves as a raw hex. `-container` names that
+     ground the way `error` / `error-container` already do. Not a general
+     success colour — nothing else uses either value yet. */
+  --color-accent-green: #85c559;
+  --color-accent-green-container: #e2f6e9;
+
   /* Error */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
@@ -198,6 +205,8 @@
   --color-neutral-900: var(--color-neutral-900);
   --color-on-surface-warm: var(--color-on-surface-warm);
   --color-accent-pink: var(--color-accent-pink);
+  --color-accent-green: var(--color-accent-green);
+  --color-accent-green-container: var(--color-accent-green-container);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);
