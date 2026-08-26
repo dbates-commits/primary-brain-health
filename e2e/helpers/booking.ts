@@ -38,7 +38,13 @@ export function uniqueEmail(): string {
  */
 async function startFromOverview(page: Page, cta: string): Promise<void> {
   const overview = page.getByRole("dialog");
-  await expect(overview.getByRole("heading", { name: /^Welcome/ })).toBeVisible();
+  // A longer wait than the default. The pane is opened by a mount effect that
+  // first calls a server action, so the first test in a run waits on a cold
+  // compile of the whole client bundle before that request is even made — well
+  // past the 5s default, and only ever on the first one.
+  await expect(overview.getByRole("heading", { name: /^Welcome/ })).toBeVisible({
+    timeout: 20_000,
+  });
   await overview.getByRole("button", { name: cta }).click();
 }
 

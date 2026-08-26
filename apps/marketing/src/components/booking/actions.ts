@@ -10,7 +10,6 @@ import {
   recordConsentCore,
   resendBookingConfirmation,
   resolveBookingResumeState,
-  resolveBookingUserId,
   type BookingResumeState,
 } from "@pbh/booking/server";
 import {
@@ -21,7 +20,7 @@ import {
   type DetailsState,
   type SignupState,
 } from "@pbh/booking";
-import { auth } from "@/auth";
+import { resolveActorId } from "@/lib/booking-actor";
 import { getProfileValues } from "@/lib/profile";
 
 /**
@@ -43,30 +42,6 @@ import { getProfileValues } from "@/lib/profile";
 const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
-/**
- * Who is acting: the booking cookie, or an Auth.js session behind it.
- *
- * Mid-flow there is no session at all — only the signed HttpOnly booking cookie
- * issued at signup, which lives two hours. The session is what carries someone
- * whose cookie has aged out and whose 24-hour confirmation link is spent: they
- * sign in again, and `/welcome` bounces them back into the flow. Without the
- * fallback on *every* action they would see their step and then fail on submit
- * with "we couldn't find your booking", which is exactly the dead end signing in
- * was supposed to fix.
- *
- * Safe to prefer: a session is the stronger proof of the two — it took a magic
- * link delivered to the address — and it grants nothing here on its own. Every
- * gate downstream still turns on what has actually been written. Same
- * either-proof rule `/welcome` applies, and its doc comment states.
- *
- * Still no fallback to anything the *client* sends. That was the vulnerability
- * the booking cookie exists to close: an attacker controls whether a form field
- * is present, and cannot control either of these.
- */
-async function resolveActorId(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id ?? resolveBookingUserId(await cookies());
-}
 
 export async function signupAction(
   _prev: SignupState,
