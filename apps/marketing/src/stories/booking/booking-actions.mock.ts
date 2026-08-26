@@ -42,3 +42,7 @@ export async function consentAction(): Promise<ConsentState> {
 export async function getBookingResumeState(): Promise<null> {
   return null;
 }
+
+export async function getBookingDetailsValues(): Promise<null> {
+  return null;
+}

@@ -10,6 +10,7 @@ import {
   CONSENT_STAMP_FIELD,
   DEFAULT_PACKAGE_KEY,
   trackForPackage,
+  type DetailsInitialValues,
   type PackageKey,
   type SignupResult,
 } from "@pbh/booking";
@@ -17,7 +18,16 @@ import { Modal } from "./Modal";
 import { BookingSection } from "./BookingSection";
 import { ConsentTerms } from "./ConsentTerms";
 import { resolveConsentTerms } from "./consent-copy";
-import { MODAL_STEPS, type ModalStep, type ModalStepCopyMap } from "./steps";
+import { MODAL_STEPS, type ModalStepCopyMap } from "./steps";
+import { BookingOverviewPane } from "./BookingOverviewPane";
+import { BookingStepper } from "./BookingStepper";
+import {
+  displayKeyFor,
+  progressOrder,
+  stepIndexFor,
+  type BookingProgressStep,
+  type DisplayStepKey,
+} from "./step-model";
 import { resolveStepHeaders } from "./step-headers";
 import { NavigatorNote } from "./NavigatorNote";
 import { EmailConfirmationStep } from "./EmailConfirmationStep";
@@ -27,6 +37,7 @@ import {
   consentAction,
   resendConfirmationAction,
   getBookingResumeState,
+  getBookingDetailsValues,
 } from "./actions";
 import {
   createAssessmentCheckoutSession,
@@ -41,12 +52,6 @@ import {
  * Payment is the last step it owns: a paid customer is sent to `/welcome`, so
  * there is no in-modal confirmation step (see `WELCOME_PATH`).
  */
-const STEP_LABEL: Record<ModalStep, string> = {
-  confirm: "Confirm your email",
-  details: "Complete your details",
-  consent: "Review terms and consent",
-  payment: "Payment",
-};
 
 /**
  * Where the flow ends. The route gates on an Auth.js session or the booking
@@ -126,9 +131,64 @@ export function BookingStepFlow({
    * constraint. See `BookingFormCard`.
    */
   const [signedUp, setSignedUp] = useState(false);
+  /**
+   * Which of the modal's two faces is showing: the overview pane, or the step
+   * itself. A second axis beside `stepIndex` rather than a fifth entry in
+   * `MODAL_STEPS` — that array is asserted against the CMS documents on disk,
+   * so it cannot carry a screen that has no document.
+   */
+  const [pane, setPane] = useState<"overview" | "step">("overview");
+  /**
+   * The furthest point this booking has reached, which is not the same as the
+   * step on screen once a customer goes back to edit their details. Raised only
+   * by the resume resolver or by `advance`, i.e. only after a server write has
+   * actually landed — which is what makes it safe to greet on (see
+   * `BookingOverviewPane`).
+   */
+  const [furthestStep, setFurthestStep] = useState<BookingProgressStep>("confirm");
+  /**
+   * The row as it stands, fetched only when someone goes back into the details
+   * step — without it the form would come up blank and be unsubmittable until
+   * five fields were retyped. Null means "not fetched"; an empty object means
+   * fetched and there was nothing, so neither state re-triggers the read.
+   */
+  const [detailsValues, setDetailsValues] =
+    useState<DetailsInitialValues | null>(null);
 
+  /**
+   * Move to the next step — or back to where the booking had already got to, if
+   * that is further.
+   *
+   * The clamp used to be `min(i + 1, last)`, which was right while the flow was
+   * strictly forward. Now that a customer can drop back into Details from
+   * Payment, `i + 1` would land them on Consent, which they have already signed.
+   *
+   * Deliberately keyed on state rather than `[]`-stable. Safe here: both
+   * consumers call `onComplete` from an effect guarded by an `advanced` ref, so
+   * a new identity cannot re-fire it. It would NOT be safe to do this to
+   * `createSession` below, whose stability is what stops `PaymentStep` minting a
+   * fresh Stripe Session on every render.
+   */
   const advance = useCallback(() => {
-    setStepIndex((i) => Math.min(i + 1, MODAL_STEPS.length - 1));
+    const next = MODAL_STEPS[Math.min(stepIndex + 1, MODAL_STEPS.length - 1)];
+    const behind = progressOrder(next) <= progressOrder(furthestStep);
+    setFurthestStep(behind ? furthestStep : next);
+    // `furthestStep` can be "done", which has no modal step — a fully paid
+    // booking leaves for /welcome instead. Fall back to `next` rather than
+    // indexing past the end of the array.
+    const index = behind ? stepIndexFor(displayKeyFor(furthestStep)) : -1;
+    setStepIndex(index >= 0 ? index : MODAL_STEPS.indexOf(next));
+    setPane("step");
+  }, [stepIndex, furthestStep]);
+
+  /**
+   * Every path that opens the modal goes through here, so none can forget to
+   * show the overview first — it leads on every open until the booking is done.
+   */
+  const openModal = useCallback((index: number) => {
+    setStepIndex(index);
+    setPane("overview");
+    setOpen(true);
   }, []);
 
   /**
@@ -169,14 +229,13 @@ export function BookingStepFlow({
     setContext({ firstName: result.firstName, lastName: result.lastName });
     setSignedUp(true);
     setExpiredLink(false);
-    setStepIndex(0);
-    setOpen(true);
-  }, []);
+    setFurthestStep("confirm");
+    openModal(0);
+  }, [openModal]);
 
   const reopen = useCallback(() => {
-    setStepIndex(0);
-    setOpen(true);
-  }, []);
+    openModal(0);
+  }, [openModal]);
 
   /**
    * Payment is the last step we own — hand the customer to `/welcome` rather
@@ -232,14 +291,18 @@ export function BookingStepFlow({
       // An expired link lands on the confirmation step whatever else is done,
       // since the address still isn't proven.
       const target = marker === "expired" ? "confirm" : resumed.step;
-      setStepIndex(MODAL_STEPS.indexOf(target));
+      // Both, and together: an unproven address invalidates everything after it,
+      // so an expired link must clamp the progress as well as the step. Letting
+      // the two disagree would greet someone "Welcome Back!" over a list whose
+      // rows the flow will not actually let them reach.
+      setFurthestStep(target);
       setExpiredLink(marker === "expired");
-      setOpen(true);
+      openModal(MODAL_STEPS.indexOf(target));
     });
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, openModal]);
 
   /**
    * Bind the chosen package to the checkout action. Memoised deliberately:
@@ -273,7 +336,34 @@ export function BookingStepFlow({
   // CMS copy from the Modals collection where an editor has written some, the
   // step's exported constant otherwise — keyed off MODAL_STEPS, so a renamed
   // step is a typecheck failure rather than a silently missing header.
-  const stepHeader = <StepHeader {...resolveStepHeaders(modalCopy, track)[step]} />;
+  const headers = resolveStepHeaders(modalCopy, track);
+  const stepHeader = <StepHeader {...headers[step]} />;
+
+  /**
+   * Go back into a step already behind them. Only ever called for a step the
+   * model marks re-enterable — the rows and tabs for the others render nothing
+   * clickable at all, so this is not a guard against a click that can happen.
+   */
+  const selectStep = useCallback(
+    (key: DisplayStepKey) => {
+      const index = stepIndexFor(key);
+      if (index < 0) {
+        return;
+      }
+      if (key === "details" && detailsValues === null) {
+        void getBookingDetailsValues().then((fetched) => {
+          // `{}` rather than leaving it null, so a user the server can't resolve
+          // doesn't send a second request on the next visit to this step.
+          setDetailsValues(fetched ?? {});
+        });
+      }
+      setStepIndex(index);
+      setPane("step");
+    },
+    [detailsValues],
+  );
+
+  const showOverview = pane === "overview";
 
   return (
     <>
@@ -293,25 +383,53 @@ export function BookingStepFlow({
       <Modal
         open={open}
         onClose={close}
-        label={STEP_LABEL[step]}
-        header={stepHeader}
+        // The accessible name tracks what is actually on screen, rather than a
+        // parallel list of step names that could drift from the visible titles.
+        label={showOverview ? "Your onboarding steps" : headers[step].title}
+        header={showOverview ? undefined : stepHeader}
+        // The overview has no stepper — it *is* the step list — and neither does
+        // the email gate, which sits before there is any progress to show.
+        banner={
+          showOverview || step === "confirm" ? undefined : (
+            <BookingStepper
+              furthestStep={furthestStep}
+              activeStep={step}
+              onSelectStep={selectStep}
+            />
+          )
+        }
       >
-        {step === "confirm" && (
+        {showOverview && (
+          <BookingOverviewPane
+            furthestStep={furthestStep}
+            activeStep={step}
+            onStart={() => {
+              setPane("step");
+            }}
+            onSelectStep={selectStep}
+          />
+        )}
+        {!showOverview && step === "confirm" && (
           <EmailConfirmationStep
             expired={expiredLink}
             resend={resendConfirmationAction}
           />
         )}
-        {step === "details" && (
+        {!showOverview && step === "details" && (
           <DetailsForm
             action={detailsAction}
             firstName={context.firstName}
             lastName={context.lastName}
+            // `key` remounts the form once the row arrives: the three controlled
+            // fields seed from this prop in `useState`, which a re-render alone
+            // would not revisit. Only ever changes on a deliberate re-entry.
+            key={detailsValues ? "prefilled" : "blank"}
+            initialValues={detailsValues ?? undefined}
             onComplete={advance}
             showHeader={false}
           />
         )}
-        {step === "consent" && (
+        {!showOverview && step === "consent" && (
           <ConsentForm
             action={consentWithStamp}
             track={track}
@@ -328,7 +446,7 @@ export function BookingStepFlow({
             }
           />
         )}
-        {step === "payment" && (
+        {!showOverview && step === "payment" && (
           <PaymentStep
             createSession={createSession}
             finalize={finalizeCheckoutSession}

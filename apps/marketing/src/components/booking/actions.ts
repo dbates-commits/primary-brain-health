@@ -17,9 +17,12 @@ import {
   CONSENT_STAMP_ERROR,
   CONSENT_STAMP_FIELD,
   type ConsentState,
+  type DetailsInitialValues,
   type DetailsState,
   type SignupState,
 } from "@pbh/booking";
+import { auth } from "@/auth";
+import { getProfileValues } from "@/lib/profile";
 
 /**
  * Real per-step server actions for the marketing booking modal (pbh-ggr.5),
@@ -109,16 +112,56 @@ export async function consentAction(
  * marketing home page stays statically rendered — only a customer actually
  * returning from a confirmation link pays for the round-trip.
  *
- * Returns null for a missing, forged, or expired cookie, and for a user that no
- * longer exists. The step is computed from persisted state, never from anything
- * the client sends.
+ * Returns null for a missing, forged, or expired cookie with no session behind
+ * it, and for a user that no longer exists. The step is computed from persisted
+ * state, never from anything the client sends.
+ *
+ * The Auth.js session is a fallback, not the primary: mid-flow there is no
+ * session at all, only the booking cookie. It matters for the customer whose
+ * booking cookie has aged out (two hours) and whose confirmation link is spent —
+ * they sign in again, and this is what lets the flow recognise them. Same
+ * either-proof rule `/welcome` already applies, and it grants nothing on its own:
+ * every gate downstream still turns on what has actually been written.
  */
 export async function getBookingResumeState(): Promise<BookingResumeState | null> {
-  const userId = resolveBookingUserId(await cookies());
+  const session = await auth();
+  const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
   if (!userId) {
     return null;
   }
   return resolveBookingResumeState(userId);
+}
+
+/**
+ * What the details step already holds, for someone re-entering it to correct
+ * something.
+ *
+ * Read lazily, only when a customer actually goes back — not folded into
+ * `getBookingResumeState`, which runs on every return from a confirmation link
+ * and would then be pushing seven PII columns into the payload for the majority
+ * who never re-enter this step. That function answers "how far did this booking
+ * get"; this one answers "what is in the row", and they are different questions.
+ *
+ * `email` is dropped: the step neither shows nor writes it, so it has no reason
+ * to travel.
+ */
+export async function getBookingDetailsValues(): Promise<DetailsInitialValues | null> {
+  const session = await auth();
+  const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
+  if (!userId) {
+    return null;
+  }
+  const values = await getProfileValues(userId);
+  if (!values) {
+    return null;
+  }
+  return {
+    dateOfBirth: values.dateOfBirth,
+    zip: values.zip,
+    phone: values.phone,
+    gender: values.gender,
+    educationLevel: values.educationLevel,
+  };
 }
 
 /**

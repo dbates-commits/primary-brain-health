@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db, users, writeAuditLog } from "@pbh/db";
-import type { SignupState, SignupValues } from "../types";
+import { DUPLICATE_EMAIL_ERROR, type SignupState, type SignupValues } from "../types";
 import { issueBookingSession, type BookingCookieJar } from "./booking-session";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
@@ -94,10 +94,7 @@ export async function createAccountCore(
       return {
         status: "error",
         message: "Please fix the fields below.",
-        fieldErrors: {
-          email:
-            "An account with this email already exists. Try signing in instead.",
-        },
+        fieldErrors: { email: DUPLICATE_EMAIL_ERROR },
         values,
       };
     }

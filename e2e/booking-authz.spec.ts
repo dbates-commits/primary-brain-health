@@ -59,7 +59,21 @@ test.describe("booking authorization", () => {
     // at consent. Had either attempt landed a `consents` row, this would resume
     // at payment instead.
     await context.addCookies([real]);
-    await page.goto("/?booking=resume#booking");
+    // `reload`, not `goto`. The page is already at this exact URL — the confirm
+    // route redirected here — and a `goto` to the same URL including its
+    // fragment is a same-document navigation in Chrome, so nothing remounts and
+    // the resume path never re-runs. The assertion below then passed on state
+    // left over from before the cookie was cleared, rather than on anything the
+    // server resolved.
+    await page.reload();
+    // The overview leads every open, and it is itself the assertion: it names
+    // the step the server resolved to. Had either refused attempt landed a
+    // `consents` row, this would read "Complete Payment" instead.
+    const overview = page.getByRole("dialog");
+    await expect(
+      overview.getByRole("heading", { name: "Welcome Back!" }),
+    ).toBeVisible();
+    await overview.getByRole("button", { name: "Sign Consent Form" }).click();
     await expect(
       page.getByRole("button", { name: /continue with payment/i }),
     ).toBeVisible();

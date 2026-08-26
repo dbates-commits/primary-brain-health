@@ -13,6 +13,18 @@ export type SignupValues = {
 };
 
 /**
+ * The email field error for an address that already has an account.
+ *
+ * A shared constant rather than a literal in two places: `createAccountCore`
+ * produces it on the unique-violation path, and `SignupForm` matches on it to
+ * offer the sign-in link the message itself advises. A silent drift between the
+ * two would leave that advice with nothing to click — which is exactly the
+ * dead end it exists to fix, for someone whose booking cookie has aged out.
+ */
+export const DUPLICATE_EMAIL_ERROR =
+  "An account with this email already exists. Try signing in instead.";
+
+/**
  * No `userId` in any of these shapes, on purpose: identity lives in the signed
  * HttpOnly booking cookie the server issues at signup (see `booking-session.ts`
  * and `resolveBookingUserId`). Handing the id to the client is what let a caller
