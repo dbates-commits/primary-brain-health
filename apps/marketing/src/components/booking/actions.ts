@@ -43,6 +43,31 @@ import { getProfileValues } from "@/lib/profile";
 const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
+/**
+ * Who is acting: the booking cookie, or an Auth.js session behind it.
+ *
+ * Mid-flow there is no session at all — only the signed HttpOnly booking cookie
+ * issued at signup, which lives two hours. The session is what carries someone
+ * whose cookie has aged out and whose 24-hour confirmation link is spent: they
+ * sign in again, and `/welcome` bounces them back into the flow. Without the
+ * fallback on *every* action they would see their step and then fail on submit
+ * with "we couldn't find your booking", which is exactly the dead end signing in
+ * was supposed to fix.
+ *
+ * Safe to prefer: a session is the stronger proof of the two — it took a magic
+ * link delivered to the address — and it grants nothing here on its own. Every
+ * gate downstream still turns on what has actually been written. Same
+ * either-proof rule `/welcome` applies, and its doc comment states.
+ *
+ * Still no fallback to anything the *client* sends. That was the vulnerability
+ * the booking cookie exists to close: an attacker controls whether a form field
+ * is present, and cannot control either of these.
+ */
+async function resolveActorId(): Promise<string | null> {
+  const session = await auth();
+  return session?.user?.id ?? resolveBookingUserId(await cookies());
+}
+
 export async function signupAction(
   _prev: SignupState,
   formData: FormData,
@@ -57,7 +82,7 @@ export async function detailsAction(
   _prev: DetailsState,
   formData: FormData,
 ): Promise<DetailsState> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return {
       status: "error",
@@ -80,7 +105,7 @@ export async function consentAction(
   _prev: ConsentState,
   formData: FormData,
 ): Promise<ConsentState> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return { status: "error", message: NO_BOOKING_SESSION };
   }
@@ -116,16 +141,11 @@ export async function consentAction(
  * it, and for a user that no longer exists. The step is computed from persisted
  * state, never from anything the client sends.
  *
- * The Auth.js session is a fallback, not the primary: mid-flow there is no
- * session at all, only the booking cookie. It matters for the customer whose
- * booking cookie has aged out (two hours) and whose confirmation link is spent —
- * they sign in again, and this is what lets the flow recognise them. Same
- * either-proof rule `/welcome` already applies, and it grants nothing on its own:
- * every gate downstream still turns on what has actually been written.
+ * Identity comes from `resolveActorId`, so a customer who signed back in after
+ * their booking cookie aged out is recognised here too.
  */
 export async function getBookingResumeState(): Promise<BookingResumeState | null> {
-  const session = await auth();
-  const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return null;
   }
@@ -146,8 +166,7 @@ export async function getBookingResumeState(): Promise<BookingResumeState | null
  * to travel.
  */
 export async function getBookingDetailsValues(): Promise<DetailsInitialValues | null> {
-  const session = await auth();
-  const userId = session?.user?.id ?? resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return null;
   }
@@ -165,14 +184,14 @@ export async function getBookingDetailsValues(): Promise<DetailsInitialValues | 
 }
 
 /**
- * Re-send the confirmation email for the browser holding a booking cookie.
+ * Re-send the confirmation email to whoever is acting.
  *
- * Takes no argument: the recipient is whoever the cookie says, so this can't be
- * pointed at another customer's inbox. Throttled inside
+ * Takes no argument: the recipient comes from the cookie or the session, so this
+ * can't be pointed at another customer's inbox. Throttled inside
  * `resendBookingConfirmation`.
  */
 export async function resendConfirmationAction(): Promise<{ ok: true }> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return { ok: true };
   }

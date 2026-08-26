@@ -177,8 +177,14 @@ rather than by widening either lifetime:
 
 1. The duplicate-email error on the signup form now offers a link to `/login` —
    the message already gave that advice with nothing to press.
-2. `getBookingResumeState` falls back to the Auth.js session, so the resolver
-   recognises them without the booking cookie.
+2. **Every** booking action resolves identity through `resolveActorId` — the
+   booking cookie, or an Auth.js session behind it. It has to be every one: give
+   only the read path the fallback and a signed-in customer sees their step and
+   then fails on submit with "we couldn't find your booking", which is the dead
+   end signing in was meant to fix. A session is the stronger of the two proofs
+   (it took a magic link to the address) and grants nothing on its own; there is
+   still no fallback to anything the client sends, which is the vulnerability the
+   booking cookie exists to close.
 3. `/welcome` bounces an unpaid-but-identified visitor to `/?booking=resume`
    rather than to `/`, which is what reopens the modal at their step.
 
