@@ -30,10 +30,11 @@ export function uniqueEmail(): string {
 /**
  * Click through the overview pane into the step it points at.
  *
- * The modal opens on that pane every time until the booking is finished (Figma
- * 2063:583), so every path into a step goes through one button. Asserting the
- * label rather than clicking whatever is there is deliberate — it is what would
- * catch the pane offering an action the customer cannot actually take.
+ * The pane leads any open where the booking already has progress behind it
+ * (Figma 2063:583) — so, returning from the confirmation link, but not the
+ * signup that precedes it. Asserting the label rather than clicking whatever is
+ * there is deliberate: it is what would catch the pane offering an action the
+ * customer cannot actually take.
  */
 async function startFromOverview(page: Page, cta: string): Promise<void> {
   const overview = page.getByRole("dialog");
@@ -55,9 +56,8 @@ export async function reachConsentStep(page: Page): Promise<void> {
   await booking.getByLabel("Email").fill(email);
   await booking.getByRole("button", { name: /book your assessment/i }).click();
 
-  // The modal now leads with the overview pane on every open — "Welcome!" here,
-  // since nothing is behind them yet — so the gate is one CTA in.
-  await startFromOverview(page, "Confirm Your Email");
+  // Straight to the gate: signup shows the confirmation step and nothing else.
+  // The overview is for someone coming back to progress they already have.
   await expect(
     page.getByRole("heading", { name: /email confirmation/i }),
   ).toBeVisible();

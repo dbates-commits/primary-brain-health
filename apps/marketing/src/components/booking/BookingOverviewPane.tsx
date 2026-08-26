@@ -28,15 +28,22 @@ interface BookingOverviewPaneProps {
  * What the booking modal shows before its steps (Figma 2063:583): where you are,
  * what is left, and one button into the next thing.
  *
- * Shown on every open until the booking is finished, and greeting by state
- * rather than by identity — **"Welcome!"** when nothing is behind them,
- * **"Welcome Back!"** once anything is. That test never asks whether a cookie
- * exists, which matters because the booking cookie is HttpOnly and the browser
- * cannot read it: the honest answer for *no cookie*, *expired cookie* and
- * *deleted account* alike is "no progress", which reads as a first visit. So
- * someone returning after the cookie's two hours is greeted as new — a known
- * limit, not a bug, and the reason a stranded returner is offered the sign-in
- * path instead.
+ * Shown when someone comes back to a booking that already has progress behind
+ * it — never on the way into the confirmation gate, where a summary of four
+ * untaken steps would be an obstacle rather than orientation. `BookingStepFlow`
+ * owns that trigger.
+ *
+ * It greets by state rather than by identity — **"Welcome!"** when nothing is
+ * behind them, **"Welcome Back!"** once anything is. That test never asks
+ * whether a cookie exists, which matters because the booking cookie is HttpOnly
+ * and the browser cannot read it: the honest answer for *no cookie*, *expired
+ * cookie* and *deleted account* alike is "no progress". Given the trigger above,
+ * "Welcome!" is not reachable today — the branch stays because the greeting is
+ * this component's own business, and a caller that opens it earlier should not
+ * have to know to pass a flag.
+ *
+ * Someone returning after the booking cookie's two hours is not recognised at
+ * all, which is why the signup form offers them the sign-in path instead.
  *
  * The CTA is labelled from `activeStep`, not from the first incomplete row. At
  * the email gate it reads "Confirm Your Email" even though the gate has no row

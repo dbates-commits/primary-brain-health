@@ -11,9 +11,10 @@ const meta = {
     docs: {
       description: {
         component:
-          'What the booking modal shows before its steps (Figma 2063:583): where you are, ' +
-          'what is left, and one button into the next thing. Shown on every open until the ' +
-          'booking is finished. ' +
+          'What the booking modal shows when someone comes back to a booking that already ' +
+          'has progress behind it (Figma 2063:583): where you are, what is left, and one ' +
+          'button into the next thing. Not shown on the way into the confirmation gate — a ' +
+          'summary of four untaken steps is an obstacle, not orientation. ' +
           'It greets by state, not by identity — "Welcome!" while nothing is behind you, ' +
           '"Welcome Back!" once anything is. That test never asks whether a cookie exists, ' +
           'which matters because the booking cookie is HttpOnly: the honest answer for no ' +
@@ -41,7 +42,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Nothing behind them yet, still at the email gate. */
+/**
+ * Nothing behind them yet. Not reachable through the current trigger — the flow
+ * opens straight at the gate instead — but it pins the greeting logic and the
+ * rule that the CTA names something the customer can actually do.
+ */
 export const FirstTime: Story = {
   args: { furthestStep: 'confirm', activeStep: 'confirm' },
   play: async ({ canvasElement }) => {

@@ -115,13 +115,22 @@ stateDiagram-v2
 
 ### The overview pane
 
-Every open of the modal leads with an overview pane (Figma 2063:583) before the
-step itself — where they are, what is left, and one button into the next thing.
-It greets by state rather than identity: **"Welcome!"** while nothing is behind
-them, **"Welcome Back!"** once anything is. That test never asks whether a cookie
-exists, which matters because the booking cookie is HttpOnly and the browser
-cannot read it — the honest answer for *no cookie*, *expired cookie* and *deleted
-account* alike is "no progress", which reads as a first visit.
+Someone coming back to a booking that already has progress behind it lands on an
+overview pane (Figma 2063:583) before the step itself — where they are, what is
+left, and one button into the next thing. It greets by state rather than
+identity: **"Welcome Back!"** once anything is behind them, **"Welcome!"** when
+nothing is.
+
+**It does not show on the way into the confirmation gate.** Filling in a name and
+an email opens the modal straight at the gate: a summary of four untaken steps in
+front of someone who has taken none is an obstacle, not orientation. The same
+goes for an expired link, which lands on that gate whatever else is done — so in
+practice the pane always reads "Welcome Back!", and the other branch is the
+component's own business rather than a state the flow produces.
+
+The greeting never asks whether a cookie exists, which matters because the
+booking cookie is HttpOnly and the browser cannot read it — the honest answer for
+*no cookie*, *expired cookie* and *deleted account* alike is "no progress".
 
 The pane is a second axis (`pane`) beside `stepIndex`, not a fifth entry in
 `MODAL_STEPS` — that array is asserted against the four CMS documents on disk.

@@ -182,14 +182,22 @@ export function BookingStepFlow({
   }, [stepIndex, furthestStep]);
 
   /**
-   * Every path that opens the modal goes through here, so none can forget to
-   * show the overview first — it leads on every open until the booking is done.
+   * Open the modal at a step.
+   *
+   * The overview pane is opt-in, and it is only ever right for someone coming
+   * back to a booking that already has progress behind it. Someone who has just
+   * filled in their name and email needs the confirmation gate and nothing else
+   * — a summary of four steps in front of a person who has taken none is an
+   * obstacle, not orientation.
    */
-  const openModal = useCallback((index: number) => {
-    setStepIndex(index);
-    setPane("overview");
-    setOpen(true);
-  }, []);
+  const openModal = useCallback(
+    (index: number, options?: { overview?: boolean }) => {
+      setStepIndex(index);
+      setPane(options?.overview ? "overview" : "step");
+      setOpen(true);
+    },
+    [],
+  );
 
   /**
    * Carry the chosen package into signup so it is persisted on the account.
@@ -297,7 +305,12 @@ export function BookingStepFlow({
       // rows the flow will not actually let them reach.
       setFurthestStep(target);
       setExpiredLink(marker === "expired");
-      openModal(MODAL_STEPS.indexOf(target));
+      // The overview only for someone with progress to survey. `confirm` means
+      // the address still isn't proven — whether that is a first visit or an
+      // expired link — so there is nothing to summarise and one thing to do.
+      openModal(MODAL_STEPS.indexOf(target), {
+        overview: target !== "confirm",
+      });
     });
     return () => {
       cancelled = true;
