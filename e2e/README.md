@@ -15,7 +15,12 @@ Config: [`playwright.config.ts`](../playwright.config.ts). Specs live here in `e
 ```bash
 pnpm test:e2e                 # headless
 pnpm test:e2e:ui              # Playwright UI mode
-pnpm test:e2e booking-smoke   # a single spec
+pnpm test:e2e booking-smoke   # a single spec (substring match on the path)
+
+# Watch it happen. UI mode gives a test picker, a live browser pane and
+# time-travel through every step's DOM snapshot; --headed just shows the run.
+E2E_FULL_FLOW=1 pnpm test:e2e:ui
+E2E_FULL_FLOW=1 pnpm test:e2e --headed resume
 
 # Against an already-running dev server (skip the managed webServer):
 E2E_SKIP_WEBSERVER=1 pnpm test:e2e
@@ -28,11 +33,19 @@ First-time browser install (once per machine): `npx playwright install chromium`
 | Spec | Needs | Runs by default |
 |---|---|---|
 | `booking-smoke.spec.ts` | the app only, no secrets | ✅ yes |
+| `booking-authz.spec.ts` | test DB | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
 | `onboarding.spec.ts` (payment path) | test DB + Stripe test keys | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
+| `resume.spec.ts` (abandon + return) | test DB + Stripe test keys | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
 
-The smoke spec proves the harness + booking entry work with no secrets. The
-payment spec is skipped (not failed) unless you opt in, so a missing secret is
-never a false red.
+The smoke spec proves the harness + booking entry work with no secrets. The rest
+are skipped (not failed) unless you opt in, so a missing secret is never a false
+red.
+
+`resume.spec.ts` is the abandon-and-return path: it stops after every step,
+leaves, comes back to `/?booking=resume#booking`, and asserts the step the
+server resolved — through payment and once more afterwards. One leg drops the
+booking cookie and recovers by signing in, which is the only automated cover for
+a customer returning after the cookie's two hours.
 
 `onboarding.spec.ts` drives the whole path (signup → email confirm → details →
 consent → Stripe) for a fresh user per case and asserts the charge outcome:

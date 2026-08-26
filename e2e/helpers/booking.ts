@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { expect, type Page } from "@playwright/test";
-import { waitForConfirmUrl } from "./confirm";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
+import { waitForConfirmUrlForUser } from "./confirm";
 
 /**
  * The signed, HttpOnly cookie the booking flow uses as identity. Named here at
@@ -36,7 +36,7 @@ export function uniqueEmail(): string {
  * there is deliberate: it is what would catch the pane offering an action the
  * customer cannot actually take.
  */
-async function startFromOverview(page: Page, cta: string): Promise<void> {
+export async function openFromOverview(page: Page, cta: string): Promise<void> {
   const overview = page.getByRole("dialog");
   // A longer wait than the default. The pane is opened by a mount effect that
   // first calls a server action, so the first test in a run waits on a cold
@@ -48,12 +48,43 @@ async function startFromOverview(page: Page, cta: string): Promise<void> {
   await overview.getByRole("button", { name: cta }).click();
 }
 
-export async function reachConsentStep(page: Page): Promise<void> {
+/**
+ * Where the booking flow reopens. Bare `/` will not do it: the resume effect
+ * early-returns unless the marker is in the query string, so a customer who
+ * simply retypes the address gets the signup form and no modal. Both server-side
+ * producers of the marker — the confirmation route and `/welcome`'s unpaid
+ * bounce — emit exactly this.
+ */
+export const RESUME_URL = "/?booking=resume#booking";
+
+/**
+ * This browser's booking user id, read out of the signed cookie.
+ *
+ * The cookie is `<userId>.<expiryMs>.<hmac>` and is HttpOnly, so the page cannot
+ * read it — but the test's context can. Used to scope the log scrape to this
+ * signup's confirmation link rather than whatever was logged last.
+ */
+export async function bookingUserId(context: BrowserContext): Promise<string> {
+  const [cookie] = (await context.cookies()).filter(
+    (c) => c.name === BOOKING_COOKIE,
+  );
+  expect(cookie, "signup should have issued the booking cookie").toBeTruthy();
+  return cookie.value.split(".")[0];
+}
+
+/**
+ * Fill and submit the on-page signup form, stopping at the confirmation gate.
+ *
+ * Deliberately does not consume the emailed link — a test that wants to leave
+ * while still unverified needs to stop here. Returns the address, which the
+ * sign-in leg needs.
+ */
+export async function signUp(page: Page): Promise<string> {
   const email = uniqueEmail();
 
   await page.goto("/");
 
-  // Signup is on the page now, not behind a card CTA. Scope to the section:
+  // Signup is on the page, not behind a card CTA. Scope to the section:
   // "First Name" also labels a field in the details step, so an unscoped
   // locator would go ambiguous the moment the modal opens.
   const booking = page.locator("#booking");
@@ -62,20 +93,30 @@ export async function reachConsentStep(page: Page): Promise<void> {
   await booking.getByLabel("Email").fill(email);
   await booking.getByRole("button", { name: /book your assessment/i }).click();
 
-  // Straight to the gate: signup shows the confirmation step and nothing else.
-  // The overview is for someone coming back to progress they already have.
   await expect(
     page.getByRole("heading", { name: /email confirmation/i }),
-  ).toBeVisible();
-  const confirmUrl = await waitForConfirmUrl();
-  await page.goto(confirmUrl);
+  ).toBeVisible({ timeout: 20_000 });
 
-  // Back from the link, so the overview says "Welcome Back!" and points at the
-  // details step.
-  await startFromOverview(page, "Complete Personal Information");
+  return email;
+}
 
-  // The details step's name fields arrive prefilled from signup — left as they
-  // are here, which is the "booking for myself" path.
+/**
+ * Redeem this user's confirmation link.
+ *
+ * Also a "come back": the route redirects to the resume URL, so returning from
+ * the email and returning after abandoning are the same navigation.
+ */
+export async function confirmEmail(
+  page: Page,
+  userId: string,
+): Promise<void> {
+  await page.goto(await waitForConfirmUrlForUser(userId));
+}
+
+/** Fill and submit the details step that is already on screen. */
+export async function fillDetails(page: Page): Promise<void> {
+  // The name fields arrive prefilled from signup — left as they are here, which
+  // is the "booking for myself" path.
   const modal = page.getByRole("dialog");
   await modal.getByLabel("Birthday").fill("1990-01-15");
   await modal.getByLabel("ZIP Code").fill("02101");
@@ -85,6 +126,16 @@ export async function reachConsentStep(page: Page): Promise<void> {
     .getByLabel("Highest Level of education")
     .selectOption({ index: 1 });
   await modal.getByRole("button", { name: "Submit" }).click();
+}
+
+/** Drive signup → email confirm → details, stopping on the consent step. */
+export async function reachConsentStep(page: Page): Promise<void> {
+  await signUp(page);
+  await confirmEmail(page, await bookingUserId(page.context()));
+
+  // Back from the link, so the overview leads and points at the details step.
+  await openFromOverview(page, "Complete Personal Information");
+  await fillDetails(page);
 
   await expect(page.getByRole("checkbox")).toBeVisible();
 }
