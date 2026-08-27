@@ -182,6 +182,17 @@ export function BookingStepFlow({
   }, [stepIndex, furthestStep]);
 
   /**
+   * Details submitted. Drop the fetched row before advancing: it is now the
+   * *pre-edit* copy, and `selectStep` only re-reads when it is null, so a second
+   * trip back into the step would prefill the stale values and write them back
+   * over the correction on submit.
+   */
+  const completeDetails = useCallback(() => {
+    setDetailsValues(null);
+    advance();
+  }, [advance]);
+
+  /**
    * Open the modal at a step.
    *
    * The overview pane is opt-in, and it is only ever right for someone coming
@@ -458,7 +469,7 @@ export function BookingStepFlow({
             // would not revisit. Only ever changes on a deliberate re-entry.
             key={detailsValues ? "prefilled" : "blank"}
             initialValues={detailsValues ?? undefined}
-            onComplete={advance}
+            onComplete={completeDetails}
             showHeader={false}
           />
         )}
