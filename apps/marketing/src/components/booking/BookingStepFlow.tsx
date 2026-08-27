@@ -154,6 +154,13 @@ export function BookingStepFlow({
    */
   const [detailsValues, setDetailsValues] =
     useState<DetailsInitialValues | null>(null);
+  /**
+   * Whether that read is in flight. The form must not be on screen while it is:
+   * it seeds its controlled fields once, in `useState`, so it is remounted when
+   * the row lands — and anything typed into the blank one it replaces, plus any
+   * `useActionState` error showing, goes with it.
+   */
+  const [detailsPending, setDetailsPending] = useState(false);
 
   /**
    * Move to the next step — or back to where the booking had already got to, if
@@ -395,10 +402,12 @@ export function BookingStepFlow({
         return;
       }
       if (key === "details" && detailsValues === null) {
+        setDetailsPending(true);
         void getBookingDetailsValues().then((fetched) => {
           // `{}` rather than leaving it null, so a user the server can't resolve
           // doesn't send a second request on the next visit to this step.
           setDetailsValues(fetched ?? {});
+          setDetailsPending(false);
         });
       }
       setStepIndex(index);
@@ -459,7 +468,10 @@ export function BookingStepFlow({
             resend={resendConfirmationAction}
           />
         )}
-        {!showOverview && step === "details" && (
+        {!showOverview && step === "details" && detailsPending && (
+          <p className="text-sm text-on-surface-variant">Loading your details…</p>
+        )}
+        {!showOverview && step === "details" && !detailsPending && (
           <DetailsForm
             action={detailsAction}
             firstName={context.firstName}
