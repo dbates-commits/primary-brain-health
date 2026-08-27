@@ -1,7 +1,7 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
-import { db, users, writeAuditLog } from "@pbh/db";
+import { and, eq } from "drizzle-orm";
+import { db, payments, users, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry, getStripe } from "@pbh/payments";
 import { getPackage, resolvePackageKey } from "../packages";
 import type { CreateCheckoutResult } from "../types";
@@ -11,6 +11,10 @@ import { recordSucceededPayment } from "./fulfill";
 // server logs, never to the customer.
 const ACCOUNT_NOT_FOUND = "We couldn't find your account.";
 const CHECKOUT_START_FAILED = "Couldn't start payment. Please try again.";
+// The one error here that names its cause: the customer is not stuck, they are
+// finished, and telling them so is what stops them retrying the card.
+const ALREADY_PAID =
+  "You've already paid for this assessment. Check your email for the receipt.";
 
 function checkoutError(message: string): CreateCheckoutResult {
   return { status: "error", message };
@@ -45,6 +49,23 @@ export async function createCheckoutSessionCore(
   const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
   if (!user) {
     return checkoutError(ACCOUNT_NOT_FOUND);
+  }
+
+  // Refuse to mint a second Session for someone who has already paid (pbh-ypf).
+  // `PaymentStep` mints one per mount, so any route back into the payment step —
+  // a stale tab, Back, a `?booking=resume` link followed twice — was a reachable
+  // double charge. The modal locks that step, but a UI lock is not a control:
+  // these are server actions, and the guard has to be here.
+  //
+  // Same test the resume resolver calls `done` and `getEntitledTrack` calls
+  // entitled: one `payments` row that reached `succeeded`.
+  const [paid] = await db
+    .select({ id: payments.id })
+    .from(payments)
+    .where(and(eq(payments.userId, id), eq(payments.status, "succeeded")))
+    .limit(1);
+  if (paid) {
+    return checkoutError(ALREADY_PAID);
   }
 
   // The package stored on the account at signup wins. The client also sends a

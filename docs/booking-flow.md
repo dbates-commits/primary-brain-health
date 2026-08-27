@@ -113,6 +113,84 @@ stateDiagram-v2
     done --> [*]
 ```
 
+### The overview pane
+
+Someone coming back to a booking that already has progress behind it lands on an
+overview pane (Figma 2063:583) before the step itself — where they are, what is
+left, and one button into the next thing. It greets by state rather than
+identity: **"Welcome Back!"** once anything is behind them, **"Welcome!"** when
+nothing is.
+
+**It does not show on the way into the confirmation gate.** Filling in a name and
+an email opens the modal straight at the gate: a summary of four untaken steps in
+front of someone who has taken none is an obstacle, not orientation. The same
+goes for an expired link, which lands on that gate whatever else is done — so in
+practice the pane always reads "Welcome Back!", and the other branch is the
+component's own business rather than a state the flow produces.
+
+The greeting never asks whether a cookie exists, which matters because the
+booking cookie is HttpOnly and the browser cannot read it — the honest answer for
+*no cookie*, *expired cookie* and *deleted account* alike is "no progress".
+
+The pane is a second axis (`pane`) beside `stepIndex`, not a fifth entry in
+`MODAL_STEPS` — that array is asserted against the four CMS documents on disk.
+Its rows and the stepper band above the step body (2060:5600) both come from
+`components/booking/step-model.ts`, which is a **display** list and deliberately
+not the same four:
+
+- **`confirm` has no row.** Proving the address is a precondition, not a step: it
+  happens once, before there is any progress to show, and both designs omit it.
+  Someone at the gate sees the step with no stepper and no overview.
+- **`assessments` is not a modal step at all** — it is `/welcome`, shown as the
+  outbound promise and never actionable.
+
+Row status is derived from the ordinal rather than read per-step, because
+`resolveBookingResumeState` is a short-circuited chain that returns at the first
+unmet gate. Asking it for a per-step map would run all four queries on every open
+to report what the ordering already implies, and would admit states the flow
+cannot reach.
+
+### Going back
+
+Only **details** is re-enterable, from either the stepper tab or the overview
+row. It is a plain idempotent `UPDATE` with no audit row and no email. The others
+are locked, and the lock is structural — an inert row renders no focusable
+element at all, so there is no click to refuse:
+
+- **consent** writes append-only rows that no constraint stops it duplicating
+  (`pbh-3u1`), possibly at a different CMS `version`.
+- **payment** mints a fresh Stripe Checkout Session on every mount, and
+  `createCheckoutSessionCore` has no already-paid guard (`pbh-ypf`) — re-entry
+  after payment is a reachable double charge.
+
+Re-entering details fetches the current row through `getBookingDetailsValues` and
+prefills the form. Without that it would come up blank, and
+`validateProfileFields` would then refuse to submit it — so a customer going back
+to fix one field would have to retype five.
+
+### When the cookie has aged out
+
+The booking cookie lives two hours; the confirmation token lives 24 and is
+single-use. So someone who abandons **after** confirming and returns the next day
+has a dead cookie and a spent link. They are routed back in through sign-in
+rather than by widening either lifetime:
+
+1. The duplicate-email error on the signup form now offers a link to `/login` —
+   the message already gave that advice with nothing to press.
+2. **Every** booking action resolves identity through `resolveActorId` — the
+   booking cookie, or an Auth.js session behind it. It has to be every one: give
+   only the read path the fallback and a signed-in customer sees their step and
+   then fails on submit with "we couldn't find your booking", which is the dead
+   end signing in was meant to fix. A session is the stronger of the two proofs
+   (it took a magic link to the address) and grants nothing on its own; there is
+   still no fallback to anything the client sends, which is the vulnerability the
+   booking cookie exists to close.
+3. `/welcome` bounces an unpaid-but-identified visitor to `/?booking=resume`
+   rather than to `/`, which is what reopens the modal at their step.
+
+An unpaid signed-in visitor is therefore a supported state. It grants nothing:
+`/welcome`'s own gate still turns on a succeeded payment.
+
 ---
 
 ## Step by step

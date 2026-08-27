@@ -28,9 +28,13 @@ export const dynamic = "force-dynamic";
  * this check they would land on "Your payment is confirmed" and a CTA into the
  * Engagement App having never paid.
  *
- * An unpaid visitor goes to `/` rather than `/login` — they are already signed
- * in, so `/login` would send them straight back here and loop. Home is where
- * the booking flow they abandoned actually lives.
+ * An unpaid visitor goes home rather than to `/login` — they are already signed
+ * in, so `/login` would send them straight back here and loop. Home is where the
+ * booking flow they abandoned actually lives, and the `?booking=resume` marker
+ * is what makes it reopen at the step they reached: without it they land on the
+ * signup form and hit the unique-email constraint. That is the whole return path
+ * for someone whose booking cookie has aged out — they sign in, and this bounce
+ * puts them back in the flow.
  */
 export default async function WelcomePage() {
   const session = await auth();
@@ -40,7 +44,7 @@ export default async function WelcomePage() {
     redirect("/login");
   }
   if ((await getEntitledTrack(userId)) === null) {
-    redirect("/");
+    redirect("/?booking=resume#booking");
   }
 
   return (

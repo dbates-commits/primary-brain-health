@@ -1,5 +1,6 @@
 import { test, expect, type FrameLocator, type Page } from "@playwright/test";
 import { reachConsentStep, submitConsent } from "./helpers/booking";
+import { payWith, stripeFrame } from "./helpers/stripe";
 
 /**
  * The onboarding money-path through Stripe: marketing booking → email confirm →
@@ -51,32 +52,7 @@ const DECLINED_CARDS = [
 async function reachPaymentStep(page: Page): Promise<FrameLocator> {
   await reachConsentStep(page);
   await submitConsent(page);
-  return page.frameLocator('iframe[name="embedded-checkout"]');
-}
-
-/**
- * Fill the Stripe card fields (stable ids in the embedded-checkout frame) and
- * submit. Opts out of Link "save my info", which otherwise forces a required
- * phone number and blocks the card charge.
- */
-async function payWith(stripe: FrameLocator, cardNumber: string): Promise<void> {
-  await expect(stripe.locator("#cardNumber")).toBeVisible({ timeout: 30_000 });
-  await stripe.locator("#cardNumber").fill(cardNumber);
-  await stripe.locator("#cardExpiry").fill("1234");
-  await stripe.locator("#cardCvc").fill("123");
-  const cardName = stripe.locator("#billingName");
-  if (await cardName.count()) {
-    await cardName.fill("Ada Lovelace");
-  }
-  const postal = stripe.locator("#billingPostalCode");
-  if (await postal.count()) {
-    await postal.fill("02101");
-  }
-  const saveInfo = stripe.getByLabel(/save my info/i);
-  if ((await saveInfo.count()) && (await saveInfo.isChecked())) {
-    await saveInfo.uncheck();
-  }
-  await stripe.locator('button[type="submit"]').click();
+  return stripeFrame(page);
 }
 
 test.describe("onboarding payment", () => {

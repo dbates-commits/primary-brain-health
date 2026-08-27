@@ -36,6 +36,19 @@ const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
  */
 export const PAYMENT_HEADER = { title: "Payment" } as const;
 
+/**
+ * How long to leave Stripe's success state on screen before handing off.
+ *
+ * Embedded Checkout fires `onComplete` as its "Thanks for your payment" state
+ * appears, so navigating the moment `finalize` resolves can wipe it off screen
+ * mid-animation — the customer sees a flicker where the confirmation should be.
+ *
+ * Measured from when Stripe fired, not from when `finalize` came back, so a slow
+ * round-trip spends the wait rather than adding to it. A fast one still gets the
+ * full two seconds.
+ */
+const SUCCESS_HOLD_MS = 2000;
+
 export function PaymentStep({
   createSession,
   finalize,
@@ -94,11 +107,17 @@ export function PaymentStep({
       return;
     }
     setCompleteError(null);
+    const completedAt = Date.now();
     try {
       const finalized = await finalize(sessionId);
       if (finalized.status === "error") {
         setCompleteError(finalized.message);
         return;
+      }
+      // Only on the way to success — an error belongs on screen immediately.
+      const remaining = SUCCESS_HOLD_MS - (Date.now() - completedAt);
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining));
       }
       onComplete(sessionId);
     } catch (err) {

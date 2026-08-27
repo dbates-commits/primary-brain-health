@@ -15,6 +15,14 @@ interface ModalProps {
    * and pass it as `children` instead.
    */
   header?: ReactNode;
+  /**
+   * Optional full-bleed band above everything, drawn edge to edge with no
+   * padding of its own — the booking stepper is the one caller. Deliberately not
+   * folded into `header`: that region is inset by `px-6 … sm:px-8` with a
+   * `pr-14` gutter for the close button, which a bordered band spanning the
+   * panel cannot live inside.
+   */
+  banner?: ReactNode;
   children: ReactNode;
 }
 
@@ -44,7 +52,14 @@ const TRANSITION_MS = 200;
  * state first — mount and animate in one pass and there is no start value to
  * animate from, so nothing moves.
  */
-export function Modal({ open, onClose, label, header, children }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  label,
+  header,
+  banner,
+  children,
+}: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -159,46 +174,53 @@ export function Modal({ open, onClose, label, header, children }: ModalProps) {
         )}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-4 top-4 z-20 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          <svg
-            aria-hidden="true"
-            className="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
+        {banner ? <div className="shrink-0">{banner}</div> : null}
+        {/* Everything below the banner. The close button is positioned against
+            *this* box rather than the panel, so a band at the top pushes it down
+            instead of having it land on the band's own content. With no banner
+            this is a pass-through flex column and the geometry is unchanged. */}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-4 top-4 z-20 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </button>
-        {/* Fixed header region (title + description) — stays put while only the
-            body below scrolls, so the scrollbar spans the content, not the whole
-            modal. `pr-14` keeps the title clear of the close button. */}
-        {header ? (
-          <div className="shrink-0 px-6 pb-4 pr-14 pt-6 sm:px-8 sm:pb-8 sm:pt-8">
-            {header}
+            <svg
+              aria-hidden="true"
+              className="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+          {/* Fixed header region (title + description) — stays put while only the
+              body below scrolls, so the scrollbar spans the content, not the whole
+              modal. `pr-14` keeps the title clear of the close button. */}
+          {header ? (
+            <div className="shrink-0 px-6 pb-4 pr-14 pt-6 sm:px-8 sm:pb-8 sm:pt-8">
+              {header}
+            </div>
+          ) : null}
+          <div
+            className={cn(
+              // No bottom padding here on purpose: a padding-bottom on the scroll
+              // container insets where a `sticky bottom-0` child pins, leaving the
+              // step's action bar short of the edge with content scrolling beneath
+              // it. Each step supplies its own bottom padding instead — via
+              // `StickyActions` on the steps that pin their actions, and directly
+              // on the ones that don't (payment, done).
+              "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8",
+              // No fixed header → the body owns the top padding (and clears the
+              // close button on the right).
+              header ? "" : "pr-14 pt-6 sm:pt-8",
+            )}
+          >
+            {children}
           </div>
-        ) : null}
-        <div
-          className={cn(
-            // No bottom padding here on purpose: a padding-bottom on the scroll
-            // container insets where a `sticky bottom-0` child pins, leaving the
-            // step's action bar short of the edge with content scrolling beneath
-            // it. Each step supplies its own bottom padding instead — via
-            // `StickyActions` on the steps that pin their actions, and directly
-            // on the ones that don't (payment, done).
-            "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8",
-            // No fixed header → the body owns the top padding (and clears the
-            // close button on the right).
-            header ? "" : "pr-14 pt-6 sm:pt-8",
-          )}
-        >
-          {children}
         </div>
       </div>
     </div>,

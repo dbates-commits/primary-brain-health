@@ -5,13 +5,13 @@ import {
   createCheckoutSessionCore,
   getClientIp,
   hashIp,
-  resolveBookingUserId,
   verifyAndRecordCheckout,
 } from "@pbh/booking/server";
 import type {
   CreateCheckoutResult,
   PaymentFinalizeResult,
 } from "@pbh/booking";
+import { resolveActorId } from "@/lib/booking-actor";
 import { createSessionForUser } from "@/lib/auth-session";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
@@ -38,7 +38,7 @@ function paymentError(message: string): PaymentFinalizeResult {
 export async function createAssessmentCheckoutSession(
   packageKey?: string,
 ): Promise<CreateCheckoutResult> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return { status: "error", message: NO_BOOKING_SESSION };
   }
@@ -66,7 +66,7 @@ export async function createAssessmentCheckoutSession(
 export async function finalizeCheckoutSession(
   checkoutSessionId: string,
 ): Promise<PaymentFinalizeResult> {
-  const id = resolveBookingUserId(await cookies());
+  const id = await resolveActorId();
   const sessionId = checkoutSessionId.trim();
   if (!id || !sessionId) {
     return paymentError(PAYMENT_UNCONFIRMED);
