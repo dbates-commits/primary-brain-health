@@ -12,6 +12,11 @@
  * to end.
  */
 
+import type {
+  BillingPortalFlow,
+  BillingPortalResult,
+  OpenBillingPortalAction,
+} from "@/lib/billing-portal-flow";
 import type { DeleteAccountAction } from "@/lib/delete-account-state";
 import {
   readProfileValues,
@@ -137,3 +142,23 @@ export function deleteAccountSpy(
     return { status: "success" };
   };
 }
+
+/**
+ * Stands in for the portal call, reporting which flow the pressed link asked
+ * for. The real action mints a single-use Stripe URL; the panel is what decides
+ * where it opens, so a story only needs the flow and a URL to hand back.
+ */
+export function billingPortalSpy(
+  onOpen: (flow: BillingPortalFlow) => void,
+  result: BillingPortalResult = { status: "ready", url: PORTAL_URL },
+  delayMs = ACTION_DELAY_MS,
+): OpenBillingPortalAction {
+  return async (flow) => {
+    await delay(delayMs);
+    onOpen(flow);
+    return result;
+  };
+}
+
+/** Shaped like Stripe's, so a story asserting the opened URL reads honestly. */
+export const PORTAL_URL = "https://billing.stripe.com/p/session/test_1U98as";

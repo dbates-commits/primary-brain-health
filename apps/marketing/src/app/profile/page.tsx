@@ -60,7 +60,7 @@ export default async function ProfilePage() {
           </div>
           <div className="flex flex-col gap-5">
             <ProfileInformationCard userId={session.user.id} />
-            <PaymentDetailsCard />
+            <PaymentDetailsCard userId={session.user.id} />
             <DeleteAccountCard userId={session.user.id} />
           </div>
         </div>

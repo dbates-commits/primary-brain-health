@@ -36,6 +36,13 @@ export const payments = pgTable(
     isHsaFsa: boolean("is_hsa_fsa").notNull().default(false),
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),
+    // Expiry of the card that paid, for the "Expires 04/27" half of the account
+    // page's payment line. Non-sensitive, like brand and last4, and captured
+    // from the same expanded charge. Stored rather than re-fetched: the card
+    // shown there is the one we charged, which is a fact about this row, not
+    // whatever payment method the Customer happens to hold today.
+    cardExpMonth: integer("card_exp_month"),
+    cardExpYear: integer("card_exp_year"),
     succeededAt: timestamp("succeeded_at", { withTimezone: true }),
     // DEPRECATED (pbh-23g): the cross-app sign-in handoff is gone. It existed to
     // carry a session from marketing to a second app on another origin; with one

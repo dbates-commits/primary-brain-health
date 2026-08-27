@@ -27,6 +27,7 @@ export * from "./details-core";
 export * from "./consent-core";
 export * from "./consent-stamp";
 export * from "./checkout-core";
+export * from "./stripe-customer";
 export * from "./webhook";
 // Named, not `export *`: the other senders in that module are internal to the
 // booking orchestration and should stay unreachable from an app. Deactivation
