@@ -241,9 +241,29 @@ export function BookingStepFlow({
     openModal(0);
   }, [openModal]);
 
+  /**
+   * Reopen a booking the customer closed. Back to where they had got to, not to
+   * index 0: a resuming customer is `signedUp` too, so opening at the top would
+   * put someone whose address is already proven back in front of the
+   * confirmation gate — a screen with no stepper and nothing to press but
+   * "resend", and no way onward short of reloading `?booking=resume`.
+   *
+   * Same pair of decisions as the resume effect, for the same reasons: the step
+   * their progress stands at, and the overview only when there is progress to
+   * survey.
+   */
   const reopen = useCallback(() => {
-    openModal(0);
-  }, [openModal]);
+    // `done` has no modal step — a paid booking belongs on /welcome. The resume
+    // effect sends them there before this button can be pressed, so this is the
+    // guard rather than the path.
+    if (furthestStep === "done") {
+      router.replace(WELCOME_PATH);
+      return;
+    }
+    openModal(MODAL_STEPS.indexOf(furthestStep), {
+      overview: furthestStep !== "confirm",
+    });
+  }, [furthestStep, openModal, router]);
 
   /**
    * Payment is the last step we own — hand the customer to `/welcome` rather
