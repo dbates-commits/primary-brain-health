@@ -52,32 +52,47 @@ export async function recordConsentCore({
   }
 
   try {
-    await db.insert(consents).values([
-      {
-        userId,
-        consentType: "wellness",
-        version: consentVersion,
-        ipHash,
-        userAgent,
-      },
-      {
-        userId,
-        consentType: "hipaa_npp",
-        version: consentVersion,
-        ipHash,
-        userAgent,
-      },
-    ]);
+    // `onConflictDoNothing` against the (user, type, version) unique index
+    // (pbh-3u1). The rows are append-only *evidence*: a new version is a new
+    // row, but the same version twice is two records of one acknowledgment with
+    // nothing to say which is operative. A resubmit is therefore a no-op, not an
+    // error — the evidence it would write is already on file, and the customer
+    // has nothing to fix.
+    const inserted = await db
+      .insert(consents)
+      .values([
+        {
+          userId,
+          consentType: "wellness",
+          version: consentVersion,
+          ipHash,
+          userAgent,
+        },
+        {
+          userId,
+          consentType: "hipaa_npp",
+          version: consentVersion,
+          ipHash,
+          userAgent,
+        },
+      ])
+      .onConflictDoNothing()
+      .returning({ id: consents.id });
 
-    await writeAuditLog({
-      eventType: "consent",
-      userId,
-      ipHash,
-      metadata: {
-        types: ["wellness", "hipaa_npp"],
-        version: consentVersion,
-      },
-    });
+    // Only when something was actually written — same rule as
+    // `recordSucceededPayment`, so the log counts acknowledgments rather than
+    // submissions.
+    if (inserted.length > 0) {
+      await writeAuditLog({
+        eventType: "consent",
+        userId,
+        ipHash,
+        metadata: {
+          types: ["wellness", "hipaa_npp"],
+          version: consentVersion,
+        },
+      });
+    }
 
     return { status: "success" };
   } catch (err) {
