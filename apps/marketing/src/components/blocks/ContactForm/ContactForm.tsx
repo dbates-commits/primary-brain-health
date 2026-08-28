@@ -61,12 +61,12 @@ export function ContactForm({
   };
 
   const inputClasses =
-    "w-full bg-surface-container-low border-none rounded-lg px-3 py-3 sm:px-4 sm:py-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
+    "w-full bg-background-warm border-none rounded-lg px-3 py-3 sm:px-4 sm:py-4 text-ink-strong focus:ring-2 focus:ring-focus-ring focus:outline-none";
 
   return (
     <Section
       id="contact"
-      className="py-16 md:py-32 px-4 sm:px-6 md:px-16 bg-primary text-on-primary"
+      className="py-16 md:py-32 px-4 sm:px-6 md:px-16 bg-brand-default text-brand-on-brand"
     >
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start">
         {/* Left: Copy */}
@@ -84,7 +84,7 @@ export function ContactForm({
             <p
               data-scroll-item
               data-tina-field={tinaFields?.subheadline}
-              className="text-on-primary-container text-xl leading-relaxed text-pretty"
+              className="text-brand-wash text-xl leading-relaxed text-pretty"
             >
               {subheadline}
             </p>
@@ -94,7 +94,7 @@ export function ContactForm({
         {/* Right: Form */}
         <div
           data-scroll-item
-          className="bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg"
+          className="bg-background-default p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-ink-strong shadow-lg"
         >
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-5">

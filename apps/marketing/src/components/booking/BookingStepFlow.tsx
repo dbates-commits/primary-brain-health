@@ -469,7 +469,7 @@ export function BookingStepFlow({
           />
         )}
         {!showOverview && step === "details" && detailsPending && (
-          <p className="text-sm text-on-surface-variant">Loading your details…</p>
+          <p className="text-sm text-text-default">Loading your details…</p>
         )}
         {!showOverview && step === "details" && !detailsPending && (
           <DetailsForm

@@ -44,7 +44,7 @@ export function BookingStepper({
 
   return (
     <nav aria-label="Booking progress">
-      <ol className="flex w-full border-b border-neutral-350 bg-surface">
+      <ol className="flex w-full border-b border-grey-350 bg-background-default">
         {DISPLAY_STEPS.map((key) => (
           <BookingStepperTab
             key={key}

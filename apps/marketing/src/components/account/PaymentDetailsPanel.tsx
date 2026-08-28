@@ -92,7 +92,7 @@ export function PaymentDetailsPanel({
 
       {card ? (
         <>
-          <p className="mt-6 flex items-center gap-2 font-body text-base text-on-surface-variant">
+          <p className="mt-6 flex items-center gap-2 font-body text-base text-text-default">
             <PhosphorIcon
               name="CreditCard"
               size={24}
@@ -110,7 +110,7 @@ export function PaymentDetailsPanel({
             ) : null}
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4 font-body text-base text-on-surface-variant">
+          <div className="mt-6 flex flex-wrap items-center gap-4 font-body text-base text-text-default">
             <PhosphorIcon
               name="Receipt"
               size={24}
@@ -124,7 +124,7 @@ export function PaymentDetailsPanel({
               onClick={() => {
                 openPortal("receipts");
               }}
-              className="cursor-pointer text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:underline disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer text-brand-default underline-offset-4 hover:underline focus:outline-none focus-visible:underline disabled:cursor-not-allowed disabled:opacity-50"
             >
               View Receipts
             </button>
@@ -154,7 +154,7 @@ export function PaymentDetailsPanel({
         // Signed up and never paid, or refunded. Both reach /profile — the page
         // gates on a session, not an entitlement — and neither has a card, a
         // receipt or a portal worth opening. Same line `PlanSummary` draws.
-        <p className="mt-6 font-body text-base text-on-surface-variant">
+        <p className="mt-6 font-body text-base text-text-default">
           No payment method on file yet. Once you book an assessment, the card
           you pay with and your receipts will appear here.
         </p>

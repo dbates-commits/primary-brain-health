@@ -28,7 +28,7 @@ export function Eyebrow({
     <Comp
       className={cn(
         "text-lg font-body font-bold uppercase tracking-[0.18em]",
-        color === "primary" ? "text-primary" : "text-secondary",
+        color === "primary" ? "text-brand-default" : "text-aqua-default",
         className
       )}
       style={style}

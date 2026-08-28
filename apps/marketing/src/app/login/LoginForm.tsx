@@ -32,7 +32,7 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
         <Heading as="h1" size="lg" className="mb-2">
           Sign in
         </Heading>
-        <p className="text-on-surface-variant">
+        <p className="text-text-default">
           Enter your email and we&rsquo;ll send you a secure sign-in link.
         </p>
       </div>

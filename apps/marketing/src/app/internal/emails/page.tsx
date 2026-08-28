@@ -33,12 +33,12 @@ export default async function EmailsPreviewPage() {
   );
 
   return (
-    <div className="min-h-screen bg-surface-container-low px-4 py-10">
+    <div className="min-h-screen bg-background-warm px-4 py-10">
       <div className="mx-auto max-w-6xl">
-        <h1 className="font-headline text-3xl text-on-surface">
+        <h1 className="font-headline text-3xl text-ink-strong">
           Email templates
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
+        <p className="mt-2 max-w-2xl text-sm text-text-default">
           Every transactional email the site sends, rendered with sample data.
           These are live previews of the actual templates — what ships is what
           you see here.
@@ -48,7 +48,7 @@ export default async function EmailsPreviewPage() {
             <a
               key={preview.slug}
               href={`#${preview.slug}`}
-              className="text-primary underline"
+              className="text-brand-default underline"
             >
               {preview.name}
             </a>

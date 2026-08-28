@@ -45,7 +45,7 @@ export function BenefitsList({
               <h2
                 data-scroll-item
                 data-tina-field={tinaFields?.headline}
-                className="font-headline font-thin text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
+                className="font-headline font-thin text-ink-strong text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
               >
                 {headline}
               </h2>
@@ -54,7 +54,7 @@ export function BenefitsList({
               <p
                 data-scroll-item
                 data-tina-field={tinaFields?.subheadline}
-                className="mt-5 text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto text-pretty"
+                className="mt-5 text-base md:text-lg text-text-default max-w-2xl mx-auto text-pretty"
               >
                 {subheadline}
               </p>
@@ -79,7 +79,7 @@ export function BenefitsList({
                     name={item.icon}
                     aria-hidden="true"
                     weight="regular"
-                    className="w-8 h-8 md:w-10 md:h-10 text-secondary"
+                    className="w-8 h-8 md:w-10 md:h-10 text-aqua-default"
                   />
                 </div>
               )}
@@ -87,7 +87,7 @@ export function BenefitsList({
                 {item.title && (
                   <h3
                     data-tina-field={getItemField(i, "title")}
-                    className="font-headline font-thin text-on-surface text-2xl md:text-3xl leading-[1.2] text-balance"
+                    className="font-headline font-thin text-ink-strong text-2xl md:text-3xl leading-[1.2] text-balance"
                   >
                     {item.title}
                   </h3>
@@ -95,7 +95,7 @@ export function BenefitsList({
                 {item.body && (
                   <p
                     data-tina-field={getItemField(i, "body")}
-                    className="mt-2 text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty"
+                    className="mt-2 text-text-default text-base md:text-lg leading-relaxed text-pretty"
                   >
                     {item.body}
                   </p>

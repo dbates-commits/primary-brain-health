@@ -16,8 +16,8 @@ import type { ReactNode } from "react";
  */
 export function BookingModalShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-[32rem] items-center justify-center bg-on-surface/50 p-4">
-      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl">
+    <div className="flex min-h-[32rem] items-center justify-center bg-ink-strong/50 p-4">
+      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl">
         {/* `pr-14`/`pt-*` are Modal's no-header branch: with no pinned header the
             body owns the top padding and clears the close button. */}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pr-14 pt-6 sm:px-8 sm:pt-8">

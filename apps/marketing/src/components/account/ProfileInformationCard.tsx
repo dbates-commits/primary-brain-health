@@ -36,7 +36,7 @@ export async function ProfileInformationCard({ userId }: { userId: string }) {
       ) : (
         // Unreachable in practice — a session implies a row — but the read is
         // honestly nullable rather than asserted.
-        <p className="mt-6 font-body text-base text-on-surface-variant">
+        <p className="mt-6 font-body text-base text-text-default">
           We couldn&rsquo;t load your profile. Please refresh and try again.
         </p>
       )}

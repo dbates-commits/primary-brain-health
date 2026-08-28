@@ -21,7 +21,7 @@ const meta = {
   args: { onChange: fn() },
   decorators: [
     (Story) => (
-      <div className="w-96 bg-surface p-8">
+      <div className="w-96 bg-background-default p-8">
         <Story />
       </div>
     ),

@@ -130,7 +130,7 @@ export function DeleteAccountModal({
         }
       }}
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-on-surface/50 p-4",
+        "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink-strong/50 p-4",
         "transition-opacity duration-200 ease-out motion-reduce:transition-none",
         shown ? "opacity-100" : "pointer-events-none opacity-0",
       )}
@@ -151,7 +151,7 @@ export function DeleteAccountModal({
           e.stopPropagation();
         }}
         className={cn(
-          "w-full max-w-[620px] rounded-xl bg-surface p-8",
+          "w-full max-w-[620px] rounded-xl bg-background-default p-8",
           "drop-shadow-[0px_4px_12px_rgba(0,0,0,0.24)]",
           "transition duration-200 ease-out motion-reduce:transition-none",
           shown ? "scale-100 opacity-100" : "scale-95 opacity-0",
@@ -160,7 +160,7 @@ export function DeleteAccountModal({
         <Heading
           as="h2"
           size="lg"
-          className="font-thin leading-[1.06] text-on-surface-variant"
+          className="font-thin leading-[1.06] text-text-default"
         >
           Delete Account
         </Heading>
@@ -173,7 +173,7 @@ export function DeleteAccountModal({
           system. Are you sure you want to delete the account linked to{" "}
           {/* Figma `text/label` — the address is darker than the sentence
               around it, so the thing being acted on reads first. */}
-          <span className="text-neutral-700">{email}</span>?
+          <span className="text-grey-800">{email}</span>?
         </p>
 
         <form action={formAction} className="mt-10">
@@ -191,7 +191,7 @@ export function DeleteAccountModal({
                   setConfirmed(e.target.checked);
                 }}
               />
-              <span className="font-body text-xl leading-[1.4] text-on-surface-variant">
+              <span className="font-body text-xl leading-[1.4] text-text-default">
                 I understand that I won&rsquo;t be able to recover my account.
               </span>
             </label>

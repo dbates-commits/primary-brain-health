@@ -29,7 +29,7 @@ const meta = {
   args: { onSelectStep: fn() },
   decorators: [
     (Story) => (
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl bg-surface shadow-2xl">
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-3xl bg-background-default shadow-2xl">
         <Story />
       </div>
     ),

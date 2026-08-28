@@ -160,7 +160,7 @@ export function PaymentStep({
       )}
 
       {stripePromise && !clientSecret && !initError && (
-        <p className="text-sm text-on-surface-variant">Loading payment…</p>
+        <p className="text-sm text-text-default">Loading payment…</p>
       )}
     </div>
   );

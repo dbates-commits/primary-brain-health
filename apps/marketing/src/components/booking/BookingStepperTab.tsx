@@ -65,7 +65,7 @@ export function BookingStepperTab({
   const shell = cn(
     "flex h-[60px] w-full items-center gap-2 overflow-clip px-4",
     status === "current"
-      ? "border-b-4 border-primary bg-background-brand-subtle text-on-surface-variant"
+      ? "border-b-4 border-brand-default bg-background-brand-subtle text-text-default"
       : "text-text-secondary",
   );
 
@@ -81,7 +81,7 @@ export function BookingStepperTab({
           aria-label={`${model.tabLabel} — completed, edit`}
           className={cn(
             shell,
-            "cursor-pointer transition-colors hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary",
+            "cursor-pointer transition-colors hover:bg-background-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-default",
           )}
         >
           {body}

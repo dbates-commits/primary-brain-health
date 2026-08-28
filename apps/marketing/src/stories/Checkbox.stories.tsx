@@ -23,7 +23,7 @@ const meta = {
   args: { onChange: fn() },
   decorators: [
     (Story) => (
-      <div className="bg-surface p-8">
+      <div className="bg-background-default p-8">
         <Story />
       </div>
     ),
@@ -64,7 +64,7 @@ export const WithLabel: Story = {
   render: (args) => (
     <label htmlFor="consent" className="flex items-center gap-2">
       <Checkbox {...args} id="consent" name="consent" />
-      <span className="text-base text-on-surface">
+      <span className="text-base text-ink-strong">
         I&rsquo;ve read and agree to the consent form.
       </span>
     </label>

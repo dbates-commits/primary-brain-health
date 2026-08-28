@@ -125,8 +125,6 @@
      node reports `colors/pink/600`, for the same #d60012 — so Figma has two
      names for this and one of them collides with the magenta above. The Figma
      sync is manual, so this is the name we keep. */
-  --color-danger: #d60012;
-  --color-on-danger: #ffffff;
 
   /* Figma `accent/green`, the label on the account page's `Active` plan badge,
      over a pale ground the design leaves as a raw hex. `-container` names that
@@ -354,6 +352,20 @@
   /* was `neutral-200` — a grey with no counterpart anywhere in Figma's
      ramp (the nearest, colors/neutral/300, is #d9d9d9). */
   --color-grey-warm-200: #dfdfdf;
+  /* was `on-surface` — the darkest ink, used as body text on light grounds
+     and as the ground of the dark Button. Figma's darkest *named* text is
+     `text/heading` (pure black); this is `colors/neutral/850`, which the
+     design uses constantly but never gives a semantic name. Called `ink`
+     rather than `text-*` because it is a ground as often as a colour. */
+  --color-ink-strong: var(--color-grey-850);
+
+  /* The destructive-action red. Figma calls this value `accent/pink` AND
+     `colors/pink/600` — two names, neither of which says what it is for.
+     `danger` is kept as the code's role name until FIG-01 is resolved, so
+     call sites read correctly; it is an alias, not a second value. */
+  --color-danger: var(--color-accent-pink);
+  --color-on-danger: #ffffff;
+
   /* was `error` — MD3's red, which the design reserves for message text.
      Distinct from `accent-pink` (#d60012), the destructive-action red. */
   --color-error: #ba1a1a;
@@ -550,6 +562,7 @@
   --text-caption--line-height: var(--text-caption--line-height);
 
   /* --- No Figma variable yet --- */
+  --color-ink-strong: var(--color-ink-strong);
   --color-brand-deep: var(--color-brand-deep);
   --color-brand-wash: var(--color-brand-wash);
   --color-brand-pale: var(--color-brand-pale);

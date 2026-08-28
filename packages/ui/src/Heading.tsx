@@ -30,7 +30,7 @@ export function Heading({
   return (
     <Tag
       className={cn(
-        "font-headline font-normal text-on-surface",
+        "font-headline font-normal text-ink-strong",
         sizeStyles[size],
         className
       )}

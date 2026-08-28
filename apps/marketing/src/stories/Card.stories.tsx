@@ -23,7 +23,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-96 bg-surface p-8">
+      <div className="w-96 bg-background-default p-8">
         <Story />
       </div>
     ),
@@ -124,7 +124,7 @@ export const NoPadding: Story = {
     padding: 'none',
     children: (
       <>
-        <div className="h-32 rounded-t-xl bg-secondary" />
+        <div className="h-32 rounded-t-xl bg-aqua-default" />
         <div className="p-6">
           <CardTitle>Edge-to-edge media</CardTitle>
           <CardDescription>Inner padding is applied by the content, not the card.</CardDescription>

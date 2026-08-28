@@ -71,7 +71,7 @@ export function MobileLoginModal({
       // that is fading out can never swallow a tap meant for the drawer.
       inert={!open}
       className={cn(
-        "fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-surface",
+        "fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-background-default",
         // The surface only fades. It must not move: this layer's X sits
         // exactly on top of the drawer's, and translating the sheet would
         // slide one off the other for the length of the transition. The rise
@@ -93,7 +93,7 @@ export function MobileLoginModal({
           type="button"
           onClick={onBack}
           aria-label="Back to menu"
-          className="p-2 text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="p-2 text-ink-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-default"
         >
           <PhosphorIcon name="ArrowCircleLeft" size={24} aria-hidden="true" />
         </button>
@@ -101,7 +101,7 @@ export function MobileLoginModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="p-2 text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="p-2 text-brand-default focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-default"
         >
           <PhosphorIcon name="X" size={24} aria-hidden="true" />
         </button>

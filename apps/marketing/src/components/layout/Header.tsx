@@ -182,7 +182,7 @@ export function Header() {
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300",
         scrolled
-          ? "bg-surface/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]"
+          ? "bg-background-default/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]"
           : "bg-transparent shadow-none"
       )}
     >
@@ -220,8 +220,8 @@ export function Header() {
                 className={cn(
                   "font-body text-base font-semibold tracking-tight transition-all",
                   activeHash === item.link
-                    ? "text-secondary"
-                    : "text-on-surface/70 hover:text-on-surface"
+                    ? "text-aqua-default"
+                    : "text-ink-strong/70 hover:text-ink-strong"
                 )}
               >
                 {item.label}
@@ -252,7 +252,7 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           ref={menuButtonRef}
-          className="lg:hidden p-2 text-primary"
+          className="lg:hidden p-2 text-brand-default"
           onClick={() => {
             if (mobileMenuOpen) {
               closeMobileMenu();
@@ -287,7 +287,7 @@ export function Header() {
         )}
       >
         <div className="overflow-hidden">
-          <div className="bg-surface/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
+          <div className="bg-background-default/95 backdrop-blur-xl px-8 py-6 border-t border-outline-variant/10">
             <div className="flex flex-col gap-4">
               {visibleNav.map((item) => (
                 <a
@@ -297,8 +297,8 @@ export function Header() {
                   className={cn(
                     "font-body text-base font-semibold py-2",
                     activeHash === item.link
-                      ? "text-secondary"
-                      : "text-on-surface/70"
+                      ? "text-aqua-default"
+                      : "text-ink-strong/70"
                   )}
                 >
                   {item.label}
@@ -336,7 +336,7 @@ export function Header() {
                   ref={loginRowRef}
                   type="button"
                   onClick={() => setLoginModalOpen(true)}
-                  className="py-2 text-left font-body text-base font-semibold text-primary"
+                  className="py-2 text-left font-body text-base font-semibold text-brand-default"
                 >
                   Login
                 </button>

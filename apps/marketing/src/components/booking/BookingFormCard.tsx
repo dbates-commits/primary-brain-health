@@ -38,7 +38,7 @@ export function BookingFormCard({
 
       {signedUp ? (
         <div className="flex flex-col gap-6">
-          <p className="text-lg text-on-surface">
+          <p className="text-lg text-ink-strong">
             We&rsquo;ve emailed you a link to confirm your address. Open it to
             pick up where you left off.
           </p>

@@ -61,21 +61,21 @@ export default async function ModalStepPage({
   }
 
   return (
-    <div className="min-h-screen bg-surface-container-low px-4 py-10">
+    <div className="min-h-screen bg-background-warm px-4 py-10">
       <div className="mx-auto max-w-4xl">
-        <p className="text-sm text-on-surface-variant">
-          <Link href="/internal/modals" className="text-primary underline">
+        <p className="text-sm text-text-default">
+          <Link href="/internal/modals" className="text-brand-default underline">
             Booking modal steps
           </Link>
         </p>
-        <h1 className="mt-2 font-headline text-3xl text-on-surface">
+        <h1 className="mt-2 font-headline text-3xl text-ink-strong">
           {STEP_META[step].name}
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-on-surface-variant">
+        <p className="mt-1 max-w-2xl text-sm text-text-default">
           {STEP_META[step].when}
         </p>
         {!result ? (
-          <p className="mt-4 max-w-2xl rounded-lg bg-surface p-4 text-sm text-on-surface-variant">
+          <p className="mt-4 max-w-2xl rounded-lg bg-background-default p-4 text-sm text-text-default">
             Showing the wording that ships in code — the CMS copy for this step
             couldn’t be loaded. On a preview deployment that is expected until
             the Modals collection reaches the main branch.
@@ -88,8 +88,8 @@ export default async function ModalStepPage({
               href={`/internal/modals/${item.step}`}
               className={
                 item.step === step
-                  ? "font-semibold text-on-surface"
-                  : "text-primary underline"
+                  ? "font-semibold text-ink-strong"
+                  : "text-brand-default underline"
               }
             >
               {item.name}

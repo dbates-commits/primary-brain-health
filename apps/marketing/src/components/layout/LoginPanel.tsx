@@ -68,7 +68,7 @@ export function LoginPanel({
         <Heading as="h2" size="sm" className="text-2xl">
           {state.status === "sent" ? "Email Confirmation" : "Login"}
         </Heading>
-        <p className="text-base text-on-surface">
+        <p className="text-base text-ink-strong">
           {state.status === "sent"
             ? "We’ve sent you an email. Please check your inbox in order to login."
             : "Enter the email you used to create the account."}

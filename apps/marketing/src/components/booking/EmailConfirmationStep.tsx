@@ -48,16 +48,16 @@ export function EmailConfirmationStep({
 
   return (
     <div className="flex flex-col gap-8">
-      <p className="text-xl leading-relaxed text-on-surface">
+      <p className="text-xl leading-relaxed text-ink-strong">
         {expired
           ? "That confirmation link has expired or was already used. Send yourself a fresh one and we’ll pick up where you left off."
           : "Thanks for starting the process with us. We’ve sent you an email. Please check your inbox and confirm this is you."}
       </p>
 
-      <hr className="border-t border-neutral-200" />
+      <hr className="border-t border-grey-warm-200" />
 
       <StickyActions>
-        <p className="text-center text-base text-on-surface">
+        <p className="text-center text-base text-ink-strong">
           {resent ? (
             <span aria-live="polite">
               Sent. Check your inbox — it can take a minute to arrive.
@@ -69,7 +69,7 @@ export function EmailConfirmationStep({
                 type="button"
                 onClick={handleResend}
                 disabled={pending}
-                className="font-bold text-primary underline underline-offset-2 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="font-bold text-brand-default underline underline-offset-2 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {pending ? "Sending…" : "Re-send confirmation email."}
               </button>

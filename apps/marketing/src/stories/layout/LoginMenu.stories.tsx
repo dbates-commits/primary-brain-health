@@ -24,7 +24,7 @@ const meta = {
     (Story) => (
       // Stands in for the header row: the trigger sits at the right-hand end,
       // with room below for the panel to open into.
-      <div className="min-h-[420px] bg-surface p-10">
+      <div className="min-h-[420px] bg-background-default p-10">
         <div className="flex justify-end">
           <Story />
         </div>

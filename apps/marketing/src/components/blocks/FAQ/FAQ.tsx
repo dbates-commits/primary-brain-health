@@ -107,7 +107,7 @@ export function FAQ({
               {headline && (
                 <h1
                   data-tina-field={tinaFields?.headline}
-                  className="font-headline font-thin text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance"
+                  className="font-headline font-thin text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-ink-strong text-balance"
                 >
                   {headline}
                 </h1>
@@ -115,7 +115,7 @@ export function FAQ({
               {subheadline && (
                 <p
                   data-tina-field={tinaFields?.subheadline}
-                  className="text-base md:text-lg text-on-surface-variant mt-4 text-balance md:text-wrap"
+                  className="text-base md:text-lg text-text-default mt-4 text-balance md:text-wrap"
                 >
                   {subheadline}
                 </p>
@@ -133,7 +133,7 @@ export function FAQ({
                     className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span className="font-body text-lg md:text-xl font-medium text-on-surface pr-4">
+                    <span className="font-body text-lg md:text-xl font-medium text-ink-strong pr-4">
                       {item.question}
                     </span>
                     <span
@@ -143,8 +143,8 @@ export function FAQ({
                       )}
                       aria-hidden="true"
                     >
-                      <span className="absolute top-1/2 left-0 right-0 h-px bg-on-surface -translate-y-1/2" />
-                      <span className="absolute left-1/2 top-0 bottom-0 w-px bg-on-surface -translate-x-1/2" />
+                      <span className="absolute top-1/2 left-0 right-0 h-px bg-ink-strong -translate-y-1/2" />
+                      <span className="absolute left-1/2 top-0 bottom-0 w-px bg-ink-strong -translate-x-1/2" />
                     </span>
                   </button>
 
@@ -155,7 +155,7 @@ export function FAQ({
                     )}
                   >
                     <div className="overflow-hidden">
-                      <div className="pb-6 -mt-1 text-on-surface-variant leading-relaxed max-w-3xl">
+                      <div className="pb-6 -mt-1 text-text-default leading-relaxed max-w-3xl">
                         {renderRichText(item.answer)}
                       </div>
                     </div>
@@ -170,7 +170,7 @@ export function FAQ({
               {ctaText && (
                 <p
                   data-tina-field={tinaFields?.ctaText}
-                  className="mb-4 text-on-surface-variant"
+                  className="mb-4 text-text-default"
                 >
                   {ctaText}
                 </p>

@@ -31,7 +31,7 @@ export const DEFAULT_HERO_IMAGE = "/images/laughing-couple.png";
 
 export function highlightBrainHealth(
   headline: string,
-  colorClass = "text-secondary",
+  colorClass = "text-aqua-default",
   spanStyle?: CSSProperties
 ) {
   const parts = headline.split(/(Brain Health)/i);
@@ -46,7 +46,7 @@ export function highlightBrainHealth(
   );
 }
 
-export function TrustAvatars({ borderClass = "border-surface" }: { borderClass?: string }) {
+export function TrustAvatars({ borderClass = "border-background-default" }: { borderClass?: string }) {
   return (
     <div className="flex items-center">
       {TRUST_AVATARS.map((src, i) => (

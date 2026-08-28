@@ -24,10 +24,10 @@ export function EngagementAppCta() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex w-full flex-col gap-4">
-        <h1 className="font-headline text-4xl font-thin text-on-surface sm:text-5xl">
+        <h1 className="font-headline text-4xl font-thin text-ink-strong sm:text-5xl">
           You&rsquo;re all set 🎉
         </h1>
-        <p className="text-xl text-on-surface">
+        <p className="text-xl text-ink-strong">
           Your payment is confirmed and we&rsquo;ve saved your details.{" "}
           {ENGAGEMENT_APP_URL
             ? "Continue to your app to start your brain health assessments."

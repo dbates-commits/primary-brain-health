@@ -164,7 +164,7 @@ export function StackSections({
             <p
               data-scroll-item
               data-tina-field={tinaFields?.label}
-              className="font-body font-bold text-primary text-xs md:text-sm uppercase tracking-[0.18em] mb-4"
+              className="font-body font-bold text-brand-default text-xs md:text-sm uppercase tracking-[0.18em] mb-4"
             >
               {label}
             </p>
@@ -173,7 +173,7 @@ export function StackSections({
             <h2
               data-scroll-item
               data-tina-field={tinaFields?.headline}
-              className="font-headline font-thin text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
+              className="font-headline font-thin text-ink-strong text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
             >
               {headline}
             </h2>
@@ -182,7 +182,7 @@ export function StackSections({
             <p
               data-scroll-item
               data-tina-field={tinaFields?.subheadline}
-              className="mt-5 text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto text-pretty"
+              className="mt-5 text-base md:text-lg text-text-default max-w-2xl mx-auto text-pretty"
             >
               {subheadline}
             </p>
@@ -277,13 +277,13 @@ export function StackSections({
                           name={item.icon}
                           aria-hidden="true"
                           weight="regular"
-                          className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
+                          className="w-14 h-14 md:w-16 md:h-16 text-ink-strong"
                         />
                       ))}
                     {item.title && (
                       <h3
                         data-tina-field={getItemField(i, "title")}
-                        className="font-headline font-thin text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
+                        className="font-headline font-thin text-ink-strong text-3xl md:text-4xl leading-[1.15] text-balance"
                       >
                         {item.title}
                       </h3>
@@ -291,7 +291,7 @@ export function StackSections({
                     {item.body && (
                       <p
                         data-tina-field={getItemField(i, "body")}
-                        className="text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md"
+                        className="text-text-default text-base md:text-lg leading-relaxed text-pretty max-w-md"
                       >
                         {item.body}
                       </p>

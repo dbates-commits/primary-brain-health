@@ -52,7 +52,7 @@ export function WelcomeActions() {
         <PhosphorIcon
           name="ClipboardText"
           size={48}
-          className="text-on-surface"
+          className="text-ink-strong"
         />
         <div className="flex flex-1 flex-col gap-2">
           <Heading as="h2" size="sm">

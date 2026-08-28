@@ -12,7 +12,7 @@ import { DEFAULT_PACKAGE } from "@pbh/booking";
  */
 export function BookingIncludesPanel() {
   return (
-    <div className="flex h-full flex-col gap-10 rounded-xl bg-primary-container-high p-5">
+    <div className="flex h-full flex-col gap-10 rounded-xl bg-brand-850 p-5">
       <div className="flex flex-col gap-4">
         <h3 className="font-headline text-xl font-thin leading-none text-white">
           Includes
@@ -27,7 +27,7 @@ export function BookingIncludesPanel() {
                 weight="regular"
                 className="shrink-0 text-white"
               />
-              <span className="text-on-primary-container">{item.text}</span>
+              <span className="text-brand-wash">{item.text}</span>
             </li>
           ))}
         </ul>
@@ -40,7 +40,7 @@ export function BookingIncludesPanel() {
         <p className="font-headline text-5xl font-thin leading-none text-white">
           {DEFAULT_PACKAGE.displayPrice}
         </p>
-        <p className="text-xs leading-normal text-on-primary-container">
+        <p className="text-xs leading-normal text-brand-wash">
           This service may be eligible for{" "}
           <span className="text-white">HSA/FSA reimbursement</span>, depending on
           your plan. We can provide documentation to support submission.

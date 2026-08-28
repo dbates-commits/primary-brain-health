@@ -186,7 +186,7 @@ export function SignupForm({
               // any stale client state on the way to a fresh sign-in.
               <a
                 href="/login"
-                className="mt-1 inline-block font-body text-sm font-bold text-primary underline underline-offset-2 hover:brightness-110"
+                className="mt-1 inline-block font-body text-sm font-bold text-brand-default underline underline-offset-2 hover:brightness-110"
               >
                 Sign in to continue your booking
               </a>
