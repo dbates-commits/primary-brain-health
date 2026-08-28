@@ -43,7 +43,7 @@ export const AllWeights: Story = {
       {WEIGHTS.map((weight) => (
         <div key={weight} className="flex flex-col items-center gap-2">
           <PhosphorIcon name="Brain" size={40} weight={weight} />
-          <span className="text-xs text-text-default">{weight}</span>
+          <span className="text-caption text-text-default">{weight}</span>
         </div>
       ))}
     </div>
@@ -58,7 +58,7 @@ export const CommonIcons: Story = {
         (name) => (
           <div key={name} className="flex flex-col items-center gap-2">
             <PhosphorIcon name={name} size={32} weight="duotone" />
-            <span className="text-xs text-text-default">{name}</span>
+            <span className="text-caption text-text-default">{name}</span>
           </div>
         ),
       )}

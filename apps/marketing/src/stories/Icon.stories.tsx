@@ -62,7 +62,7 @@ export const AllIcons: Story = {
       {ICON_NAMES.map((name) => (
         <div key={name} className="flex flex-col items-center gap-2">
           <Icon name={name} size="lg" />
-          <span className="text-xs text-text-default">{name}</span>
+          <span className="text-caption text-text-default">{name}</span>
         </div>
       ))}
     </div>
@@ -77,7 +77,7 @@ export const AllSizes: Story = {
       {(['sm', 'md', 'lg', 'xl'] as const).map((size) => (
         <div key={size} className="flex flex-col items-center gap-2">
           <Icon name="rocket" size={size} />
-          <span className="text-xs text-text-default">{size}</span>
+          <span className="text-caption text-text-default">{size}</span>
         </div>
       ))}
     </div>

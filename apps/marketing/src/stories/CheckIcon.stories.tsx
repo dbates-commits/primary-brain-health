@@ -65,7 +65,7 @@ export const PaddedRatherThanScaled: Story = {
           <span className="rounded bg-brand-default text-brand-on-brand">
             <CheckIcon className={`${s.box} ${s.pad}`} />
           </span>
-          <span className="text-xs text-text-default">{s.label}</span>
+          <span className="text-caption text-text-default">{s.label}</span>
         </div>
       ))}
     </div>

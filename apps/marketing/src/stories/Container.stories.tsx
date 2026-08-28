@@ -17,7 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const filler = (label: string) => (
-  <div className="rounded-lg bg-aqua-default/15 py-12 text-center text-sm text-text-default">
+  <div className="rounded-lg bg-aqua-default/15 py-12 text-center text-body-sm text-text-default">
     {label}
   </div>
 );

@@ -60,7 +60,7 @@ interface CardTitleProps {
 
 export function CardTitle({ children, className, as: Tag = "h3" }: CardTitleProps) {
   return (
-    <Tag className={cn("text-xl font-semibold text-ink-strong", className)}>
+    <Tag className={cn("text-subtitle font-semibold text-ink-strong", className)}>
       {children}
     </Tag>
   );

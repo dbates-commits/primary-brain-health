@@ -34,7 +34,7 @@
  * not vanish the moment you click into the field to fix it. Verified in-browser.
  */
 export const fieldBaseClass =
-  "h-12 w-full rounded-lg bg-background-warm px-3.5 text-sm text-text-warm-dark placeholder:text-text-default disabled:text-grey-450 disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-grey-350";
+  "h-12 w-full rounded-lg bg-background-warm px-3.5 text-body-sm text-text-warm-dark placeholder:text-text-default disabled:text-grey-450 disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-grey-350";
 
 /**
  * Filled input style for a field placed directly under a {@link "./Label"}.
@@ -50,4 +50,4 @@ export const fieldClass = `mt-2 ${fieldBaseClass}`;
  * auto-height with vertical padding instead of the fixed 48px row.
  */
 export const textareaClass =
-  "mt-2 w-full rounded-lg bg-background-warm px-3.5 py-3 text-sm text-text-warm-dark placeholder:text-text-default disabled:text-grey-450 disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-grey-350";
+  "mt-2 w-full rounded-lg bg-background-warm px-3.5 py-3 text-body-sm text-text-warm-dark placeholder:text-text-default disabled:text-grey-450 disabled:cursor-not-allowed aria-invalid:ring-2 aria-invalid:ring-accent-pink focus:outline-none focus:ring-2 focus:ring-grey-350";

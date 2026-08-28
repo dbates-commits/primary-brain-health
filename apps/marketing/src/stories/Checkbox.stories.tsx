@@ -64,7 +64,7 @@ export const WithLabel: Story = {
   render: (args) => (
     <label htmlFor="consent" className="flex items-center gap-2">
       <Checkbox {...args} id="consent" name="consent" />
-      <span className="text-base text-ink-strong">
+      <span className="text-body text-ink-strong">
         I&rsquo;ve read and agree to the consent form.
       </span>
     </label>

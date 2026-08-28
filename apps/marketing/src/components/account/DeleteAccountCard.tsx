@@ -33,7 +33,7 @@ export async function DeleteAccountCard({ userId }: { userId: string }) {
       ) : (
         // Unreachable in practice — a session implies a row — but the read is
         // honestly nullable rather than asserted.
-        <p className="font-body text-base text-text-default">
+        <p className="font-body text-body text-text-default">
           We couldn&rsquo;t load your account. Please refresh and try again.
         </p>
       )}

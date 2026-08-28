@@ -21,10 +21,10 @@ export default function ContactThankYouPage() {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
           </svg>
         </div>
-        <h1 className="text-4xl md:text-5xl font-normal font-headline text-ink-strong leading-[1.1] mb-5 text-balance">
+        <h1 className="text-4xl md:text-h2 font-normal font-headline text-ink-strong leading-[1.1] mb-5 text-balance">
           Thank you for reaching out
         </h1>
-        <p className="text-lg md:text-xl text-text-default leading-relaxed mb-10 text-pretty">
+        <p className="text-lg md:text-body-lg text-text-default leading-relaxed mb-10 text-pretty">
           We&apos;ve received your message. Someone from our team will get back
           to you within one business day.
         </p>

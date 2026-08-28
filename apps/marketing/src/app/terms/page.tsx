@@ -12,13 +12,13 @@ export default function TermsPage() {
       <article className="max-w-3xl mx-auto [&_p]:text-lg [&_p]:leading-[2] [&_p]:text-brand-default/90 [&_p]:mb-8 [&_h2]:mt-16 [&_h2]:mb-6 [&_li]:text-lg [&_li]:leading-[1.8] [&_li]:text-text-default">
         {/* Header */}
         <header className="mb-16">
-          <span className="text-aqua-default text-xs font-semibold uppercase tracking-[0.2em] mb-4 block font-body">
+          <span className="text-aqua-default text-caption font-semibold uppercase tracking-[0.2em] mb-4 block font-body">
             Legal Documentation
           </span>
-          <h1 className="font-headline text-5xl md:text-6xl font-extrabold text-ink-strong tracking-tight mb-6">
+          <h1 className="font-headline text-h2 md:text-6xl font-extrabold text-ink-strong tracking-tight mb-6">
             Terms &amp; Conditions
           </h1>
-          <div className="flex items-center gap-2 text-text-default text-sm">
+          <div className="flex items-center gap-2 text-text-default text-body-sm">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -133,7 +133,7 @@ export default function TermsPage() {
 
         {/* Contact CTA */}
         <div className="mt-24 pt-12 text-center border-t border-outline-variant/20">
-          <p className="!text-base text-text-default mb-4">
+          <p className="!text-body text-text-default mb-4">
             Have questions regarding these terms?
           </p>
           <a

@@ -20,7 +20,7 @@ export function AccountSettingsBanner() {
       <Heading as="h1" size="lg" className="leading-[1.06] text-brand-on-brand">
         Account Settings
       </Heading>
-      <p className="mt-4 font-body text-lg leading-[1.2] md:text-xl">
+      <p className="mt-4 font-body text-lg leading-[1.2] md:text-body-lg">
         Manage your profile information and subscription.
       </p>
     </div>

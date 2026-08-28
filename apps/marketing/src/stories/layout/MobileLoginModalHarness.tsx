@@ -32,7 +32,7 @@ export function MobileLoginModalHarness({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="py-2 text-left font-body text-base font-semibold text-brand-default"
+        className="py-2 text-left font-body text-body font-semibold text-brand-default"
       >
         Login
       </button>

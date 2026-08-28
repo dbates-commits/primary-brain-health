@@ -27,7 +27,7 @@ export function ModalStoryHarness({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="h-12 rounded-full bg-brand-default px-6 text-base font-bold text-brand-on-brand"
+        className="h-12 rounded-full bg-brand-default px-6 text-body font-bold text-brand-on-brand"
       >
         Open the dialog
       </button>

@@ -15,7 +15,7 @@ export function Footer() {
               className="h-10 w-auto"
             />
           </a>
-          <p className="text-ink-strong/70 text-sm leading-relaxed mb-6">
+          <p className="text-ink-strong/70 text-body-sm leading-relaxed mb-6">
             A clinical leader in cognitive longevity and proactive brain care.
             Virtual-first, evidence-based, patient-centered.
           </p>
@@ -24,14 +24,14 @@ export function Footer() {
         {/* Link Columns */}
         <div className="grid grid-cols-2 gap-12">
           <div className="space-y-4">
-            <h5 className="font-body font-bold text-brand-default text-sm uppercase tracking-widest">
+            <h5 className="font-body font-bold text-brand-default text-body-sm uppercase tracking-widest">
               Menu
             </h5>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#what-you-gain"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   What You Gain
                 </a>
@@ -39,7 +39,7 @@ export function Footer() {
               <li>
                 <a
                   href="#how-it-works"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   How It Works
                 </a>
@@ -47,7 +47,7 @@ export function Footer() {
               <li>
                 <a
                   href="#intake"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   Get Assessed
                 </a>
@@ -55,7 +55,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/faqs"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   FAQs
                 </Link>
@@ -63,14 +63,14 @@ export function Footer() {
             </ul>
           </div>
           <div className="space-y-4">
-            <h5 className="font-body font-bold text-brand-default text-sm uppercase tracking-widest">
+            <h5 className="font-body font-bold text-brand-default text-body-sm uppercase tracking-widest">
               Support
             </h5>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/contact"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   Contact
                 </Link>
@@ -78,7 +78,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   Terms &amp; Conditions
                 </Link>
@@ -86,7 +86,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-sm"
+                  className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm"
                 >
                   Privacy Policy
                 </Link>
@@ -98,13 +98,13 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-outline-variant/10 px-8 md:px-24 py-8 flex flex-col md:flex-row justify-between items-center gap-4 max-w-[1400px] mx-auto">
-        <span className="text-ink-strong/70 text-sm">
+        <span className="text-ink-strong/70 text-body-sm">
           &copy; {new Date().getFullYear()} Primary Brain Health. All rights
           reserved.
         </span>
         <a
           href="mailto:contact@primarybrainhealth.com"
-          className="flex items-center gap-2 text-ink-strong/70 hover:text-ink-strong text-sm transition-colors"
+          className="flex items-center gap-2 text-ink-strong/70 hover:text-ink-strong text-body-sm transition-colors"
         >
           <svg
             className="w-4 h-4"

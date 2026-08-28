@@ -48,7 +48,7 @@ export function EmailConfirmationStep({
 
   return (
     <div className="flex flex-col gap-8">
-      <p className="text-xl leading-relaxed text-ink-strong">
+      <p className="text-body-lg leading-relaxed text-ink-strong">
         {expired
           ? "That confirmation link has expired or was already used. Send yourself a fresh one and we’ll pick up where you left off."
           : "Thanks for starting the process with us. We’ve sent you an email. Please check your inbox and confirm this is you."}
@@ -57,7 +57,7 @@ export function EmailConfirmationStep({
       <hr className="border-t border-grey-warm-200" />
 
       <StickyActions>
-        <p className="text-center text-base text-ink-strong">
+        <p className="text-center text-body text-ink-strong">
           {resent ? (
             <span aria-live="polite">
               Sent. Check your inbox — it can take a minute to arrive.

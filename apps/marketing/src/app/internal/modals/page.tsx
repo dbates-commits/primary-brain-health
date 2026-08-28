@@ -22,7 +22,7 @@ export default function ModalsIndexPage() {
         <h1 className="font-headline text-3xl text-ink-strong">
           Booking modal steps
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-text-default">
+        <p className="mt-2 max-w-2xl text-body-sm text-text-default">
           The four steps inside the booking modal, in the order a customer meets
           them. Open one to see it exactly as it renders, and — from the Tina
           admin — to edit its heading beside it. Everything else on these
@@ -35,10 +35,10 @@ export default function ModalsIndexPage() {
                 href={`/internal/modals/${item.step}`}
                 className="block rounded-2xl bg-background-default p-6 shadow-sm transition-colors hover:bg-background-warm"
               >
-                <span className="font-headline text-xl text-ink-strong">
+                <span className="font-headline text-subtitle text-ink-strong">
                   {item.name}
                 </span>
-                <span className="mt-1 block max-w-2xl text-sm text-text-default">
+                <span className="mt-1 block max-w-2xl text-body-sm text-text-default">
                   {item.when}
                 </span>
               </Link>

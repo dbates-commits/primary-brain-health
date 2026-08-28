@@ -14,7 +14,7 @@ export function BookingIncludesPanel() {
   return (
     <div className="flex h-full flex-col gap-10 rounded-xl bg-brand-850 p-5">
       <div className="flex flex-col gap-4">
-        <h3 className="font-headline text-xl font-thin leading-none text-text-inverse">
+        <h3 className="font-headline text-subtitle font-thin leading-none text-text-inverse">
           Includes
         </h3>
         <ul className="flex flex-col gap-4">
@@ -37,10 +37,10 @@ export function BookingIncludesPanel() {
           however many bullets the package has. */}
       <div className="mt-auto flex flex-col gap-4">
         <hr className="border-t border-border-inverse/20" />
-        <p className="font-headline text-5xl font-thin leading-none text-text-inverse">
+        <p className="font-headline text-h2 font-thin leading-none text-text-inverse">
           {DEFAULT_PACKAGE.displayPrice}
         </p>
-        <p className="text-xs leading-normal text-brand-wash">
+        <p className="text-caption leading-normal text-brand-wash">
           This service may be eligible for{" "}
           <span className="text-text-inverse">HSA/FSA reimbursement</span>, depending on
           your plan. We can provide documentation to support submission.

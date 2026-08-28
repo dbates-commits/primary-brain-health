@@ -94,7 +94,7 @@ export function IntakeForm({
           {headline && (
             <h2
               data-scroll-item
-              className="text-4xl md:text-5xl lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
+              className="text-4xl md:text-h2 lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
               data-tina-field={tinaFields?.headline}
             >
               {headline}
@@ -103,7 +103,7 @@ export function IntakeForm({
           {subheadline && (
             <p
               data-scroll-item
-              className="text-brand-wash text-xl leading-relaxed mb-8 text-pretty"
+              className="text-brand-wash text-body-lg leading-relaxed mb-8 text-pretty"
               data-tina-field={tinaFields?.subheadline}
             >
               {subheadline}
@@ -143,7 +143,7 @@ export function IntakeForm({
               </ul>
               <div className="mt-10 pt-8 border-t border-border-inverse/15">
                 <span className="text-3xl font-normal text-text-inverse font-headline">$149</span>
-                <p className="text-brand-wash/60 text-sm mt-2">
+                <p className="text-brand-wash/60 text-body-sm mt-2">
                   This service may be eligible for{' '}
                   <span className="text-text-inverse">HSA/FSA reimbursement</span>
                   . We can provide documentation to support submission.
@@ -160,7 +160,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   First Name
                 </label>
@@ -177,7 +177,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Last Name
                 </label>
@@ -197,7 +197,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Email Address
                 </label>
@@ -214,7 +214,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Phone Number
                 </label>
@@ -235,7 +235,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="yearOfBirth"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Year of Birth
                 </label>
@@ -269,7 +269,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="gender"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Gender
                 </label>
@@ -303,7 +303,7 @@ export function IntakeForm({
             <div>
               <label
                 htmlFor="educationLevel"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Highest Level of Education
               </label>
@@ -354,7 +354,7 @@ export function IntakeForm({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2">
+              <label className="block text-body-sm font-semibold mb-2">
                 Who is this consultation for?
               </label>
               <div
@@ -370,7 +370,7 @@ export function IntakeForm({
                     defaultChecked
                     className="peer sr-only"
                   />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-text-default transition-colors peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring hover:text-on-aqua-container">
+                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-body-sm font-medium text-text-default transition-colors peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring hover:text-on-aqua-container">
                     Myself
                   </span>
                 </label>
@@ -381,7 +381,7 @@ export function IntakeForm({
                     value="Someone else"
                     className="peer sr-only"
                   />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-text-default transition-colors peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring hover:text-on-aqua-container">
+                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-body-sm font-medium text-text-default transition-colors peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring hover:text-on-aqua-container">
                     Someone Else
                   </span>
                 </label>
@@ -391,7 +391,7 @@ export function IntakeForm({
             <div>
               <label
                 htmlFor="message"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Message (Optional)
               </label>

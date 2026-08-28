@@ -25,10 +25,10 @@ export default function ThankYouPage() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </div>
-          <h1 className="text-4xl md:text-5xl font-normal font-headline text-ink-strong leading-[1.1] mb-5 text-balance">
+          <h1 className="text-4xl md:text-h2 font-normal font-headline text-ink-strong leading-[1.1] mb-5 text-balance">
             Thank you for reaching out
           </h1>
-          <p className="text-lg md:text-xl text-text-default leading-relaxed max-w-2xl mx-auto text-pretty">
+          <p className="text-lg md:text-body-lg text-text-default leading-relaxed max-w-2xl mx-auto text-pretty">
             Your request for a brain health consultation has been received. We
             are honored to support you on your journey toward cognitive clarity
             and wellness.
@@ -68,42 +68,42 @@ export default function ThankYouPage() {
               </h2>
               <ul className="space-y-8">
                 <li className="flex gap-5">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-aqua-default text-text-inverse flex items-center justify-center font-bold font-body text-base">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-aqua-default text-text-inverse flex items-center justify-center font-bold font-body text-body">
                     1
                   </div>
                   <div>
                     <p className="font-bold text-ink-strong text-lg mb-1 font-body">
                       Initial Review
                     </p>
-                    <p className="text-text-default text-base leading-relaxed">
+                    <p className="text-text-default text-body leading-relaxed">
                       An intake specialist will review your information to match
                       you with the right clinical specialist.
                     </p>
                   </div>
                 </li>
                 <li className="flex gap-5">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-aqua-default text-text-inverse flex items-center justify-center font-bold font-body text-base">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-aqua-default text-text-inverse flex items-center justify-center font-bold font-body text-body">
                     2
                   </div>
                   <div>
                     <p className="font-bold text-ink-strong text-lg mb-1 font-body">
                       Personal Outreach
                     </p>
-                    <p className="text-text-default text-base leading-relaxed">
+                    <p className="text-text-default text-body leading-relaxed">
                       Expect a call from our care coordination team within 24-48
                       business hours to discuss your needs.
                     </p>
                   </div>
                 </li>
                 <li className="flex gap-5">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-aqua-default text-text-inverse flex items-center justify-center font-bold font-body text-base">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-aqua-default text-text-inverse flex items-center justify-center font-bold font-body text-body">
                     3
                   </div>
                   <div>
                     <p className="font-bold text-ink-strong text-lg mb-1 font-body">
                       Scheduling
                     </p>
-                    <p className="text-text-default text-base leading-relaxed">
+                    <p className="text-text-default text-body leading-relaxed">
                       We will finalize your consultation date and provide clear
                       pre-visit instructions.
                     </p>

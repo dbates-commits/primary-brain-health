@@ -38,7 +38,7 @@ export function Toast({
       )}
     >
       <SuccessCircleIcon className="size-6 shrink-0" />
-      <p className="font-body text-sm font-medium text-text-inverse">{message}</p>
+      <p className="font-body text-body-sm font-medium text-text-inverse">{message}</p>
     </div>
   );
 }

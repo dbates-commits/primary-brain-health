@@ -119,11 +119,11 @@ export function UserMenu({ firstName }: { firstName: string }) {
       >
         <span
           aria-hidden="true"
-          className="flex size-8 items-center justify-center rounded-full bg-brand-default font-body text-base font-medium text-brand-on-brand"
+          className="flex size-8 items-center justify-center rounded-full bg-brand-default font-body text-body font-medium text-brand-on-brand"
         >
           {initial}
         </span>
-        <span className="font-body text-base font-medium tracking-tight text-ink-strong">
+        <span className="font-body text-body font-medium tracking-tight text-ink-strong">
           {firstName}
         </span>
         <PhosphorIcon

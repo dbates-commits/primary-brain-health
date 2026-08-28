@@ -63,7 +63,7 @@ export default async function ModalStepPage({
   return (
     <div className="min-h-screen bg-background-warm px-4 py-10">
       <div className="mx-auto max-w-4xl">
-        <p className="text-sm text-text-default">
+        <p className="text-body-sm text-text-default">
           <Link href="/internal/modals" className="text-brand-default underline">
             Booking modal steps
           </Link>
@@ -71,17 +71,17 @@ export default async function ModalStepPage({
         <h1 className="mt-2 font-headline text-3xl text-ink-strong">
           {STEP_META[step].name}
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-text-default">
+        <p className="mt-1 max-w-2xl text-body-sm text-text-default">
           {STEP_META[step].when}
         </p>
         {!result ? (
-          <p className="mt-4 max-w-2xl rounded-lg bg-background-default p-4 text-sm text-text-default">
+          <p className="mt-4 max-w-2xl rounded-lg bg-background-default p-4 text-body-sm text-text-default">
             Showing the wording that ships in code — the CMS copy for this step
             couldn’t be loaded. On a preview deployment that is expected until
             the Modals collection reaches the main branch.
           </p>
         ) : null}
-        <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-body-sm">
           {STEP_LIST.map((item) => (
             <Link
               key={item.step}

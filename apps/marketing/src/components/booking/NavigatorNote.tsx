@@ -48,7 +48,7 @@ export function NavigatorNote() {
         </h2>
         <p
           data-scroll-item
-          className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-text-default md:text-lg"
+          className="mx-auto mt-5 max-w-2xl text-pretty text-body leading-relaxed text-text-default md:text-lg"
         >
           {BODY}
         </p>

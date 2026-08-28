@@ -58,7 +58,7 @@ export function DeleteAccountPanel({
       >
         Delete Account
       </Heading>
-      <p className="mt-2 font-body text-base leading-[1.2] text-text-secondary">
+      <p className="mt-2 font-body text-body leading-[1.2] text-text-secondary">
         Your account will be permanently deleted.
       </p>
       <hr className="mt-6 border-t border-border-subtle" />

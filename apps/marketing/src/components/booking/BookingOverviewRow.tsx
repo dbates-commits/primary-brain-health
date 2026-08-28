@@ -50,10 +50,10 @@ export function BookingOverviewRow({
         className="shrink-0"
       />
       <span className="flex min-w-0 flex-1 flex-col gap-1 text-left">
-        <span className="font-body text-xs uppercase leading-normal">
+        <span className="font-body text-caption uppercase leading-normal">
           Step {position}
         </span>
-        <span className="font-body text-base leading-normal">
+        <span className="font-body text-body leading-normal">
           {model.overviewLabel}
         </span>
       </span>

@@ -25,7 +25,7 @@ export async function ProfileInformationCard({ userId }: { userId: string }) {
       <Heading as="h2" size="md" className="leading-[1.06] md:text-[2rem]">
         Profile Information
       </Heading>
-      <p className="mt-2 font-body text-base leading-[1.2] text-text-secondary">
+      <p className="mt-2 font-body text-body leading-[1.2] text-text-secondary">
         Update your personal details used for assessments and clinical
         consultations.
       </p>
@@ -36,7 +36,7 @@ export async function ProfileInformationCard({ userId }: { userId: string }) {
       ) : (
         // Unreachable in practice — a session implies a row — but the read is
         // honestly nullable rather than asserted.
-        <p className="mt-6 font-body text-base text-text-default">
+        <p className="mt-6 font-body text-body text-text-default">
           We couldn&rsquo;t load your profile. Please refresh and try again.
         </p>
       )}

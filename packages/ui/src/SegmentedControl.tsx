@@ -62,7 +62,7 @@ export function SegmentedControl({
             {/* py-2.5 (not py-3): with the group's own p-1, a 20px line box and
                 10px of vertical padding land the control on the designs' 48px
                 field height, matching the inputs it sits beside. */}
-            <span className="flex items-center justify-center rounded-full px-4 py-2.5 text-sm font-medium text-text-default transition-colors hover:text-on-aqua-container peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring">
+            <span className="flex items-center justify-center rounded-full px-4 py-2.5 text-body-sm font-medium text-text-default transition-colors hover:text-on-aqua-container peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring">
               {option.label}
             </span>
           </label>

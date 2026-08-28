@@ -120,7 +120,7 @@ export function FAQ({
               {headline && (
                 <h1
                   data-tina-field={tinaFields?.headline}
-                  className="font-headline font-thin text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-ink-strong text-balance"
+                  className="font-headline font-thin text-4xl md:text-h2 lg:text-6xl leading-[1.15] text-ink-strong text-balance"
                 >
                   {headline}
                 </h1>
@@ -128,7 +128,7 @@ export function FAQ({
               {subheadline && (
                 <p
                   data-tina-field={tinaFields?.subheadline}
-                  className="text-base md:text-lg text-text-default mt-4 text-balance md:text-wrap"
+                  className="text-body md:text-lg text-text-default mt-4 text-balance md:text-wrap"
                 >
                   {subheadline}
                 </p>
@@ -146,7 +146,7 @@ export function FAQ({
                     className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span className="font-body text-lg md:text-xl font-medium text-ink-strong pr-4">
+                    <span className="font-body text-lg md:text-body-lg font-medium text-ink-strong pr-4">
                       {item.question}
                     </span>
                     <span
@@ -273,7 +273,7 @@ export function FAQ({
             {items.map((item, index) => (
               <div key={index} className={cn("rounded-xl p-6", styles.cardBg)}>
                 <h3 className={cn("font-semibold mb-3", styles.question)}>{item.question}</h3>
-                <p className={cn("text-sm", styles.answer)}>{renderRichText(item.answer)}</p>
+                <p className={cn("text-body-sm", styles.answer)}>{renderRichText(item.answer)}</p>
               </div>
             ))}
           </div>

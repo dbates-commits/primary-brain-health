@@ -154,16 +154,16 @@ export function ConsentForm({
           <div className="flex flex-col gap-6">
             {terms ?? (
               <>
-                <p className="text-sm leading-normal text-grey-700">
+                <p className="text-body-sm leading-normal text-grey-700">
                   {TERMS_INTRO}
                 </p>
 
                 {LEGAL_SECTIONS.map((section) => (
                   <div key={section.title} className="flex flex-col gap-2">
-                    <p className="text-sm font-bold text-grey-900">
+                    <p className="text-body-sm font-bold text-grey-900">
                       {section.title}
                     </p>
-                    <p className="text-sm leading-normal text-grey-700">
+                    <p className="text-body-sm leading-normal text-grey-700">
                       {section.body}
                     </p>
                   </div>
@@ -193,7 +193,7 @@ export function ConsentForm({
                 aria-invalid={agreedError ? true : undefined}
                 aria-describedby={agreedError ? "agreed-error" : undefined}
               />
-              <span className="text-base text-ink-strong">
+              <span className="text-body text-ink-strong">
                 I&rsquo;ve read and agree to the consent form.
               </span>
             </label>
@@ -201,7 +201,7 @@ export function ConsentForm({
           </div>
 
           {state.status === "error" && !fieldErrors && (
-            <p role="alert" className="animate-error-in text-sm text-error">
+            <p role="alert" className="animate-error-in text-body-sm text-error">
               {state.message}
             </p>
           )}

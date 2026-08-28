@@ -38,12 +38,12 @@ export default async function EmailsPreviewPage() {
         <h1 className="font-headline text-3xl text-ink-strong">
           Email templates
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-text-default">
+        <p className="mt-2 max-w-2xl text-body-sm text-text-default">
           Every transactional email the site sends, rendered with sample data.
           These are live previews of the actual templates — what ships is what
           you see here.
         </p>
-        <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-body-sm">
           {rendered.map((preview) => (
             <a
               key={preview.slug}

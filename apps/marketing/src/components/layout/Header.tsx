@@ -218,7 +218,7 @@ export function Header() {
                 key={item.link}
                 href={item.link}
                 className={cn(
-                  "font-body text-base font-semibold tracking-tight transition-all",
+                  "font-body text-body font-semibold tracking-tight transition-all",
                   activeHash === item.link
                     ? "text-aqua-default"
                     : "text-ink-strong/70 hover:text-ink-strong"
@@ -295,7 +295,7 @@ export function Header() {
                   href={item.link}
                   onClick={closeMobileMenu}
                   className={cn(
-                    "font-body text-base font-semibold py-2",
+                    "font-body text-body font-semibold py-2",
                     activeHash === item.link
                       ? "text-aqua-default"
                       : "text-ink-strong/70"
@@ -336,7 +336,7 @@ export function Header() {
                   ref={loginRowRef}
                   type="button"
                   onClick={() => setLoginModalOpen(true)}
-                  className="py-2 text-left font-body text-base font-semibold text-brand-default"
+                  className="py-2 text-left font-body text-body font-semibold text-brand-default"
                 >
                   Login
                 </button>

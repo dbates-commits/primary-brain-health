@@ -75,7 +75,7 @@ export function ContactForm({
             <h2
               data-scroll-item
               data-tina-field={tinaFields?.headline}
-              className="text-4xl md:text-5xl lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
+              className="text-4xl md:text-h2 lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
             >
               {headline}
             </h2>
@@ -84,7 +84,7 @@ export function ContactForm({
             <p
               data-scroll-item
               data-tina-field={tinaFields?.subheadline}
-              className="text-brand-wash text-xl leading-relaxed text-pretty"
+              className="text-brand-wash text-body-lg leading-relaxed text-pretty"
             >
               {subheadline}
             </p>
@@ -101,7 +101,7 @@ export function ContactForm({
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   First Name
                 </label>
@@ -118,7 +118,7 @@ export function ContactForm({
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Last Name
                 </label>
@@ -137,7 +137,7 @@ export function ContactForm({
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Email Address
               </label>
@@ -154,7 +154,7 @@ export function ContactForm({
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Phone Number
               </label>
@@ -172,7 +172,7 @@ export function ContactForm({
             <div>
               <label
                 htmlFor="message"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Message
               </label>

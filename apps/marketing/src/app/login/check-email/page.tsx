@@ -30,7 +30,7 @@ export default function CheckEmailPage() {
           </div>
 
           <Card variant="bordered">
-            <p className="text-sm text-text-default">
+            <p className="text-body-sm text-text-default">
               Didn&rsquo;t get it? Check your spam folder, or{" "}
               <Link href="/login" className="text-brand-default underline">
                 request a new link

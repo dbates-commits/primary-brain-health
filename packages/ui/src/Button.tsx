@@ -38,13 +38,13 @@ export function Button({
   // `md` is the only size the design system defines — Figma's Button (609:785)
   // has a single size at 24px horizontal / 16px vertical padding.
   // `leading-[normal]` matches Figma's automatic line height, which comes from
-  // the font's own metrics (~19px for Inter at 16px). Tailwind's `text-base`
+  // the font's own metrics (~19px for Inter at 16px). Tailwind's `text-body`
   // would impose 24px instead, making the button 56px tall against the designed
   // 51px — so padding alone does not reconcile it. `sm` and `lg` have no
   // counterpart in the design and are left as-is.
   const sizeStyles = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-4 text-base leading-[normal]",
+    sm: "px-4 py-2 text-body-sm",
+    md: "px-6 py-4 text-body leading-[normal]",
     lg: "px-8 py-4 text-lg",
   };
 

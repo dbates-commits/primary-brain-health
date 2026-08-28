@@ -167,7 +167,7 @@ export function DeleteAccountModal({
 
         <p
           id={bodyId}
-          className="mt-8 font-body text-xl leading-[1.4] text-text-secondary"
+          className="mt-8 font-body text-body-lg leading-[1.4] text-text-secondary"
         >
           You are sending a request to delete your account and data from our
           system. Are you sure you want to delete the account linked to{" "}
@@ -191,13 +191,13 @@ export function DeleteAccountModal({
                   setConfirmed(e.target.checked);
                 }}
               />
-              <span className="font-body text-xl leading-[1.4] text-text-default">
+              <span className="font-body text-body-lg leading-[1.4] text-text-default">
                 I understand that I won&rsquo;t be able to recover my account.
               </span>
             </label>
 
             {state.status === "error" ? (
-              <p role="alert" className="mt-4 animate-error-in text-sm text-error">
+              <p role="alert" className="mt-4 animate-error-in text-body-sm text-error">
                 {state.message}
               </p>
             ) : null}
