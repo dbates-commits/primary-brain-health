@@ -31,6 +31,14 @@ export const users = pgTable("users", {
   // a hint, or someone could show themselves the $449 flow and pay the $149
   // price. See ASSESSMENT_PACKAGES in @pbh/booking.
   selectedPackageKey: text("selected_package_key"),
+  // The account's durable Stripe Customer, created the first time they reach
+  // checkout. Checkout could run as a guest (`customer_email` prefills the form
+  // without creating anything), but the Customer Portal has no other handle: a
+  // portal session takes a `cus_…` and nothing else. It is also what makes a
+  // later plan upgrade a second charge on the same customer rather than a second
+  // stranger with the same email. Nullable: every account created before the
+  // portal existed has none, and one is minted on demand.
+  stripeCustomerId: text("stripe_customer_id").unique(),
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.
   dateOfBirth: date("date_of_birth", { mode: "string" }),
   zip: text(),
