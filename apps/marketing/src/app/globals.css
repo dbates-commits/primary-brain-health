@@ -135,8 +135,8 @@
 
 /* "Brain Health" — no glow, color fades in after headline appears */
 @keyframes brain-health-in {
-  from { color: var(--color-on-surface); }
-  to   { color: var(--color-secondary); }
+  from { color: var(--color-ink-strong); }
+  to   { color: var(--color-aqua-default); }
 }
 
 .animate-brain-health-in {
@@ -201,12 +201,12 @@
 }
 
 body {
-  background: var(--color-surface);
-  color: var(--color-on-surface);
+  background: var(--color-background-default);
+  color: var(--color-ink-strong);
   font-family: var(--font-body);
 }
 
 ::selection {
-  background: var(--color-secondary-container);
+  background: var(--color-aqua-container);
   color: var(--color-on-secondary-container);
 }

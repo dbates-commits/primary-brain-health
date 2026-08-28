@@ -25,8 +25,8 @@ export const emailColors = {
   backgroundDefault: "#ffffff",
   /** @token --color-background-warm — page ground behind the card */
   backgroundWarm: "#f5f3ee",
-  /** @token --color-surface-container — a shade the design does not name */
-  surfaceContainer: "#f0eee9",
+  /** @token --color-background-warm-strong — the email panel ground */
+  backgroundWarmStrong: "#f0eee9",
   /** @token --color-ink-strong — primary text */
   inkStrong: "#1b1c19",
   /** @token --color-text-default — secondary text */

@@ -101,7 +101,7 @@ PaymentReceiptEmail.PreviewProps = {
 export default PaymentReceiptEmail;
 
 const receiptStyle: React.CSSProperties = {
-  backgroundColor: emailColors.surfaceContainer,
+  backgroundColor: emailColors.backgroundWarmStrong,
   borderRadius: "12px",
   padding: "8px 20px",
   margin: "0 0 20px",

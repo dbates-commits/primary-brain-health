@@ -26,7 +26,7 @@ const LOGO_VIEWBOX = "0 0 1291 1291";
 // Sourced from the design system (--color-primary-fixed). Slightly
 // deeper than the prior off-white (#F2F8FA) so the logo reads against
 // the warm surface bg without losing its watercolor softness.
-const LOGO_FILL = "var(--color-primary-fixed)";
+const LOGO_FILL = "var(--color-brand-pale)";
 const BRUSH_STROKE_WIDTH = 170;
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t);

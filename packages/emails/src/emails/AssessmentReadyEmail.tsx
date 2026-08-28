@@ -64,7 +64,7 @@ AssessmentReadyEmail.PreviewProps = {
 export default AssessmentReadyEmail;
 
 const listStyle: React.CSSProperties = {
-  backgroundColor: emailColors.surfaceContainer,
+  backgroundColor: emailColors.backgroundWarmStrong,
   borderRadius: "12px",
   padding: "12px 20px",
   margin: "0 0 20px",

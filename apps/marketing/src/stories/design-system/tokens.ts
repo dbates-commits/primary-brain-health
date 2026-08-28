@@ -112,6 +112,7 @@ export const CODE_ONLY_COLORS: Swatch[] = [
   { className: "bg-mint-subtle", figma: null, rgb: rgb("#e2efef") },
   { className: "bg-accent-green-strong", figma: null, rgb: rgb("#4dc78c") },
   { className: "bg-accent-green-container", figma: null, rgb: rgb("#e2f6e9") },
+  { className: "bg-background-warm-strong", figma: null, rgb: rgb("#f0eee9") },
   { className: "bg-toast-surface", figma: null, rgb: rgb("#1f262e") },
   { className: "bg-border-inverse", figma: null, rgb: rgb("#ffffff") },
 ];

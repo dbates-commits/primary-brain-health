@@ -50,65 +50,24 @@
 
 :root {
   /* Primary palette — Dark Teal per identity guide */
-  --color-primary: #006e8a;
-  --color-primary-container: #004d61;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #a3d4e4;
-  --color-primary-fixed: #d1eaf2;
-  --color-primary-fixed-dim: #8ec7da;
   /* Card surface sitting on `primary` in the booking/CTA section (Figma
      1088:4452). Deliberately lighter and less saturated than
      `primary-container`, which reads almost flat against `primary` at card
      size. */
-  --color-primary-container-high: #224b60;
   /* Pale green used to emphasise text on `primary` — the "HSA/FSA
      reimbursement" phrase in the booking section. Not part of the aqua
      secondary ramp; it is a highlight, not an accent surface. */
-  --color-on-primary-highlight: #deffc8;
-
-  /* Secondary palette — Aqua accent per identity guide */
-  --color-secondary: #009ea1;
-  --color-secondary-container: #b3e8e9;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #007577;
-  --color-secondary-fixed: #b3e8e9;
-
-  /* Surface hierarchy */
-  --color-surface: #ffffff;
-  --color-surface-container: #f0eee9;
-  --color-surface-container-low: #f5f3ee;
-  --color-surface-container-high: #eae8e3;
-  --color-surface-container-highest: #e4e2dd;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-dim: #dbdad5;
-  --color-surface-variant: #e4e2dd;
-
-  /* On-surface */
-  --color-on-surface: #1b1c19;
-  --color-on-surface-variant: #44474d;
 
   /* Neutral grey ramp — cool/neutral greys from the Figma form designs
      (terms panels, form inputs). Intentionally cooler than the warm
      `surface` hierarchy above; use where a surface must match the
      design's neutral greys rather than the brand's warm off-whites. */
-  --color-neutral-50: #f6f6f6;
-  --color-neutral-100: #f3f4f6;
-  --color-neutral-200: #dfdfdf;
-  --color-neutral-300: #d1d5db;
   /* Figma `border/default` — the focus outline on a form field (1629:69). */
-  --color-neutral-350: #d8d8d8;
-  --color-neutral-400: #9ca3af;
   /* Figma `text/tertiary` — the disabled field label in Text Field (1629:69). */
-  --color-neutral-500: #888884;
-  --color-neutral-600: #4b5563;
-  /* Figma `text/label` — the field label in Text Field (1629:69). */
-  --color-neutral-700: #374151;
-  --color-neutral-900: #111827;
 
   /* Value colour of a filled form field — Figma `text/warm-dark`. Warmer and
      darker than `on-surface`; the design uses it for text the user has typed,
      leaving `on-surface-variant` for the resting/placeholder state. */
-  --color-on-surface-warm: #231815;
 
   /* Figma `accent/pink`, used as the error outline on a form field. Distinct
      from `error` (#ba1a1a), which the design reserves for message text. */
@@ -130,14 +89,6 @@
      over a pale ground the design leaves as a raw hex. `-container` names that
      ground the way `error` / `error-container` already do. Not a general
      success colour — nothing else uses either value yet. */
-
-  /* Inverse */
-  --color-inverse-surface: #30312e;
-  --color-inverse-on-surface: #f2f1ec;
-  --color-inverse-primary: #8ec7da;
-
-  /* Surface tint */
-  --color-surface-tint: #006e8a;
 
   /* ===========================================================
      FIGMA PRIMITIVES — collection `Primitives`
@@ -352,6 +303,11 @@
   /* was `neutral-200` — a grey with no counterpart anywhere in Figma's
      ramp (the nearest, colors/neutral/300, is #d9d9d9). */
   --color-grey-warm-200: #dfdfdf;
+  /* was `surface-container` — the panel ground inside the transactional
+     emails, one step warmer/darker than `background-warm`. Figma names no
+     equivalent; the emails are the only consumer. */
+  --color-background-warm-strong: #f0eee9;
+
   /* was `on-surface` — the darkest ink, used as body text on light grounds
      and as the ground of the dark Button. Figma's darkest *named* text is
      `text/heading` (pure black); this is `colors/neutral/850`, which the
@@ -382,6 +338,23 @@
   --shadow-toast: 0 4px 16px rgb(27 28 25 / 0.2);
 }
 
+/* Disable Tailwind's stock colour palette.
+   Without this the theme is purely additive: `bg-indigo-600`, `text-gray-600`
+   and `bg-neutral-800` all still resolve, silently, to colours with nothing to
+   do with the brand — which is exactly how five starter blocks shipped an
+   indigo palette on a teal site. Reaching for one now fails to compile a
+   utility, loudly, at the call site.
+
+   Kept out of `@theme inline` on purpose: `initial` must be a real reset, not
+   a value passed through inline. `white` and `black` are re-declared because
+   Figma defines both as primitives with these exact values, so they remain
+   part of the design system rather than Tailwind leftovers. */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+
 @theme inline {
   /* === FONT TOGGLE ===
      Active: Larken for headlines, Inter for everything else (body,
@@ -395,54 +368,15 @@
 
   /* ORIGINAL (revert) */
   /* --font-headline: var(--font-gilda-display), Georgia, serif; */
-  /* --font-body: "Interstate", system-ui, sans-serif; */
 
-  --color-primary: var(--color-primary);
-  --color-primary-container: var(--color-primary-container);
-  --color-on-primary: var(--color-on-primary);
-  --color-on-primary-container: var(--color-on-primary-container);
-  --color-primary-fixed: var(--color-primary-fixed);
-  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
-  --color-primary-container-high: var(--color-primary-container-high);
-  --color-on-primary-highlight: var(--color-on-primary-highlight);
-  --color-secondary: var(--color-secondary);
-  --color-secondary-container: var(--color-secondary-container);
-  --color-on-secondary: var(--color-on-secondary);
-  --color-on-secondary-container: var(--color-on-secondary-container);
-  --color-secondary-fixed: var(--color-secondary-fixed);
-  --color-surface: var(--color-surface);
-  --color-surface-container: var(--color-surface-container);
-  --color-surface-container-low: var(--color-surface-container-low);
-  --color-surface-container-high: var(--color-surface-container-high);
-  --color-surface-container-highest: var(--color-surface-container-highest);
-  --color-surface-container-lowest: var(--color-surface-container-lowest);
-  --color-surface-dim: var(--color-surface-dim);
-  --color-surface-variant: var(--color-surface-variant);
-  --color-on-surface: var(--color-on-surface);
-  --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);
   --color-outline-variant: var(--color-outline-variant);
-  --color-neutral-50: var(--color-neutral-50);
-  --color-neutral-100: var(--color-neutral-100);
-  --color-neutral-200: var(--color-neutral-200);
-  --color-neutral-300: var(--color-neutral-300);
-  --color-neutral-350: var(--color-neutral-350);
-  --color-neutral-400: var(--color-neutral-400);
-  --color-neutral-500: var(--color-neutral-500);
-  --color-neutral-600: var(--color-neutral-600);
-  --color-neutral-700: var(--color-neutral-700);
-  --color-neutral-900: var(--color-neutral-900);
-  --color-on-surface-warm: var(--color-on-surface-warm);
   --color-accent-pink: var(--color-accent-pink);
   --color-danger: var(--color-danger);
   --color-on-danger: var(--color-on-danger);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);
-  --color-inverse-surface: var(--color-inverse-surface);
-  --color-inverse-on-surface: var(--color-inverse-on-surface);
-  --color-inverse-primary: var(--color-inverse-primary);
-  --color-surface-tint: var(--color-surface-tint);
 
   /* ===========================================================
      FIGMA-NAMED MIRRORS. Every token above must appear here or
@@ -562,6 +496,7 @@
   --text-caption--line-height: var(--text-caption--line-height);
 
   /* --- No Figma variable yet --- */
+  --color-background-warm-strong: var(--color-background-warm-strong);
   --color-ink-strong: var(--color-ink-strong);
   --color-brand-deep: var(--color-brand-deep);
   --color-brand-wash: var(--color-brand-wash);
