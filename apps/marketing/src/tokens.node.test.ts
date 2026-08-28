@@ -33,6 +33,8 @@ interface Theme {
   root: Map<string, string>;
   /** name → the raw declaration value, so a typo'd `var()` target is visible. */
   mirror: Map<string, string>;
+  /** Names declared twice in the same block, in either block. */
+  duplicates: string[];
 }
 
 /**
@@ -69,23 +71,48 @@ function parseTheme(css: string): Theme {
     for (const line of stripped.split("\n")) {
       const decl = /^\s*(--[a-z0-9-]+)\s*:\s*(.+?);/i.exec(line);
       if (decl) {
+        // Last-wins, matching CSS. `duplicates` below is what notices.
         found.set(decl[1], decl[2].trim());
       }
     }
     return found;
   };
 
+  const rootBody = blockBody(/:root\s*\{/);
+  const mirrorBody = blockBody(/@theme\s+inline\s*\{/);
   return {
-    root: declarations(blockBody(/:root\s*\{/)),
-    mirror: declarations(blockBody(/@theme\s+inline\s*\{/)),
+    root: declarations(rootBody),
+    mirror: declarations(mirrorBody),
+    duplicates: [...duplicated(rootBody), ...duplicated(mirrorBody)],
   };
+}
+
+/**
+ * Names declared more than once in a block. CSS takes the last, so a duplicate
+ * is not an error — but it means two places claim to own the token and only one
+ * of them is read, which is how a value silently stops tracking its comment.
+ */
+function duplicated(body: string): string[] {
+  const stripped = body.replace(/\/\*[\s\S]*?\*\//g, "");
+  const counts = new Map<string, number>();
+  for (const line of stripped.split("\n")) {
+    const decl = /^\s*(--[a-z0-9-]+)\s*:/i.exec(line);
+    if (decl) {
+      counts.set(decl[1], (counts.get(decl[1]) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()].filter(([, n]) => n > 1).map(([name]) => name);
 }
 
 const isMirrored = (name: string) =>
   MIRRORED_PREFIXES.some((prefix) => name.startsWith(prefix));
 
 describe("theme.css @theme inline mirror", () => {
-  const { root, mirror } = parseTheme(readFileSync(THEME_CSS, "utf8"));
+  const { root, mirror, duplicates } = parseTheme(readFileSync(THEME_CSS, "utf8"));
+
+  it("declares each token exactly once per block", () => {
+    expect(duplicates).toEqual([]);
+  });
 
   it("declares tokens to mirror at all", () => {
     // Guards the parser itself: a refactor that renames the blocks would

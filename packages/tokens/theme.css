@@ -83,52 +83,9 @@
   --color-surface-dim: #dbdad5;
   --color-surface-variant: #e4e2dd;
 
-  /* Figma `background/brand-subtle` — the ground the signed-in screens sit on
-     (Account Settings, 2092:13081). Not part of the warm `surface` hierarchy
-     above: it is the brand's pale blue, and the page, the footer and the
-     document root all share it so the header and footer blend into the page
-     rather than banding against it. */
-  --color-background-brand-subtle: #eff6f9;
-
-  /* Figma `border/subtle` — the hairline around each card on the account page
-     (2092:13108, 2092:13144) and the rules inside them. One step off
-     `neutral-350` (#d8d8d8), which is the *different* Figma variable
-     `border/default`; kept apart so the two can move independently. */
-  --color-border-subtle: #d9d9d9;
-
-  /* Figma `border/strong` — the hairline on the Cancel button in the Delete
-     Account modal (2060:7053), the one place the design outlines a button in
-     grey rather than in its own colour. Shares a hex with `neutral-500`, which
-     is the *different* Figma variable `text/tertiary`; kept apart for the same
-     reason `border-subtle` and `neutral-350` are, so nudging a border can never
-     silently repaint a disabled field label. */
-  --color-border-strong: #888884;
-
-  /* Figma `text/secondary` — the sub-copy under an account-card heading
-     (2092:13144), and the label of a field that is permanently locked rather
-     than merely busy. Cooler and lighter than `on-surface-variant` (#44474d),
-     which stays the colour of body text. */
-  --color-text-secondary: #6f706e;
-
-  /* Figma `brand/muted` — a pale tint of `primary`, drawn on the Save button
-     while nothing has been edited (2092:13168). A state, not a role: it says
-     "this button has nothing to do yet", so it lives at the one call site that
-     means that rather than becoming a `Button` colour anyone can reach for. */
-  --color-brand-muted: #afd2e3;
-
-  /* Figma's toast ground (2092:13191) — a near-black with a blue cast, darker
-     and cooler than `inverse-surface` (#30312e), which is the theme's own
-     inverted ground. Bound to no Figma variable; the toast is drawn in raw hex
-     there, so this is the name we give it. */
-  --color-toast-surface: #1f262e;
-
   /* On-surface */
   --color-on-surface: #1b1c19;
   --color-on-surface-variant: #44474d;
-
-  /* Outline */
-  --color-outline: #75777e;
-  --color-outline-variant: #c5c6ce;
 
   /* Neutral grey ramp — cool/neutral greys from the Figma form designs
      (terms panels, form inputs). Intentionally cooler than the warm
@@ -175,13 +132,6 @@
      over a pale ground the design leaves as a raw hex. `-container` names that
      ground the way `error` / `error-container` already do. Not a general
      success colour — nothing else uses either value yet. */
-  --color-accent-green: #85c559;
-  --color-accent-green-container: #e2f6e9;
-
-  /* Error */
-  --color-error: #ba1a1a;
-  --color-on-error: #ffffff;
-  --color-error-container: #ffdad6;
 
   /* Inverse */
   --color-inverse-surface: #30312e;
@@ -249,11 +199,15 @@
   --color-background-subtle: var(--color-grey-50);
   --color-background-warm: var(--color-warm-50);
   --color-background-brand: var(--color-brand-700);
+  /* The ground the signed-in screens sit on (Account Settings, 2092:13081).
+     Page, header and footer all share it so they blend rather than band. */
   --color-background-brand-subtle: var(--color-brand-50);
   --color-background-teal-subtle: var(--color-aqua-50);
 
   --color-text-default: var(--color-grey-750);
   --color-text-heading: #000000;
+  /* Sub-copy under an account-card heading (2092:13144), and the label of a
+     field that is permanently locked rather than merely busy. */
   --color-text-secondary: var(--color-grey-550);
   --color-text-tertiary: var(--color-grey-500);
   --color-text-label: var(--color-grey-800);
@@ -265,13 +219,20 @@
   --color-text-inverse-secondary: var(--color-brand-200);
 
   --color-border-default: var(--color-grey-350);
+  /* The hairline around each account card (2092:13108, 2092:13144). One step
+     off `border-default`; Figma keeps them apart, so we do too. */
   --color-border-subtle: var(--color-grey-300);
+  /* The outline on the Cancel button in the Delete Account modal (2060:7053),
+     the one place the design outlines a button in grey. Shares a hex with
+     `text-tertiary` and is deliberately a separate name. */
   --color-border-strong: var(--color-grey-500);
   --color-border-brand: var(--color-brand-700);
 
   --color-brand-default: var(--color-brand-700);
   --color-brand-hover: var(--color-brand-600);
   --color-brand-active: var(--color-brand-800);
+  /* Drawn on the Save button while nothing has been edited (2092:13168). A
+     state, not a role — it says "this button has nothing to do yet". */
   --color-brand-muted: var(--color-brand-200);
   --color-brand-subtle: var(--color-brand-50);
   --color-brand-on-brand: #ffffff;
@@ -362,12 +323,43 @@
   /* FIG-02 — pale ground under the account page's `Active` plan badge.
      `-container` names it the way `error`/`error-container` already do. */
   --color-accent-green-container: #e2f6e9;
-  /* FIG-02 — the toast ground. Near-black with a blue cast, cooler than
-     anything in the neutral ramp. */
+  /* FIG-02 — the toast ground (2092:13191). Near-black with a blue cast,
+     cooler than anything in the neutral ramp, and drawn as a raw hex in
+     Figma rather than bound to a variable. */
   --color-toast-surface: #1f262e;
   /* FIG-02 — white as a border/ring on a dark ground. Figma has
      `text/inverse` but no `border/inverse`. */
   --color-border-inverse: #ffffff;
+  /* FIG-04 — retained from the MD3 set because the code needs them and
+     Figma names no equivalent. Renamed into the Figma style so the whole
+     file reads one way; the old MD3 names are what they were called. */
+  /* was `primary-container` — the deep teal behind the intake form. */
+  --color-brand-deep: #004d61;
+  /* was `on-primary-container` — pale teal text/rule on that deep ground. */
+  --color-brand-wash: #a3d4e4;
+  /* was `primary-fixed` — pale teal fill, read as a raw var() by
+     ScrollFillLogo. */
+  --color-brand-pale: #d1eaf2;
+  /* was `primary-fixed-dim` — the focus ring on a field over a pale ground. */
+  --color-focus-ring: #8ec7da;
+  /* was `secondary-container` / `secondary-fixed` — the aqua card on the
+     thank-you screens. */
+  --color-aqua-container: #b3e8e9;
+  /* was `on-secondary-container` — text on that aqua card. */
+  --color-on-aqua-container: #007577;
+  /* was `outline` / `outline-variant` — hairlines with no Figma border
+     variable at their value; `border/*` covers the rest. */
+  --color-outline: #75777e;
+  --color-outline-variant: #c5c6ce;
+  /* was `neutral-200` — a grey with no counterpart anywhere in Figma's
+     ramp (the nearest, colors/neutral/300, is #d9d9d9). */
+  --color-grey-warm-200: #dfdfdf;
+  /* was `error` — MD3's red, which the design reserves for message text.
+     Distinct from `accent-pink` (#d60012), the destructive-action red. */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+
   /* FIG-03 — elevation. Figma has no shadow variables at all, so these
      are read off the rendered design. The tints were the RETIRED navy
      (#041632) and forest green (#446558); they are re-tinted onto the
@@ -414,12 +406,6 @@
   --color-surface-container-lowest: var(--color-surface-container-lowest);
   --color-surface-dim: var(--color-surface-dim);
   --color-surface-variant: var(--color-surface-variant);
-  --color-background-brand-subtle: var(--color-background-brand-subtle);
-  --color-border-subtle: var(--color-border-subtle);
-  --color-border-strong: var(--color-border-strong);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-brand-muted: var(--color-brand-muted);
-  --color-toast-surface: var(--color-toast-surface);
   --color-on-surface: var(--color-on-surface);
   --color-on-surface-variant: var(--color-on-surface-variant);
   --color-outline: var(--color-outline);
@@ -438,8 +424,6 @@
   --color-accent-pink: var(--color-accent-pink);
   --color-danger: var(--color-danger);
   --color-on-danger: var(--color-on-danger);
-  --color-accent-green: var(--color-accent-green);
-  --color-accent-green-container: var(--color-accent-green-container);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);
@@ -566,6 +550,13 @@
   --text-caption--line-height: var(--text-caption--line-height);
 
   /* --- No Figma variable yet --- */
+  --color-brand-deep: var(--color-brand-deep);
+  --color-brand-wash: var(--color-brand-wash);
+  --color-brand-pale: var(--color-brand-pale);
+  --color-focus-ring: var(--color-focus-ring);
+  --color-aqua-container: var(--color-aqua-container);
+  --color-on-aqua-container: var(--color-on-aqua-container);
+  --color-grey-warm-200: var(--color-grey-warm-200);
   --color-mint-subtle: var(--color-mint-subtle);
   --color-accent-green-strong: var(--color-accent-green-strong);
   --color-accent-green-container: var(--color-accent-green-container);
