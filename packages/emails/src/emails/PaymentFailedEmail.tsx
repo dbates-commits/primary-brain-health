@@ -113,7 +113,7 @@ const receiptLabelStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "13px",
   lineHeight: "20px",
-  color: emailColors.onSurfaceVariant,
+  color: emailColors.textDefault,
 };
 
 const receiptValueStyle: React.CSSProperties = {
@@ -122,16 +122,17 @@ const receiptValueStyle: React.CSSProperties = {
   fontSize: "13px",
   fontWeight: 600,
   lineHeight: "20px",
-  color: emailColors.onSurface,
+  color: emailColors.inkStrong,
 };
 
 /**
- * Same row treatment as `receiptValueStyle`, in the error red — the design
- * (Figma 1396:2061) calls out the failed status as the one coloured value in
- * the panel. Uses the project's `--color-error` rather than the design's raw
- * #d60012 so it tracks the token set with the rest of the emails.
+ * Same row treatment as `receiptValueStyle`, in red — the design (Figma
+ * 1396:2061) calls out the failed status as the one coloured value in the
+ * panel. That red is #d60012, which is now a token (`--color-danger`, Figma's
+ * `accent/pink`); it used to fall back to `--color-error` (#ba1a1a) because
+ * the design's value had no name.
  */
 const receiptFailedStyle: React.CSSProperties = {
   ...receiptValueStyle,
-  color: emailColors.error,
+  color: emailColors.danger,
 };

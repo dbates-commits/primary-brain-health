@@ -112,7 +112,7 @@ const receiptLabelStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "13px",
   lineHeight: "20px",
-  color: emailColors.onSurfaceVariant,
+  color: emailColors.textDefault,
 };
 
 const receiptValueStyle: React.CSSProperties = {
@@ -121,5 +121,5 @@ const receiptValueStyle: React.CSSProperties = {
   fontSize: "13px",
   fontWeight: 600,
   lineHeight: "20px",
-  color: emailColors.onSurface,
+  color: emailColors.inkStrong,
 };

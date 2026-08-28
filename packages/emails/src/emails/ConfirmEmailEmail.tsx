@@ -49,7 +49,7 @@ export function ConfirmEmailEmail({ confirmUrl }: ConfirmEmailEmailProps) {
 }
 
 const linkStyle: React.CSSProperties = {
-  color: emailColors.primary,
+  color: emailColors.brandDefault,
   textDecoration: "underline",
 };
 

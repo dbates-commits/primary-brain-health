@@ -40,13 +40,13 @@ const textStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "12px",
   lineHeight: "18px",
-  color: emailColors.onSurfaceVariant,
+  color: emailColors.textDefault,
   // Centred to match the design (Figma 1088:2514), which stacks the footer lines
   // centre-aligned under the body rather than ranged left.
   textAlign: "center",
 };
 
 const linkStyle: React.CSSProperties = {
-  color: emailColors.primary,
+  color: emailColors.brandDefault,
   textDecoration: "underline",
 };

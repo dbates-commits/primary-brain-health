@@ -48,13 +48,13 @@ export function EmailLayout({
 }
 
 const bodyStyle: React.CSSProperties = {
-  backgroundColor: emailColors.surfaceContainerLow,
+  backgroundColor: emailColors.backgroundWarm,
   margin: 0,
   padding: "32px 16px",
 };
 
 const cardStyle: React.CSSProperties = {
-  backgroundColor: emailColors.surface,
+  backgroundColor: emailColors.backgroundDefault,
   borderRadius: "16px",
   maxWidth: "560px",
   margin: "0 auto",
