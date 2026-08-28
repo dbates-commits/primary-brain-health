@@ -23,7 +23,7 @@ export function AccountCard({ children, className }: AccountCardProps) {
   return (
     <section
       className={cn(
-        "rounded-xl border border-border-subtle bg-background-default p-6 md:p-8",
+        "rounded-form-card border border-border-subtle bg-background-default p-6 md:p-8",
         className
       )}
     >

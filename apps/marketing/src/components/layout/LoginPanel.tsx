@@ -56,7 +56,7 @@ export function LoginPanel({
     <div
       {...rest}
       className={cn(
-        "flex flex-col gap-5 rounded-xl bg-background-default p-8",
+        "flex flex-col gap-5 rounded-form-card bg-background-default p-8",
         "shadow-card",
         className,
       )}

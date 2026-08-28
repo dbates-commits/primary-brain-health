@@ -151,7 +151,7 @@ export function DeleteAccountModal({
           e.stopPropagation();
         }}
         className={cn(
-          "w-full max-w-[620px] rounded-xl bg-background-default p-8",
+          "w-full max-w-[620px] rounded-modal bg-background-default p-8",
           "shadow-card",
           "transition duration-200 ease-out motion-reduce:transition-none",
           shown ? "scale-100 opacity-100" : "scale-95 opacity-0",

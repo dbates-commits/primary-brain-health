@@ -16,9 +16,9 @@ export function Card({
   hover = false,
 }: CardProps) {
   const variantStyles = {
-    default: "bg-background-default rounded-xl",
-    elevated: "bg-background-default rounded-xl shadow-card",
-    bordered: "bg-background-default rounded-xl border border-border-subtle",
+    default: "bg-background-default rounded-form-card",
+    elevated: "bg-background-default rounded-form-card shadow-card",
+    bordered: "bg-background-default rounded-form-card border border-border-subtle",
     ghost: "bg-transparent",
   };
 
