@@ -1,9 +1,7 @@
 import { defineConfig } from "tinacms";
 import { pageCollection } from "./collections/page";
 import { postCollection } from "./collections/post";
-import { projectCollection } from "./collections/project";
 import { authorCollection } from "./collections/author";
-import { testimonialCollection } from "./collections/testimonial";
 import { globalCtaCollection } from "./collections/globalCta";
 import { settingsCollection } from "./collections/settings";
 import { faqCollection } from "./collections/faq";
@@ -47,9 +45,7 @@ export default defineConfig({
       pageCollection,
       modalsCollection,
       postCollection,
-      projectCollection,
       authorCollection,
-      testimonialCollection,
       globalCtaCollection,
       settingsCollection,
       faqCollection,

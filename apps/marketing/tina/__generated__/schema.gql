@@ -60,12 +60,8 @@ type Query {
   modalConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ModalFilter): ModalConnection!
   post(relativePath: String): Post!
   postConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: PostFilter): PostConnection!
-  project(relativePath: String): Project!
-  projectConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: ProjectFilter): ProjectConnection!
   author(relativePath: String): Author!
   authorConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: AuthorFilter): AuthorConnection!
-  testimonial(relativePath: String): Testimonial!
-  testimonialConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: TestimonialFilter): TestimonialConnection!
   globalCta(relativePath: String): GlobalCta!
   globalCtaConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: GlobalCtaFilter): GlobalCtaConnection!
   settings(relativePath: String): Settings!
@@ -78,9 +74,7 @@ input DocumentFilter {
   page: PageFilter
   modal: ModalFilter
   post: PostFilter
-  project: ProjectFilter
   author: AuthorFilter
-  testimonial: TestimonialFilter
   globalCta: GlobalCtaFilter
   settings: SettingsFilter
   faq: FaqFilter
@@ -109,7 +103,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = Page | ModalStep | ModalConsentStep | Post | Project | Author | Testimonial | GlobalCta | Settings | Faq | Folder
+union DocumentNode = Page | ModalStep | ModalConsentStep | Post | Author | GlobalCta | Settings | Faq | Folder
 
 type PageBlocksHero {
   theme: String
@@ -120,49 +114,6 @@ type PageBlocksHero {
   primaryButtonText: String
   primaryButtonTextMobile: String
   primaryButtonLink: String
-}
-
-union PageBlocksTestimonialsTestimonialRefsTestimonial = Testimonial
-
-type PageBlocksTestimonialsTestimonialRefs {
-  testimonial: PageBlocksTestimonialsTestimonialRefsTestimonial
-}
-
-type PageBlocksTestimonialsItems {
-  quote: String!
-  authorName: String!
-  authorRole: String
-  company: String
-  avatar: String
-  rating: Float
-}
-
-type PageBlocksTestimonials {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  useReferences: Boolean
-  testimonialRefs: [PageBlocksTestimonialsTestimonialRefs]
-  items: [PageBlocksTestimonialsItems]
-}
-
-type PageBlocksGalleryItems {
-  image: String
-  alt: String
-  caption: String
-  video: String
-  aspectRatio: String
-}
-
-type PageBlocksGallery {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  columns: String
-  gap: String
-  items: [PageBlocksGalleryItems]
 }
 
 union PageBlocksFaqItemsFaq = Faq
@@ -182,23 +133,6 @@ type PageBlocksFaq {
   ctaText: String
   ctaButtonText: String
   ctaLink: String
-}
-
-type PageBlocksStatsItems {
-  value: String!
-  label: String!
-  icon: String
-  description: String
-  progress: Float
-}
-
-type PageBlocksStats {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  animate: Boolean
-  items: [PageBlocksStatsItems]
 }
 
 type PageBlocksIntakeForm {
@@ -250,7 +184,7 @@ type PageBlocksContactForm {
   buttonText: String
 }
 
-union PageBlocks = PageBlocksHero | PageBlocksTestimonials | PageBlocksGallery | PageBlocksFaq | PageBlocksStats | PageBlocksIntakeForm | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksContactForm
+union PageBlocks = PageBlocksHero | PageBlocksFaq | PageBlocksIntakeForm | PageBlocksScrollFillLogo | PageBlocksStackSections | PageBlocksBenefitsList | PageBlocksContactForm
 
 type Page implements Node & Document {
   title: String!
@@ -293,17 +227,12 @@ input PageBlocksHeroFilter {
   primaryButtonLink: StringFilter
 }
 
-input BooleanFilter {
-  eq: Boolean
-  exists: Boolean
+input PageBlocksFaqItemsFaqFilter {
+  faq: FaqFilter
 }
 
-input PageBlocksTestimonialsTestimonialRefsTestimonialFilter {
-  testimonial: TestimonialFilter
-}
-
-input PageBlocksTestimonialsTestimonialRefsFilter {
-  testimonial: PageBlocksTestimonialsTestimonialRefsTestimonialFilter
+input PageBlocksFaqItemsFilter {
+  faq: PageBlocksFaqItemsFaqFilter
 }
 
 input NumberFilter {
@@ -316,49 +245,9 @@ input NumberFilter {
   in: [Float]
 }
 
-input PageBlocksTestimonialsItemsFilter {
-  quote: StringFilter
-  authorName: StringFilter
-  authorRole: StringFilter
-  company: StringFilter
-  avatar: ImageFilter
-  rating: NumberFilter
-}
-
-input PageBlocksTestimonialsFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  useReferences: BooleanFilter
-  testimonialRefs: PageBlocksTestimonialsTestimonialRefsFilter
-  items: PageBlocksTestimonialsItemsFilter
-}
-
-input PageBlocksGalleryItemsFilter {
-  image: ImageFilter
-  alt: StringFilter
-  caption: StringFilter
-  video: StringFilter
-  aspectRatio: StringFilter
-}
-
-input PageBlocksGalleryFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  columns: StringFilter
-  gap: StringFilter
-  items: PageBlocksGalleryItemsFilter
-}
-
-input PageBlocksFaqItemsFaqFilter {
-  faq: FaqFilter
-}
-
-input PageBlocksFaqItemsFilter {
-  faq: PageBlocksFaqItemsFaqFilter
+input BooleanFilter {
+  eq: Boolean
+  exists: Boolean
 }
 
 input PageBlocksFaqFilter {
@@ -372,23 +261,6 @@ input PageBlocksFaqFilter {
   ctaText: StringFilter
   ctaButtonText: StringFilter
   ctaLink: StringFilter
-}
-
-input PageBlocksStatsItemsFilter {
-  value: StringFilter
-  label: StringFilter
-  icon: StringFilter
-  description: StringFilter
-  progress: NumberFilter
-}
-
-input PageBlocksStatsFilter {
-  variant: StringFilter
-  theme: StringFilter
-  headline: StringFilter
-  subheadline: StringFilter
-  animate: BooleanFilter
-  items: PageBlocksStatsItemsFilter
 }
 
 input PageBlocksIntakeFormFilter {
@@ -442,10 +314,7 @@ input PageBlocksContactFormFilter {
 
 input PageBlocksFilter {
   hero: PageBlocksHeroFilter
-  testimonials: PageBlocksTestimonialsFilter
-  gallery: PageBlocksGalleryFilter
   faq: PageBlocksFaqFilter
-  stats: PageBlocksStatsFilter
   intakeForm: PageBlocksIntakeFormFilter
   scrollFillLogo: PageBlocksScrollFillLogoFilter
   stackSections: PageBlocksStackSectionsFilter
@@ -619,95 +488,6 @@ type PostConnection implements Connection {
   edges: [PostConnectionEdges]
 }
 
-type ProjectGallery {
-  image: String
-  alt: String
-  caption: String
-}
-
-union ProjectTestimonial = Testimonial
-
-type Project implements Node & Document {
-  title: String!
-  description: String
-  client: String
-  date: String
-  featuredImage: String
-  gallery: [ProjectGallery]
-  category: String
-  techStack: [String]
-  liveUrl: String
-  githubUrl: String
-  featured: Boolean
-  testimonial: ProjectTestimonial
-  body: JSON
-  id: ID!
-  _sys: SystemInfo!
-  _values: JSON!
-}
-
-input ProjectGalleryFilter {
-  image: ImageFilter
-  alt: StringFilter
-  caption: StringFilter
-}
-
-input ProjectTestimonialFilter {
-  testimonial: TestimonialFilter
-}
-
-input ProjectBodyChallengeFilter {
-  title: StringFilter
-  content: RichTextFilter
-}
-
-input ProjectBodySolutionFilter {
-  title: StringFilter
-  content: RichTextFilter
-}
-
-input ProjectBodyResultsStatsFilter {
-  value: StringFilter
-  label: StringFilter
-}
-
-input ProjectBodyResultsFilter {
-  stats: ProjectBodyResultsStatsFilter
-}
-
-input ProjectBodyFilter {
-  challenge: ProjectBodyChallengeFilter
-  solution: ProjectBodySolutionFilter
-  results: ProjectBodyResultsFilter
-}
-
-input ProjectFilter {
-  title: StringFilter
-  description: StringFilter
-  client: StringFilter
-  date: DatetimeFilter
-  featuredImage: ImageFilter
-  gallery: ProjectGalleryFilter
-  category: StringFilter
-  techStack: StringFilter
-  liveUrl: StringFilter
-  githubUrl: StringFilter
-  featured: BooleanFilter
-  testimonial: ProjectTestimonialFilter
-  body: ProjectBodyFilter
-}
-
-type ProjectConnectionEdges {
-  cursor: String!
-  node: Project
-}
-
-type ProjectConnection implements Connection {
-  pageInfo: PageInfo!
-  totalCount: Float!
-  edges: [ProjectConnectionEdges]
-}
-
 type AuthorSocial {
   twitter: String
   linkedin: String
@@ -752,50 +532,6 @@ type AuthorConnection implements Connection {
   pageInfo: PageInfo!
   totalCount: Float!
   edges: [AuthorConnectionEdges]
-}
-
-union TestimonialAuthor = Author
-
-type Testimonial implements Node & Document {
-  quote: String!
-  author: TestimonialAuthor
-  authorName: String
-  authorRole: String
-  authorAvatar: String
-  company: String
-  companyLogo: String
-  rating: Float
-  featured: Boolean
-  id: ID!
-  _sys: SystemInfo!
-  _values: JSON!
-}
-
-input TestimonialAuthorFilter {
-  author: AuthorFilter
-}
-
-input TestimonialFilter {
-  quote: StringFilter
-  author: TestimonialAuthorFilter
-  authorName: StringFilter
-  authorRole: StringFilter
-  authorAvatar: ImageFilter
-  company: StringFilter
-  companyLogo: ImageFilter
-  rating: NumberFilter
-  featured: BooleanFilter
-}
-
-type TestimonialConnectionEdges {
-  cursor: String!
-  node: Testimonial
-}
-
-type TestimonialConnection implements Connection {
-  pageInfo: PageInfo!
-  totalCount: Float!
-  edges: [TestimonialConnectionEdges]
 }
 
 type GlobalCtaPrimaryButton {
@@ -1024,12 +760,8 @@ type Mutation {
   createModal(relativePath: String!, params: ModalMutation!): Modal!
   updatePost(relativePath: String!, params: PostMutation!): Post!
   createPost(relativePath: String!, params: PostMutation!): Post!
-  updateProject(relativePath: String!, params: ProjectMutation!): Project!
-  createProject(relativePath: String!, params: ProjectMutation!): Project!
   updateAuthor(relativePath: String!, params: AuthorMutation!): Author!
   createAuthor(relativePath: String!, params: AuthorMutation!): Author!
-  updateTestimonial(relativePath: String!, params: TestimonialMutation!): Testimonial!
-  createTestimonial(relativePath: String!, params: TestimonialMutation!): Testimonial!
   updateGlobalCta(relativePath: String!, params: GlobalCtaMutation!): GlobalCta!
   createGlobalCta(relativePath: String!, params: GlobalCtaMutation!): GlobalCta!
   updateSettings(relativePath: String!, params: SettingsMutation!): Settings!
@@ -1042,9 +774,7 @@ input DocumentUpdateMutation {
   page: PageMutation
   modal: ModalMutation
   post: PostMutation
-  project: ProjectMutation
   author: AuthorMutation
-  testimonial: TestimonialMutation
   globalCta: GlobalCtaMutation
   settings: SettingsMutation
   faq: FaqMutation
@@ -1055,9 +785,7 @@ input DocumentMutation {
   page: PageMutation
   modal: ModalMutation
   post: PostMutation
-  project: ProjectMutation
   author: AuthorMutation
-  testimonial: TestimonialMutation
   globalCta: GlobalCtaMutation
   settings: SettingsMutation
   faq: FaqMutation
@@ -1072,47 +800,6 @@ input PageBlocksHeroMutation {
   primaryButtonText: String
   primaryButtonTextMobile: String
   primaryButtonLink: String
-}
-
-input PageBlocksTestimonialsTestimonialRefsMutation {
-  testimonial: String
-}
-
-input PageBlocksTestimonialsItemsMutation {
-  quote: String
-  authorName: String
-  authorRole: String
-  company: String
-  avatar: String
-  rating: Float
-}
-
-input PageBlocksTestimonialsMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  useReferences: Boolean
-  testimonialRefs: [PageBlocksTestimonialsTestimonialRefsMutation]
-  items: [PageBlocksTestimonialsItemsMutation]
-}
-
-input PageBlocksGalleryItemsMutation {
-  image: String
-  alt: String
-  caption: String
-  video: String
-  aspectRatio: String
-}
-
-input PageBlocksGalleryMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  columns: String
-  gap: String
-  items: [PageBlocksGalleryItemsMutation]
 }
 
 input PageBlocksFaqItemsMutation {
@@ -1130,23 +817,6 @@ input PageBlocksFaqMutation {
   ctaText: String
   ctaButtonText: String
   ctaLink: String
-}
-
-input PageBlocksStatsItemsMutation {
-  value: String
-  label: String
-  icon: String
-  description: String
-  progress: Float
-}
-
-input PageBlocksStatsMutation {
-  variant: String
-  theme: String
-  headline: String
-  subheadline: String
-  animate: Boolean
-  items: [PageBlocksStatsItemsMutation]
 }
 
 input PageBlocksIntakeFormMutation {
@@ -1200,10 +870,7 @@ input PageBlocksContactFormMutation {
 
 input PageBlocksMutation {
   hero: PageBlocksHeroMutation
-  testimonials: PageBlocksTestimonialsMutation
-  gallery: PageBlocksGalleryMutation
   faq: PageBlocksFaqMutation
-  stats: PageBlocksStatsMutation
   intakeForm: PageBlocksIntakeFormMutation
   scrollFillLogo: PageBlocksScrollFillLogoMutation
   stackSections: PageBlocksStackSectionsMutation
@@ -1254,28 +921,6 @@ input PostMutation {
   relatedPosts: [PostRelatedPostsMutation]
 }
 
-input ProjectGalleryMutation {
-  image: String
-  alt: String
-  caption: String
-}
-
-input ProjectMutation {
-  title: String
-  description: String
-  client: String
-  date: String
-  featuredImage: String
-  gallery: [ProjectGalleryMutation]
-  category: String
-  techStack: [String]
-  liveUrl: String
-  githubUrl: String
-  featured: Boolean
-  testimonial: String
-  body: JSON
-}
-
 input AuthorSocialMutation {
   twitter: String
   linkedin: String
@@ -1290,18 +935,6 @@ input AuthorMutation {
   bio: JSON
   email: String
   social: AuthorSocialMutation
-}
-
-input TestimonialMutation {
-  quote: String
-  author: String
-  authorName: String
-  authorRole: String
-  authorAvatar: String
-  company: String
-  companyLogo: String
-  rating: Float
-  featured: Boolean
 }
 
 input GlobalCtaPrimaryButtonMutation {

@@ -40,26 +40,6 @@ export async function getPosts() {
   }
 }
 
-export async function getProject(relativePath: string) {
-  try {
-    const result = await client.queries.project({ relativePath });
-    return result;
-  } catch (error) {
-    console.error("Error fetching project:", error);
-    return null;
-  }
-}
-
-export async function getProjects() {
-  try {
-    const result = await client.queries.projectConnection();
-    return result;
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    return null;
-  }
-}
-
 export async function getAuthor(relativePath: string) {
   try {
     const result = await client.queries.author({ relativePath });
@@ -80,22 +60,3 @@ export async function getAuthors() {
   }
 }
 
-export async function getTestimonial(relativePath: string) {
-  try {
-    const result = await client.queries.testimonial({ relativePath });
-    return result;
-  } catch (error) {
-    console.error("Error fetching testimonial:", error);
-    return null;
-  }
-}
-
-export async function getTestimonials() {
-  try {
-    const result = await client.queries.testimonialConnection();
-    return result;
-  } catch (error) {
-    console.error("Error fetching testimonials:", error);
-    return null;
-  }
-}

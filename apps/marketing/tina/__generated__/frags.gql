@@ -15,95 +15,6 @@ fragment PageParts on Page {
       primaryButtonTextMobile
       primaryButtonLink
     }
-    ... on PageBlocksTestimonials {
-      variant
-      theme
-      headline
-      subheadline
-      useReferences
-      testimonialRefs {
-        __typename
-        testimonial {
-          ... on Testimonial {
-            __typename
-            quote
-            author {
-              ... on Author {
-                __typename
-                name
-                role
-                avatar
-                bio
-                email
-                social {
-                  __typename
-                  twitter
-                  linkedin
-                  github
-                  website
-                }
-              }
-              ... on Document {
-                _sys {
-                  filename
-                  basename
-                  hasReferences
-                  breadcrumbs
-                  path
-                  relativePath
-                  extension
-                }
-                id
-              }
-            }
-            authorName
-            authorRole
-            authorAvatar
-            company
-            companyLogo
-            rating
-            featured
-          }
-          ... on Document {
-            _sys {
-              filename
-              basename
-              hasReferences
-              breadcrumbs
-              path
-              relativePath
-              extension
-            }
-            id
-          }
-        }
-      }
-      items {
-        __typename
-        quote
-        authorName
-        authorRole
-        company
-        avatar
-        rating
-      }
-    }
-    ... on PageBlocksGallery {
-      variant
-      theme
-      headline
-      subheadline
-      columns
-      gap
-      items {
-        __typename
-        image
-        alt
-        caption
-        video
-        aspectRatio
-      }
-    }
     ... on PageBlocksFaq {
       variant
       theme
@@ -138,21 +49,6 @@ fragment PageParts on Page {
       ctaText
       ctaButtonText
       ctaLink
-    }
-    ... on PageBlocksStats {
-      variant
-      theme
-      headline
-      subheadline
-      animate
-      items {
-        __typename
-        value
-        label
-        icon
-        description
-        progress
-      }
     }
     ... on PageBlocksIntakeForm {
       headline
@@ -343,81 +239,6 @@ fragment PostParts on Post {
   }
 }
 
-fragment ProjectParts on Project {
-  __typename
-  title
-  description
-  client
-  date
-  featuredImage
-  gallery {
-    __typename
-    image
-    alt
-    caption
-  }
-  category
-  techStack
-  liveUrl
-  githubUrl
-  featured
-  testimonial {
-    ... on Testimonial {
-      __typename
-      quote
-      author {
-        ... on Author {
-          __typename
-          name
-          role
-          avatar
-          bio
-          email
-          social {
-            __typename
-            twitter
-            linkedin
-            github
-            website
-          }
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
-      authorName
-      authorRole
-      authorAvatar
-      company
-      companyLogo
-      rating
-      featured
-    }
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-  }
-  body
-}
-
 fragment AuthorParts on Author {
   __typename
   name
@@ -432,47 +253,6 @@ fragment AuthorParts on Author {
     github
     website
   }
-}
-
-fragment TestimonialParts on Testimonial {
-  __typename
-  quote
-  author {
-    ... on Author {
-      __typename
-      name
-      role
-      avatar
-      bio
-      email
-      social {
-        __typename
-        twitter
-        linkedin
-        github
-        website
-      }
-    }
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-  }
-  authorName
-  authorRole
-  authorAvatar
-  company
-  companyLogo
-  rating
-  featured
 }
 
 fragment GlobalCtaParts on GlobalCta {

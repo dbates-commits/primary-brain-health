@@ -70,245 +70,6 @@ var heroBlock = {
   ]
 };
 
-// tina/blocks/testimonials.ts
-var testimonialsBlock = {
-  name: "testimonials",
-  label: "Testimonials Section",
-  ui: {
-    defaultItem: {
-      variant: "carousel",
-      theme: "light",
-      headline: "What Our Customers Say",
-      useReferences: false,
-      items: [
-        {
-          quote: "This product has completely transformed how we work. Highly recommended!",
-          authorName: "Jane Doe",
-          authorRole: "CEO",
-          company: "Acme Inc",
-          rating: 5
-        }
-      ]
-    },
-    itemProps: (item) => ({
-      label: `Testimonials - ${item?.variant || "carousel"}`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "carousel", label: "Carousel" },
-        { value: "grid", label: "Grid" },
-        { value: "single", label: "Single Featured" },
-        { value: "quotes", label: "Quotes Wall" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-        { value: "primary", label: "Primary" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "useReferences",
-      label: "Use Referenced Testimonials",
-      type: "boolean",
-      description: "Pull from the Testimonials collection instead of inline"
-    },
-    {
-      name: "testimonialRefs",
-      label: "Referenced Testimonials",
-      type: "object",
-      list: true,
-      fields: [
-        {
-          name: "testimonial",
-          label: "Testimonial",
-          type: "reference",
-          collections: ["testimonial"]
-        }
-      ]
-    },
-    {
-      name: "items",
-      label: "Inline Testimonials",
-      type: "object",
-      list: true,
-      description: "Add testimonials directly (when not using references)",
-      ui: {
-        itemProps: (item) => ({
-          label: item?.authorName || "Testimonial"
-        })
-      },
-      fields: [
-        {
-          name: "quote",
-          label: "Quote",
-          type: "string",
-          required: true,
-          ui: {
-            component: "textarea"
-          }
-        },
-        {
-          name: "authorName",
-          label: "Author Name",
-          type: "string",
-          required: true
-        },
-        {
-          name: "authorRole",
-          label: "Author Role",
-          type: "string"
-        },
-        {
-          name: "company",
-          label: "Company",
-          type: "string"
-        },
-        {
-          name: "avatar",
-          label: "Avatar",
-          type: "image"
-        },
-        {
-          name: "rating",
-          label: "Rating (1-5)",
-          type: "number"
-        }
-      ]
-    }
-  ]
-};
-
-// tina/blocks/gallery.ts
-var galleryBlock = {
-  name: "gallery",
-  label: "Gallery Section",
-  ui: {
-    defaultItem: {
-      variant: "grid",
-      theme: "light",
-      columns: "3",
-      items: []
-    },
-    itemProps: (item) => ({
-      label: `Gallery - ${item?.variant || "grid"} (${item?.items?.length || 0} items)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "grid", label: "Grid" },
-        { value: "masonry", label: "Masonry" },
-        { value: "carousel", label: "Carousel" },
-        { value: "lightbox", label: "Lightbox Gallery" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "columns",
-      label: "Columns",
-      type: "string",
-      options: ["2", "3", "4", "5"]
-    },
-    {
-      name: "gap",
-      label: "Gap Size",
-      type: "string",
-      options: [
-        { value: "none", label: "None" },
-        { value: "small", label: "Small" },
-        { value: "medium", label: "Medium" },
-        { value: "large", label: "Large" }
-      ]
-    },
-    {
-      name: "items",
-      label: "Gallery Items",
-      type: "object",
-      list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: item?.caption || item?.alt || "Gallery Item"
-        })
-      },
-      fields: [
-        {
-          name: "image",
-          label: "Image",
-          type: "image"
-        },
-        {
-          name: "alt",
-          label: "Alt Text",
-          type: "string"
-        },
-        {
-          name: "caption",
-          label: "Caption",
-          type: "string"
-        },
-        {
-          name: "video",
-          label: "Video URL",
-          type: "string",
-          description: "YouTube/Vimeo URL (overrides image in lightbox)"
-        },
-        {
-          name: "aspectRatio",
-          label: "Aspect Ratio",
-          type: "string",
-          options: [
-            { value: "square", label: "Square (1:1)" },
-            { value: "video", label: "Video (16:9)" },
-            { value: "portrait", label: "Portrait (3:4)" },
-            { value: "landscape", label: "Landscape (4:3)" }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
 // tina/blocks/faq.ts
 var faqBlock = {
   name: "faq",
@@ -396,6 +157,112 @@ var faqBlock = {
       name: "ctaLink",
       label: "CTA Link",
       type: "string"
+    }
+  ]
+};
+
+// tina/blocks/intakeForm.ts
+var intakeFormBlock = {
+  name: "intakeForm",
+  label: "Intake Form",
+  ui: {
+    defaultItem: {
+      headline: "Ready to Take the First Step?",
+      subheadline: "Book your initial brain health consultation.",
+      buttonText: "Book a Consultation"
+    },
+    itemProps: (item) => ({
+      label: `Intake Form - ${item?.headline || "Untitled"}`
+    })
+  },
+  fields: [
+    {
+      name: "headline",
+      label: "Headline",
+      type: "string"
+    },
+    {
+      name: "subheadline",
+      label: "Subheadline",
+      type: "string",
+      ui: {
+        component: "textarea"
+      }
+    },
+    {
+      name: "buttonText",
+      label: "Button Text",
+      type: "string",
+      description: "Submit label on the booking form, e.g. 'Book Your Assessment and Consultation'."
+    },
+    {
+      name: "buttonTextMobile",
+      label: "Button Text (Mobile)",
+      type: "string",
+      description: "Shorter button label shown on small screens (<640px). Falls back to Button Text if empty."
+    },
+    {
+      name: "showIncludes",
+      label: "Show 'Includes:' panel",
+      type: "boolean",
+      description: "Toggle the right-hand panel listing what the assessment includes, and its price. Turn off on general contact pages where the form is for any inquiry \u2014 the form then goes full width. The list and price themselves are code-owned (ASSESSMENT_PACKAGES in @pbh/booking), because they are the promise the charge is made against."
+    }
+  ]
+};
+
+// tina/blocks/scrollFillLogo.ts
+var scrollFillLogoBlock = {
+  name: "scrollFillLogo",
+  label: "Scroll Fill Logo",
+  ui: {
+    defaultItem: {
+      slides: [
+        {
+          label: "Trust the instinct that brought you here",
+          headline: "We help you understand how your brain is performing, reduce your risk of cognitive decline, and take action early through advanced assessment, clinical insight, and ongoing personalized care."
+        },
+        {
+          label: "Why Primary Brain Health?",
+          headline: "Brain health today is reactive, fragmented, and often imprecise. PBH is built for what comes next."
+        }
+      ]
+    },
+    itemProps: (item) => ({
+      label: `Scroll Fill Logo - ${item?.slides?.[0]?.headline?.slice(0, 40) || "Untitled"}`
+    })
+  },
+  fields: [
+    {
+      name: "slides",
+      label: "Slides",
+      type: "object",
+      list: true,
+      description: "Each slide fades in and out as the section is scrolled. Add as many as you want \u2014 they're divided evenly across the scroll.",
+      ui: {
+        itemProps: (item) => ({
+          label: item?.label || item?.headline?.slice(0, 50) || "Slide"
+        }),
+        defaultItem: {
+          label: "",
+          headline: ""
+        }
+      },
+      fields: [
+        {
+          name: "label",
+          label: "Eyebrow Label",
+          type: "string",
+          description: "Rendered uppercase in the design."
+        },
+        {
+          name: "headline",
+          label: "Headline",
+          type: "string",
+          ui: {
+            component: "textarea"
+          }
+        }
+      ]
     }
   ]
 };
@@ -629,220 +496,6 @@ function IconPickerInner({ input }) {
 }
 var IconPicker = wrapFieldsWithMeta(IconPickerInner);
 
-// tina/blocks/stats.ts
-var statsBlock = {
-  name: "stats",
-  label: "Stats Section",
-  ui: {
-    defaultItem: {
-      variant: "counters",
-      theme: "light",
-      items: [
-        { value: "10K+", label: "Active Users" },
-        { value: "99.9%", label: "Uptime" },
-        { value: "50+", label: "Countries" },
-        { value: "24/7", label: "Support" }
-      ]
-    },
-    itemProps: (item) => ({
-      label: `Stats - ${item?.variant || "counters"} (${item?.items?.length || 0} items)`
-    })
-  },
-  fields: [
-    {
-      name: "variant",
-      label: "Layout Style",
-      type: "string",
-      options: [
-        { value: "counters", label: "Counters" },
-        { value: "progress", label: "Progress Bars" },
-        { value: "icons", label: "With Icons" },
-        { value: "cards", label: "Cards" }
-      ]
-    },
-    {
-      name: "theme",
-      label: "Color Theme",
-      type: "string",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-        { value: "primary", label: "Primary" },
-        { value: "gradient", label: "Gradient" }
-      ]
-    },
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string"
-    },
-    {
-      name: "animate",
-      label: "Animate Numbers",
-      type: "boolean",
-      description: "Count up animation on scroll"
-    },
-    {
-      name: "items",
-      label: "Stat Items",
-      type: "object",
-      list: true,
-      ui: {
-        itemProps: (item) => ({
-          label: `${item?.value || ""} - ${item?.label || "Stat"}`
-        })
-      },
-      fields: [
-        {
-          name: "value",
-          label: "Value",
-          type: "string",
-          required: true,
-          description: "e.g., '10K+', '99.9%', '24/7'"
-        },
-        {
-          name: "label",
-          label: "Label",
-          type: "string",
-          required: true
-        },
-        {
-          name: "icon",
-          label: "Icon",
-          type: "string",
-          description: "Pick a Phosphor icon.",
-          ui: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            component: IconPicker
-          }
-        },
-        {
-          name: "description",
-          label: "Description",
-          type: "string"
-        },
-        {
-          name: "progress",
-          label: "Progress Value (0-100)",
-          type: "number",
-          description: "For progress bar variant"
-        }
-      ]
-    }
-  ]
-};
-
-// tina/blocks/intakeForm.ts
-var intakeFormBlock = {
-  name: "intakeForm",
-  label: "Intake Form",
-  ui: {
-    defaultItem: {
-      headline: "Ready to Take the First Step?",
-      subheadline: "Book your initial brain health consultation.",
-      buttonText: "Book a Consultation"
-    },
-    itemProps: (item) => ({
-      label: `Intake Form - ${item?.headline || "Untitled"}`
-    })
-  },
-  fields: [
-    {
-      name: "headline",
-      label: "Headline",
-      type: "string"
-    },
-    {
-      name: "subheadline",
-      label: "Subheadline",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
-    },
-    {
-      name: "buttonText",
-      label: "Button Text",
-      type: "string",
-      description: "Submit label on the booking form, e.g. 'Book Your Assessment and Consultation'."
-    },
-    {
-      name: "buttonTextMobile",
-      label: "Button Text (Mobile)",
-      type: "string",
-      description: "Shorter button label shown on small screens (<640px). Falls back to Button Text if empty."
-    },
-    {
-      name: "showIncludes",
-      label: "Show 'Includes:' panel",
-      type: "boolean",
-      description: "Toggle the right-hand panel listing what the assessment includes, and its price. Turn off on general contact pages where the form is for any inquiry \u2014 the form then goes full width. The list and price themselves are code-owned (ASSESSMENT_PACKAGES in @pbh/booking), because they are the promise the charge is made against."
-    }
-  ]
-};
-
-// tina/blocks/scrollFillLogo.ts
-var scrollFillLogoBlock = {
-  name: "scrollFillLogo",
-  label: "Scroll Fill Logo",
-  ui: {
-    defaultItem: {
-      slides: [
-        {
-          label: "Trust the instinct that brought you here",
-          headline: "We help you understand how your brain is performing, reduce your risk of cognitive decline, and take action early through advanced assessment, clinical insight, and ongoing personalized care."
-        },
-        {
-          label: "Why Primary Brain Health?",
-          headline: "Brain health today is reactive, fragmented, and often imprecise. PBH is built for what comes next."
-        }
-      ]
-    },
-    itemProps: (item) => ({
-      label: `Scroll Fill Logo - ${item?.slides?.[0]?.headline?.slice(0, 40) || "Untitled"}`
-    })
-  },
-  fields: [
-    {
-      name: "slides",
-      label: "Slides",
-      type: "object",
-      list: true,
-      description: "Each slide fades in and out as the section is scrolled. Add as many as you want \u2014 they're divided evenly across the scroll.",
-      ui: {
-        itemProps: (item) => ({
-          label: item?.label || item?.headline?.slice(0, 50) || "Slide"
-        }),
-        defaultItem: {
-          label: "",
-          headline: ""
-        }
-      },
-      fields: [
-        {
-          name: "label",
-          label: "Eyebrow Label",
-          type: "string",
-          description: "Rendered uppercase in the design."
-        },
-        {
-          name: "headline",
-          label: "Headline",
-          type: "string",
-          ui: {
-            component: "textarea"
-          }
-        }
-      ]
-    }
-  ]
-};
-
 // tina/blocks/stackSections.ts
 var stackSectionsBlock = {
   name: "stackSections",
@@ -1069,10 +722,7 @@ var pageCollection = {
       },
       templates: [
         heroBlock,
-        testimonialsBlock,
-        galleryBlock,
         faqBlock,
-        statsBlock,
         intakeFormBlock,
         scrollFillLogoBlock,
         stackSectionsBlock,
@@ -1258,180 +908,6 @@ var postCollection = {
   ]
 };
 
-// tina/collections/project.ts
-var projectCollection = {
-  name: "project",
-  label: "Projects",
-  path: "content/projects",
-  format: "mdx",
-  ui: {
-    router: ({ document }) => {
-      return `/projects/${document._sys.filename}`;
-    }
-  },
-  fields: [
-    {
-      name: "title",
-      label: "Project Title",
-      type: "string",
-      required: true,
-      isTitle: true
-    },
-    {
-      name: "description",
-      label: "Short Description",
-      type: "string",
-      ui: {
-        component: "textarea"
-      }
-    },
-    {
-      name: "client",
-      label: "Client Name",
-      type: "string"
-    },
-    {
-      name: "date",
-      label: "Project Date",
-      type: "datetime"
-    },
-    {
-      name: "featuredImage",
-      label: "Featured Image",
-      type: "image"
-    },
-    {
-      name: "gallery",
-      label: "Project Gallery",
-      type: "object",
-      list: true,
-      fields: [
-        {
-          name: "image",
-          label: "Image",
-          type: "image"
-        },
-        {
-          name: "alt",
-          label: "Alt Text",
-          type: "string"
-        },
-        {
-          name: "caption",
-          label: "Caption",
-          type: "string"
-        }
-      ]
-    },
-    {
-      name: "category",
-      label: "Category",
-      type: "string",
-      options: [
-        { value: "web", label: "Web Development" },
-        { value: "mobile", label: "Mobile App" },
-        { value: "branding", label: "Branding" },
-        { value: "design", label: "UI/UX Design" },
-        { value: "ecommerce", label: "E-commerce" }
-      ]
-    },
-    {
-      name: "techStack",
-      label: "Tech Stack",
-      type: "string",
-      list: true,
-      options: [
-        { value: "react", label: "React" },
-        { value: "nextjs", label: "Next.js" },
-        { value: "typescript", label: "TypeScript" },
-        { value: "tailwind", label: "Tailwind CSS" },
-        { value: "node", label: "Node.js" },
-        { value: "python", label: "Python" },
-        { value: "figma", label: "Figma" },
-        { value: "aws", label: "AWS" },
-        { value: "vercel", label: "Vercel" }
-      ]
-    },
-    {
-      name: "liveUrl",
-      label: "Live URL",
-      type: "string"
-    },
-    {
-      name: "githubUrl",
-      label: "GitHub URL",
-      type: "string"
-    },
-    {
-      name: "featured",
-      label: "Featured Project",
-      type: "boolean"
-    },
-    {
-      name: "testimonial",
-      label: "Client Testimonial",
-      type: "reference",
-      collections: ["testimonial"]
-    },
-    {
-      name: "body",
-      label: "Case Study Content",
-      type: "rich-text",
-      isBody: true,
-      templates: [
-        {
-          name: "challenge",
-          label: "Challenge Section",
-          fields: [
-            {
-              name: "title",
-              label: "Title",
-              type: "string"
-            },
-            {
-              name: "content",
-              label: "Content",
-              type: "rich-text"
-            }
-          ]
-        },
-        {
-          name: "solution",
-          label: "Solution Section",
-          fields: [
-            {
-              name: "title",
-              label: "Title",
-              type: "string"
-            },
-            {
-              name: "content",
-              label: "Content",
-              type: "rich-text"
-            }
-          ]
-        },
-        {
-          name: "results",
-          label: "Results Section",
-          fields: [
-            {
-              name: "stats",
-              label: "Stats",
-              type: "object",
-              list: true,
-              fields: [
-                { name: "value", label: "Value", type: "string" },
-                { name: "label", label: "Label", type: "string" }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
 // tina/collections/author.ts
 var authorCollection = {
   name: "author",
@@ -1492,77 +968,6 @@ var authorCollection = {
           type: "string"
         }
       ]
-    }
-  ]
-};
-
-// tina/collections/testimonial.ts
-var testimonialCollection = {
-  name: "testimonial",
-  label: "Testimonials",
-  path: "content/testimonials",
-  format: "mdx",
-  fields: [
-    {
-      name: "quote",
-      label: "Quote",
-      type: "string",
-      required: true,
-      isTitle: true,
-      ui: {
-        component: "textarea"
-      }
-    },
-    {
-      name: "author",
-      label: "Author",
-      type: "reference",
-      collections: ["author"],
-      description: "Reference an existing author"
-    },
-    {
-      name: "authorName",
-      label: "Author Name (Inline)",
-      type: "string",
-      description: "Use if not referencing an author"
-    },
-    {
-      name: "authorRole",
-      label: "Author Role (Inline)",
-      type: "string"
-    },
-    {
-      name: "authorAvatar",
-      label: "Author Avatar (Inline)",
-      type: "image"
-    },
-    {
-      name: "company",
-      label: "Company",
-      type: "string"
-    },
-    {
-      name: "companyLogo",
-      label: "Company Logo",
-      type: "image"
-    },
-    {
-      name: "rating",
-      label: "Rating (1-5)",
-      type: "number",
-      ui: {
-        validate: (value) => {
-          if (value && (value < 1 || value > 5)) {
-            return "Rating must be between 1 and 5";
-          }
-        }
-      }
-    },
-    {
-      name: "featured",
-      label: "Featured",
-      type: "boolean",
-      description: "Highlight this testimonial"
     }
   ]
 };
@@ -2033,9 +1438,7 @@ var config_default = defineConfig({
       pageCollection,
       modalsCollection,
       postCollection,
-      projectCollection,
       authorCollection,
-      testimonialCollection,
       globalCtaCollection,
       settingsCollection,
       faqCollection

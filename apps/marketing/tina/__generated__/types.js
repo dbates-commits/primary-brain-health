@@ -23,95 +23,6 @@ export const PagePartsFragmentDoc = gql`
       primaryButtonTextMobile
       primaryButtonLink
     }
-    ... on PageBlocksTestimonials {
-      variant
-      theme
-      headline
-      subheadline
-      useReferences
-      testimonialRefs {
-        __typename
-        testimonial {
-          ... on Testimonial {
-            __typename
-            quote
-            author {
-              ... on Author {
-                __typename
-                name
-                role
-                avatar
-                bio
-                email
-                social {
-                  __typename
-                  twitter
-                  linkedin
-                  github
-                  website
-                }
-              }
-              ... on Document {
-                _sys {
-                  filename
-                  basename
-                  hasReferences
-                  breadcrumbs
-                  path
-                  relativePath
-                  extension
-                }
-                id
-              }
-            }
-            authorName
-            authorRole
-            authorAvatar
-            company
-            companyLogo
-            rating
-            featured
-          }
-          ... on Document {
-            _sys {
-              filename
-              basename
-              hasReferences
-              breadcrumbs
-              path
-              relativePath
-              extension
-            }
-            id
-          }
-        }
-      }
-      items {
-        __typename
-        quote
-        authorName
-        authorRole
-        company
-        avatar
-        rating
-      }
-    }
-    ... on PageBlocksGallery {
-      variant
-      theme
-      headline
-      subheadline
-      columns
-      gap
-      items {
-        __typename
-        image
-        alt
-        caption
-        video
-        aspectRatio
-      }
-    }
     ... on PageBlocksFaq {
       variant
       theme
@@ -146,21 +57,6 @@ export const PagePartsFragmentDoc = gql`
       ctaText
       ctaButtonText
       ctaLink
-    }
-    ... on PageBlocksStats {
-      variant
-      theme
-      headline
-      subheadline
-      animate
-      items {
-        __typename
-        value
-        label
-        icon
-        description
-        progress
-      }
     }
     ... on PageBlocksIntakeForm {
       headline
@@ -353,82 +249,6 @@ export const PostPartsFragmentDoc = gql`
   }
 }
     `;
-export const ProjectPartsFragmentDoc = gql`
-    fragment ProjectParts on Project {
-  __typename
-  title
-  description
-  client
-  date
-  featuredImage
-  gallery {
-    __typename
-    image
-    alt
-    caption
-  }
-  category
-  techStack
-  liveUrl
-  githubUrl
-  featured
-  testimonial {
-    ... on Testimonial {
-      __typename
-      quote
-      author {
-        ... on Author {
-          __typename
-          name
-          role
-          avatar
-          bio
-          email
-          social {
-            __typename
-            twitter
-            linkedin
-            github
-            website
-          }
-        }
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-      }
-      authorName
-      authorRole
-      authorAvatar
-      company
-      companyLogo
-      rating
-      featured
-    }
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-  }
-  body
-}
-    `;
 export const AuthorPartsFragmentDoc = gql`
     fragment AuthorParts on Author {
   __typename
@@ -444,48 +264,6 @@ export const AuthorPartsFragmentDoc = gql`
     github
     website
   }
-}
-    `;
-export const TestimonialPartsFragmentDoc = gql`
-    fragment TestimonialParts on Testimonial {
-  __typename
-  quote
-  author {
-    ... on Author {
-      __typename
-      name
-      role
-      avatar
-      bio
-      email
-      social {
-        __typename
-        twitter
-        linkedin
-        github
-        website
-      }
-    }
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-  }
-  authorName
-  authorRole
-  authorAvatar
-  company
-  companyLogo
-  rating
-  featured
 }
     `;
 export const GlobalCtaPartsFragmentDoc = gql`
@@ -741,63 +519,6 @@ export const PostConnectionDocument = gql`
   }
 }
     ${PostPartsFragmentDoc}`;
-export const ProjectDocument = gql`
-    query project($relativePath: String!) {
-  project(relativePath: $relativePath) {
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-    ...ProjectParts
-  }
-}
-    ${ProjectPartsFragmentDoc}`;
-export const ProjectConnectionDocument = gql`
-    query projectConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: ProjectFilter) {
-  projectConnection(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    sort: $sort
-    filter: $filter
-  ) {
-    pageInfo {
-      hasPreviousPage
-      hasNextPage
-      startCursor
-      endCursor
-    }
-    totalCount
-    edges {
-      cursor
-      node {
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-        ...ProjectParts
-      }
-    }
-  }
-}
-    ${ProjectPartsFragmentDoc}`;
 export const AuthorDocument = gql`
     query author($relativePath: String!) {
   author(relativePath: $relativePath) {
@@ -855,63 +576,6 @@ export const AuthorConnectionDocument = gql`
   }
 }
     ${AuthorPartsFragmentDoc}`;
-export const TestimonialDocument = gql`
-    query testimonial($relativePath: String!) {
-  testimonial(relativePath: $relativePath) {
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-    ...TestimonialParts
-  }
-}
-    ${TestimonialPartsFragmentDoc}`;
-export const TestimonialConnectionDocument = gql`
-    query testimonialConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: TestimonialFilter) {
-  testimonialConnection(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    sort: $sort
-    filter: $filter
-  ) {
-    pageInfo {
-      hasPreviousPage
-      hasNextPage
-      startCursor
-      endCursor
-    }
-    totalCount
-    edges {
-      cursor
-      node {
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-        ...TestimonialParts
-      }
-    }
-  }
-}
-    ${TestimonialPartsFragmentDoc}`;
 export const GlobalCtaDocument = gql`
     query globalCta($relativePath: String!) {
   globalCta(relativePath: $relativePath) {
@@ -1103,23 +767,11 @@ export function getSdk(requester) {
     postConnection(variables, options) {
       return requester(PostConnectionDocument, variables, options);
     },
-    project(variables, options) {
-      return requester(ProjectDocument, variables, options);
-    },
-    projectConnection(variables, options) {
-      return requester(ProjectConnectionDocument, variables, options);
-    },
     author(variables, options) {
       return requester(AuthorDocument, variables, options);
     },
     authorConnection(variables, options) {
       return requester(AuthorConnectionDocument, variables, options);
-    },
-    testimonial(variables, options) {
-      return requester(TestimonialDocument, variables, options);
-    },
-    testimonialConnection(variables, options) {
-      return requester(TestimonialConnectionDocument, variables, options);
     },
     globalCta(variables, options) {
       return requester(GlobalCtaDocument, variables, options);
