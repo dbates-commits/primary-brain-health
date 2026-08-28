@@ -15,14 +15,14 @@ export default defineConfig({
   test: {
     projects: [
       {
-        // Node-side sweeps over the CMS content on disk — no browser, no
-        // Storybook. `pnpm test` runs this project alone; see the note in
-        // package.json.
+        // Node-side sweeps over files on disk — the CMS content, and the
+        // design-token mirror in @pbh/tokens. No browser, no Storybook.
+        // `pnpm test` runs this project alone; see the note in package.json.
         extends: true,
         test: {
           name: 'content',
           environment: 'node',
-          include: ['content/**/*.test.ts'],
+          include: ['content/**/*.test.ts', 'src/**/*.node.test.ts'],
         },
       },
       {

@@ -50,7 +50,6 @@
   --color-on-secondary: #ffffff;
   --color-on-secondary-container: #007577;
   --color-secondary-fixed: #b3e8e9;
-  --color-secondary-fixed-dim: #80d6d8;
 
   /* Surface hierarchy */
   --color-surface: #ffffff;
@@ -190,6 +189,7 @@
   --color-primary-container: var(--color-primary-container);
   --color-on-primary: var(--color-on-primary);
   --color-on-primary-container: var(--color-on-primary-container);
+  --color-primary-fixed: var(--color-primary-fixed);
   --color-primary-fixed-dim: var(--color-primary-fixed-dim);
   --color-primary-container-high: var(--color-primary-container-high);
   --color-on-primary-highlight: var(--color-on-primary-highlight);
