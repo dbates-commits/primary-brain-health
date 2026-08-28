@@ -34,7 +34,7 @@ const BODY =
 export function NavigatorNote() {
   return (
     <Section
-      className="bg-[#E2EFEF] px-6 py-20 md:px-10 md:py-28"
+      className="bg-mint-subtle px-6 py-20 md:px-10 md:py-28"
       stagger={90}
     >
       <div className="mx-auto max-w-4xl text-center">

@@ -31,7 +31,7 @@ export function BookingFormCard({
   onReopen: () => void;
 }) {
   return (
-    <div className="rounded-xl bg-white p-8 shadow-[0_4px_12px_rgba(0,0,0,0.24)]">
+    <div className="rounded-xl bg-background-default p-8 shadow-card">
       <h3 id="booking-form-title" className="sr-only">
         Book your assessment
       </h3>

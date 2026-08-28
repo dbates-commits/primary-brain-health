@@ -121,7 +121,7 @@ export function MobileLoginModal({
         <LoginPanel
           action={action}
           onDone={onClose}
-          className="gap-4 p-5 drop-shadow-[0px_4px_12px_rgba(0,0,0,0.12)]"
+          className="gap-4 p-5 shadow-card"
         />
       </div>
     </div>,

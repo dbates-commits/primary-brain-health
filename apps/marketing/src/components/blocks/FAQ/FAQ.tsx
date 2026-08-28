@@ -37,26 +37,39 @@ export interface FAQProps {
   };
 }
 
+/**
+ * The two grounds this block can sit on, in design-system tokens.
+ *
+ * Figma models the FAQ's own colours as `FAQs/question-color`,
+ * `FAQs/answer-color` and `FAQs/border-color`, which alias `text/heading`,
+ * `text/default` and `border/default` — that is the `light` row. Figma has no
+ * dark FAQ, so `dark` is the brand ground the design uses elsewhere for an
+ * inverted section, rather than the neutral near-black it inherited from the
+ * Tina starter.
+ */
 const themeStyles = {
   light: {
-    bg: "bg-white",
-    headline: "text-gray-900",
-    subheadline: "text-gray-600",
-    question: "text-gray-900",
-    answer: "text-gray-600",
-    border: "border-gray-200",
-    hoverBg: "hover:bg-gray-50",
-    cardBg: "bg-gray-50",
+    bg: "bg-background-default",
+    headline: "text-text-heading",
+    subheadline: "text-text-default",
+    // FAQs/question-color -> text/heading
+    question: "text-text-heading",
+    // FAQs/answer-color -> text/default
+    answer: "text-text-default",
+    // FAQs/border-color -> border/default
+    border: "border-border-default",
+    hoverBg: "hover:bg-background-subtle",
+    cardBg: "bg-background-subtle",
   },
   dark: {
-    bg: "bg-gray-900",
-    headline: "text-white",
-    subheadline: "text-gray-400",
-    question: "text-white",
-    answer: "text-gray-300",
-    border: "border-gray-700",
-    hoverBg: "hover:bg-gray-800",
-    cardBg: "bg-gray-800",
+    bg: "bg-background-brand",
+    headline: "text-text-inverse",
+    subheadline: "text-text-inverse-secondary",
+    question: "text-text-inverse",
+    answer: "text-text-inverse-secondary",
+    border: "border-border-inverse/20",
+    hoverBg: "hover:bg-brand-active",
+    cardBg: "bg-brand-active",
   },
 };
 

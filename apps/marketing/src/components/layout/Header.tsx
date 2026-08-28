@@ -182,7 +182,7 @@ export function Header() {
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300",
         scrolled
-          ? "bg-background-default/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(4,22,50,0.06)]"
+          ? "bg-background-default/70 backdrop-blur-xl shadow-header"
           : "bg-transparent shadow-none"
       )}
     >

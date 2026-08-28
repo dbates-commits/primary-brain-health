@@ -46,7 +46,7 @@ export default function ThankYouPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-default/60 via-transparent to-transparent" />
             <div className="absolute bottom-10 left-10 right-10">
-              <div className="bg-background-default/90 backdrop-blur-md p-8 rounded-[1.5rem] border border-white/20 shadow-xl">
+              <div className="bg-background-default/90 backdrop-blur-md p-8 rounded-[1.5rem] border border-border-inverse/20 shadow-xl">
                 <Eyebrow className="mb-3">Restorative Care</Eyebrow>
                 <h3 className="text-3xl font-bold text-ink-strong mb-3 font-headline leading-tight">
                   A focused approach to your vitality.

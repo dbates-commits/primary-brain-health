@@ -33,7 +33,7 @@ export function BenefitsList({
       ? tinaField(blockData.items[index], field)
       : undefined;
   return (
-    <section className="bg-[#E2EFEF] px-6 md:px-10 pt-20 md:pt-28 pb-20 md:pb-28">
+    <section className="bg-mint-subtle px-6 md:px-10 pt-20 md:pt-28 pb-20 md:pb-28">
       <div className="max-w-6xl mx-auto flex flex-col gap-10 md:gap-14">
         {(headline || subheadline) && (
           <div
@@ -74,7 +74,7 @@ export function BenefitsList({
               className="flex flex-col items-center text-center gap-5 md:gap-6"
             >
               {item.icon && (
-                <div className="flex items-center justify-center shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-full bg-white shadow-[0_8px_18px_-12px_rgba(4,22,50,0.18)]">
+                <div className="flex items-center justify-center shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-full bg-background-default shadow-card">
                   <PhosphorIcon
                     name={item.icon}
                     aria-hidden="true"

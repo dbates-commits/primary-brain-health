@@ -56,8 +56,8 @@ export function LoginPanel({
     <div
       {...rest}
       className={cn(
-        "flex flex-col gap-5 rounded-xl bg-white p-8",
-        "drop-shadow-[0px_4px_12px_rgba(0,0,0,0.24)]",
+        "flex flex-col gap-5 rounded-xl bg-background-default p-8",
+        "shadow-card",
         className,
       )}
     >

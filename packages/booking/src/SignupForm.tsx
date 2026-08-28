@@ -93,7 +93,7 @@ export function SignupForm({
       color={submitColor}
       className={
         submitColor === "white"
-          ? "w-full shadow-[0_8px_12px_rgba(0,0,0,0.12)]"
+          ? "w-full shadow-menu"
           : "w-full"
       }
     >

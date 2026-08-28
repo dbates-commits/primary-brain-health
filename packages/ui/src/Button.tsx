@@ -58,7 +58,7 @@ export function Button({
       // label `button/secondary/text-color` #45474d — which is
       // `on-surface-variant`, not `on-surface` (#1b1c19).
       white:
-        "bg-white text-text-default hover:bg-background-warm focus:ring-outline",
+        "bg-background-default text-text-default hover:bg-background-warm focus:ring-outline",
       dark: "bg-ink-strong text-background-default hover:brightness-125 focus:ring-ink-strong",
       // The destructive action — Delete Account and its modal's confirm
       // (Figma 1988:12282, 2060:7053). A role, not a state, which is why it
@@ -73,7 +73,7 @@ export function Button({
       secondary:
         "border-2 border-aqua-default text-aqua-default hover:bg-aqua-default/5 focus:ring-aqua-default",
       white:
-        "border-2 border-white text-white hover:bg-white/10 focus:ring-white",
+        "border-2 border-border-inverse text-text-inverse hover:bg-text-inverse/10 focus:ring-border-inverse",
       dark: "border-2 border-ink-strong text-ink-strong hover:bg-ink-strong/5 focus:ring-ink-strong",
       danger:
         "border-2 border-danger text-danger hover:bg-danger/5 focus:ring-danger",
@@ -81,7 +81,7 @@ export function Button({
     ghost: {
       primary: "text-brand-default hover:bg-brand-default/5 focus:ring-brand-default",
       secondary: "text-aqua-default hover:bg-aqua-default/5 focus:ring-aqua-default",
-      white: "text-white hover:bg-white/10 focus:ring-white",
+      white: "text-text-inverse hover:bg-text-inverse/10 focus:ring-border-inverse",
       dark: "text-ink-strong hover:bg-ink-strong/5 focus:ring-ink-strong",
       danger: "text-danger hover:bg-danger/5 focus:ring-danger",
     },

@@ -16,9 +16,9 @@ export function Card({
   hover = false,
 }: CardProps) {
   const variantStyles = {
-    default: "bg-white rounded-xl",
-    elevated: "bg-white rounded-xl shadow-lg",
-    bordered: "bg-white rounded-xl border border-gray-200",
+    default: "bg-background-default rounded-xl",
+    elevated: "bg-background-default rounded-xl shadow-card",
+    bordered: "bg-background-default rounded-xl border border-border-subtle",
     ghost: "bg-transparent",
   };
 
@@ -60,7 +60,7 @@ interface CardTitleProps {
 
 export function CardTitle({ children, className, as: Tag = "h3" }: CardTitleProps) {
   return (
-    <Tag className={cn("text-xl font-semibold text-gray-900", className)}>
+    <Tag className={cn("text-xl font-semibold text-ink-strong", className)}>
       {children}
     </Tag>
   );
@@ -72,7 +72,7 @@ interface CardDescriptionProps {
 }
 
 export function CardDescription({ children, className }: CardDescriptionProps) {
-  return <p className={cn("text-gray-600", className)}>{children}</p>;
+  return <p className={cn("text-text-default", className)}>{children}</p>;
 }
 
 interface CardContentProps {
@@ -90,5 +90,5 @@ interface CardFooterProps {
 }
 
 export function CardFooter({ children, className }: CardFooterProps) {
-  return <div className={cn("mt-4 pt-4 border-t border-gray-100", className)}>{children}</div>;
+  return <div className={cn("mt-4 pt-4 border-t border-border-subtle", className)}>{children}</div>;
 }

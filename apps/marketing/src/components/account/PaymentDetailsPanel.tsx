@@ -139,7 +139,7 @@ export function PaymentDetailsPanel({
             onClick={() => {
               openPortal("payment-method");
             }}
-            className="mt-6 border border-black"
+            className="mt-6 border border-text-heading"
           >
             Update Payment Information
           </Button>

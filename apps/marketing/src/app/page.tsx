@@ -59,13 +59,13 @@ export default async function Home() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Welcome to Primary Brain Health</h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-text-default mb-4">
             Create your home page content in the Tina admin.
           </p>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/admin/index.html"
-            className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"
+            className="inline-block bg-brand-default text-brand-on-brand px-6 py-3 rounded-lg hover:bg-brand-hover"
           >
             Open Tina Admin
           </a>

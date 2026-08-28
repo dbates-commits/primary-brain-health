@@ -227,7 +227,7 @@ export function StackSections({
               <div
                 data-scroll-reveal-self
                 className={cn(
-                  "relative w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
+                  "relative w-full bg-background-brand-subtle rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
                   reversed && "md:[&>div:first-of-type]:order-2"
                 )}
                 style={

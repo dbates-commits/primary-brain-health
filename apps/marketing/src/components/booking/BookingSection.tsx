@@ -58,7 +58,7 @@ export function BookingSection({
         <div className="flex flex-col gap-4 lg:flex-1">
           <h2
             data-tina-field={tinaFields?.headline}
-            className="text-balance font-headline text-4xl font-thin leading-tight text-white md:text-5xl"
+            className="text-balance font-headline text-4xl font-thin leading-tight text-text-inverse md:text-5xl"
           >
             {headline}
           </h2>
