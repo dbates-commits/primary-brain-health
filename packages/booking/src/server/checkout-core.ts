@@ -102,8 +102,7 @@ export async function createCheckoutSessionCore(
     // Payment Information" is addressed by `cus_…` and by nothing else — and an
     // upgrade later should be a second charge on the same person rather than a
     // second stranger with the same address. `customer` and `customer_email`
-    // are mutually exclusive, and the Customer already carries the address, so
-    // Embedded Checkout still prefills it.
+    // are mutually exclusive, so the email is carried by the Customer instead.
     const customerId = await ensureStripeCustomer(user);
     // `invoice_creation` is what puts anything in the portal's billing history.
     // Without it a one-off PaymentIntent leaves a charge and a Stripe receipt
@@ -116,6 +115,12 @@ export async function createCheckoutSessionCore(
       locale: "en",
       mode: "payment",
       customer: customerId,
+      // Without this, naming a `customer` makes Checkout stop writing back:
+      // `ensureStripeCustomer` creates the Customer from email + name only, and
+      // the billing address the buyer types here would be discarded. The
+      // invoice below is generated from the Customer, so the bill-to line on
+      // every receipt would be blank (pbh-yzl).
+      customer_update: { address: "auto", name: "auto" },
       invoice_creation: { enabled: true },
       payment_method_types: ["card"],
       line_items: [{ quantity: 1, price: catalog.priceId }],
