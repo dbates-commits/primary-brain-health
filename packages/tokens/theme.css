@@ -7,10 +7,32 @@
      @import "tailwindcss";
      @import "@pbh/tokens/theme.css";
 
-   Color token naming follows the Material Design 3 convention
-   (primary / secondary / surface / error / outline / inverse with
-   on-*, *-container, *-fixed, *-variant modifiers). Use the token
-   classes (`bg-primary`, `text-on-surface`, …) rather than raw hex.
+   FIGMA IS THE SOURCE OF TRUTH. Tokens mirror the Primitives, Colors
+   and Fonts collections of Figma file SppKdzsaH6rQ14u90UpNSq under
+   Figma's own variable names: the variable path with `/` replaced by
+   `-`, so `background/default` is `--color-background-default` and a
+   Figma variable name is greppable in this repo.
+
+   The stutter in `text-text-default` is deliberate and must not be
+   "tidied". Tailwind 4 has a single `--color-*` namespace, and
+   `default` is a leaf name in five Figma groups (background, border,
+   brand, teal, text); `subtle` in four. Collapse it and `bg-default`
+   and `text-default` become the same colour.
+
+   Two groups are renamed, and only because Tailwind already ships
+   those names: `colors/neutral/*` -> `grey-*` and `teal/*` -> `aqua-*`.
+   MAP BY VALUE, NEVER BY INDEX — Figma's step numbers do not match the
+   pre-sync code ramp (Figma's neutral/100 is the old neutral-50).
+
+   The MD3 block below (primary / on-surface / surface / …) is the
+   retired vocabulary, kept only until the call sites are migrated.
+   Do not add to it. See docs/design-tokens.md.
+
+   The sync is MANUAL — the Figma plan tier is `starter`, so the
+   Variables REST API is unavailable and the only complete read is the
+   Plugin API via the Figma MCP, which needs the desktop app open. To
+   re-sync: enumerate `figma.variables.getLocalVariableCollectionsAsync()`
+   and diff against docs/design-tokens-figma-export.json.
    ============================================================= */
 
 /* Register the shared design-system component sources so Tailwind 4
@@ -133,7 +155,7 @@
 
   /* Figma `accent/pink`, used as the error outline on a form field. Distinct
      from `error` (#ba1a1a), which the design reserves for message text. */
-  --color-accent-pink: #d6007f;
+  --color-accent-pink: var(--color-pink-600);
 
   /* Figma `colors/pink/600` — the ground under a destructive action: the Delete
      Account button on the account page (1988:12282) and the confirm button in
@@ -168,6 +190,192 @@
 
   /* Surface tint */
   --color-surface-tint: #006e8a;
+
+  /* ===========================================================
+     FIGMA PRIMITIVES — collection `Primitives`
+     Raw ramps. Components should reach for the semantic tokens
+     below, not for these; a step number carries no meaning.
+     =========================================================== */
+  --color-brand-50: #eff6f9;
+  --color-brand-100: #b5ddf2;
+  --color-brand-200: #afd2e3;
+  --color-brand-300: #5eaeb3;
+  --color-brand-400: #4a9ba0;
+  --color-brand-500: #008db8;
+  --color-brand-600: #007dad;
+  --color-brand-700: #006e8a;
+  --color-brand-800: #346b89;
+  --color-brand-850: #224b60;
+  --color-brand-900: #033246;
+
+  /* `colors/neutral/*`. Renamed because Tailwind owns `--color-neutral-*`.
+     The step numbers are FIGMA's — they do not match the retired
+     `--color-neutral-*` ramp above (Figma's 100 is that ramp's 50). */
+  --color-grey-50: #fafafa;
+  --color-grey-100: #f6f6f6;
+  --color-grey-200: #f3f4f6;
+  --color-grey-300: #d9d9d9;
+  --color-grey-350: #d8d8d8;
+  --color-grey-400: #d1d5db;
+  --color-grey-450: #9ca3af;
+  --color-grey-500: #888884;
+  --color-grey-550: #6f706e;
+  --color-grey-600: #6b7280;
+  --color-grey-700: #4b5563;
+  --color-grey-750: #45474d;
+  --color-grey-800: #374151;
+  --color-grey-850: #1b1c19;
+  --color-grey-900: #111827;
+
+  /* `teal/*`. Renamed because Tailwind owns `--color-teal-*`. */
+  --color-aqua-50: #e5efef;
+  --color-aqua-100: #a0e6ea;
+  --color-aqua-500: #009ea1;
+  --color-aqua-700: #495e55;
+
+  --color-green-500: #85c559;
+  --color-pink-600: #d60012;
+  --color-yellow-100: #feffc8;
+  --color-warm-50: #f5f3ee;
+  --color-warm-900: #231815;
+
+  /* ===========================================================
+     FIGMA SEMANTICS — collection `Colors`
+     Every one is an alias in Figma too, so the `var()` chain here
+     is the same shape the design has. These are what components
+     should use.
+     =========================================================== */
+  --color-background-default: #ffffff;
+  --color-background-subtle: var(--color-grey-50);
+  --color-background-warm: var(--color-warm-50);
+  --color-background-brand: var(--color-brand-700);
+  --color-background-brand-subtle: var(--color-brand-50);
+  --color-background-teal-subtle: var(--color-aqua-50);
+
+  --color-text-default: var(--color-grey-750);
+  --color-text-heading: #000000;
+  --color-text-secondary: var(--color-grey-550);
+  --color-text-tertiary: var(--color-grey-500);
+  --color-text-label: var(--color-grey-800);
+  --color-text-disabled: var(--color-grey-450);
+  --color-text-brand: var(--color-brand-700);
+  --color-text-supporting: var(--color-aqua-700);
+  --color-text-warm-dark: var(--color-warm-900);
+  --color-text-inverse: #ffffff;
+  --color-text-inverse-secondary: var(--color-brand-200);
+
+  --color-border-default: var(--color-grey-350);
+  --color-border-subtle: var(--color-grey-300);
+  --color-border-strong: var(--color-grey-500);
+  --color-border-brand: var(--color-brand-700);
+
+  --color-brand-default: var(--color-brand-700);
+  --color-brand-hover: var(--color-brand-600);
+  --color-brand-active: var(--color-brand-800);
+  --color-brand-muted: var(--color-brand-200);
+  --color-brand-subtle: var(--color-brand-50);
+  --color-brand-on-brand: #ffffff;
+
+  --color-aqua-default: var(--color-aqua-500);
+  --color-aqua-subtle: var(--color-aqua-50);
+
+  --color-accent-green: var(--color-green-500);
+  --color-icon-brand-teal: var(--color-brand-400);
+
+  /* `stepper/*` — the booking stepper is the only consumer, but Figma
+     models it as a semantic group rather than a component group, so it
+     is mirrored as one. */
+  --color-stepper-active: var(--color-brand-default);
+  --color-stepper-inactive: var(--color-border-default);
+  --color-stepper-circle-bg: var(--color-background-default);
+  --color-stepper-icon-active: var(--color-brand-on-brand);
+  --color-stepper-line-inactive: var(--color-border-subtle);
+  --color-stepper-text-active: var(--color-brand-default);
+  --color-stepper-text-inactive: var(--color-text-secondary);
+
+  /* ===========================================================
+     RADII — collection `Components`
+     The only component-scoped Figma variables exported as tokens;
+     the rest resolve to a primitive and are consumed as one.
+     =========================================================== */
+  --radius-button: 40px;          /* button/radius */
+  --radius-modal: 12px;           /* modal/corner-radius */
+  --radius-form-card: 12px;       /* form-card/radius */
+  --radius-input: 8px;            /* form-field/input-radius */
+  --radius-hero: 20px;            /* hero/radius */
+  --radius-step-card-icon: 40px;  /* step-card/icon-radius */
+
+  /* ===========================================================
+     TYPE SCALE — collection `Fonts`
+     Sizes are Figma's. LINE HEIGHTS ARE NOT — Figma tokenises none
+     (and reports lineHeight: 100 on every style, which reads as an
+     unset default). The body steps carry the exact line height
+     Tailwind's text-sm/base/xl pair with them, which is what these
+     sizes render with today; the heading steps use a ratio and are
+     unverified against the design. See FIG-06 in
+     docs/figma-token-requests.md.
+
+     `heading/subtitle` and `body/large` are both 20px, as are
+     `heading/small` and `body/base` at 16px. Both names are kept —
+     they are different Figma variables and may diverge.
+     =========================================================== */
+  --text-display: 80px;
+  --text-display--line-height: 1.1;
+  --text-h1: 56px;
+  --text-h1--line-height: 1.1;
+  --text-h2: 48px;
+  --text-h2--line-height: 1.1;
+  --text-h3: 40px;
+  --text-h3--line-height: 1.15;
+  --text-h4: 32px;
+  --text-h4--line-height: 1.2;
+  --text-h5: 24px;
+  --text-h5--line-height: 32px;
+  --text-subtitle: 20px;
+  --text-subtitle--line-height: 28px;
+  --text-heading-small: 16px;
+  --text-heading-small--line-height: 1.25;
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 28px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+
+  /* ===========================================================
+     NO FIGMA VARIABLE YET
+     Values the code needs that the design system does not name.
+     Every entry here has a numbered request in
+     docs/figma-token-requests.md. Do not grow this block without
+     adding one.
+     =========================================================== */
+  /* FIG-02 — the mint behind a benefit tile (BenefitsList) and the
+     navigator note in the booking modal. Drawn as a raw hex in Figma.
+     Deliberately NOT folded into `--color-accent-green-container`
+     (#e2f6e9) below: two near-identical greens, different roles. */
+  --color-mint-subtle: #e2efef;
+  /* FIG-02 — the tick in SuccessCircleIcon. A different green again
+     from `accent-green` (#85c559). */
+  --color-accent-green-strong: #4dc78c;
+  /* FIG-02 — pale ground under the account page's `Active` plan badge.
+     `-container` names it the way `error`/`error-container` already do. */
+  --color-accent-green-container: #e2f6e9;
+  /* FIG-02 — the toast ground. Near-black with a blue cast, cooler than
+     anything in the neutral ramp. */
+  --color-toast-surface: #1f262e;
+  /* FIG-02 — white as a border/ring on a dark ground. Figma has
+     `text/inverse` but no `border/inverse`. */
+  --color-border-inverse: #ffffff;
+  /* FIG-03 — elevation. Figma has no shadow variables at all, so these
+     are read off the rendered design. The tints were the RETIRED navy
+     (#041632) and forest green (#446558); they are re-tinted onto the
+     current ink so nothing carries a dead palette forward. */
+  --shadow-card: 0 1px 2px rgb(27 28 25 / 0.04), 0 4px 16px rgb(27 28 25 / 0.06);
+  --shadow-menu: 0 8px 12px rgb(27 28 25 / 0.08);
+  --shadow-header: 0 12px 32px rgb(27 28 25 / 0.06);
+  --shadow-toast: 0 4px 16px rgb(27 28 25 / 0.2);
 }
 
 @theme inline {
@@ -239,4 +447,131 @@
   --color-inverse-on-surface: var(--color-inverse-on-surface);
   --color-inverse-primary: var(--color-inverse-primary);
   --color-surface-tint: var(--color-surface-tint);
+
+  /* ===========================================================
+     FIGMA-NAMED MIRRORS. Every token above must appear here or
+     Tailwind emits no utility for it — silently. Guarded by
+     apps/marketing/src/tokens.node.test.ts.
+     =========================================================== */
+  /* --- Figma primitives --- */
+  --color-brand-50: var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-850: var(--color-brand-850);
+  --color-brand-900: var(--color-brand-900);
+  --color-grey-50: var(--color-grey-50);
+  --color-grey-100: var(--color-grey-100);
+  --color-grey-200: var(--color-grey-200);
+  --color-grey-300: var(--color-grey-300);
+  --color-grey-350: var(--color-grey-350);
+  --color-grey-400: var(--color-grey-400);
+  --color-grey-450: var(--color-grey-450);
+  --color-grey-500: var(--color-grey-500);
+  --color-grey-550: var(--color-grey-550);
+  --color-grey-600: var(--color-grey-600);
+  --color-grey-700: var(--color-grey-700);
+  --color-grey-750: var(--color-grey-750);
+  --color-grey-800: var(--color-grey-800);
+  --color-grey-850: var(--color-grey-850);
+  --color-grey-900: var(--color-grey-900);
+  --color-aqua-50: var(--color-aqua-50);
+  --color-aqua-100: var(--color-aqua-100);
+  --color-aqua-500: var(--color-aqua-500);
+  --color-aqua-700: var(--color-aqua-700);
+  --color-green-500: var(--color-green-500);
+  --color-pink-600: var(--color-pink-600);
+  --color-yellow-100: var(--color-yellow-100);
+  --color-warm-50: var(--color-warm-50);
+  --color-warm-900: var(--color-warm-900);
+
+  /* --- Figma semantics --- */
+  --color-background-default: var(--color-background-default);
+  --color-background-subtle: var(--color-background-subtle);
+  --color-background-warm: var(--color-background-warm);
+  --color-background-brand: var(--color-background-brand);
+  --color-background-brand-subtle: var(--color-background-brand-subtle);
+  --color-background-teal-subtle: var(--color-background-teal-subtle);
+  --color-text-default: var(--color-text-default);
+  --color-text-heading: var(--color-text-heading);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-label: var(--color-text-label);
+  --color-text-disabled: var(--color-text-disabled);
+  --color-text-brand: var(--color-text-brand);
+  --color-text-supporting: var(--color-text-supporting);
+  --color-text-warm-dark: var(--color-text-warm-dark);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-inverse-secondary: var(--color-text-inverse-secondary);
+  --color-border-default: var(--color-border-default);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-brand: var(--color-border-brand);
+  --color-brand-default: var(--color-brand-default);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-brand-active: var(--color-brand-active);
+  --color-brand-muted: var(--color-brand-muted);
+  --color-brand-subtle: var(--color-brand-subtle);
+  --color-brand-on-brand: var(--color-brand-on-brand);
+  --color-aqua-default: var(--color-aqua-default);
+  --color-aqua-subtle: var(--color-aqua-subtle);
+  --color-accent-green: var(--color-accent-green);
+  --color-icon-brand-teal: var(--color-icon-brand-teal);
+  --color-stepper-active: var(--color-stepper-active);
+  --color-stepper-inactive: var(--color-stepper-inactive);
+  --color-stepper-circle-bg: var(--color-stepper-circle-bg);
+  --color-stepper-icon-active: var(--color-stepper-icon-active);
+  --color-stepper-line-inactive: var(--color-stepper-line-inactive);
+  --color-stepper-text-active: var(--color-stepper-text-active);
+  --color-stepper-text-inactive: var(--color-stepper-text-inactive);
+  --color-border-inverse: var(--color-border-inverse);
+
+  /* --- Radii --- */
+  --radius-button: var(--radius-button);
+  --radius-modal: var(--radius-modal);
+  --radius-form-card: var(--radius-form-card);
+  --radius-input: var(--radius-input);
+  --radius-hero: var(--radius-hero);
+  --radius-step-card-icon: var(--radius-step-card-icon);
+
+  /* --- Type scale --- */
+  --text-display: var(--text-display);
+  --text-display--line-height: var(--text-display--line-height);
+  --text-h1: var(--text-h1);
+  --text-h1--line-height: var(--text-h1--line-height);
+  --text-h2: var(--text-h2);
+  --text-h2--line-height: var(--text-h2--line-height);
+  --text-h3: var(--text-h3);
+  --text-h3--line-height: var(--text-h3--line-height);
+  --text-h4: var(--text-h4);
+  --text-h4--line-height: var(--text-h4--line-height);
+  --text-h5: var(--text-h5);
+  --text-h5--line-height: var(--text-h5--line-height);
+  --text-subtitle: var(--text-subtitle);
+  --text-subtitle--line-height: var(--text-subtitle--line-height);
+  --text-heading-small: var(--text-heading-small);
+  --text-heading-small--line-height: var(--text-heading-small--line-height);
+  --text-body-lg: var(--text-body-lg);
+  --text-body-lg--line-height: var(--text-body-lg--line-height);
+  --text-body: var(--text-body);
+  --text-body--line-height: var(--text-body--line-height);
+  --text-body-sm: var(--text-body-sm);
+  --text-body-sm--line-height: var(--text-body-sm--line-height);
+  --text-caption: var(--text-caption);
+  --text-caption--line-height: var(--text-caption--line-height);
+
+  /* --- No Figma variable yet --- */
+  --color-mint-subtle: var(--color-mint-subtle);
+  --color-accent-green-strong: var(--color-accent-green-strong);
+  --color-accent-green-container: var(--color-accent-green-container);
+  --color-toast-surface: var(--color-toast-surface);
+  --shadow-card: var(--shadow-card);
+  --shadow-menu: var(--shadow-menu);
+  --shadow-header: var(--shadow-header);
+  --shadow-toast: var(--shadow-toast);
 }
