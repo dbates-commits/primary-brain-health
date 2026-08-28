@@ -50,7 +50,9 @@ export const emailPreviews: EmailPreview[] = [
     slug: "payment-failed",
     name: "Payment failed",
     subject: "Your payment didn't go through",
-    trigger: "Sent once, when a payment is first recorded as failed.",
+    trigger:
+      "Once per declined PaymentIntent — the payment step mints a fresh one each " +
+      "time it mounts, so three declines send three. Skipped once the customer has paid.",
     element: PaymentFailedEmail(PaymentFailedEmail.PreviewProps),
   },
   {

@@ -240,7 +240,12 @@ export async function sendPaymentFailedEmail(
         failedOn: new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
           new Date(),
         ),
-        updatePaymentUrl: `${siteBaseUrl()}/?booking=resume`,
+        // Sign-in, not `/?booking=resume` directly: that marker only resolves
+        // against the booking cookie or a session, and this mail is usually
+        // opened on another device or well after the cookie's 2h (pbh-is2).
+        // Signing in lands on /welcome, which sends an unpaid customer back to
+        // `/?booking=resume` with the modal reopened on the payment step.
+        updatePaymentUrl: `${siteBaseUrl()}/login?email=${encodeURIComponent(recipient.email)}`,
       }),
   );
 }

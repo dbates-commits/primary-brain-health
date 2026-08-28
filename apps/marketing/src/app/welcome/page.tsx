@@ -32,7 +32,9 @@ export const dynamic = "force-dynamic";
  *
  * An unpaid visitor goes to `/` rather than `/login` — they are already signed
  * in, so `/login` would send them straight back here and loop. Home is where
- * the booking flow they abandoned actually lives.
+ * the booking flow they abandoned actually lives, and `?booking=resume` is what
+ * makes it reopen at the step they left rather than at the top of the page —
+ * the path a declined customer takes back in from their email (pbh-is2).
  */
 export default async function WelcomePage() {
   const session = await auth();
@@ -43,7 +45,7 @@ export default async function WelcomePage() {
     redirect("/login");
   }
   if ((await getEntitledTrack(userId)) === null) {
-    redirect("/");
+    redirect("/?booking=resume");
   }
 
   return (

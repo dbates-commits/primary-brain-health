@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
+import { auth } from "@/auth";
 import {
   completeProfileCore,
   createAccountCore,
@@ -109,12 +110,20 @@ export async function consentAction(
  * marketing home page stays statically rendered — only a customer actually
  * returning from a confirmation link pays for the round-trip.
  *
- * Returns null for a missing, forged, or expired cookie, and for a user that no
- * longer exists. The step is computed from persisted state, never from anything
- * the client sends.
+ * Falls back to the Auth.js session when the booking cookie is gone. That
+ * cookie is per-browser and lives 2h, which is enough for the email round-trip
+ * it was built for but not for the decline notice, whose CTA sends the customer
+ * through sign-in on whatever device opened the mail (pbh-is2). A session is
+ * the stronger proof of the two — it is a real sign-in, not a marker that this
+ * browser once started a booking.
+ *
+ * Returns null for a missing, forged, or expired cookie with no session behind
+ * it, and for a user that no longer exists. The step is computed from persisted
+ * state, never from anything the client sends.
  */
 export async function getBookingResumeState(): Promise<BookingResumeState | null> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId =
+    resolveBookingUserId(await cookies()) ?? (await auth())?.user?.id;
   if (!userId) {
     return null;
   }
