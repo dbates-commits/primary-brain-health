@@ -96,7 +96,7 @@ PaymentFailedEmail.PreviewProps = {
   cardBrand: "visa",
   cardLast4: "4242",
   failedOn: "July 14, 2026",
-  updatePaymentUrl: "https://primarybrainhealth.com/booking/payment",
+  updatePaymentUrl: "https://primarybrainhealth.com/?booking=resume",
 } satisfies PaymentFailedEmailProps;
 
 export default PaymentFailedEmail;

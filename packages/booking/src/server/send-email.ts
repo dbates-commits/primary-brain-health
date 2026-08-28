@@ -19,6 +19,7 @@ import {
   AccountDeactivatedEmail,
   AssessmentReadyEmail,
   ConfirmEmailEmail,
+  PaymentFailedEmail,
   PaymentReceiptEmail,
   PaymentRefundedEmail,
   renderEmail,
@@ -212,6 +213,42 @@ export async function sendPaymentReceiptEmail(
         // by the time most people open it — /welcome would just bounce them to
         // a sign-in wall.
         assessmentsUrl: assessmentsUrl(),
+      }),
+  );
+}
+
+/** Payment first recorded as failed → decline notice with resume CTA. */
+export async function sendPaymentFailedEmail(
+  userId: string,
+  payment: {
+    amountCents: number;
+    currency: string;
+    cardBrand?: string | null;
+    cardLast4?: string | null;
+  },
+): Promise<SendEmailResult> {
+  return sendTemplate(
+    "payment-failed",
+    userId,
+    "Your payment didn't go through",
+    (recipient) =>
+      PaymentFailedEmail({
+        firstName: recipient.firstName,
+        amountCents: payment.amountCents,
+        currency: payment.currency,
+        cardBrand: payment.cardBrand,
+        cardLast4: payment.cardLast4,
+        failedOn: new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
+          new Date(),
+        ),
+        // Sign-in, not the resume marker directly: that marker resolves against
+        // the booking cookie or a session, and this mail is usually opened on
+        // another device or well after the cookie's 2h (pbh-is2). Signing in
+        // lands on /welcome, which bounces an unpaid customer to
+        // `/?booking=resume#booking` with the modal reopened on the step they
+        // left — identity there comes from `resolveActorId`, so the session is
+        // enough.
+        updatePaymentUrl: `${siteBaseUrl()}/login?email=${encodeURIComponent(recipient.email)}`,
       }),
   );
 }

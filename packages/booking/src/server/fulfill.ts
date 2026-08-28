@@ -19,6 +19,7 @@ import { db, payments, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry } from "@pbh/payments";
 import { getPackage, resolvePackageKey } from "../packages";
 import {
+  sendPaymentFailedEmail,
   sendPaymentReceiptEmail,
   sendPaymentRefundedEmail,
 } from "./send-email";
@@ -145,6 +146,8 @@ export async function recordFailedPayment(
     return { status: "rejected", reason: "intent has no userId metadata" };
   }
 
+  const card = cardFromIntent(intent);
+
   const written = await db
     .insert(payments)
     .values({
@@ -153,6 +156,8 @@ export async function recordFailedPayment(
       amountCents: intent.amount,
       currency: intent.currency,
       status: "failed",
+      cardBrand: card?.brand ?? null,
+      cardLast4: card?.last4 ?? null,
     })
     // No `pending` row is ever written (session creation only audit-logs), so
     // any existing row here is already terminal (succeeded/failed/refunded).
@@ -175,6 +180,28 @@ export async function recordFailedPayment(
         amountCents: intent.amount,
         reason: intent.last_payment_error?.message ?? null,
       },
+    });
+    // The decline email goes only to someone still stuck. Each mount of the
+    // payment step mints a fresh Session, so a soft decline retried
+    // successfully leaves two intents: this one, failed, and a succeeded one.
+    // Without this check that customer gets a receipt and a "we're holding your
+    // assessment" notice for the same booking (pbh-is2). Read after the write,
+    // so a success recorded by either racing path is already visible.
+    const paid = await db
+      .select({ id: payments.id })
+      .from(payments)
+      .where(and(eq(payments.userId, userId), eq(payments.status, "succeeded")))
+      .limit(1);
+    if (paid.length > 0) {
+      return { status: "recorded", userId, firstWrite };
+    }
+    // firstWrite is the exactly-once signal, so the notice goes out here
+    // (never throws — see send-email.ts).
+    await sendPaymentFailedEmail(userId, {
+      amountCents: intent.amount,
+      currency: intent.currency,
+      cardBrand: card?.brand ?? null,
+      cardLast4: card?.last4 ?? null,
     });
   }
 

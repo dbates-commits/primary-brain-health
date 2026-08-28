@@ -62,7 +62,7 @@ export async function handleStripeWebhook(req: Request): Promise<Response> {
         break;
       }
       case "payment_intent.payment_failed": {
-        await recordFailedPayment(event.data.object as Stripe.PaymentIntent);
+        await handleFailed(event.data.object as Stripe.PaymentIntent);
         break;
       }
       case "charge.refunded": {
@@ -141,4 +141,26 @@ async function handleSucceeded(intent: Stripe.PaymentIntent): Promise<void> {
     // Surface as a retryable failure so Stripe redelivers and we re-attempt.
     throw new Error(`Linus registration failed for ${context}`);
   }
+}
+
+/**
+ * Record the declined payment. Re-fetches with the latest charge expanded for
+ * the same reason `handleSucceeded` does: the event payload carries
+ * `latest_charge` as a bare id, so the brand/last4 that name the card in the
+ * decline email and on the `payments` row are not in it (pbh-is2).
+ *
+ * Unlike the succeeded path there is nothing to register, and a failure to
+ * re-fetch should not cost us the record — the thin intent still has the id,
+ * amount and error, which is everything except the card.
+ */
+async function handleFailed(intent: Stripe.PaymentIntent): Promise<void> {
+  let full = intent;
+  try {
+    full = await getStripe().paymentIntents.retrieve(intent.id, {
+      expand: ["latest_charge"],
+    });
+  } catch (err) {
+    console.error(`Stripe webhook: could not expand ${intent.id}:`, err);
+  }
+  await recordFailedPayment(full);
 }

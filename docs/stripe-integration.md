@@ -72,7 +72,7 @@ Register these on the Dashboard endpoint (and they're what `route.ts` switches o
 | Event | Effect |
 | :---- | :---- |
 | `payment_intent.succeeded` | record `succeeded` (+ brand/last4) → audit |
-| `payment_intent.payment_failed` | record `failed` → audit |
+| `payment_intent.payment_failed` | record `failed` → audit → payment-failed email |
 | `charge.refunded` | record `refunded` → audit |
 
 ### External hosts in play

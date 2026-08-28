@@ -51,7 +51,8 @@ export const emailPreviews: EmailPreview[] = [
     name: "Payment failed",
     subject: "Your payment didn't go through",
     trigger:
-      "Sent when a payment attempt fails. NOT CURRENTLY SENT — the Stripe webhook doesn't yet handle the failure event; the template is what that send will use.",
+      "Once per declined PaymentIntent — the payment step mints a fresh one each " +
+      "time it mounts, so three declines send three. Skipped once the customer has paid.",
     element: PaymentFailedEmail(PaymentFailedEmail.PreviewProps),
   },
   {
