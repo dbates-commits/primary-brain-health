@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -9,7 +9,7 @@ import { Button, PhosphorIcon } from "@pbh/ui";
 import { requestLoginLinkInline } from "@/app/login/actions";
 import { useSignOut } from "@/lib/use-sign-out";
 import { LoginMenu } from "./LoginMenu";
-import { LoginPanel } from "./LoginPanel";
+import { MobileLoginModal } from "./MobileLoginModal";
 import { UserMenu } from "./UserMenu";
 import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
 
@@ -30,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -39,15 +39,35 @@ export function Header() {
   const { data: session } = useSession();
   const firstName = session?.user?.firstName;
   const { signOut, pending: signingOut } = useSignOut();
+  // Focus goes back to whichever of these the user came from. Held as refs
+  // rather than restored by the modal on unmount: by then the drawer may be
+  // `inert`, and focusing an inert node drops focus to `<body>` in silence.
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const loginRowRef = useRef<HTMLButtonElement>(null);
+  // The desktop fallback: at `lg` the hamburger and the drawer's rows are all
+  // `lg:hidden`, so the logo is the only control from this nav still on screen.
+  const logoRef = useRef<HTMLAnchorElement>(null);
 
   /**
-   * Close the drawer, collapsing the login panel with it. The drawer is
-   * animated shut rather than unmounted, so a panel left disclosed would still
-   * be there — invisible and zero-height — the next time it opens.
+   * Close the drawer and the login modal together. The drawer is animated shut
+   * rather than unmounted, so a modal left open over it would still be there —
+   * over an invisible, zero-height menu — with no way back.
    */
   function closeMobileMenu() {
     setMobileMenuOpen(false);
-    setLoginOpen(false);
+    setLoginModalOpen(false);
+  }
+
+  /** Dismiss the whole stack and put focus back on the hamburger. */
+  function closeFromLoginModal() {
+    closeMobileMenu();
+    menuButtonRef.current?.focus();
+  }
+
+  /** Step back to the drawer, which has been open underneath all along. */
+  function backToMenu() {
+    setLoginModalOpen(false);
+    loginRowRef.current?.focus();
   }
 
   useEffect(() => {
@@ -56,6 +76,30 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Crossing into desktop with the drawer or the modal open would strand both:
+  // the drawer is `lg:hidden` and so is the hamburger, so the full-screen
+  // overlay — and its scroll lock — would have no reachable control left to
+  // dismiss them. `lg` here is the same 1024px the classNames below use.
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => {
+      if (!desktop.matches) {
+        return;
+      }
+      // Focus has to be placed, not just dropped: with the modal open it is
+      // inside a portal that is about to go, and the two deliberate exits
+      // above both aim at controls that are `lg:hidden` at this width.
+      const focusWasInTheModal = loginModalOpen;
+      closeMobileMenu();
+      if (focusWasInTheModal) {
+        logoRef.current?.focus();
+      }
+    };
+    onChange();
+    desktop.addEventListener("change", onChange);
+    return () => desktop.removeEventListener("change", onChange);
+  }, [loginModalOpen]);
 
   function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -145,6 +189,7 @@ export function Header() {
       <div className="flex justify-between items-center gap-10 py-5 px-6 lg:px-10 max-w-[90rem] mx-auto">
         {/* Logo */}
         <a
+          ref={logoRef}
           href="/"
           onClick={handleLogoClick}
           className="flex items-center"
@@ -206,6 +251,7 @@ export function Header() {
 
         {/* Mobile Menu Button */}
         <button
+          ref={menuButtonRef}
           className="lg:hidden p-2 text-primary"
           onClick={() => {
             if (mobileMenuOpen) {
@@ -216,28 +262,15 @@ export function Header() {
           }}
           aria-label="Toggle menu"
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            {mobileMenuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
+          {/* Phosphor, not a hand-drawn path: this X and the one in
+              `MobileLoginModal` sit in the same place at the same size, so
+              drawing them from different sources shows up as the glyph
+              changing weight the moment the modal opens. */}
+          <PhosphorIcon
+            name={mobileMenuOpen ? "X" : "List"}
+            size={24}
+            aria-hidden="true"
+          />
         </button>
       </div>
 
@@ -297,34 +330,16 @@ export function Header() {
                   </button>
                 </>
               ) : (
-                <>
-                  {/* Same panel as the desktop popover, disclosed inline — the
-                      drawer is already an overlay, so nesting a second one in
-                      it would be one layer too many. */}
-                  <button
-                    type="button"
-                    onClick={() => setLoginOpen((v) => !v)}
-                    aria-expanded={loginOpen}
-                    className="flex items-center gap-1 py-2 text-left font-body text-base font-semibold text-primary"
-                  >
-                    Login
-                    <PhosphorIcon
-                      name="CaretDown"
-                      size={16}
-                      aria-hidden="true"
-                      className={cn(
-                        "transition-transform",
-                        loginOpen && "rotate-180",
-                      )}
-                    />
-                  </button>
-                  {loginOpen && (
-                    <LoginPanel
-                      action={requestLoginLinkInline}
-                      onDone={() => setLoginOpen(false)}
-                    />
-                  )}
-                </>
+                // A plain row now, not a disclosure: it opens
+                // `MobileLoginModal` over the drawer (Figma 2155:12505).
+                <button
+                  ref={loginRowRef}
+                  type="button"
+                  onClick={() => setLoginModalOpen(true)}
+                  className="py-2 text-left font-body text-base font-semibold text-primary"
+                >
+                  Login
+                </button>
               )}
 
               {!firstName && (
@@ -343,6 +358,16 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {/* Outside the drawer, and portalled out of the nav entirely — the nav's
+          `backdrop-blur` would otherwise become the containing block for its
+          `fixed` overlay. The drawer stays open underneath it. */}
+      <MobileLoginModal
+        open={loginModalOpen}
+        onBack={backToMenu}
+        onClose={closeFromLoginModal}
+        action={requestLoginLinkInline}
+      />
     </nav>
   );
 }

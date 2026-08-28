@@ -1,19 +1,42 @@
+import { getProfileValues } from "@/lib/profile";
 import { AccountCard } from "./AccountCard";
+import { DeleteAccountPanelWithSignOut } from "./DeleteAccountPanelWithSignOut";
+import { deleteAccountAction } from "./actions";
 
 /**
- * TODO: Delete Account — Figma 2092:13184. Heading and sub-copy over a rule,
- * then the destructive button. `@pbh/ui`'s `Button` has no `danger` colour yet
- * (Figma uses `colors/pink/600` #d60012); adding one is part of this card.
+ * Delete Account (Figma 1988:12282), the last card on the account page.
  *
- * Stub: this card's slot in the grid is final. Everything inside, `min-h-*`
- * included, goes when the real card lands.
+ * I/O only. Everything visible lives in `DeleteAccountPanel` — unlike
+ * `ProfileInformationCard`, which keeps its header here, because this card's
+ * copy is the part most worth pinning in a story.
+ *
+ * The email is read rather than taken from the session: the session callback
+ * returns `{ id, firstName }` and nothing more, on purpose. `getProfileValues`
+ * already selects it in an explicit column list, so this needs no query of its
+ * own.
+ *
+ * Figma's 32px padding is `AccountCard`'s default `md:p-8`, so no override.
+ *
+ * No Storybook story: this is an async server component that reaches the
+ * database. `Account/DeleteAccountPanel` is where the UI is exercised.
  */
-export function DeleteAccountCard() {
+export async function DeleteAccountCard({ userId }: { userId: string }) {
+  const initial = await getProfileValues(userId);
+
   return (
-    <AccountCard className="min-h-[232px]">
-      <p className="font-body text-base text-on-surface-variant">
-        Delete Account — coming soon.
-      </p>
+    <AccountCard>
+      {initial ? (
+        <DeleteAccountPanelWithSignOut
+          email={initial.email}
+          action={deleteAccountAction}
+        />
+      ) : (
+        // Unreachable in practice — a session implies a row — but the read is
+        // honestly nullable rather than asserted.
+        <p className="font-body text-base text-on-surface-variant">
+          We couldn&rsquo;t load your account. Please refresh and try again.
+        </p>
+      )}
     </AccountCard>
   );
 }

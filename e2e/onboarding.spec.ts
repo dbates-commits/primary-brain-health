@@ -1,5 +1,6 @@
 import { test, expect, type FrameLocator, type Page } from "@playwright/test";
 import { reachConsentStep, submitConsent } from "./helpers/booking";
+import { payWith, stripeFrame } from "./helpers/stripe";
 
 /**
  * The onboarding money-path through Stripe: marketing booking → email confirm →
@@ -17,12 +18,6 @@ import { reachConsentStep, submitConsent } from "./helpers/booking";
  *   - Stripe TEST keys + an ACTIVE assessment price
  */
 const FULL_FLOW = process.env.E2E_FULL_FLOW === "1";
-
-/**
- * The welcome screen's CTA target. With it unset the screen deliberately renders
- * no button at all, so the href assertion is skipped rather than failed.
- */
-const ENGAGEMENT_APP_URL = process.env.NEXT_PUBLIC_ENGAGEMENT_APP_URL ?? "";
 
 // Accepted Stripe test cards across brands. HSA/FSA cards are ordinary branded
 // cards — Stripe test mode has no distinct HSA/FSA number and the funnel doesn't
@@ -57,32 +52,7 @@ const DECLINED_CARDS = [
 async function reachPaymentStep(page: Page): Promise<FrameLocator> {
   await reachConsentStep(page);
   await submitConsent(page);
-  return page.frameLocator('iframe[name="embedded-checkout"]');
-}
-
-/**
- * Fill the Stripe card fields (stable ids in the embedded-checkout frame) and
- * submit. Opts out of Link "save my info", which otherwise forces a required
- * phone number and blocks the card charge.
- */
-async function payWith(stripe: FrameLocator, cardNumber: string): Promise<void> {
-  await expect(stripe.locator("#cardNumber")).toBeVisible({ timeout: 30_000 });
-  await stripe.locator("#cardNumber").fill(cardNumber);
-  await stripe.locator("#cardExpiry").fill("1234");
-  await stripe.locator("#cardCvc").fill("123");
-  const cardName = stripe.locator("#billingName");
-  if (await cardName.count()) {
-    await cardName.fill("Ada Lovelace");
-  }
-  const postal = stripe.locator("#billingPostalCode");
-  if (await postal.count()) {
-    await postal.fill("02101");
-  }
-  const saveInfo = stripe.getByLabel(/save my info/i);
-  if ((await saveInfo.count()) && (await saveInfo.isChecked())) {
-    await saveInfo.uncheck();
-  }
-  await stripe.locator('button[type="submit"]').click();
+  return stripeFrame(page);
 }
 
 test.describe("onboarding payment", () => {
@@ -102,20 +72,23 @@ test.describe("onboarding payment", () => {
         timeout: 30_000,
       });
 
-      // Payment is the last step we own: the flow navigates to /welcome, the
-      // hand-off out to the Linus Engagement App.
+      // Payment is the last step we own: the flow navigates to /welcome, where
+      // the customer picks how to begin.
       await page.waitForURL(/\/welcome$/, { timeout: 30_000 });
-      // By role, not text: Next's route announcer carries the page title, which
-      // is the same sentence. The heading renders a typographic apostrophe
-      // (`&rsquo;` → U+2019), so match either form rather than the ASCII one.
+      // By role, not text: the route announcer also carries the page title, and
+      // matching by role keeps this on the <h1> itself.
       await expect(
-        page.getByRole("heading", { name: /you[’']re all set/i }),
+        page.getByRole("heading", { name: /choose how to start/i }),
       ).toBeVisible({ timeout: 30_000 });
-      if (ENGAGEMENT_APP_URL) {
-        await expect(
-          page.getByRole("link", { name: /go to your app/i }),
-        ).toHaveAttribute("href", ENGAGEMENT_APP_URL);
-      }
+      // Both cards render. Their destinations are still `#` placeholders, so
+      // there is no href worth asserting until scheduling and the assessments
+      // hand-off are wired up.
+      await expect(
+        page.getByRole("heading", { name: /talk to a brain health coach/i }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: /start with assessments/i }),
+      ).toBeVisible();
     });
   }
 

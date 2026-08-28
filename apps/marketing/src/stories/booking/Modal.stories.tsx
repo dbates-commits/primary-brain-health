@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fireEvent, fn, userEvent, waitFor, within } from 'storybook/test';
 import { StepHeader } from "@pbh/ui";
 import { Modal } from "@/components/booking/Modal";
+import { BookingStepper } from "@/components/booking/BookingStepper";
 import { ModalStoryHarness } from "./ModalStoryHarness";
 
 const PARAGRAPHS = Array.from({ length: 14 }, (_, i) => i);
@@ -176,5 +177,52 @@ export const ReopensFromTrigger: Story = {
     await waitFor(async () => {
       await expect(body.getByRole('dialog')).toBeInTheDocument();
     });
+  },
+};
+
+/**
+ * The `banner` slot: a full-bleed band above everything, with the close button
+ * measured from below it rather than from the panel.
+ *
+ * The assertion is geometric on purpose. The close button is
+ * `absolute right-4 top-4`, and the band's fourth tab is `flex-1 px-4
+ * overflow-clip` — position it against the panel and it lands on "Start
+ * Assessment". Nothing about the class list would show that; only the boxes do.
+ */
+export const WithStepperBanner: Story = {
+  args: {
+    label: 'Sign consent form',
+    banner: (
+      <BookingStepper
+        furthestStep="consent"
+        activeStep="consent"
+        onSelectStep={fn()}
+      />
+    ),
+    header: <StepHeader title="Consent Form" subtitle="Please review the terms below." />,
+    children: (
+      <div className="pb-6 sm:pb-10">
+        <p className="text-sm text-on-surface-variant">The step body.</p>
+      </div>
+    ),
+  },
+  play: async () => {
+    // Portalled out of the canvas, and it fades in over 200ms — wait for it to
+    // be *visible*, not merely present, or every measurement below races it.
+    const screen = () => within(document.body);
+    const dialog = await waitFor(async () => {
+      const found = screen().getByRole('dialog');
+      await expect(found).toBeVisible();
+      return found;
+    });
+
+    const band = within(dialog)
+      .getByRole('navigation', { name: 'Booking progress' })
+      .getBoundingClientRect();
+    const close = screen()
+      .getByRole('button', { name: 'Close' })
+      .getBoundingClientRect();
+
+    await expect(close.top).toBeGreaterThanOrEqual(band.bottom);
   },
 };

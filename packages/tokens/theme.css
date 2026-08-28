@@ -75,6 +75,14 @@
      `border/default`; kept apart so the two can move independently. */
   --color-border-subtle: #d9d9d9;
 
+  /* Figma `border/strong` — the hairline on the Cancel button in the Delete
+     Account modal (2060:7053), the one place the design outlines a button in
+     grey rather than in its own colour. Shares a hex with `neutral-500`, which
+     is the *different* Figma variable `text/tertiary`; kept apart for the same
+     reason `border-subtle` and `neutral-350` are, so nudging a border can never
+     silently repaint a disabled field label. */
+  --color-border-strong: #888884;
+
   /* Figma `text/secondary` — the sub-copy under an account-card heading
      (2092:13144), and the label of a field that is permanently locked rather
      than merely busy. Cooler and lighter than `on-surface-variant` (#44474d),
@@ -128,6 +136,27 @@
      from `error` (#ba1a1a), which the design reserves for message text. */
   --color-accent-pink: #d6007f;
 
+  /* Figma `colors/pink/600` — the ground under a destructive action: the Delete
+     Account button on the account page (1988:12282) and the confirm button in
+     its modal (2060:7053). Neither red already here fits. `error` (#ba1a1a) is
+     the MD3 role the design reserves for *message text*, and `accent-pink`
+     (#d6007f) is the magenta a form field's outline turns on an error; folding
+     this onto either would repaint something that is currently correct.
+
+     NOTE: the modal node reports its binding as `accent/pink` while the card
+     node reports `colors/pink/600`, for the same #d60012 — so Figma has two
+     names for this and one of them collides with the magenta above. The Figma
+     sync is manual, so this is the name we keep. */
+  --color-danger: #d60012;
+  --color-on-danger: #ffffff;
+
+  /* Figma `accent/green`, the label on the account page's `Active` plan badge,
+     over a pale ground the design leaves as a raw hex. `-container` names that
+     ground the way `error` / `error-container` already do. Not a general
+     success colour — nothing else uses either value yet. */
+  --color-accent-green: #85c559;
+  --color-accent-green-container: #e2f6e9;
+
   /* Error */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
@@ -179,6 +208,7 @@
   --color-surface-variant: var(--color-surface-variant);
   --color-background-brand-subtle: var(--color-background-brand-subtle);
   --color-border-subtle: var(--color-border-subtle);
+  --color-border-strong: var(--color-border-strong);
   --color-text-secondary: var(--color-text-secondary);
   --color-brand-muted: var(--color-brand-muted);
   --color-toast-surface: var(--color-toast-surface);
@@ -198,6 +228,10 @@
   --color-neutral-900: var(--color-neutral-900);
   --color-on-surface-warm: var(--color-on-surface-warm);
   --color-accent-pink: var(--color-accent-pink);
+  --color-danger: var(--color-danger);
+  --color-on-danger: var(--color-on-danger);
+  --color-accent-green: var(--color-accent-green);
+  --color-accent-green-container: var(--color-accent-green-container);
   --color-error: var(--color-error);
   --color-on-error: var(--color-on-error);
   --color-error-container: var(--color-error-container);

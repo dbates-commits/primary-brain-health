@@ -36,10 +36,25 @@ export const DETAILS_HEADER = {
     "Please tell us about the person who’ll be taking the assessment. The assessment uses these details — like age and education — to give accurate, personalized results.",
 } as const;
 
+/**
+ * What the details step already holds, for someone re-entering it. Exported so
+ * the app's server action and this form agree on one shape — a `"use server"`
+ * module can only export async functions, so the type cannot live beside the
+ * action that returns it.
+ */
+export interface DetailsInitialValues {
+  dateOfBirth?: string;
+  zip?: string;
+  phone?: string;
+  gender?: string;
+  educationLevel?: string;
+}
+
 export function DetailsForm({
   action,
   firstName,
   lastName,
+  initialValues,
   onComplete,
   showHeader = true,
 }: {
@@ -47,6 +62,14 @@ export function DetailsForm({
   /** Account holder's name, from signup — prefilled into the fields below. */
   firstName: string;
   lastName: string;
+  /**
+   * What the row already holds, for someone re-entering this step to correct
+   * something. Absent on a first pass, when there is nothing to prefill.
+   *
+   * The name pair stays a separate prop: it arrives from signup before any of
+   * this exists, and is the one thing the step is known to have on a first pass.
+   */
+  initialValues?: DetailsInitialValues;
   onComplete: () => void;
   showHeader?: boolean;
 }) {
@@ -54,9 +77,11 @@ export function DetailsForm({
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const values = state.status === "error" ? state.values : undefined;
 
-  const [phone, setPhone] = useState("");
-  const [gender, setGender] = useState("");
-  const [educationLevel, setEducationLevel] = useState("");
+  const [phone, setPhone] = useState(initialValues?.phone ?? "");
+  const [gender, setGender] = useState(initialValues?.gender ?? "");
+  const [educationLevel, setEducationLevel] = useState(
+    initialValues?.educationLevel ?? "",
+  );
 
   const phoneRef = useRef<HTMLInputElement>(null);
   const genderRef = useRef<HTMLSelectElement>(null);
@@ -158,7 +183,7 @@ export function DetailsForm({
                 aria-describedby={
                   fieldErrors?.dateOfBirth ? "dateOfBirth-error" : undefined
                 }
-                defaultValue={values?.dateOfBirth ?? ""}
+                defaultValue={values?.dateOfBirth ?? initialValues?.dateOfBirth ?? ""}
                 className={fieldClass}
               />
               <FieldError
@@ -209,7 +234,7 @@ export function DetailsForm({
                 aria-required="true"
                 aria-invalid={fieldErrors?.zip ? true : undefined}
                 aria-describedby={fieldErrors?.zip ? "zip-error" : undefined}
-                defaultValue={values?.zip ?? ""}
+                defaultValue={values?.zip ?? initialValues?.zip ?? ""}
                 className={fieldClass}
               />
               <FieldError id="zip-error" message={fieldErrors?.zip} />

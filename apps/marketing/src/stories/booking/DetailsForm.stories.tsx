@@ -157,3 +157,38 @@ export const Submitting: Story = {
     });
   },
 };
+
+/**
+ * Re-entering the step from the stepper, with the row already filled.
+ *
+ * Without `initialValues` the form comes up blank however much is stored, and
+ * `validateProfileFields` then refuses to submit it — so a customer going back
+ * to fix one field would have to retype five. This is the story that pins the
+ * prefill.
+ */
+export const Prefilled: Story = {
+  args: {
+    initialValues: {
+      dateOfBirth: '1962-04-18',
+      zip: '02116',
+      phone: '(617) 555-0142',
+      // The canonical values, not display labels — `normalizeGender` and
+      // `normalizeEducationLevel` are what `getBookingDetailsValues` runs the
+      // row through, and anything outside these sets fails Linus registration.
+      gender: 'FEMALE',
+      educationLevel: 'ED_YEARS_16',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByLabelText('Birthday')).toHaveValue('1962-04-18');
+    await expect(canvas.getByLabelText('ZIP Code')).toHaveValue('02116');
+    await expect(canvas.getByLabelText('Phone Number')).toHaveValue(
+      '(617) 555-0142',
+    );
+    await expect(canvas.getByLabelText('Gender')).toHaveValue('FEMALE');
+    await expect(
+      canvas.getByLabelText('Highest Level of education'),
+    ).toHaveValue('ED_YEARS_16');
+  },
+};

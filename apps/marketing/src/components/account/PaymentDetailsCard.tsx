@@ -1,19 +1,36 @@
+import { getPaymentDetails } from "@/lib/payment-details";
 import { AccountCard } from "./AccountCard";
+import { PaymentDetailsPanel } from "./PaymentDetailsPanel";
+import { openBillingPortalAction } from "./actions";
 
 /**
- * TODO: Payment Details — Figma 2092:13169. Heading and sub-copy over a rule,
- * the saved card line, the receipts line with its "View Receipts" link, and the
- * Update Payment Information button.
+ * Payment Details (Figma 1988:12234) — the card we charged, where the receipts
+ * went, and the two routes into the Stripe Customer Portal.
  *
- * Stub: this card's slot in the grid is final. Everything inside, `min-h-*`
- * included, goes when the real card lands.
+ * I/O only; everything visible lives in `PaymentDetailsPanel`. Figma's 32px
+ * padding is `AccountCard`'s default `md:p-8`, so no override.
+ *
+ * No Storybook story: this is an async server component that reaches the
+ * database. `Account/PaymentDetailsPanel` is where the UI is exercised.
  */
-export function PaymentDetailsCard() {
+export async function PaymentDetailsCard({ userId }: { userId: string }) {
+  const details = await getPaymentDetails(userId);
+
   return (
-    <AccountCard className="min-h-[328px]">
-      <p className="font-body text-base text-on-surface-variant">
-        Payment Details — coming soon.
-      </p>
+    <AccountCard>
+      {details ? (
+        <PaymentDetailsPanel
+          details={details}
+          action={openBillingPortalAction}
+        />
+      ) : (
+        // Unreachable in practice — a session implies a row — but the read is
+        // honestly nullable rather than asserted.
+        <p className="font-body text-base text-on-surface-variant">
+          We couldn&rsquo;t load your payment details. Please refresh and try
+          again.
+        </p>
+      )}
     </AccountCard>
   );
 }

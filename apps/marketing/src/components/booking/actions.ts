@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { auth } from "@/auth";
 import {
   completeProfileCore,
   createAccountCore,
@@ -11,16 +10,18 @@ import {
   recordConsentCore,
   resendBookingConfirmation,
   resolveBookingResumeState,
-  resolveBookingUserId,
   type BookingResumeState,
 } from "@pbh/booking/server";
 import {
   CONSENT_STAMP_ERROR,
   CONSENT_STAMP_FIELD,
   type ConsentState,
+  type DetailsInitialValues,
   type DetailsState,
   type SignupState,
 } from "@pbh/booking";
+import { resolveActorId } from "@/lib/booking-actor";
+import { getProfileValues } from "@/lib/profile";
 
 /**
  * Real per-step server actions for the marketing booking modal (pbh-ggr.5),
@@ -41,6 +42,7 @@ import {
 const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
+
 export async function signupAction(
   _prev: SignupState,
   formData: FormData,
@@ -55,7 +57,7 @@ export async function detailsAction(
   _prev: DetailsState,
   formData: FormData,
 ): Promise<DetailsState> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return {
       status: "error",
@@ -78,7 +80,7 @@ export async function consentAction(
   _prev: ConsentState,
   formData: FormData,
 ): Promise<ConsentState> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return { status: "error", message: NO_BOOKING_SESSION };
   }
@@ -110,20 +112,15 @@ export async function consentAction(
  * marketing home page stays statically rendered — only a customer actually
  * returning from a confirmation link pays for the round-trip.
  *
- * Falls back to the Auth.js session when the booking cookie is gone. That
- * cookie is per-browser and lives 2h, which is enough for the email round-trip
- * it was built for but not for the decline notice, whose CTA sends the customer
- * through sign-in on whatever device opened the mail (pbh-is2). A session is
- * the stronger proof of the two — it is a real sign-in, not a marker that this
- * browser once started a booking.
- *
  * Returns null for a missing, forged, or expired cookie with no session behind
  * it, and for a user that no longer exists. The step is computed from persisted
  * state, never from anything the client sends.
+ *
+ * Identity comes from `resolveActorId`, so a customer who signed back in after
+ * their booking cookie aged out is recognised here too.
  */
 export async function getBookingResumeState(): Promise<BookingResumeState | null> {
-  const userId =
-    resolveBookingUserId(await cookies()) ?? (await auth())?.user?.id;
+  const userId = await resolveActorId();
   if (!userId) {
     return null;
   }
@@ -131,14 +128,45 @@ export async function getBookingResumeState(): Promise<BookingResumeState | null
 }
 
 /**
- * Re-send the confirmation email for the browser holding a booking cookie.
+ * What the details step already holds, for someone re-entering it to correct
+ * something.
  *
- * Takes no argument: the recipient is whoever the cookie says, so this can't be
- * pointed at another customer's inbox. Throttled inside
+ * Read lazily, only when a customer actually goes back — not folded into
+ * `getBookingResumeState`, which runs on every return from a confirmation link
+ * and would then be pushing seven PII columns into the payload for the majority
+ * who never re-enter this step. That function answers "how far did this booking
+ * get"; this one answers "what is in the row", and they are different questions.
+ *
+ * `email` is dropped: the step neither shows nor writes it, so it has no reason
+ * to travel.
+ */
+export async function getBookingDetailsValues(): Promise<DetailsInitialValues | null> {
+  const userId = await resolveActorId();
+  if (!userId) {
+    return null;
+  }
+  const values = await getProfileValues(userId);
+  if (!values) {
+    return null;
+  }
+  return {
+    dateOfBirth: values.dateOfBirth,
+    zip: values.zip,
+    phone: values.phone,
+    gender: values.gender,
+    educationLevel: values.educationLevel,
+  };
+}
+
+/**
+ * Re-send the confirmation email to whoever is acting.
+ *
+ * Takes no argument: the recipient comes from the cookie or the session, so this
+ * can't be pointed at another customer's inbox. Throttled inside
  * `resendBookingConfirmation`.
  */
 export async function resendConfirmationAction(): Promise<{ ok: true }> {
-  const userId = resolveBookingUserId(await cookies());
+  const userId = await resolveActorId();
   if (!userId) {
     return { ok: true };
   }

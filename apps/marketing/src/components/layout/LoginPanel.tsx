@@ -19,8 +19,9 @@ const initialState: LoginState = { status: "idle" };
  * 1988:10890): request a magic link without leaving the page.
  *
  * Carries its own card chrome — white, 12px radius, 32px padding — because the
- * same component is also dropped straight into the mobile drawer, where there
- * is no popover around it. Width comes from the parent.
+ * same component is also the card inside `MobileLoginModal`, where there is no
+ * popover around it. Width, and on mobile the tighter 20px padding, come from
+ * the parent's `className`.
  *
  * The action is injected rather than imported so Storybook can render all four
  * states; `requestLoginLinkInline` is `"use server"` and pulls in Auth.js and
@@ -61,7 +62,10 @@ export function LoginPanel({
       )}
     >
       <div className="flex flex-col gap-4">
-        <Heading as="h2" size="sm">
+        {/* `size="sm"` is `text-xl md:text-2xl`; both designs draw this at
+            24px, so the mobile step is lifted to match rather than reading 20px
+            below `md`. */}
+        <Heading as="h2" size="sm" className="text-2xl">
           {state.status === "sent" ? "Email Confirmation" : "Login"}
         </Heading>
         <p className="text-base text-on-surface">
@@ -120,10 +124,17 @@ export function LoginPanel({
             {/* Disabled on emptiness only, never on validity: a button you
                 can't press can't tell you why, so a malformed address has to
                 reach the server and come back as an error message. */}
+            {/* Figma draws the pristine CTA `brand/muted` — pale but fully
+                opaque, not the 50% wash `Button` gives every disabled button.
+                Same override, and same reasoning, as `ProfileForm`'s Save. */}
             <Button
               type="submit"
               color="primary"
-              className="w-full"
+              className={cn(
+                "w-full",
+                email.trim().length === 0 &&
+                  "bg-brand-muted opacity-100 hover:brightness-100",
+              )}
               disabled={email.trim().length === 0}
             >
               {pending ? "Sending…" : "Send Confirmation Email"}

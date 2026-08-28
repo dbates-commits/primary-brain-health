@@ -1,16 +1,21 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
-import { db, users, writeAuditLog } from "@pbh/db";
+import { and, eq } from "drizzle-orm";
+import { db, payments, users, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry, getStripe } from "@pbh/payments";
 import { getPackage, resolvePackageKey } from "../packages";
 import type { CreateCheckoutResult } from "../types";
 import { recordSucceededPayment } from "./fulfill";
+import { ensureStripeCustomer } from "./stripe-customer";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
 const ACCOUNT_NOT_FOUND = "We couldn't find your account.";
 const CHECKOUT_START_FAILED = "Couldn't start payment. Please try again.";
+// The one error here that names its cause: the customer is not stuck, they are
+// finished, and telling them so is what stops them retrying the card.
+const ALREADY_PAID =
+  "You've already paid for this assessment. Check your email for the receipt.";
 
 function checkoutError(message: string): CreateCheckoutResult {
   return { status: "error", message };
@@ -47,6 +52,23 @@ export async function createCheckoutSessionCore(
     return checkoutError(ACCOUNT_NOT_FOUND);
   }
 
+  // Refuse to mint a second Session for someone who has already paid (pbh-ypf).
+  // `PaymentStep` mints one per mount, so any route back into the payment step —
+  // a stale tab, Back, a `?booking=resume` link followed twice — was a reachable
+  // double charge. The modal locks that step, but a UI lock is not a control:
+  // these are server actions, and the guard has to be here.
+  //
+  // Same test the resume resolver calls `done` and `getEntitledTrack` calls
+  // entitled: one `payments` row that reached `succeeded`.
+  const [paid] = await db
+    .select({ id: payments.id })
+    .from(payments)
+    .where(and(eq(payments.userId, id), eq(payments.status, "succeeded")))
+    .limit(1);
+  if (paid) {
+    return checkoutError(ALREADY_PAID);
+  }
+
   // The package stored on the account at signup wins. The client also sends a
   // key, but only as a fallback for accounts created before this was recorded:
   // trusting it would let someone drive the $449 flow in the UI while quietly
@@ -73,17 +95,33 @@ export async function createCheckoutSessionCore(
     // Catalog entry is the source of truth for amount/currency/name; we only
     // pass its price ID as the line item and let Stripe render the rest.
     const catalog = await getAssessmentCatalogEntry(pkg.priceEnvVar);
-    // One-time guest checkout — no Stripe Customer. We don't save cards for
-    // off-session reuse, so a durable Customer object buys nothing here; the
-    // receipt goes to `receipt_email` and the user is tracked via metadata.
-    // `customer_email` prefills the email field in Embedded Checkout from the
-    // account we already have (it doesn't create a Customer).
+    // Charge a durable Customer, not a guest. This was guest checkout while
+    // /profile had nothing to show: no card is saved for off-session reuse, so
+    // the Customer bought nothing. The account page's Payment Details card
+    // changes that — the Customer Portal behind "View Receipts" and "Update
+    // Payment Information" is addressed by `cus_…` and by nothing else — and an
+    // upgrade later should be a second charge on the same person rather than a
+    // second stranger with the same address. `customer` and `customer_email`
+    // are mutually exclusive, so the email is carried by the Customer instead.
+    const customerId = await ensureStripeCustomer(user);
+    // `invoice_creation` is what puts anything in the portal's billing history.
+    // Without it a one-off PaymentIntent leaves a charge and a Stripe receipt
+    // but no invoice, and the portal renders an empty list — so "View Receipts"
+    // would open a page that proves nothing. Off by default; it costs one
+    // finalized invoice per payment.
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
       redirect_on_completion: "never",
       locale: "en",
       mode: "payment",
-      customer_email: user.email,
+      customer: customerId,
+      // Without this, naming a `customer` makes Checkout stop writing back:
+      // `ensureStripeCustomer` creates the Customer from email + name only, and
+      // the billing address the buyer types here would be discarded. The
+      // invoice below is generated from the Customer, so the bill-to line on
+      // every receipt would be blank (pbh-yzl).
+      customer_update: { address: "auto", name: "auto" },
+      invoice_creation: { enabled: true },
       payment_method_types: ["card"],
       line_items: [{ quantity: 1, price: catalog.priceId }],
       payment_intent_data: { receipt_email: user.email, metadata },

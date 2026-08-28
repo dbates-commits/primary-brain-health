@@ -16,6 +16,7 @@ import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { db, users, writeAuditLog } from "@pbh/db";
 import {
+  AccountDeactivatedEmail,
   AssessmentReadyEmail,
   ConfirmEmailEmail,
   PaymentFailedEmail,
@@ -240,11 +241,13 @@ export async function sendPaymentFailedEmail(
         failedOn: new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
           new Date(),
         ),
-        // Sign-in, not `/?booking=resume` directly: that marker only resolves
-        // against the booking cookie or a session, and this mail is usually
-        // opened on another device or well after the cookie's 2h (pbh-is2).
-        // Signing in lands on /welcome, which sends an unpaid customer back to
-        // `/?booking=resume` with the modal reopened on the payment step.
+        // Sign-in, not the resume marker directly: that marker resolves against
+        // the booking cookie or a session, and this mail is usually opened on
+        // another device or well after the cookie's 2h (pbh-is2). Signing in
+        // lands on /welcome, which bounces an unpaid customer to
+        // `/?booking=resume#booking` with the modal reopened on the step they
+        // left — identity there comes from `resolveActorId`, so the session is
+        // enough.
         updatePaymentUrl: `${siteBaseUrl()}/login?email=${encodeURIComponent(recipient.email)}`,
       }),
   );
@@ -290,5 +293,25 @@ export async function sendPaymentRefundedEmail(
         cardBrand: payment.cardBrand,
         cardLast4: payment.cardLast4,
       }),
+  );
+}
+
+/**
+ * Deletion request filed from the account page → the confirmation that we have
+ * it. Sent after `users.deactivated_at` is stamped, which is safe because that
+ * stamp keeps the row intact: `loadRecipient` still finds the real address.
+ *
+ * Lives here with the booking senders rather than in the app because this is
+ * the one place that owns Resend, the env gate and the `email_sent` audit row.
+ * It is the only sender re-exported from `./index` — see the note there.
+ */
+export async function sendAccountDeactivatedEmail(
+  userId: string,
+): Promise<SendEmailResult> {
+  return sendTemplate(
+    "account-deactivated",
+    userId,
+    "Your account has been deactivated",
+    (recipient) => AccountDeactivatedEmail({ firstName: recipient.firstName }),
   );
 }

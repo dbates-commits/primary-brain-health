@@ -89,6 +89,8 @@ export async function recordSucceededPayment(
       status: "succeeded",
       cardBrand: card?.brand ?? null,
       cardLast4: card?.last4 ?? null,
+      cardExpMonth: card?.exp_month ?? null,
+      cardExpYear: card?.exp_year ?? null,
       succeededAt: new Date(),
     })
     .onConflictDoUpdate({
@@ -100,6 +102,8 @@ export async function recordSucceededPayment(
         packageKey,
         cardBrand: card?.brand ?? null,
         cardLast4: card?.last4 ?? null,
+        cardExpMonth: card?.exp_month ?? null,
+        cardExpYear: card?.exp_year ?? null,
         succeededAt: new Date(),
       },
       // Skip (and return no row) if it's already succeeded → once-only audit.

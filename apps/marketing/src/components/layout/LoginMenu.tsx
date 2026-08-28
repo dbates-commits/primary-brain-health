@@ -16,8 +16,9 @@ import { usePopoverTransition } from "./use-popover-transition";
  * away. What it does borrow is the a11y floor — Escape to close, click-outside
  * to close, focus moved in on open and restored to the trigger on close.
  *
- * Desktop only. The mobile drawer renders `LoginPanel` inline instead, so there
- * is one form and one code path rather than two behaviours to keep in step.
+ * Desktop only. Below `lg`, `MobileLoginModal` puts the same `LoginPanel` on a
+ * full-screen surface — one form and one server action either way, with only
+ * the chrome around it differing.
  */
 export function LoginMenu() {
   const [open, setOpen] = useState(false);

@@ -6,7 +6,11 @@
  * actions can validate against the same canonical values.
  */
 export { SignupForm, SIGNUP_HEADER } from "./SignupForm";
-export { DetailsForm, DETAILS_HEADER } from "./DetailsForm";
+export {
+  DetailsForm,
+  DETAILS_HEADER,
+  type DetailsInitialValues,
+} from "./DetailsForm";
 export { ConsentForm, consentHeader } from "./ConsentForm";
 export { PaymentStep, PAYMENT_HEADER } from "./PaymentStep";
 export { StickyActions } from "./StickyActions";

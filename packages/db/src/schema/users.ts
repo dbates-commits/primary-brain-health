@@ -31,6 +31,14 @@ export const users = pgTable("users", {
   // a hint, or someone could show themselves the $449 flow and pay the $149
   // price. See ASSESSMENT_PACKAGES in @pbh/booking.
   selectedPackageKey: text("selected_package_key"),
+  // The account's durable Stripe Customer, created the first time they reach
+  // checkout. Checkout could run as a guest (`customer_email` prefills the form
+  // without creating anything), but the Customer Portal has no other handle: a
+  // portal session takes a `cus_…` and nothing else. It is also what makes a
+  // later plan upgrade a second charge on the same customer rather than a second
+  // stranger with the same email. Nullable: every account created before the
+  // portal existed has none, and one is minted on demand.
+  stripeCustomerId: text("stripe_customer_id").unique(),
   // `string` mode: a plain calendar date ("YYYY-MM-DD"), no time/timezone.
   dateOfBirth: date("date_of_birth", { mode: "string" }),
   zip: text(),
@@ -81,6 +89,19 @@ export const users = pgTable("users", {
   welcomeSeenAt: timestamp("welcome_seen_at", {
     withTimezone: true,
   }),
+  // Set when the customer files a deletion request from the account page. The
+  // row and every value in it are kept: `payments`, `consents` and `audit_log`
+  // all reference this table with ON DELETE no action and are retention-bearing
+  // (the first two append-only, the last on a six-year HIPAA clock), so there is
+  // nothing here we are free to erase on request. The erasure itself is an
+  // operator-run routine for now, and `deactivated_at IS NOT NULL` is its
+  // worklist.
+  //
+  // This single column carries the whole state. It locks sign-in — see
+  // `findAuthUserByEmail`, which stops treating the address as an account — and
+  // it makes the stamping UPDATE its own idempotency claim, so a double-submit
+  // or a replayed POST can only win once. See `deactivate-account-core.ts`.
+  deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

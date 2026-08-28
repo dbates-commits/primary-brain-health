@@ -52,12 +52,15 @@ Accessors: `getStripeSecretKey()` / `getStripeWebhookSecret()` in
 | :---- | :---- | :---- |
 | `createAssessmentCheckoutSession(userId)` | `apps/marketing/src/components/booking/payment/actions.ts` | Creates the Checkout Session (`ui_mode: "embedded_page"`), returns its `client_secret` + `sessionId` to mount Embedded Checkout |
 | `finalizeCheckoutSession(userId, checkoutSessionId)` | same | Client fast path, called from Embedded Checkout's `onComplete`: re-verify → record → sign in → return success, on which the flow navigates to `/welcome` |
+| `openBillingPortalAction(formData)` | `apps/marketing/src/components/account/actions.ts` | Both links on the account page's Payment Details card. Mints a one-shot Customer Portal URL and returns it — the card opens it in a new tab, so the customer keeps their place. The portal home for "View Receipts", the `payment_method_update` flow for "Update Payment Information" |
 
 ### Outbound (calls we make to Stripe)
 
 | Call | When |
 | :---- | :---- |
-| `checkout.sessions.create(...)` | On reaching the payment step |
+| `customers.create(...)` | First time an account reaches checkout (or opens the portal, for an account that paid as a guest). Claimed onto `users.stripe_customer_id` with `WHERE stripe_customer_id IS NULL`, so a race can't leave invoices on a customer no row points at |
+| `checkout.sessions.create(...)` | On reaching the payment step. Carries `customer` (never `customer_email` — they are mutually exclusive) and `invoice_creation: { enabled: true }`, which is what gives the portal's billing history anything to list |
+| `billingPortal.sessions.create(...)` | On either link of the Payment Details card. The URL is single-use and expires, so it is minted per click and never stored |
 | `checkout.sessions.retrieve(id, { expand: ['payment_intent.latest_charge'] })` | On client finalize (re-verify the Session's PaymentIntent + capture brand/last4) |
 | `paymentIntents.retrieve(id, { expand: ['latest_charge'] })` | Inside the webhook (re-verify + capture brand/last4) |
 | `webhooks.constructEvent(rawBody, sig, secret)` | Every inbound webhook (signature verification) |
@@ -216,7 +219,19 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook   # prints whsec_�
    reach them — use `stripe listen` locally or a stable preview alias.
 4. **Keep the route public** — if middleware (e.g. Clerk) is added, exclude
    `/api/stripe/webhook`.
-5. **Branding is Dashboard-side.** Embedded Checkout renders Stripe's prebuilt
+5. **The Customer Portal is Dashboard-side, and per mode.** The account page's
+   "View Receipts" and "Update Payment Information" both open it, and an
+   inactive configuration makes both fail. Under **Settings → Billing →
+   Customer portal**, activate a configuration with *Invoice history* and
+   *Payment methods → allow customers to update* enabled. Turn
+   *Subscriptions → cancel* **off**: nothing here is a subscription, so it would
+   draw a cancel section with nothing to cancel. The portal's own default return
+   URL is a single value per mode and would send Preview traffic to staging, so
+   `createBillingPortalUrl` passes `return_url` explicitly from `siteBaseUrl()`.
+6. **Receipt emails are off by default in live mode.** `receipt_email` on the
+   PaymentIntent sends nothing until **Settings → Payments → Customer emails →
+   Successful payments** is on. Test mode never sends them at all.
+7. **Branding is Dashboard-side.** Embedded Checkout renders Stripe's prebuilt
    form, so brand colors/logo/fonts are set under **Stripe Dashboard → Settings →
    Branding**, not via code (the old Elements `appearance` tokens are gone). Set
    this per mode (test vs live) so Preview and Production match.
