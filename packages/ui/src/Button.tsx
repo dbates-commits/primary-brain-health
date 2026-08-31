@@ -64,7 +64,7 @@ export function Button({
       // (Figma 1988:12282, 2060:7053). A role, not a state, which is why it
       // lives here and `brand-muted` does not: it says "this button destroys
       // something" wherever it appears. See the note on `--color-danger` in
-      // @pbh/tokens for why it is neither `error` nor `accent-pink`.
+      // @pbh/tokens for why it is not `error`.
       danger: "bg-danger text-text-inverse hover:brightness-110 focus:ring-danger",
     },
     outline: {

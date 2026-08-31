@@ -24,9 +24,7 @@
    MAP BY VALUE, NEVER BY INDEX — Figma's step numbers do not match the
    pre-sync code ramp (Figma's neutral/100 is the old neutral-50).
 
-   The MD3 block below (primary / on-surface / surface / …) is the
-   retired vocabulary, kept only until the call sites are migrated.
-   Do not add to it. See docs/design-tokens.md.
+   See docs/design-tokens.md.
 
    The sync is MANUAL — the Figma plan tier is `starter`, so the
    Variables REST API is unavailable and the only complete read is the
@@ -49,47 +47,6 @@
 @source "../booking/src";
 
 :root {
-  /* Primary palette — Dark Teal per identity guide */
-  /* Card surface sitting on `primary` in the booking/CTA section (Figma
-     1088:4452). Deliberately lighter and less saturated than
-     `primary-container`, which reads almost flat against `primary` at card
-     size. */
-  /* Pale green used to emphasise text on `primary` — the "HSA/FSA
-     reimbursement" phrase in the booking section. Not part of the aqua
-     secondary ramp; it is a highlight, not an accent surface. */
-
-  /* Neutral grey ramp — cool/neutral greys from the Figma form designs
-     (terms panels, form inputs). Intentionally cooler than the warm
-     `surface` hierarchy above; use where a surface must match the
-     design's neutral greys rather than the brand's warm off-whites. */
-  /* Figma `border/default` — the focus outline on a form field (1629:69). */
-  /* Figma `text/tertiary` — the disabled field label in Text Field (1629:69). */
-
-  /* Value colour of a filled form field — Figma `text/warm-dark`. Warmer and
-     darker than `on-surface`; the design uses it for text the user has typed,
-     leaving `on-surface-variant` for the resting/placeholder state. */
-
-  /* Figma `accent/pink`, used as the error outline on a form field. Distinct
-     from `error` (#ba1a1a), which the design reserves for message text. */
-  --color-accent-pink: var(--color-pink-600);
-
-  /* Figma `colors/pink/600` — the ground under a destructive action: the Delete
-     Account button on the account page (1988:12282) and the confirm button in
-     its modal (2060:7053). Neither red already here fits. `error` (#ba1a1a) is
-     the MD3 role the design reserves for *message text*, and `accent-pink`
-     (#d6007f) is the magenta a form field's outline turns on an error; folding
-     this onto either would repaint something that is currently correct.
-
-     NOTE: the modal node reports its binding as `accent/pink` while the card
-     node reports `colors/pink/600`, for the same #d60012 — so Figma has two
-     names for this and one of them collides with the magenta above. The Figma
-     sync is manual, so this is the name we keep. */
-
-  /* Figma `accent/green`, the label on the account page's `Active` plan badge,
-     over a pale ground the design leaves as a raw hex. `-container` names that
-     ground the way `error` / `error-container` already do. Not a general
-     success colour — nothing else uses either value yet. */
-
   /* ===========================================================
      FIGMA PRIMITIVES — collection `Primitives`
      Raw ramps. Components should reach for the semantic tokens
@@ -132,11 +89,15 @@
   --color-aqua-500: #009ea1;
   --color-aqua-700: #495e55;
 
+  --color-green-100: #e2f6e9;
   --color-green-500: #85c559;
-  --color-pink-600: #d60012;
+  --color-green-600: #4dc78c;
+  --color-mint-100: #e2efef;
   --color-yellow-100: #feffc8;
   --color-warm-50: #f5f3ee;
+  --color-warm-100: #f0eee9;
   --color-warm-900: #231815;
+  --color-ink-900: #1f262e;
 
   /* ===========================================================
      FIGMA SEMANTICS — collection `Colors`
@@ -152,6 +113,9 @@
      Page, header and footer all share it so they blend rather than band. */
   --color-background-brand-subtle: var(--color-brand-50);
   --color-background-teal-subtle: var(--color-aqua-50);
+  /* The panel ground inside the transactional emails, one step
+     warmer/darker than `background-warm`. */
+  --color-background-warm-strong: var(--color-warm-100);
 
   --color-text-default: var(--color-grey-750);
   --color-text-heading: #000000;
@@ -176,6 +140,9 @@
      `text-tertiary` and is deliberately a separate name. */
   --color-border-strong: var(--color-grey-500);
   --color-border-brand: var(--color-brand-700);
+  /* White as a border/ring on a dark ground — `text/inverse` covers text
+     only, and Figma now names this separately. */
+  --color-border-inverse: #ffffff;
 
   --color-brand-default: var(--color-brand-700);
   --color-brand-hover: var(--color-brand-600);
@@ -188,9 +155,28 @@
 
   --color-aqua-default: var(--color-aqua-500);
   --color-aqua-subtle: var(--color-aqua-50);
+  /* The mint behind a benefit tile and the booking modal's navigator note.
+     A different near-mint from `accent-green-container` (#e2f6e9), which is
+     a badge ground — Figma keeps the two apart, so we do too. */
+  --color-mint-subtle: var(--color-mint-100);
 
   --color-accent-green: var(--color-green-500);
+  /* The tick disc in the toast glyph. */
+  --color-accent-green-strong: var(--color-green-600);
+  /* Pale ground under the account page's `Active` plan badge. */
+  --color-accent-green-container: var(--color-green-100);
   --color-icon-brand-teal: var(--color-brand-400);
+
+  /* The toast ground. Near-black with a blue cast, cooler than anything
+     in the grey ramp. */
+  --color-toast-surface: var(--color-ink-900);
+
+  /* The destructive-action red: the Delete Account button and its confirm.
+     Figma named this `accent/pink` AND `colors/pink/600` until FIG-01 was
+     resolved; it is now one variable, named for its role. It is the one
+     `Colors` entry Figma leaves as a raw value rather than an alias. */
+  --color-danger: #d60012;
+  --color-on-danger: #ffffff;
 
   /* `stepper/*` — the booking stepper is the only consumer, but Figma
      models it as a semantic group rather than a component group, so it
@@ -217,17 +203,21 @@
 
   /* ===========================================================
      TYPE SCALE — collection `Fonts`
-     Sizes are Figma's. LINE HEIGHTS ARE NOT — Figma tokenises none
-     (and reports lineHeight: 100 on every style, which reads as an
-     unset default). The body steps carry the exact line height
-     Tailwind's text-sm/base/xl pair with them, which is what these
-     sizes render with today; the heading steps use a ratio and are
-     unverified against the design. See FIG-06 in
-     docs/figma-token-requests.md.
+     Sizes are Figma's. LINE HEIGHTS ARE NOT, and now confirmed so:
+     all 17 text styles report `lineHeight: AUTO` (FIG-06 — "never
+     configured" was the answer). Weights are real and are the design's:
+     every heading style is Larken **Thin**, body is Inter Regular /
+     Medium / Bold, captions Regular / Semi Bold. The body steps carry
+     the line height Tailwind's text-sm/base/xl pair with them, which is
+     what these sizes render with today; the heading steps use a ratio,
+     which is the code's own choice and has nothing to match in Figma.
 
-     `heading/subtitle` and `body/large` are both 20px, as are
-     `heading/small` and `body/base` at 16px. Both names are kept —
-     they are different Figma variables and may diverge.
+     `heading/subtitle` now aliases `body/large` in Figma, and
+     `heading/small` aliases `body/base` (FIG-05 — deliberate aliases).
+     Both names are kept: they are still separate variables.
+
+     FIG-04 IS STILL OPEN. The scale has no step for 18, 30, 36, 60, 72
+     or 13px, so ~100 call sites at those sizes stay on stock Tailwind.
      =========================================================== */
   --text-display: 80px;
   --text-display--line-height: 1.1;
@@ -261,25 +251,7 @@
      docs/figma-token-requests.md. Do not grow this block without
      adding one.
      =========================================================== */
-  /* FIG-02 — the mint behind a benefit tile (BenefitsList) and the
-     navigator note in the booking modal. Drawn as a raw hex in Figma.
-     Deliberately NOT folded into `--color-accent-green-container`
-     (#e2f6e9) below: two near-identical greens, different roles. */
-  --color-mint-subtle: #e2efef;
-  /* FIG-02 — the tick in SuccessCircleIcon. A different green again
-     from `accent-green` (#85c559). */
-  --color-accent-green-strong: #4dc78c;
-  /* FIG-02 — pale ground under the account page's `Active` plan badge.
-     `-container` names it the way `error`/`error-container` already do. */
-  --color-accent-green-container: #e2f6e9;
-  /* FIG-02 — the toast ground (2092:13191). Near-black with a blue cast,
-     cooler than anything in the neutral ramp, and drawn as a raw hex in
-     Figma rather than bound to a variable. */
-  --color-toast-surface: #1f262e;
-  /* FIG-02 — white as a border/ring on a dark ground. Figma has
-     `text/inverse` but no `border/inverse`. */
-  --color-border-inverse: #ffffff;
-  /* FIG-04 — retained from the MD3 set because the code needs them and
+  /* Retained from the MD3 set because the code needs them and
      Figma names no equivalent. Renamed into the Figma style so the whole
      file reads one way; the old MD3 names are what they were called. */
   /* was `primary-container` — the deep teal behind the intake form. */
@@ -303,11 +275,6 @@
   /* was `neutral-200` — a grey with no counterpart anywhere in Figma's
      ramp (the nearest, colors/neutral/300, is #d9d9d9). */
   --color-grey-warm-200: #dfdfdf;
-  /* was `surface-container` — the panel ground inside the transactional
-     emails, one step warmer/darker than `background-warm`. Figma names no
-     equivalent; the emails are the only consumer. */
-  --color-background-warm-strong: #f0eee9;
-
   /* was `on-surface` — the darkest ink, used as body text on light grounds
      and as the ground of the dark Button. Figma's darkest *named* text is
      `text/heading` (pure black); this is `colors/neutral/850`, which the
@@ -315,27 +282,22 @@
      rather than `text-*` because it is a ground as often as a colour. */
   --color-ink-strong: var(--color-grey-850);
 
-  /* The destructive-action red. Figma calls this value `accent/pink` AND
-     `colors/pink/600` — two names, neither of which says what it is for.
-     `danger` is kept as the code's role name until FIG-01 is resolved, so
-     call sites read correctly; it is an alias, not a second value. */
-  --color-danger: var(--color-accent-pink);
-  --color-on-danger: #ffffff;
-
   /* was `error` — MD3's red, which the design reserves for message text.
-     Distinct from `accent-pink` (#d60012), the destructive-action red. */
+     Distinct from `danger` (#d60012), the destructive-action red. */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
 
-  /* FIG-03 — elevation. Figma has no shadow variables at all, so these
-     are read off the rendered design. The tints were the RETIRED navy
-     (#041632) and forest green (#446558); they are re-tinted onto the
-     current ink so nothing carries a dead palette forward. */
-  --shadow-card: 0 1px 2px rgb(27 28 25 / 0.04), 0 4px 16px rgb(27 28 25 / 0.06);
-  --shadow-menu: 0 8px 12px rgb(27 28 25 / 0.08);
-  --shadow-header: 0 12px 32px rgb(27 28 25 / 0.06);
-  --shadow-toast: 0 4px 16px rgb(27 28 25 / 0.2);
+  /* ELEVATION — Figma effect styles `elevation/*` (FIG-03, resolved).
+     These are effect STYLES, not variables, so they are not part of the
+     `getLocalVariableCollectionsAsync` enumeration — re-read them with
+     `getLocalEffectStylesAsync` at the next sync. Figma tints every one
+     with pure black; the earlier hand-written values were re-tinted onto
+     the ink, which is why they read lighter than the design. */
+  --shadow-card: 0 2px 12px rgb(0 0 0 / 0.12);          /* elevation/card */
+  --shadow-menu: 0 8px 24px rgb(0 0 0 / 0.08);          /* elevation/menu-popover */
+  --shadow-header: 0 -1px 24px rgb(0 0 0 / 0.12);       /* elevation/sticky-header */
+  --shadow-toast: 0 4px 16px rgb(0 0 0 / 0.2);          /* elevation/toast */
 }
 
 /* Disable Tailwind's stock colour palette.
@@ -371,7 +333,6 @@
 
   --color-outline: var(--color-outline);
   --color-outline-variant: var(--color-outline-variant);
-  --color-accent-pink: var(--color-accent-pink);
   --color-danger: var(--color-danger);
   --color-on-danger: var(--color-on-danger);
   --color-error: var(--color-error);
@@ -414,11 +375,15 @@
   --color-aqua-100: var(--color-aqua-100);
   --color-aqua-500: var(--color-aqua-500);
   --color-aqua-700: var(--color-aqua-700);
+  --color-green-100: var(--color-green-100);
   --color-green-500: var(--color-green-500);
-  --color-pink-600: var(--color-pink-600);
+  --color-green-600: var(--color-green-600);
+  --color-mint-100: var(--color-mint-100);
   --color-yellow-100: var(--color-yellow-100);
   --color-warm-50: var(--color-warm-50);
+  --color-warm-100: var(--color-warm-100);
   --color-warm-900: var(--color-warm-900);
+  --color-ink-900: var(--color-ink-900);
 
   /* --- Figma semantics --- */
   --color-background-default: var(--color-background-default);
@@ -427,6 +392,7 @@
   --color-background-brand: var(--color-background-brand);
   --color-background-brand-subtle: var(--color-background-brand-subtle);
   --color-background-teal-subtle: var(--color-background-teal-subtle);
+  --color-background-warm-strong: var(--color-background-warm-strong);
   --color-text-default: var(--color-text-default);
   --color-text-heading: var(--color-text-heading);
   --color-text-secondary: var(--color-text-secondary);
@@ -450,8 +416,12 @@
   --color-brand-on-brand: var(--color-brand-on-brand);
   --color-aqua-default: var(--color-aqua-default);
   --color-aqua-subtle: var(--color-aqua-subtle);
+  --color-mint-subtle: var(--color-mint-subtle);
   --color-accent-green: var(--color-accent-green);
+  --color-accent-green-strong: var(--color-accent-green-strong);
+  --color-accent-green-container: var(--color-accent-green-container);
   --color-icon-brand-teal: var(--color-icon-brand-teal);
+  --color-toast-surface: var(--color-toast-surface);
   --color-stepper-active: var(--color-stepper-active);
   --color-stepper-inactive: var(--color-stepper-inactive);
   --color-stepper-circle-bg: var(--color-stepper-circle-bg);
@@ -496,7 +466,6 @@
   --text-caption--line-height: var(--text-caption--line-height);
 
   /* --- No Figma variable yet --- */
-  --color-background-warm-strong: var(--color-background-warm-strong);
   --color-ink-strong: var(--color-ink-strong);
   --color-brand-deep: var(--color-brand-deep);
   --color-brand-wash: var(--color-brand-wash);
@@ -505,10 +474,6 @@
   --color-aqua-container: var(--color-aqua-container);
   --color-on-aqua-container: var(--color-on-aqua-container);
   --color-grey-warm-200: var(--color-grey-warm-200);
-  --color-mint-subtle: var(--color-mint-subtle);
-  --color-accent-green-strong: var(--color-accent-green-strong);
-  --color-accent-green-container: var(--color-accent-green-container);
-  --color-toast-surface: var(--color-toast-surface);
   --shadow-card: var(--shadow-card);
   --shadow-menu: var(--shadow-menu);
   --shadow-header: var(--shadow-header);

@@ -69,8 +69,9 @@ again would add names without adding truth.
 ## The token set
 
 **Primitives** — raw ramps. Prefer a semantic; a step number carries no meaning.
-`brand-50…900`, `grey-50…900`, `aqua-50/100/500/700`, `green-500`, `pink-600`,
-`yellow-100`, `warm-50`, `warm-900`, plus `white` and `black`.
+`brand-50…900`, `grey-50…900`, `aqua-50/100/500/700`,
+`green-100/500/600`, `mint-100`, `yellow-100`, `warm-50/100/900`, `ink-900`,
+plus `white` and `black`.
 
 **Semantics** — what components use. `background-*`, `text-*`, `border-*`,
 `brand-*`, `aqua-*`, `accent-*`, `icon-*`, `stepper-*`.
@@ -78,37 +79,40 @@ again would add names without adding truth.
 **Type scale** — `text-display` (80px), `text-h1` (56), `text-h2` (48),
 `text-h3` (40), `text-h4` (32), `text-h5` (24), `text-subtitle` (20),
 `text-heading-small` (16), `text-body-lg` (20), `text-body` (16),
-`text-body-sm` (14), `text-caption` (12). `heading/subtitle` and `body/large`
-are both 20px in Figma, as are `heading/small` and `body/base` at 16px; both
-names are kept because they are different Figma variables and may diverge.
+`text-body-sm` (14), `text-caption` (12). In Figma `heading/subtitle` aliases
+`body/large` and `heading/small` aliases `body/base` — deliberate, per FIG-05.
+Both names are kept on each pair because they are still separate variables.
 
-Line heights are **not** from Figma — it tokenises none, and reports
-`lineHeight: 100` on every style, which reads as an unset default. The body
+Line heights are **not** from Figma and now confirmed not to be: all 17 text
+styles report `lineHeight: AUTO`, i.e. never configured (FIG-06). The body
 steps carry what Tailwind's `text-sm`/`base`/`xl` pair with them, which is what
-these sizes render with today. The heading steps use a ratio and are unverified
-(FIG-06).
+these sizes render with today; the heading ratios are the code's own choice with
+nothing upstream to match. Weights *are* the design's — every heading style is
+Larken **Thin**, body is Inter Regular/Medium/Bold, captions Regular/Semi Bold.
+
+**Six sizes are still missing** — 18, 30, 36, 60, 72 and 13px, which is FIG-04
+and the reason ~100 call sites are still on stock Tailwind.
 
 **No Figma variable yet** — a fenced block in `theme.css`. Every entry has a
 numbered request in [`figma-token-requests.md`](figma-token-requests.md); do not
 grow it without adding one.
 
-`mint-subtle`, `accent-green-strong`, `accent-green-container`, `toast-surface`,
-`border-inverse`, `brand-deep`, `brand-wash`, `brand-pale`, `focus-ring`,
-`aqua-container`, `on-aqua-container`, `outline`, `outline-variant`,
-`grey-warm-200`, `background-warm-strong`, `ink-strong`, `danger`, `on-danger`,
-`error`, `on-error`, `error-container`, and the four `--shadow-*`.
+`brand-deep`, `brand-wash`, `brand-pale`, `focus-ring`, `aqua-container`,
+`on-aqua-container`, `outline`, `outline-variant`, `grey-warm-200`,
+`ink-strong`, `on-danger`, `error`, `on-error`, `error-container`.
 
-Two of those are worth knowing about:
+The four `--shadow-*` used to live here too. They don't any more: Figma now has
+four `elevation/*` **effect styles** (FIG-03), and the tokens carry those values.
+Effect styles are not part of the variable enumeration — read them with
+`getLocalEffectStylesAsync` at each sync.
+
+One of those is worth knowing about:
 
 - **`ink-strong`** (#1b1c19) is the darkest ink — body text on light grounds and
   the ground of the dark Button. Figma's darkest *named* text is `text/heading`
   (pure black); this value is `colors/neutral/850`, which the design uses
   constantly and never names. Called `ink` because it is a ground as often as a
   colour.
-- **`danger`** is an alias of `accent-pink`, not a second value. Figma calls
-  #d60012 both `accent/pink` and `colors/pink/600`, neither of which says what
-  it is for. `bg-danger` reads correctly at the call site; FIG-01 asks for the
-  name to be fixed upstream.
 
 ## Stock Tailwind colours are off
 
@@ -145,14 +149,19 @@ drops it with no error.
 
 Manual, by design. The Figma plan tier is `starter`, so the Variables REST API
 is unavailable and the only complete read is the Plugin API through the Figma
-MCP, which needs the desktop app open.
+MCP. The **remote** Figma MCP can run it against the file key directly — the
+desktop app does not need to be open, despite what this section used to say.
 
 1. Load the `figma-use` skill (a required prerequisite for `use_figma`).
 2. Enumerate `figma.variables.getLocalVariableCollectionsAsync()`, resolving
    each variable's `valuesByMode` and following `VARIABLE_ALIAS` entries.
-3. Diff against [`design-tokens-figma-export.json`](design-tokens-figma-export.json),
+3. Read `figma.getLocalEffectStylesAsync()` and `figma.getLocalTextStylesAsync()`
+   in the same pass. **Styles are not variables and do not appear in step 2** —
+   the four `elevation/*` shadows and every weight/line-height live here.
+4. Diff against [`design-tokens-figma-export.json`](design-tokens-figma-export.json),
    which is that enumeration as of the last sync.
-4. Apply the diff to `theme.css`, then work through "Adding a token" above.
+5. Apply the diff to `theme.css`, then work through "Adding a token" above.
+6. Rewrite the export file and note what moved, so the next diff has a baseline.
 
 `get_variable_defs` on a node is **not** a substitute: it returns only the
 variables bound to that node, which is why a first pass made two dozen tokens
@@ -178,14 +187,14 @@ names are the Material Design 3 vocabulary this repo used until August 2026.
 | `on-secondary` | `text-inverse` | |
 | `surface`, `surface-container-lowest` | `background-default` | |
 | `surface-container-low` | `background-warm` | |
-| `surface-container` | `background-warm-strong` | no Figma variable |
+| `surface-container` | `background-warm-strong` | |
 | `on-surface` | `ink-strong` | no Figma variable |
 | `on-surface-variant` | `text-default` | **value corrected** #44474d → #45474d |
 | `on-surface-warm` | `text-warm-dark` | |
 | `neutral-50/100/300/350/400/600/700/900` | `grey-100/200/400/350/450/700/800/900` | by value, not by index |
 | `neutral-200` | `grey-warm-200` | no Figma variable |
 | `on-danger` | `text-inverse` | |
-| `accent-pink` | `accent-pink` | **value corrected** #d6007f → #d60012 |
+| `accent-pink` | `danger` | #d6007f was a magenta found nowhere in Figma; FIG-01 collapsed `accent/pink` and `colors/pink/600` into one `danger` at #d60012 |
 
 `danger`, `on-danger`, `error`, `on-error`, `error-container`, `outline`,
 `outline-variant`, `accent-green`, `accent-green-container`, `brand-muted`,

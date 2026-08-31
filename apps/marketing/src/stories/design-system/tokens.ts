@@ -53,8 +53,14 @@ export const SEMANTIC_COLORS: Swatch[] = [
   { className: "bg-aqua-default", figma: "teal/default", rgb: rgb("#009ea1") },
   { className: "bg-aqua-subtle", figma: "teal/subtle", rgb: rgb("#e5efef") },
   { className: "bg-accent-green", figma: "accent/green", rgb: rgb("#85c559") },
-  { className: "bg-accent-pink", figma: "accent/pink", rgb: rgb("#d60012") },
+  { className: "bg-danger", figma: "danger", rgb: rgb("#d60012") },
   { className: "bg-icon-brand-teal", figma: "icon/brand-teal", rgb: rgb("#4a9ba0") },
+  { className: "bg-mint-subtle", figma: "mint/subtle", rgb: rgb("#e2efef") },
+  { className: "bg-accent-green-strong", figma: "accent/green-strong", rgb: rgb("#4dc78c") },
+  { className: "bg-accent-green-container", figma: "accent/green-container", rgb: rgb("#e2f6e9") },
+  { className: "bg-toast-surface", figma: "toast/surface", rgb: rgb("#1f262e") },
+  { className: "bg-border-inverse", figma: "border/inverse", rgb: rgb("#ffffff") },
+  { className: "bg-background-warm-strong", figma: "background/warm-strong", rgb: rgb("#f0eee9") },
 ];
 
 /** The booking stepper's own group, modelled as semantics in Figma. */
@@ -100,21 +106,28 @@ export const PRIMITIVE_COLORS: Swatch[] = [
   { className: "bg-aqua-100", figma: "colors/teal/100", rgb: rgb("#a0e6ea") },
   { className: "bg-aqua-500", figma: "colors/teal/500", rgb: rgb("#009ea1") },
   { className: "bg-aqua-700", figma: "colors/teal/700", rgb: rgb("#495e55") },
+  { className: "bg-green-100", figma: "colors/green/100", rgb: rgb("#e2f6e9") },
   { className: "bg-green-500", figma: "colors/green/500", rgb: rgb("#85c559") },
-  { className: "bg-pink-600", figma: "colors/pink/600", rgb: rgb("#d60012") },
+  { className: "bg-green-600", figma: "colors/green/600", rgb: rgb("#4dc78c") },
+  { className: "bg-mint-100", figma: "colors/mint/100", rgb: rgb("#e2efef") },
   { className: "bg-yellow-100", figma: "colors/yellow/100", rgb: rgb("#feffc8") },
   { className: "bg-warm-50", figma: "colors/warm/50", rgb: rgb("#f5f3ee") },
+  { className: "bg-warm-100", figma: "colors/warm/100", rgb: rgb("#f0eee9") },
   { className: "bg-warm-900", figma: "colors/warm/900", rgb: rgb("#231815") },
+  { className: "bg-ink-900", figma: "colors/ink/900", rgb: rgb("#1f262e") },
 ];
 
-/** Values the code needs that Figma has no variable for — see FIG-02, FIG-03. */
+/** Values the code needs that Figma has no variable for. */
 export const CODE_ONLY_COLORS: Swatch[] = [
-  { className: "bg-mint-subtle", figma: null, rgb: rgb("#e2efef") },
-  { className: "bg-accent-green-strong", figma: null, rgb: rgb("#4dc78c") },
-  { className: "bg-accent-green-container", figma: null, rgb: rgb("#e2f6e9") },
-  { className: "bg-background-warm-strong", figma: null, rgb: rgb("#f0eee9") },
-  { className: "bg-toast-surface", figma: null, rgb: rgb("#1f262e") },
-  { className: "bg-border-inverse", figma: null, rgb: rgb("#ffffff") },
+  { className: "bg-brand-deep", figma: null, rgb: rgb("#004d61") },
+  { className: "bg-brand-wash", figma: null, rgb: rgb("#a3d4e4") },
+  { className: "bg-brand-pale", figma: null, rgb: rgb("#d1eaf2") },
+  { className: "bg-focus-ring", figma: null, rgb: rgb("#8ec7da") },
+  { className: "bg-aqua-container", figma: null, rgb: rgb("#b3e8e9") },
+  { className: "bg-on-aqua-container", figma: null, rgb: rgb("#007577") },
+  { className: "bg-outline", figma: null, rgb: rgb("#75777e") },
+  { className: "bg-outline-variant", figma: null, rgb: rgb("#c5c6ce") },
+  { className: "bg-grey-warm-200", figma: null, rgb: rgb("#dfdfdf") },
 ];
 
 export interface SizeToken {

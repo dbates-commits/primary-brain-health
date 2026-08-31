@@ -5,9 +5,14 @@ For **Arian**. Changes on the Figma side that the code can't decide for itself.
 File `SppKdzsaH6rQ14u90UpNSq`. Full variable export:
 [`design-tokens-figma-export.json`](design-tokens-figma-export.json).
 
-**FIG-04 is the only blocking one.**
+Last synced **2026-08-31**. Arian's pass closed FIG-01, 02, 03, 05, 06, 07, 08
+and 10 — see [Resolved](#resolved) at the bottom for what each turned into.
+
+**FIG-04 is still the only blocking one.**
 
 ---
+
+## Open
 
 ### FIG-04 — Type scale is missing six sizes ⚠️
 
@@ -28,129 +33,75 @@ answered; everything that matched a Figma step has already moved.
 
 ---
 
-### FIG-01 — One red, two names, neither says what it's for
+### FIG-11 — `Body/Large Bold` binds `fontSize` but not `fontFamily`
 
-`accent/pink` and `colors/pink/600` are both `#d60012`. Bound on Delete Account
-(1988:12282) and its confirm button (2060:7053).
+Every other text style binds both. This one binds only the size, so its family
+is loose — it renders Inter today by coincidence rather than by the variable.
 
-It's a red, used for destructive actions and invalid fields — "pink" points at
-the wrong thing, and there's a real magenta elsewhere in the brand.
-
-**Ask:** keep one variable, named for its role (`danger`, or `accent/red`).
-
-*Meanwhile:* code adds `--color-danger` as an alias so call sites read
-`bg-danger`. The alias goes when this is resolved.
+**Ask:** bind `body/font-family` on it, like the other sixteen. Low priority,
+nothing renders wrong yet.
 
 ---
 
-### FIG-02 — Six values in the design with no variable
+### FIG-12 — `danger` is the one semantic left as a raw hex
 
-| value | where | code token |
-| --- | --- | --- |
-| `#E2EFEF` | mint behind a benefit tile; the booking modal's navigator note | `mint-subtle` |
-| `#4dc78c` | tick disc in the toast glyph (2092:13192) | `accent-green-strong` |
-| `#e2f6e9` | ground under the account page's `Active` badge | `accent-green-container` |
-| `#1f262e` | toast ground (2092:13191) | `toast-surface` |
-| `#ffffff` | white as a **border/ring** on dark — `text/inverse` covers text only | `border-inverse` |
-| `#f0eee9` | panel ground inside the transactional emails | `background-warm-strong` |
+Every other variable in `Colors` is an alias into `Primitives`. `danger` is
+`#d60012` written directly, because deleting `colors/pink/600` took its
+primitive with it.
 
-A value with no variable can't be changed from Figma, and can't be found by
-anyone reading the design system.
-
-**Ask:** add a variable for each, or say which existing one it should be.
-
-⚠️ `#E2EFEF` and `#e2f6e9` are two different near-mints with different roles.
-Please don't collapse them.
+**Ask:** add a primitive for it (`colors/red/600`?) and alias `danger` at it, so
+the whole collection reads one way. Cosmetic — the value is right.
 
 ---
 
-### FIG-03 — No elevation variables
+## Resolved
 
-Cards, menus, the sticky header and the toast all have elevation; `Primitives`
-has no shadow variables.
+**FIG-01 — one red, two names.** `accent/pink` and `colors/pink/600` are both
+gone; a single `danger` replaces them. Code dropped `--color-accent-pink`
+entirely and `--color-danger` is now a real variable rather than an alias.
+The invalid-field ring (`aria-invalid:ring-*` in `@pbh/ui`) moved with it, so
+invalid fields and destructive buttons now deliberately share one red.
 
-Every shadow in the codebase was a hand-written `rgba()`, drifted into four
-slightly different values, several still tinted with `#041632` and `#446558` —
-a palette replaced long ago. Nobody noticed because there was nothing to
-compare against.
+**FIG-02 — six values with no variable.** All six landed, at the exact values
+the code had guessed, and the two near-mints were kept apart as asked:
+`mint/subtle`, `accent/green-strong`, `accent/green-container`,
+`toast/surface`, `border/inverse`, `background/warm-strong`. Five new
+primitives came with them (`colors/mint/100`, `colors/green/100`,
+`colors/green/600`, `colors/warm/100`, `colors/ink/900`). They moved out of
+theme.css's "no Figma variable yet" block into the semantics.
 
-**Ask:** four variables would cover it — card, menu/popover, sticky header,
-toast.
+**FIG-03 — no elevation variables.** Four `elevation/*` **effect styles** now
+exist — card, menu-popover, sticky-header, toast. Effect styles aren't part of
+the variable enumeration, so the sync procedure now reads them separately.
+The hand-written values were re-tinted onto the ink and read about half as
+strong as the design; they're now Figma's, tinted pure black.
 
-*Meanwhile:* `--shadow-card`, `--shadow-menu`, `--shadow-header`,
-`--shadow-toast`, read off the rendered design and re-tinted onto current ink.
+**FIG-05 — duplicate sizes.** Answered as deliberate: `heading/subtitle` now
+explicitly aliases `body/large`, `heading/small` aliases `body/base`. All four
+names stay in code.
 
----
+**FIG-06 — text styles reported `weight: 100, lineHeight: 100`.** Weights are
+now real — every heading is Larken **Thin**, body is Inter Regular/Medium/Bold,
+captions Regular/Semi Bold. `lineHeight` is `AUTO` on all 17 styles, which is
+the "never configured" answer. The heading ratios in `theme.css` are therefore
+the code's own choice with nothing to match, and are no longer marked
+"unverified".
 
-### FIG-06 — Every text style reports `weight: 100, lineHeight: 100`
+**FIG-07 — dark mode was a copy of light.** The unpopulated `Dark` mode was
+removed. `Colors` is single-mode now.
 
-Reads as unset defaults — a real `lineHeight: 100` would be single-spaced on
-every heading, which isn't what the design looks like. So the code can't take
-line heights from Figma at all.
+**FIG-08 — the `device` variable was inverted.** Swapped; `desktop` mode now
+reads `"desktop"`. Spot-checked the responsive values and they sit on the right
+side.
 
-**Ask:** confirm the intended weight and line height per step. "Never
-configured" is enough of an answer.
+**FIG-09 — two values already corrected in code.** Both confirmed: `text/default`
+is `#45474d`, and the magenta `#d6007f` the code once had for `accent/pink`
+existed nowhere in the file and is now gone from both sides.
 
-*Meanwhile:* body steps carry what they render with today; heading steps use a
-ratio, marked unverified in `theme.css`.
-
----
-
-### FIG-07 — Dark mode is a copy of Light
-
-`Colors` declares `Light` and `Dark`. All 39 variables resolve identically in
-both.
-
-It reads as "dark mode is designed" to anyone opening the file, and it isn't.
-
-**Ask:** populate it or remove it until it's real.
-
----
-
-### FIG-08 — The `device` variable is inverted
-
-In `Components`, `device` is `"Mobile"` in the **desktop** mode and `"desktop"`
-in the **Mobile** mode.
-
-Not currently visible — only `modal/*` and `section/*` differ between modes —
-but it suggests the modes may be reversed elsewhere.
-
-**Ask:** swap them, and a quick check that the responsive values sit on the
-right side.
-
----
-
-### FIG-05 — Duplicate sizes
-
-`heading/subtitle` is 20px, same as `body/large`. `heading/small` is 16px, same
-as `body/base`.
-
-**Ask:** deliberate aliases, or an oversight? Code keeps all four names for now,
-so if they're meant to be one thing, two are dead weight — and if they're not,
-one pair will drift by accident.
-
----
-
-### FIG-09 — Two values already corrected in code
-
-Recorded for visibility; no action unless a code value was actually the
-intended one.
-
-| variable | Figma | code had |
-| --- | --- | --- |
-| `text/default` | `#45474d` | `#44474d` — body text across the whole site |
-| `accent/pink` | `#d60012` | `#d6007f`, a magenta found nowhere in the file |
-
----
-
-### FIG-10 — Component variables alias raw numbers
-
-`button/radius` → `sizes/40`, `modal/padding` → `sizes/32`. No layer between "a
-component's padding" and "the number 32", so a change to spacing rhythm has to
-be made component by component.
-
-**Ask:** low priority — worth a semantic spacing layer (`space/sm`, `space/md`)
-if the system grows.
+**FIG-10 — component variables aliased raw numbers.** `space/sm` (24) and
+`space/md` (32) were added and `modal/padding` / `modal/gap` now go through
+them, plus a `radius/button` that `button/radius` aliases. Not exported as
+code tokens yet — nothing consumes them — but the layer exists.
 
 ---
 
