@@ -149,7 +149,7 @@ export function ConsentForm({
           role="region"
           aria-label="Terms and conditions"
           tabIndex={0}
-          className="h-[337px] w-full overflow-y-auto rounded-md border border-grey-warm-200 bg-grey-100 py-6 pl-6 pr-10 [scrollbar-color:var(--color-neutral-300)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-brand-default [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-grey-400"
+          className="h-[337px] w-full overflow-y-auto rounded-md border border-grey-warm-200 bg-grey-100 py-6 pl-6 pr-10 [scrollbar-color:var(--color-grey-400)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-brand-default [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-grey-400"
         >
           <div className="flex flex-col gap-6">
             {terms ?? (

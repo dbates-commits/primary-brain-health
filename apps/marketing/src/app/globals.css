@@ -208,5 +208,5 @@ body {
 
 ::selection {
   background: var(--color-aqua-container);
-  color: var(--color-on-secondary-container);
+  color: var(--color-on-aqua-container);
 }
