@@ -65,19 +65,25 @@ export function StackSections({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     let frame = 0;
     const update = () => {
       frame = 0;
-      if (!container) return;
+      if (!container) {
+        return;
+      }
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
       if (isMobile) {
         // Skip per-frame work on mobile — set a one-time "fully present"
         // default so any computed opacity/transform resolves to the resting
         // state, then bail. The CSS scroll-reveal handles the fade-up.
         setProgress((prev) => {
-          if (prev.every((p) => p.entry === 1 && p.retreat === 0)) return prev;
+          if (prev.every((p) => p.entry === 1 && p.retreat === 0)) {
+            return prev;
+          }
           return Array.from({ length: items.length }, () => ({
             entry: 1,
             retreat: 0,
@@ -121,7 +127,9 @@ export function StackSections({
     };
 
     const onScroll = () => {
-      if (frame) return;
+      if (frame) {
+        return;
+      }
       frame = requestAnimationFrame(update);
     };
 
@@ -146,7 +154,9 @@ export function StackSections({
       window.removeEventListener("resize", onScroll);
       window.removeEventListener("load", update);
       cancelAnimationFrame(settle);
-      if (frame) cancelAnimationFrame(frame);
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
     };
   }, [items.length]);
 
@@ -227,7 +237,7 @@ export function StackSections({
               <div
                 data-scroll-reveal-self
                 className={cn(
-                  "relative w-full bg-background-brand-subtle rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
+                  "relative w-full bg-background-brand-subtle rounded-[1.25rem] shadow-card overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
                   reversed && "md:[&>div:first-of-type]:order-2"
                 )}
                 style={

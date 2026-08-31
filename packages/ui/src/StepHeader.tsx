@@ -23,7 +23,7 @@ export function StepHeader({
     <div className="flex w-full flex-col gap-4">
       <h1
         data-tina-field={tinaFields?.title}
-        className="font-headline text-4xl font-thin text-ink-strong sm:text-h2"
+        className="font-headline text-4xl font-thin leading-[1.1] text-ink-strong sm:text-h2"
       >
         {title}
       </h1>
