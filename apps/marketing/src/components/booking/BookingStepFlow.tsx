@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { StepHeader } from "@pbh/ui";
 import {
   DetailsForm,
@@ -119,6 +120,9 @@ export function BookingStepFlow({
   consentStamp?: string;
 }) {
   const router = useRouter();
+  // Named for what it refreshes — `update` alone reads as "update what?" in a
+  // component this size. See `completePayment` for why the header needs it.
+  const { update: updateSession } = useSession();
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
@@ -289,12 +293,26 @@ export function BookingStepFlow({
    * returning customer sees the same screen.
    */
   const completePayment = useCallback(() => {
+    // `finalizeCheckoutSession` has already minted the Auth.js session and set
+    // its cookie, so the customer *is* signed in by the time we get here — but
+    // `SessionProvider` (see `AuthProvider`) cached the signed-out session it
+    // fetched when the page loaded and only refetches on window focus. The
+    // navigation below is client-side, so nothing remounts it: without this
+    // refetch the header goes on offering "Login" to someone who just paid,
+    // until a hard reload. Same fix, same reason, as `ProfileFormWithSession`.
+    //
+    // Not awaited, and failure is swallowed: the payment succeeded and the
+    // cookie is set either way, so the worst case is the header catching up on
+    // the next focus or reload rather than now.
+    void updateSession()?.catch((err: unknown) => {
+      console.error("[booking] post-payment session refresh failed:", err);
+    });
     // `replace`, not `push`: the modal step the customer just left is behind a
     // paid `?booking=resume` page whose mount effect sends them here again, so
     // pushing would make Back bounce forward forever. Replacing keeps one exit
     // to the marketing site.
     router.replace(WELCOME_PATH);
-  }, [router]);
+  }, [router, updateSession]);
 
   const close = useCallback(() => setOpen(false), []);
 
