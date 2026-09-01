@@ -125,7 +125,11 @@ export function DetailsForm({
           height down to `StickyActions`, which parks itself on the bottom edge.
           Without the chain the bar has nothing to push against and rides up
           under the last field. */}
-      <form action={formAction} noValidate className="flex flex-1 flex-col">
+      <form
+        action={formAction}
+        noValidate
+        className="flex flex-1 flex-col gap-8"
+      >
         <fieldset
           disabled={pending}
           aria-busy={pending}
