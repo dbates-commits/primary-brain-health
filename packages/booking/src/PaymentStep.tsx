@@ -43,6 +43,7 @@ export function PaymentStep({
   createSession,
   finalize,
   onComplete,
+  onPaid,
   showHeader = true,
 }: {
   createSession: CreateCheckoutAction;
@@ -54,6 +55,14 @@ export function PaymentStep({
    * cookie before it means anything.
    */
   onComplete: (checkoutSessionId: string) => void;
+  /**
+   * Fired the moment the server confirms the payment, before the customer has
+   * pressed Continue. The charge stands from here on, so the host uses this to
+   * stop offering routes that would stall a paid booking short of `onComplete`
+   * — closing the modal, or stepping back into a form there is no longer any
+   * point editing.
+   */
+  onPaid?: () => void;
   showHeader?: boolean;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -109,11 +118,12 @@ export function PaymentStep({
         return;
       }
       setPaid(true);
+      onPaid?.();
     } catch (err) {
       console.error("finalize failed:", err);
       setCompleteError("We couldn't confirm your payment. Please try again.");
     }
-  }, [sessionId, finalize]);
+  }, [sessionId, finalize, onPaid]);
 
   /**
    * The customer's own move on from Stripe's "Thanks for your payment" state.

@@ -167,6 +167,16 @@ export function BookingStepFlow({
   const [detailsPending, setDetailsPending] = useState(false);
 
   /**
+   * Whether the charge has gone through — set by `PaymentStep` when the server
+   * confirms it, which is a moment *before* the customer presses Continue. In
+   * that window the booking is complete but the flow has not moved, so this is
+   * what keeps the ways out of the modal from stranding a paid customer short
+   * of `/welcome`. See `close` and `selectStep`.
+   */
+  const [paid, setPaid] = useState(false);
+  const markPaid = useCallback(() => setPaid(true), []);
+
+  /**
    * Move to the next step — or back to where the booking had already got to, if
    * that is further.
    *
@@ -314,7 +324,21 @@ export function BookingStepFlow({
     router.replace(WELCOME_PATH);
   }, [router, updateSession]);
 
-  const close = useCallback(() => setOpen(false), []);
+  /**
+   * Dismissing the modal — Escape, the backdrop, the close button.
+   *
+   * Once the payment has gone through there is no such thing as closing this
+   * without finishing: the charge stands, the step behind it is spent, and
+   * re-entering payment only reaches the already-paid guard. So every route out
+   * of a paid booking is the same route Continue takes.
+   */
+  const close = useCallback(() => {
+    if (paid) {
+      completePayment();
+      return;
+    }
+    setOpen(false);
+  }, [paid, completePayment]);
 
   /**
    * Reopen the flow for someone returning from a confirmation link.
@@ -415,6 +439,12 @@ export function BookingStepFlow({
    */
   const selectStep = useCallback(
     (key: DisplayStepKey) => {
+      // Nothing behind a paid booking is still editable, and the payment step
+      // itself would come back as the already-paid error. The stepper stays on
+      // screen as the progress it is; it just stops being a way back.
+      if (paid) {
+        return;
+      }
       const index = stepIndexFor(key);
       if (index < 0) {
         return;
@@ -431,7 +461,7 @@ export function BookingStepFlow({
       setStepIndex(index);
       setPane("step");
     },
-    [detailsValues],
+    [detailsValues, paid],
   );
 
   const showOverview = pane === "overview";
@@ -525,6 +555,7 @@ export function BookingStepFlow({
             createSession={createSession}
             finalize={finalizeCheckoutSession}
             onComplete={completePayment}
+            onPaid={markPaid}
             showHeader={false}
           />
         )}
