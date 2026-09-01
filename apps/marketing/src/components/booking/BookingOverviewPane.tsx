@@ -64,7 +64,10 @@ export function BookingOverviewPane({
 
   return (
     <div className="flex flex-col gap-8 pb-6 sm:pb-8">
-      <div className="flex flex-col gap-4">
+      {/* `pr-14` only here, matching the gutter `Modal` puts on its pinned
+          header region: this is the block that runs under the close button, and
+          the rows and the CTA below it have the full width. */}
+      <div className="flex flex-col gap-4 pr-14">
         <Heading as="h2" size="lg" className="font-thin leading-[1.06]">
           {returning ? "Welcome Back!" : "Welcome!"}
         </Heading>
