@@ -120,7 +120,8 @@
 /* "Brain Health" — one-time soft green glow that plays after text appears */
 @keyframes brain-health-glow {
   0%   { text-shadow: none; }
-  35%  { text-shadow: 0 0 22px rgba(68, 101, 88, 0.5), 0 0 40px rgba(68, 101, 88, 0.18); }
+  35%  { text-shadow: 0 0 22px rgb(from var(--color-aqua-default) r g b / 0.5),
+                      0 0 40px rgb(from var(--color-aqua-default) r g b / 0.18); }
   100% { text-shadow: none; }
 }
 
@@ -134,8 +135,8 @@
 
 /* "Brain Health" — no glow, color fades in after headline appears */
 @keyframes brain-health-in {
-  from { color: var(--color-on-surface); }
-  to   { color: var(--color-secondary); }
+  from { color: var(--color-ink-strong); }
+  to   { color: var(--color-aqua-default); }
 }
 
 .animate-brain-health-in {
@@ -193,19 +194,19 @@
 .neural-texture {
   background-image: radial-gradient(
     circle at 2px 2px,
-    rgba(68, 101, 88, 0.05) 1px,
+    rgb(from var(--color-aqua-default) r g b / 0.05) 1px,
     transparent 0
   );
   background-size: 40px 40px;
 }
 
 body {
-  background: var(--color-surface);
-  color: var(--color-on-surface);
+  background: var(--color-background-default);
+  color: var(--color-ink-strong);
   font-family: var(--font-body);
 }
 
 ::selection {
-  background: var(--color-secondary-container);
-  color: var(--color-on-secondary-container);
+  background: var(--color-aqua-container);
+  color: var(--color-on-aqua-container);
 }

@@ -34,7 +34,7 @@ export function WelcomeActions() {
           <Heading as="h2" size="sm">
             Talk to a Brain Health Coach
           </Heading>
-          <p className="font-body text-base text-text-secondary">
+          <p className="font-body text-body text-text-secondary">
             If you&rsquo;re feeling overwhelmed, you can schedule your Coach call
             right away. Completing your assessments first just means your Coach
             can provide the fullest picture.
@@ -52,13 +52,13 @@ export function WelcomeActions() {
         <PhosphorIcon
           name="ClipboardText"
           size={48}
-          className="text-on-surface"
+          className="text-ink-strong"
         />
         <div className="flex flex-1 flex-col gap-2">
           <Heading as="h2" size="sm">
             Start with Assessments
           </Heading>
-          <p className="font-body text-base text-text-secondary">
+          <p className="font-body text-body text-text-secondary">
             Complete your brain health assessments first &mdash; so when you meet
             your Coach, they can walk through your results with you, not
             generalities.

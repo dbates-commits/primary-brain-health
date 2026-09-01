@@ -293,7 +293,7 @@ export function DetailsForm({
           </div>
 
           {state.status === "error" && !fieldErrors && (
-            <p role="alert" className="animate-error-in text-sm text-error">
+            <p role="alert" className="animate-error-in text-body-sm text-error">
               {state.message}
             </p>
           )}

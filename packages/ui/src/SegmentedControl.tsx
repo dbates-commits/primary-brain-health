@@ -39,7 +39,7 @@ export function SegmentedControl({
       role="radiogroup"
       aria-label={ariaLabel}
       className={cn(
-        "grid gap-1 rounded-full bg-surface-container-low p-1",
+        "grid gap-1 rounded-full bg-background-warm p-1",
         className,
       )}
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
@@ -62,7 +62,7 @@ export function SegmentedControl({
             {/* py-2.5 (not py-3): with the group's own p-1, a 20px line box and
                 10px of vertical padding land the control on the designs' 48px
                 field height, matching the inputs it sits beside. */}
-            <span className="flex items-center justify-center rounded-full px-4 py-2.5 text-sm font-medium text-on-surface-variant transition-colors hover:text-on-secondary-container peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim">
+            <span className="flex items-center justify-center rounded-full px-4 py-2.5 text-body-sm font-medium text-text-default transition-colors hover:text-on-aqua-container peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring">
               {option.label}
             </span>
           </label>

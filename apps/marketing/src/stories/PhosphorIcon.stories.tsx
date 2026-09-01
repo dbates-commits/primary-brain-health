@@ -32,18 +32,18 @@ export const Default: Story = {
     name: 'Brain',
     size: 48,
     weight: 'regular',
-    className: 'text-primary',
+    className: 'text-brand-default',
   },
 };
 
 /** All six Phosphor weights on the same glyph. */
 export const AllWeights: Story = {
   render: () => (
-    <div className="flex gap-8 bg-surface p-8 text-primary">
+    <div className="flex gap-8 bg-background-default p-8 text-brand-default">
       {WEIGHTS.map((weight) => (
         <div key={weight} className="flex flex-col items-center gap-2">
           <PhosphorIcon name="Brain" size={40} weight={weight} />
-          <span className="text-xs text-on-surface-variant">{weight}</span>
+          <span className="text-caption text-text-default">{weight}</span>
         </div>
       ))}
     </div>
@@ -53,12 +53,12 @@ export const AllWeights: Story = {
 /** Glyphs used across the marketing blocks. */
 export const CommonIcons: Story = {
   render: () => (
-    <div className="grid grid-cols-4 gap-6 bg-surface p-8 text-secondary">
+    <div className="grid grid-cols-4 gap-6 bg-background-default p-8 text-aqua-default">
       {['Brain', 'HeartStraight', 'Stethoscope', 'ChartLineUp', 'ShieldCheck', 'Clock', 'Users', 'CheckCircle'].map(
         (name) => (
           <div key={name} className="flex flex-col items-center gap-2">
             <PhosphorIcon name={name} size={32} weight="duotone" />
-            <span className="text-xs text-on-surface-variant">{name}</span>
+            <span className="text-caption text-text-default">{name}</span>
           </div>
         ),
       )}
@@ -69,7 +69,7 @@ export const CommonIcons: Story = {
 /** `size` accepts a number (px) or any CSS length string. */
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-end gap-8 bg-surface p-8 text-primary">
+    <div className="flex items-end gap-8 bg-background-default p-8 text-brand-default">
       {[16, 24, 32, 48, 64].map((size) => (
         <PhosphorIcon key={size} name="Brain" size={size} weight="bold" />
       ))}

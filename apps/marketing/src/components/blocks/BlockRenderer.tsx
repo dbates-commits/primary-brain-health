@@ -3,10 +3,7 @@
 import React from "react";
 import { tinaField } from "tinacms/dist/react";
 import { Hero } from "@/components/blocks/Hero";
-import { Stats } from "@/components/blocks/Stats";
 import { FAQ } from "@/components/blocks/FAQ";
-import { Gallery } from "@/components/blocks/Gallery";
-import { Testimonials } from "@/components/blocks/Testimonials";
 import { BookingStepFlow } from "@/components/booking";
 import type { ModalStepCopyMap } from "@/components/booking/steps";
 import { ScrollFillLogo } from "@/components/blocks/ScrollFillLogo";
@@ -91,18 +88,6 @@ export function BlockRenderer({
             );
             break;
 
-          case "PageBlocksStats":
-            content = (
-              <Stats
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                subheadline={block.subheadline}
-                items={block.stats || []}
-              />
-            );
-            break;
-
           case "PageBlocksFaq": {
             // Resolve referenced FAQ documents → { question, answer, category }.
             // Order by each FAQ's sortOrder when set, otherwise preserve the
@@ -159,32 +144,6 @@ export function BlockRenderer({
             );
             break;
           }
-
-          case "PageBlocksGallery":
-            content = (
-              <Gallery
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                subheadline={block.subheadline}
-                columns={block.columns}
-                gap={block.gap}
-                items={block.items || []}
-              />
-            );
-            break;
-
-          case "PageBlocksTestimonials":
-            content = (
-              <Testimonials
-                variant={block.variant}
-                theme={block.theme}
-                headline={block.headline}
-                subheadline={block.subheadline}
-                items={block.testimonials || []}
-              />
-            );
-            break;
 
           case "PageBlocksStackSections":
             content = (

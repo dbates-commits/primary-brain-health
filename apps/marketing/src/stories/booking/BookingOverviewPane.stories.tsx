@@ -32,7 +32,7 @@ const meta = {
   decorators: [
     (Story) => (
       // The modal's panel width, so the rows wrap the way they really do.
-      <div className="mx-auto max-w-2xl rounded-3xl bg-surface p-6 shadow-2xl sm:p-8">
+      <div className="mx-auto max-w-2xl rounded-3xl bg-background-default p-6 shadow-2xl sm:p-8">
         <Story />
       </div>
     ),

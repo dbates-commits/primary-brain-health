@@ -26,7 +26,7 @@ const LOGO_VIEWBOX = "0 0 1291 1291";
 // Sourced from the design system (--color-primary-fixed). Slightly
 // deeper than the prior off-white (#F2F8FA) so the logo reads against
 // the warm surface bg without losing its watercolor softness.
-const LOGO_FILL = "var(--color-primary-fixed)";
+const LOGO_FILL = "var(--color-brand-pale)";
 const BRUSH_STROKE_WIDTH = 170;
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t);
@@ -143,7 +143,7 @@ export function ScrollFillLogo({
   }, [count]);
 
   return (
-    <section ref={containerRef} className="relative bg-surface h-[110vh]">
+    <section ref={containerRef} className="relative bg-background-default h-[110vh]">
       {/* Sticky stage is pinned 20vh from the viewport top. No overflow clip:
           the logomark is sized in vmin, so on short/landscape viewports it can
           be taller than the 45vh band — clipping it there sliced the mark's top
@@ -234,7 +234,7 @@ export function ScrollFillLogo({
                   )}
                   {slide.headline && (
                     <p
-                      className={`font-headline font-thin text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface${
+                      className={`font-headline font-thin text-subtitle md:text-h5 lg:text-3xl leading-[1.3] text-balance text-ink-strong${
                         isFirst ? " animate-fade-up" : ""
                       }`}
                       style={isFirst ? { animationDelay: "750ms" } : undefined}

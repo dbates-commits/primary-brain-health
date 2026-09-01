@@ -68,7 +68,7 @@ export function BookingOverviewPane({
         <Heading as="h2" size="lg" className="font-thin leading-[1.06]">
           {returning ? "Welcome Back!" : "Welcome!"}
         </Heading>
-        <p className="font-body text-base leading-[1.4] text-text-secondary">
+        <p className="font-body text-body leading-[1.4] text-text-secondary">
           You&rsquo;re taking the right path for your brain health. This is what
           you can expect in order to complete your onboarding process.
         </p>

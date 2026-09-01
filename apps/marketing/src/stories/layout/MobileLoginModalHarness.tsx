@@ -28,11 +28,11 @@ export function MobileLoginModalHarness({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="min-h-[40rem] bg-surface p-5">
+    <div className="min-h-[40rem] bg-background-default p-5">
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="py-2 text-left font-body text-base font-semibold text-primary"
+        className="py-2 text-left font-body text-body font-semibold text-brand-default"
       >
         Login
       </button>

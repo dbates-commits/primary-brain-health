@@ -20,11 +20,11 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <p className="font-body text-sm font-bold text-on-surface-variant">
+        <p className="font-body text-body-sm font-bold text-text-default">
           CURRENT PLAN
         </p>
         {plan ? (
-          <span className="rounded-xl bg-accent-green-container px-2.5 py-1 font-body text-xs font-semibold text-accent-green">
+          <span className="rounded-xl bg-accent-green-container px-2.5 py-1 font-body text-caption font-semibold text-accent-green">
             Active
           </span>
         ) : null}
@@ -33,10 +33,10 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
       {plan ? (
         <>
           <div className="flex flex-col gap-4">
-            <p className="font-headline text-[2.5rem] font-thin leading-none text-on-surface-variant">
+            <p className="font-headline text-[2.5rem] font-thin leading-none text-text-default">
               {plan.price}
             </p>
-            <Heading as="h2" size="sm" className="text-2xl font-thin">
+            <Heading as="h2" size="sm" className="text-h5 font-thin">
               {plan.name}
             </Heading>
           </div>
@@ -44,7 +44,7 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
           <hr className="border-t border-border-subtle" />
 
           <div className="flex flex-col gap-3">
-            <p className="font-body text-xs font-semibold text-on-surface">
+            <p className="font-body text-caption font-semibold text-ink-strong">
               What&rsquo;s Included:
             </p>
             <ul className="flex flex-col gap-3">
@@ -55,7 +55,7 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
                     aria-hidden="true"
                     size={18}
                     weight="regular"
-                    className="shrink-0 text-on-surface-variant"
+                    className="shrink-0 text-text-default"
                   />
                   {/* `emphasis` renders bold — the Comprehensive package leads
                       with a bold callback to Basic. Basic uses it nowhere, but
@@ -63,7 +63,7 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
                       ever renders a $449 plan. */}
                   <span
                     className={cn(
-                      "font-body text-xs text-on-surface-variant",
+                      "font-body text-caption text-text-default",
                       item.emphasis && "font-bold",
                     )}
                   >
@@ -79,7 +79,7 @@ export function PlanSummary({ plan }: { plan: CurrentPlan | null }) {
         // the column: somebody who signed up and never paid still reaches this
         // page, and an absent card would read as a loading failure.
         <div className="flex flex-col items-start gap-4">
-          <p className="font-body text-base text-on-surface-variant">
+          <p className="font-body text-body text-text-default">
             You don&rsquo;t have an active plan yet.
           </p>
           <Button href="/#intake" color="primary">

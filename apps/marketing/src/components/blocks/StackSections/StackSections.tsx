@@ -65,19 +65,25 @@ export function StackSections({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     let frame = 0;
     const update = () => {
       frame = 0;
-      if (!container) return;
+      if (!container) {
+        return;
+      }
       const isMobile = window.matchMedia("(max-width: 767px)").matches;
       if (isMobile) {
         // Skip per-frame work on mobile — set a one-time "fully present"
         // default so any computed opacity/transform resolves to the resting
         // state, then bail. The CSS scroll-reveal handles the fade-up.
         setProgress((prev) => {
-          if (prev.every((p) => p.entry === 1 && p.retreat === 0)) return prev;
+          if (prev.every((p) => p.entry === 1 && p.retreat === 0)) {
+            return prev;
+          }
           return Array.from({ length: items.length }, () => ({
             entry: 1,
             retreat: 0,
@@ -121,7 +127,9 @@ export function StackSections({
     };
 
     const onScroll = () => {
-      if (frame) return;
+      if (frame) {
+        return;
+      }
       frame = requestAnimationFrame(update);
     };
 
@@ -146,7 +154,9 @@ export function StackSections({
       window.removeEventListener("resize", onScroll);
       window.removeEventListener("load", update);
       cancelAnimationFrame(settle);
-      if (frame) cancelAnimationFrame(frame);
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
     };
   }, [items.length]);
 
@@ -164,7 +174,7 @@ export function StackSections({
             <p
               data-scroll-item
               data-tina-field={tinaFields?.label}
-              className="font-body font-bold text-primary text-xs md:text-sm uppercase tracking-[0.18em] mb-4"
+              className="font-body font-bold text-brand-default text-caption md:text-body-sm uppercase tracking-[0.18em] mb-4"
             >
               {label}
             </p>
@@ -173,7 +183,7 @@ export function StackSections({
             <h2
               data-scroll-item
               data-tina-field={tinaFields?.headline}
-              className="font-headline font-thin text-on-surface text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-balance"
+              className="font-headline font-thin text-ink-strong text-4xl md:text-h2 lg:text-6xl leading-[1.1] text-balance"
             >
               {headline}
             </h2>
@@ -182,7 +192,7 @@ export function StackSections({
             <p
               data-scroll-item
               data-tina-field={tinaFields?.subheadline}
-              className="mt-5 text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto text-pretty"
+              className="mt-5 text-body md:text-lg text-text-default max-w-2xl mx-auto text-pretty"
             >
               {subheadline}
             </p>
@@ -227,7 +237,7 @@ export function StackSections({
               <div
                 data-scroll-reveal-self
                 className={cn(
-                  "relative w-full bg-[#EFF6F9] rounded-[1.25rem] shadow-[0_10px_20px_-16px_rgba(4,22,50,0.25)] overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
+                  "relative w-full bg-background-brand-subtle rounded-[1.25rem] shadow-card overflow-hidden grid grid-cols-1 md:grid-cols-2 md:min-h-[440px] origin-center",
                   reversed && "md:[&>div:first-of-type]:order-2"
                 )}
                 style={
@@ -277,13 +287,13 @@ export function StackSections({
                           name={item.icon}
                           aria-hidden="true"
                           weight="regular"
-                          className="w-14 h-14 md:w-16 md:h-16 text-on-surface"
+                          className="w-14 h-14 md:w-16 md:h-16 text-ink-strong"
                         />
                       ))}
                     {item.title && (
                       <h3
                         data-tina-field={getItemField(i, "title")}
-                        className="font-headline font-thin text-on-surface text-3xl md:text-4xl leading-[1.15] text-balance"
+                        className="font-headline font-thin text-ink-strong text-3xl md:text-4xl leading-[1.15] text-balance"
                       >
                         {item.title}
                       </h3>
@@ -291,7 +301,7 @@ export function StackSections({
                     {item.body && (
                       <p
                         data-tina-field={getItemField(i, "body")}
-                        className="text-on-surface-variant text-base md:text-lg leading-relaxed text-pretty max-w-md"
+                        className="text-text-default text-body md:text-lg leading-relaxed text-pretty max-w-md"
                       >
                         {item.body}
                       </p>

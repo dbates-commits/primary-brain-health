@@ -35,7 +35,7 @@ export const ShortContent: Story = {
   render: () => (
     <BookingModalShell>
       <div className="flex flex-col gap-8">
-        <p className="text-sm text-on-surface-variant">
+        <p className="text-body-sm text-text-default">
           A step short enough to fit, so the bar never leaves the flow.
         </p>
         <StickyActions>
@@ -55,7 +55,7 @@ export const ScrollingContent: Story = {
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           {PARAGRAPHS.map((n) => (
-            <p key={n} className="text-sm leading-relaxed text-on-surface-variant">
+            <p key={n} className="text-body-sm leading-relaxed text-text-default">
               Paragraph {n + 1}. Scroll the panel and watch the action bar hold
               its position while this copy passes behind it.
             </p>
@@ -81,14 +81,14 @@ export const WithGateAboveTheCta: Story = {
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           {PARAGRAPHS.map((n) => (
-            <p key={n} className="text-sm leading-relaxed text-on-surface-variant">
+            <p key={n} className="text-body-sm leading-relaxed text-text-default">
               Paragraph {n + 1}. The gate has to stay with the button — it is
               what enables it.
             </p>
           ))}
         </div>
         <StickyActions className="flex flex-col gap-8">
-          <p className="text-base text-on-surface">
+          <p className="text-body text-ink-strong">
             A gate that must stay visible with the button.
           </p>
           <Button color="primary" className="w-full">

@@ -57,11 +57,11 @@ export default async function WelcomePage() {
             <Heading as="h1" size="lg">
               Choose How to Start
             </Heading>
-            {/* `text-secondary` in the token set is the teal accent, not a
+            {/* `text-aqua-default` in the token set is the teal accent, not a
                 muted body colour — section descriptions across the site use
                 `on-surface-variant`, which is what the design's #495e55 reads
                 as here. */}
-            <p className="max-w-[1000px] font-body text-xl text-on-surface-variant">
+            <p className="max-w-[1000px] font-body text-body-lg text-text-default">
               You&rsquo;ve taken an important step for your brain health.
               Here&rsquo;s the path most people follow.
             </p>

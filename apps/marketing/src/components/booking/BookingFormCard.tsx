@@ -31,14 +31,14 @@ export function BookingFormCard({
   onReopen: () => void;
 }) {
   return (
-    <div className="rounded-xl bg-white p-8 shadow-[0_4px_12px_rgba(0,0,0,0.24)]">
+    <div className="rounded-form-card bg-background-default p-8 shadow-card">
       <h3 id="booking-form-title" className="sr-only">
         Book your assessment
       </h3>
 
       {signedUp ? (
         <div className="flex flex-col gap-6">
-          <p className="text-lg text-on-surface">
+          <p className="text-lg text-ink-strong">
             We&rsquo;ve emailed you a link to confirm your address. Open it to
             pick up where you left off.
           </p>

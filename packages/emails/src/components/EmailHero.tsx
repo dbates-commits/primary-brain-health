@@ -51,7 +51,7 @@ const wrapperStyle: React.CSSProperties = {
 };
 
 const heroStyle: React.CSSProperties = {
-  backgroundColor: emailColors.primary,
+  backgroundColor: emailColors.brandDefault,
   borderRadius: "16px",
   padding: "40px",
   textAlign: "center",
@@ -63,7 +63,7 @@ const headingStyle: React.CSSProperties = {
   fontSize: "24px",
   fontWeight: 700,
   lineHeight: "32px",
-  color: emailColors.onPrimary,
+  color: emailColors.brandOnBrand,
 };
 
 const subheadStyle: React.CSSProperties = {
@@ -71,5 +71,5 @@ const subheadStyle: React.CSSProperties = {
   fontFamily: emailFontStack,
   fontSize: "15px",
   lineHeight: "24px",
-  color: emailColors.onPrimary,
+  color: emailColors.brandOnBrand,
 };

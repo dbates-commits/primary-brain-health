@@ -79,15 +79,27 @@ The hero lives under `src/components/blocks/Hero/`:
 
 ### Design System
 
-Theme is called "The Cognitive Sanctuary", defined as CSS custom properties in `packages/tokens/theme.css` (`@pbh/tokens`) and wired into Tailwind 4 via `@theme inline`. Each app imports it from its `globals.css` (`@import "@pbh/tokens/theme.css";`). App-specific `@font-face` declarations and keyframes stay in the app's own `globals.css`.
+**Figma is the source of truth.** `packages/tokens/theme.css` (`@pbh/tokens`)
+mirrors the variables of Figma file `SppKdzsaH6rQ14u90UpNSq` under Figma's own
+names and wires them into Tailwind 4 via `@theme inline`. Each app imports it
+from its `globals.css` (`@import "@pbh/tokens/theme.css";`); app-specific
+`@font-face` declarations and keyframes stay in the app's own `globals.css`.
 
-- **Primary**: `#041632` (dark navy)
-- **Secondary**: `#446558` (forest green)
-- **Surface**: `#fbf9f4` (warm off-white) with 7 surface-level variants
-- **Error**: `#ba1a1a`
-- **Fonts**: Manrope (headlines, `font-headline`), Inter (body, `font-body`)
+A token's name is its Figma variable path with `/` replaced by `-`, so a Figma
+variable name is greppable here: `background/default` →
+`--color-background-default` → `bg-background-default`. The stutter in
+`text-text-default` is deliberate — do not collapse it.
 
-Use design token classes (`text-primary`, `bg-surface`, `text-on-surface-variant`, etc.) rather than raw hex values.
+Stock Tailwind colours are **disabled** (`--color-*: initial`), so
+`bg-indigo-600` and `text-gray-600` emit nothing. Use tokens.
+
+**No values are listed here on purpose.** This section described a navy /
+forest-green / Manrope palette for months after it was replaced, because
+restating values is how they go stale. See
+[`docs/design-tokens.md`](docs/design-tokens.md) for the token set, the naming
+rule, how to add a token (four places, three of them enforced by tests) and the
+manual re-sync procedure. Requests to the designer live in
+[`docs/figma-token-requests.md`](docs/figma-token-requests.md).
 
 ### Path Aliases
 

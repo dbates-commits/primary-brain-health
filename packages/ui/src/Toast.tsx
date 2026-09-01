@@ -33,12 +33,12 @@ export function Toast({
       role="status"
       className={cn(
         leaving ? "animate-toast-out" : "animate-toast-in",
-        "flex items-center gap-3 rounded-xl bg-toast-surface px-5 py-3.5 shadow-[0_4px_16px_0_rgba(0,0,0,0.2)]",
+        "flex items-center gap-3 rounded-xl bg-toast-surface px-5 py-3.5 shadow-toast",
         className,
       )}
     >
       <SuccessCircleIcon className="size-6 shrink-0" />
-      <p className="font-body text-sm font-medium text-white">{message}</p>
+      <p className="font-body text-body-sm font-medium text-text-inverse">{message}</p>
     </div>
   );
 }

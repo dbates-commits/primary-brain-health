@@ -130,7 +130,7 @@ export function ConsentForm({
       action={formAction}
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col items-center gap-8 bg-surface"
+      className="flex flex-col items-center gap-8 bg-background-default"
     >
       {/* No hidden `userId`: whose consent this records is decided by the signed
           booking cookie, not by the submission. */}
@@ -149,27 +149,27 @@ export function ConsentForm({
           role="region"
           aria-label="Terms and conditions"
           tabIndex={0}
-          className="h-[337px] w-full overflow-y-auto rounded-md border border-neutral-200 bg-neutral-50 py-6 pl-6 pr-10 [scrollbar-color:var(--color-neutral-300)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-primary [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300"
+          className="h-[337px] w-full overflow-y-auto rounded-md border border-grey-warm-200 bg-grey-100 py-6 pl-6 pr-10 [scrollbar-color:var(--color-grey-400)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-brand-default [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-grey-400"
         >
           <div className="flex flex-col gap-6">
             {terms ?? (
               <>
-                <p className="text-sm leading-normal text-neutral-600">
+                <p className="text-body-sm leading-normal text-grey-700">
                   {TERMS_INTRO}
                 </p>
 
                 {LEGAL_SECTIONS.map((section) => (
                   <div key={section.title} className="flex flex-col gap-2">
-                    <p className="text-sm font-bold text-neutral-900">
+                    <p className="text-body-sm font-bold text-grey-900">
                       {section.title}
                     </p>
-                    <p className="text-sm leading-normal text-neutral-600">
+                    <p className="text-body-sm leading-normal text-grey-700">
                       {section.body}
                     </p>
                   </div>
                 ))}
 
-                <p className="text-[13px] italic text-neutral-400">
+                <p className="text-[13px] italic text-grey-450">
                   {TERMS_UPDATED}
                 </p>
               </>
@@ -193,7 +193,7 @@ export function ConsentForm({
                 aria-invalid={agreedError ? true : undefined}
                 aria-describedby={agreedError ? "agreed-error" : undefined}
               />
-              <span className="text-base text-on-surface">
+              <span className="text-body text-ink-strong">
                 I&rsquo;ve read and agree to the consent form.
               </span>
             </label>
@@ -201,7 +201,7 @@ export function ConsentForm({
           </div>
 
           {state.status === "error" && !fieldErrors && (
-            <p role="alert" className="animate-error-in text-sm text-error">
+            <p role="alert" className="animate-error-in text-body-sm text-error">
               {state.message}
             </p>
           )}

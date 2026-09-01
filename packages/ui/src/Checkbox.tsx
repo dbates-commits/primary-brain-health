@@ -27,14 +27,14 @@ export const Checkbox = forwardRef<
         ref={ref}
         type="checkbox"
         className={cn(
-          "peer size-6 appearance-none rounded-[4px] border border-outline bg-surface transition-colors",
-          "checked:border-primary checked:bg-primary",
-          "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2",
+          "peer size-6 appearance-none rounded-[4px] border border-outline bg-background-default transition-colors",
+          "checked:border-brand-default checked:bg-brand-default",
+          "focus:outline-none focus:ring-2 focus:ring-brand-default/40 focus:ring-offset-2",
           className,
         )}
         {...props}
       />
-      <CheckIcon className="pointer-events-none absolute inset-0 hidden size-6 p-1 text-on-primary peer-checked:block" />
+      <CheckIcon className="pointer-events-none absolute inset-0 hidden size-6 p-1 text-brand-on-brand peer-checked:block" />
     </span>
   );
 });

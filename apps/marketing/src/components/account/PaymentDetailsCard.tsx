@@ -26,7 +26,7 @@ export async function PaymentDetailsCard({ userId }: { userId: string }) {
       ) : (
         // Unreachable in practice — a session implies a row — but the read is
         // honestly nullable rather than asserted.
-        <p className="font-body text-base text-on-surface-variant">
+        <p className="font-body text-body text-text-default">
           We couldn&rsquo;t load your payment details. Please refresh and try
           again.
         </p>

@@ -34,7 +34,7 @@ const BODY =
 export function NavigatorNote() {
   return (
     <Section
-      className="bg-[#E2EFEF] px-6 py-20 md:px-10 md:py-28"
+      className="bg-mint-subtle px-6 py-20 md:px-10 md:py-28"
       stagger={90}
     >
       <div className="mx-auto max-w-4xl text-center">
@@ -42,13 +42,13 @@ export function NavigatorNote() {
             heads a section with three words, this is a full sentence. */}
         <h2
           data-scroll-item
-          className="text-balance font-headline text-3xl font-thin leading-[1.15] text-on-surface md:text-4xl"
+          className="text-balance font-headline text-3xl font-thin leading-[1.15] text-ink-strong md:text-4xl"
         >
           {TITLE}
         </h2>
         <p
           data-scroll-item
-          className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-on-surface-variant md:text-lg"
+          className="mx-auto mt-5 max-w-2xl text-pretty text-body leading-relaxed text-text-default md:text-lg"
         >
           {BODY}
         </p>

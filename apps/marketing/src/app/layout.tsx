@@ -89,7 +89,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://use.typekit.net/qrz4jhn.css" />
       </head>
       <body
-        className={`${gildaDisplay.variable} ${inter.variable} font-body antialiased bg-white text-on-surface`}
+        className={`${gildaDisplay.variable} ${inter.variable} font-body antialiased bg-background-default text-ink-strong`}
       >
         <ScrollToTop />
         <ScrollRevealInit />

@@ -17,7 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const filler = (label: string) => (
-  <div className="rounded-lg bg-secondary/15 py-12 text-center text-sm text-on-surface-variant">
+  <div className="rounded-lg bg-aqua-default/15 py-12 text-center text-body-sm text-text-default">
     {label}
   </div>
 );
@@ -58,7 +58,7 @@ export const Full: Story = {
 export const AllSizes: Story = {
   args: { children: null },
   render: () => (
-    <div className="space-y-4 bg-surface py-8">
+    <div className="space-y-4 bg-background-default py-8">
       <Container size="narrow">{filler('narrow')}</Container>
       <Container size="default">{filler('default')}</Container>
       <Container size="wide">{filler('wide')}</Container>

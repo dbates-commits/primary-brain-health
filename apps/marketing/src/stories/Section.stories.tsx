@@ -24,7 +24,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    className: 'bg-surface py-20',
+    className: 'bg-background-default py-20',
     children: (
       <Container>
         <Eyebrow>Why Primary Brain Health?</Eyebrow>
@@ -40,13 +40,13 @@ export const Default: Story = {
 export const WithAnchorId: Story = {
   args: {
     id: 'how-it-works',
-    className: 'bg-surface-container-low py-20',
+    className: 'bg-background-warm py-20',
     children: (
       <Container>
         <Heading as="h2" size="lg">
           How It Works
         </Heading>
-        <p className="mt-4 text-on-surface-variant">
+        <p className="mt-4 text-text-default">
           Anchored at <code>#how-it-works</code>; `scroll-mt-20` keeps it clear of the fixed header.
         </p>
       </Container>
@@ -58,13 +58,13 @@ export const WithAnchorId: Story = {
 export const WithStagger: Story = {
   args: {
     stagger: 2,
-    className: 'bg-surface py-20',
+    className: 'bg-background-default py-20',
     children: (
       <Container>
         <Heading as="h2" size="md">
           Staggered reveal
         </Heading>
-        <p className="mt-4 text-on-surface-variant">
+        <p className="mt-4 text-text-default">
           Renders <code>data-scroll-stagger=&quot;2&quot;</code> for the reveal script to read.
         </p>
       </Container>

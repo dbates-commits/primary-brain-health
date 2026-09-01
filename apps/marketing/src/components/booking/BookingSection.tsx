@@ -48,7 +48,7 @@ export function BookingSection({
   return (
     <Section
       id="booking"
-      className="bg-primary px-6 py-16 text-on-primary md:px-20 md:py-20"
+      className="bg-brand-default px-6 py-16 text-brand-on-brand md:px-20 md:py-20"
     >
       <div className="mx-auto flex max-w-6xl flex-col items-stretch gap-10 lg:flex-row lg:gap-[60px]">
         {/* Equal halves. `flex-1` on both with a zero basis splits the row
@@ -58,13 +58,13 @@ export function BookingSection({
         <div className="flex flex-col gap-4 lg:flex-1">
           <h2
             data-tina-field={tinaFields?.headline}
-            className="text-balance font-headline text-4xl font-thin leading-tight text-white md:text-5xl"
+            className="text-balance font-headline text-4xl font-thin leading-tight text-text-inverse md:text-h2"
           >
             {headline}
           </h2>
           <p
             data-tina-field={tinaFields?.subheadline}
-            className="text-pretty text-xl leading-relaxed text-on-primary-container"
+            className="text-pretty text-body-lg leading-relaxed text-brand-wash"
           >
             {subheadline}
           </p>

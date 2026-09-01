@@ -33,7 +33,7 @@ export function ConsentTerms({ content }: { content?: unknown }) {
       content={content as TinaMarkdownContent}
       components={{
         p: (props?: { children?: ReactNode }) => (
-          <p className="text-sm leading-normal text-neutral-600">
+          <p className="text-body-sm leading-normal text-grey-700">
             {props?.children}
           </p>
         ),
@@ -41,27 +41,27 @@ export function ConsentTerms({ content }: { content?: unknown }) {
         // their sections rather than scaling them up, and a legal document that
         // suddenly grows 32px type reads as a different page.
         h1: (props?: { children?: ReactNode }) => (
-          <p className="text-sm font-bold text-neutral-900">{props?.children}</p>
+          <p className="text-body-sm font-bold text-grey-900">{props?.children}</p>
         ),
         h2: (props?: { children?: ReactNode }) => (
-          <p className="text-sm font-bold text-neutral-900">{props?.children}</p>
+          <p className="text-body-sm font-bold text-grey-900">{props?.children}</p>
         ),
         h3: (props?: { children?: ReactNode }) => (
-          <p className="text-sm font-bold text-neutral-900">{props?.children}</p>
+          <p className="text-body-sm font-bold text-grey-900">{props?.children}</p>
         ),
         ul: (props?: { children?: ReactNode }) => (
-          <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-normal text-neutral-600">
+          <ul className="flex list-disc flex-col gap-2 pl-5 text-body-sm leading-normal text-grey-700">
             {props?.children}
           </ul>
         ),
         ol: (props?: { children?: ReactNode }) => (
-          <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm leading-normal text-neutral-600">
+          <ol className="flex list-decimal flex-col gap-2 pl-5 text-body-sm leading-normal text-grey-700">
             {props?.children}
           </ol>
         ),
         a: (props?: { url?: string; children?: ReactNode }) => (
           <a
-            className="text-primary underline"
+            className="text-brand-default underline"
             href={props?.url}
             // Terms routinely link out to a privacy policy; opening in place
             // would lose a booking mid-flow.

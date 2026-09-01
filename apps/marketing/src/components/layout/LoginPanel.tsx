@@ -56,19 +56,19 @@ export function LoginPanel({
     <div
       {...rest}
       className={cn(
-        "flex flex-col gap-5 rounded-xl bg-white p-8",
-        "drop-shadow-[0px_4px_12px_rgba(0,0,0,0.24)]",
+        "flex flex-col gap-5 rounded-form-card bg-background-default p-8",
+        "shadow-card",
         className,
       )}
     >
       <div className="flex flex-col gap-4">
-        {/* `size="sm"` is `text-xl md:text-2xl`; both designs draw this at
+        {/* `size="sm"` is `text-body-lg md:text-h5`; both designs draw this at
             24px, so the mobile step is lifted to match rather than reading 20px
             below `md`. */}
-        <Heading as="h2" size="sm" className="text-2xl">
+        <Heading as="h2" size="sm" className="text-h5">
           {state.status === "sent" ? "Email Confirmation" : "Login"}
         </Heading>
-        <p className="text-base text-on-surface">
+        <p className="text-body text-ink-strong">
           {state.status === "sent"
             ? "We’ve sent you an email. Please check your inbox in order to login."
             : "Enter the email you used to create the account."}

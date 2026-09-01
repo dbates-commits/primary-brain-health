@@ -21,7 +21,7 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <div className="bg-surface p-8 text-primary">
+      <div className="bg-background-default p-8 text-brand-default">
         <Story />
       </div>
     ),
@@ -39,10 +39,10 @@ export const Default: Story = {
 export const InheritsColor: Story = {
   render: () => (
     <div className="flex gap-8">
-      <CheckIcon className="size-6 text-primary" />
-      <CheckIcon className="size-6 text-secondary" />
+      <CheckIcon className="size-6 text-brand-default" />
+      <CheckIcon className="size-6 text-aqua-default" />
       <CheckIcon className="size-6 text-error" />
-      <CheckIcon className="size-6 text-on-surface-variant" />
+      <CheckIcon className="size-6 text-text-default" />
     </div>
   ),
 };
@@ -62,10 +62,10 @@ export const PaddedRatherThanScaled: Story = {
         ] as const
       ).map((s) => (
         <div key={s.label} className="flex flex-col items-center gap-2">
-          <span className="rounded bg-primary text-on-primary">
+          <span className="rounded bg-brand-default text-brand-on-brand">
             <CheckIcon className={`${s.box} ${s.pad}`} />
           </span>
-          <span className="text-xs text-on-surface-variant">{s.label}</span>
+          <span className="text-caption text-text-default">{s.label}</span>
         </div>
       ))}
     </div>

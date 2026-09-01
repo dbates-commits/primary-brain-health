@@ -152,7 +152,7 @@ export function Modal({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-on-surface/50 p-4",
+        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 p-4",
         "transition-opacity duration-200 ease-out motion-reduce:transition-none",
         shown ? "opacity-100" : "opacity-0",
       )}
@@ -165,7 +165,7 @@ export function Modal({
         aria-label={label}
         tabIndex={-1}
         className={cn(
-          "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl focus:outline-none",
+          "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
           // `transition` (not `transition-all`) already covers opacity and
           // transform, and leaves layout properties alone — the panel's height
           // changes between steps and must not animate.
@@ -184,7 +184,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="absolute right-4 top-4 z-20 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="absolute right-4 top-4 z-20 rounded-full p-2 text-text-default transition-colors hover:bg-background-warm hover:text-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-default"
           >
             <svg
               aria-hidden="true"

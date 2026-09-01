@@ -13,10 +13,10 @@ interface HeadingProps {
 }
 
 const sizeStyles: Record<HeadingSize, string> = {
-  xl: "text-4xl md:text-5xl lg:text-6xl leading-[1.1]",
-  lg: "text-3xl md:text-4xl lg:text-5xl leading-[1.15]",
-  md: "text-2xl md:text-3xl leading-[1.2]",
-  sm: "text-xl md:text-2xl leading-[1.25]",
+  xl: "text-4xl md:text-h2 lg:text-6xl leading-[1.1]",
+  lg: "text-3xl md:text-4xl lg:text-h2 leading-[1.15]",
+  md: "text-h5 md:text-3xl leading-[1.2]",
+  sm: "text-subtitle md:text-h5 leading-[1.25]",
 };
 
 export function Heading({
@@ -30,7 +30,7 @@ export function Heading({
   return (
     <Tag
       className={cn(
-        "font-headline font-normal text-on-surface",
+        "font-headline font-normal text-ink-strong",
         sizeStyles[size],
         className
       )}

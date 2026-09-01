@@ -133,13 +133,13 @@ export function PaymentStep({
       {showHeader ? <StepHeader {...PAYMENT_HEADER} /> : null}
 
       {initError && (
-        <p role="alert" className="animate-error-in text-sm text-error">
+        <p role="alert" className="animate-error-in text-body-sm text-error">
           {initError}
         </p>
       )}
 
       {!stripePromise && !initError && (
-        <p role="alert" className="text-sm text-error">
+        <p role="alert" className="text-body-sm text-error">
           Payments aren&apos;t configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.
         </p>
       )}
@@ -154,13 +154,13 @@ export function PaymentStep({
       )}
 
       {completeError && (
-        <p role="alert" className="animate-error-in text-sm text-error">
+        <p role="alert" className="animate-error-in text-body-sm text-error">
           {completeError}
         </p>
       )}
 
       {stripePromise && !clientSecret && !initError && (
-        <p className="text-sm text-on-surface-variant">Loading payment…</p>
+        <p className="text-body-sm text-text-default">Loading payment…</p>
       )}
     </div>
   );

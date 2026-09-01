@@ -1,9 +1,6 @@
 import type { Collection } from "tinacms";
 import { heroBlock } from "../blocks/hero";
-import { testimonialsBlock } from "../blocks/testimonials";
-import { galleryBlock } from "../blocks/gallery";
 import { faqBlock } from "../blocks/faq";
-import { statsBlock } from "../blocks/stats";
 import { intakeFormBlock } from "../blocks/intakeForm";
 import { scrollFillLogoBlock } from "../blocks/scrollFillLogo";
 import { stackSectionsBlock } from "../blocks/stackSections";
@@ -55,10 +52,7 @@ export const pageCollection: Collection = {
       },
       templates: [
         heroBlock,
-        testimonialsBlock,
-        galleryBlock,
         faqBlock,
-        statsBlock,
         intakeFormBlock,
         scrollFillLogoBlock,
         stackSectionsBlock,

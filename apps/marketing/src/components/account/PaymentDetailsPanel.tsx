@@ -84,7 +84,7 @@ export function PaymentDetailsPanel({
       >
         Payment Details
       </Heading>
-      <p className="mt-2 font-body text-base leading-[1.2] text-text-secondary">
+      <p className="mt-2 font-body text-body leading-[1.2] text-text-secondary">
         We use Stripe to process any of your payments. Your health information
         is never shared with them.
       </p>
@@ -92,7 +92,7 @@ export function PaymentDetailsPanel({
 
       {card ? (
         <>
-          <p className="mt-6 flex items-center gap-2 font-body text-base text-on-surface-variant">
+          <p className="mt-6 flex items-center gap-2 font-body text-body text-text-default">
             <PhosphorIcon
               name="CreditCard"
               size={24}
@@ -110,7 +110,7 @@ export function PaymentDetailsPanel({
             ) : null}
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4 font-body text-base text-on-surface-variant">
+          <div className="mt-6 flex flex-wrap items-center gap-4 font-body text-body text-text-default">
             <PhosphorIcon
               name="Receipt"
               size={24}
@@ -124,7 +124,7 @@ export function PaymentDetailsPanel({
               onClick={() => {
                 openPortal("receipts");
               }}
-              className="cursor-pointer text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:underline disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer text-brand-default underline-offset-4 hover:underline focus:outline-none focus-visible:underline disabled:cursor-not-allowed disabled:opacity-50"
             >
               View Receipts
             </button>
@@ -139,13 +139,13 @@ export function PaymentDetailsPanel({
             onClick={() => {
               openPortal("payment-method");
             }}
-            className="mt-6 border border-black"
+            className="mt-6 border border-text-heading"
           >
             Update Payment Information
           </Button>
 
           {error ? (
-            <p role="alert" className="mt-4 font-body text-base text-error">
+            <p role="alert" className="mt-4 font-body text-body text-error">
               {error}
             </p>
           ) : null}
@@ -154,7 +154,7 @@ export function PaymentDetailsPanel({
         // Signed up and never paid, or refunded. Both reach /profile — the page
         // gates on a session, not an entitlement — and neither has a card, a
         // receipt or a portal worth opening. Same line `PlanSummary` draws.
-        <p className="mt-6 font-body text-base text-on-surface-variant">
+        <p className="mt-6 font-body text-body text-text-default">
           No payment method on file yet. Once you book an assessment, the card
           you pay with and your receipts will appear here.
         </p>

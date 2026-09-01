@@ -93,7 +93,7 @@ export function SignupForm({
       color={submitColor}
       className={
         submitColor === "white"
-          ? "w-full shadow-[0_8px_12px_rgba(0,0,0,0.12)]"
+          ? "w-full shadow-menu"
           : "w-full"
       }
     >
@@ -186,7 +186,7 @@ export function SignupForm({
               // any stale client state on the way to a fresh sign-in.
               <a
                 href="/login"
-                className="mt-1 inline-block font-body text-sm font-bold text-primary underline underline-offset-2 hover:brightness-110"
+                className="mt-1 inline-block font-body text-body-sm font-bold text-brand-default underline underline-offset-2 hover:brightness-110"
               >
                 Sign in to continue your booking
               </a>
@@ -194,7 +194,7 @@ export function SignupForm({
           </div>
 
           {state.status === "error" && !fieldErrors && (
-            <p role="alert" className="animate-error-in text-sm text-error">
+            <p role="alert" className="animate-error-in text-body-sm text-error">
               {state.message}
             </p>
           )}

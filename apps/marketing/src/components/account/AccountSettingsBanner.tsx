@@ -14,13 +14,13 @@ import { Heading } from "@pbh/ui";
  */
 export function AccountSettingsBanner() {
   return (
-    <div className="rounded-xl bg-primary px-6 py-12 text-on-primary md:px-10 md:py-20">
-      {/* `Heading` hardcodes `text-on-surface` and `leading-[1.15]`; `cn` is
+    <div className="rounded-xl bg-brand-default px-6 py-12 text-brand-on-brand md:px-10 md:py-20">
+      {/* `Heading` hardcodes `text-ink-strong` and `leading-[1.15]`; `cn` is
           tailwind-merge, so both overrides below win. */}
-      <Heading as="h1" size="lg" className="leading-[1.06] text-on-primary">
+      <Heading as="h1" size="lg" className="leading-[1.06] text-brand-on-brand">
         Account Settings
       </Heading>
-      <p className="mt-4 font-body text-lg leading-[1.2] md:text-xl">
+      <p className="mt-4 font-body text-lg leading-[1.2] md:text-body-lg">
         Manage your profile information and subscription.
       </p>
     </div>

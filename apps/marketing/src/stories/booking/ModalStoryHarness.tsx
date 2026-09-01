@@ -23,11 +23,11 @@ export function ModalStoryHarness({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="flex min-h-[24rem] items-center justify-center bg-surface p-8">
+    <div className="flex min-h-[24rem] items-center justify-center bg-background-default p-8">
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="h-12 rounded-full bg-primary px-6 text-base font-bold text-on-primary"
+        className="h-12 rounded-full bg-brand-default px-6 text-body font-bold text-brand-on-brand"
       >
         Open the dialog
       </button>

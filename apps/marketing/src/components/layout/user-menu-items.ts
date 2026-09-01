@@ -22,4 +22,4 @@ export const USER_MENU_LINKS = [
  * each with its own element and props.
  */
 export const userMenuItemClass =
-  "flex w-40 items-center rounded-lg px-3 py-2.5 text-left font-body text-base font-medium text-on-surface transition-colors hover:bg-primary/6 hover:text-primary focus-visible:bg-primary/6 focus-visible:text-primary focus:outline-none";
+  "flex w-40 items-center rounded-lg px-3 py-2.5 text-left font-body text-body font-medium text-ink-strong transition-colors hover:bg-brand-default/6 hover:text-brand-default focus-visible:bg-brand-default/6 focus-visible:text-brand-default focus:outline-none";

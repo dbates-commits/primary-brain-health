@@ -81,12 +81,12 @@ export function IntakeForm({
   };
 
   const inputClasses =
-    "w-full bg-surface-container-low border-none rounded-lg px-3 py-3 sm:px-4 sm:py-4 text-on-surface focus:ring-2 focus:ring-primary-fixed-dim focus:outline-none";
+    "w-full bg-background-warm border-none rounded-lg px-3 py-3 sm:px-4 sm:py-4 text-ink-strong focus:ring-2 focus:ring-focus-ring focus:outline-none";
 
   return (
     <Section
       id="intake"
-      className="py-16 md:py-32 px-6 md:px-10 bg-primary text-on-primary"
+      className="py-16 md:py-32 px-6 md:px-10 bg-brand-default text-brand-on-brand"
     >
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
         {/* Left: Copy */}
@@ -94,7 +94,7 @@ export function IntakeForm({
           {headline && (
             <h2
               data-scroll-item
-              className="text-4xl md:text-5xl lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
+              className="text-4xl md:text-h2 lg:text-6xl font-thin font-headline mb-6 leading-[1.1] text-balance"
               data-tina-field={tinaFields?.headline}
             >
               {headline}
@@ -103,18 +103,18 @@ export function IntakeForm({
           {subheadline && (
             <p
               data-scroll-item
-              className="text-on-primary-container text-xl leading-relaxed mb-8 text-pretty"
+              className="text-brand-wash text-body-lg leading-relaxed mb-8 text-pretty"
               data-tina-field={tinaFields?.subheadline}
             >
               {subheadline}
             </p>
           )}
           {showIncludes && (
-            <div data-scroll-item className="p-6 sm:p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
-              <Heading as="h4" size="sm" className="mb-4 text-white">
+            <div data-scroll-item className="p-6 sm:p-8 bg-brand-deep rounded-[1.25rem] flex-1 flex flex-col">
+              <Heading as="h4" size="sm" className="mb-4 text-text-inverse">
                 Includes:
               </Heading>
-              <ul className="space-y-3 text-on-primary-container">
+              <ul className="space-y-3 text-brand-wash">
                 {[
                   "Digital brain health assessment",
                   "Clinician review of your results",
@@ -125,7 +125,7 @@ export function IntakeForm({
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <svg
-                      className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
+                      className="w-5 h-5 text-aqua-container mt-0.5 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -141,11 +141,11 @@ export function IntakeForm({
                   </li>
                 ))}
               </ul>
-              <div className="mt-10 pt-8 border-t border-white/15">
-                <span className="text-3xl font-normal text-white font-headline">$149</span>
-                <p className="text-on-primary-container/60 text-sm mt-2">
+              <div className="mt-10 pt-8 border-t border-border-inverse/15">
+                <span className="text-3xl font-normal text-text-inverse font-headline">$149</span>
+                <p className="text-brand-wash/60 text-body-sm mt-2">
                   This service may be eligible for{' '}
-                  <span className="text-white">HSA/FSA reimbursement</span>
+                  <span className="text-text-inverse">HSA/FSA reimbursement</span>
                   . We can provide documentation to support submission.
                 </p>
               </div>
@@ -154,13 +154,13 @@ export function IntakeForm({
         </div>
 
         {/* Right: Form */}
-        <div data-scroll-item className="bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg">
+        <div data-scroll-item className="bg-background-default p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-ink-strong shadow-lg">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   First Name
                 </label>
@@ -177,7 +177,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Last Name
                 </label>
@@ -197,7 +197,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Email Address
                 </label>
@@ -214,7 +214,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Phone Number
                 </label>
@@ -235,7 +235,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="yearOfBirth"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Year of Birth
                 </label>
@@ -257,7 +257,7 @@ export function IntakeForm({
                     ))}
                   </select>
                   <svg
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-default"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -269,7 +269,7 @@ export function IntakeForm({
               <div>
                 <label
                   htmlFor="gender"
-                  className="block text-sm font-semibold mb-2"
+                  className="block text-body-sm font-semibold mb-2"
                 >
                   Gender
                 </label>
@@ -289,7 +289,7 @@ export function IntakeForm({
                     <option value="Other">Other</option>
                   </select>
                   <svg
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-default"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -303,7 +303,7 @@ export function IntakeForm({
             <div>
               <label
                 htmlFor="educationLevel"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Highest Level of Education
               </label>
@@ -338,7 +338,7 @@ export function IntakeForm({
                   </option>
                 </select>
                 <svg
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant"
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-default"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -354,13 +354,13 @@ export function IntakeForm({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2">
+              <label className="block text-body-sm font-semibold mb-2">
                 Who is this consultation for?
               </label>
               <div
                 role="radiogroup"
                 aria-label="Who is this consultation for?"
-                className="grid grid-cols-2 gap-1 p-1 bg-surface-container-low rounded-full"
+                className="grid grid-cols-2 gap-1 p-1 bg-background-warm rounded-full"
               >
                 <label className="relative cursor-pointer">
                   <input
@@ -370,7 +370,7 @@ export function IntakeForm({
                     defaultChecked
                     className="peer sr-only"
                   />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
+                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-body-sm font-medium text-text-default transition-colors peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring hover:text-on-aqua-container">
                     Myself
                   </span>
                 </label>
@@ -381,7 +381,7 @@ export function IntakeForm({
                     value="Someone else"
                     className="peer sr-only"
                   />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
+                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-body-sm font-medium text-text-default transition-colors peer-checked:bg-background-default peer-checked:text-on-aqua-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring hover:text-on-aqua-container">
                     Someone Else
                   </span>
                 </label>
@@ -391,7 +391,7 @@ export function IntakeForm({
             <div>
               <label
                 htmlFor="message"
-                className="block text-sm font-semibold mb-2"
+                className="block text-body-sm font-semibold mb-2"
               >
                 Message (Optional)
               </label>

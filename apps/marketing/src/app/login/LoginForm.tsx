@@ -32,7 +32,7 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
         <Heading as="h1" size="lg" className="mb-2">
           Sign in
         </Heading>
-        <p className="text-on-surface-variant">
+        <p className="text-text-default">
           Enter your email and we&rsquo;ll send you a secure sign-in link.
         </p>
       </div>
@@ -63,7 +63,7 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
             <p
               id="email-error"
               role="alert"
-              className="animate-error-in text-sm text-error"
+              className="animate-error-in text-body-sm text-error"
             >
               {errorMessage}
             </p>
@@ -72,7 +72,7 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
           <Button
             type="submit"
             color="primary"
-            className="h-14 w-full text-base"
+            className="h-14 w-full text-body"
           >
             {pending ? "Sending link…" : "Email me a sign-in link"}
           </Button>

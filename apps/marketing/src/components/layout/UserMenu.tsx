@@ -119,18 +119,18 @@ export function UserMenu({ firstName }: { firstName: string }) {
       >
         <span
           aria-hidden="true"
-          className="flex size-8 items-center justify-center rounded-full bg-primary font-body text-base font-medium text-on-primary"
+          className="flex size-8 items-center justify-center rounded-full bg-brand-default font-body text-body font-medium text-brand-on-brand"
         >
           {initial}
         </span>
-        <span className="font-body text-base font-medium tracking-tight text-on-surface">
+        <span className="font-body text-body font-medium tracking-tight text-ink-strong">
           {firstName}
         </span>
         <PhosphorIcon
           name="CaretDown"
           size={16}
           aria-hidden="true"
-          className="text-on-surface"
+          className="text-ink-strong"
         />
       </button>
 
@@ -143,7 +143,7 @@ export function UserMenu({ firstName }: { firstName: string }) {
           // by the length of the transition.
           inert={!open}
           className={cn(
-            "absolute top-full right-0 z-50 mt-1.5 flex flex-col rounded-xl border border-neutral-350 bg-white p-1 drop-shadow-[0px_8px_12px_rgba(0,0,0,0.08)]",
+            "absolute top-full right-0 z-50 mt-1.5 flex flex-col rounded-xl border border-grey-350 bg-background-default p-1 shadow-menu",
             // Same 200ms ease-out as the booking modal, scaled from the
             // top-right so it opens out of the trigger it hangs from.
             "origin-top-right transition duration-200 ease-out motion-reduce:transition-none",

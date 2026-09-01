@@ -50,10 +50,10 @@ export function BookingOverviewRow({
         className="shrink-0"
       />
       <span className="flex min-w-0 flex-1 flex-col gap-1 text-left">
-        <span className="font-body text-xs uppercase leading-normal">
+        <span className="font-body text-caption uppercase leading-normal">
           Step {position}
         </span>
-        <span className="font-body text-base leading-normal">
+        <span className="font-body text-body leading-normal">
           {model.overviewLabel}
         </span>
       </span>
@@ -81,13 +81,13 @@ export function BookingOverviewRow({
 
   const shell = cn(
     "flex w-full items-center gap-5 px-2 py-3",
-    status === "done" && "text-neutral-400",
-    status === "current" && "text-primary",
-    status === "upcoming" && "text-on-surface-variant",
+    status === "done" && "text-grey-450",
+    status === "current" && "text-brand-default",
+    status === "upcoming" && "text-text-default",
   );
 
   return (
-    <li className="border-t border-neutral-350 first:border-t-0">
+    <li className="border-t border-grey-350 first:border-t-0">
       {actionable ? (
         <button
           type="button"
@@ -97,7 +97,7 @@ export function BookingOverviewRow({
           aria-label={`${model.overviewLabel} — completed, edit`}
           className={cn(
             shell,
-            "cursor-pointer rounded-lg transition-colors hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            "cursor-pointer rounded-lg transition-colors hover:bg-background-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-default",
           )}
         >
           {body}
