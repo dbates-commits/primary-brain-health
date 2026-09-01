@@ -23,6 +23,16 @@ interface ModalProps {
    * panel cannot live inside.
    */
   banner?: ReactNode;
+  /**
+   * Hold the panel at its full height instead of sizing it to the step.
+   *
+   * The booking step screens (details, consent, payment) differ enough in
+   * height that the panel visibly jumps between them, which moves the button
+   * the customer is reaching for. Fixing the height parks it. The screens that
+   * don't opt in — the overview and the email gate — are short enough that a
+   * full-height panel would be mostly empty box.
+   */
+  fillHeight?: boolean;
   children: ReactNode;
 }
 
@@ -36,6 +46,13 @@ const FOCUSABLE =
  * animation or leaves an invisible overlay swallowing clicks.
  */
 const TRANSITION_MS = 200;
+
+/**
+ * The tallest the panel may be: the viewport less the 30px it is inset from the
+ * top and bottom edges. `fillHeight` turns this same measurement into a fixed
+ * height; without it the panel sizes to its content and this is only a cap.
+ */
+const PANEL_MAX_HEIGHT = "max-h-[calc(100dvh-60px)]";
 
 /**
  * Accessible modal dialog rendered into a portal on `document.body`. Handles the
@@ -58,6 +75,7 @@ export function Modal({
   label,
   header,
   banner,
+  fillHeight = false,
   children,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -152,7 +170,11 @@ export function Modal({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 p-4",
+        // The vertical inset is the panel's margin from the viewport edge, and
+        // `PANEL_MAX_HEIGHT` is its complement — the two are one measurement and
+        // have to move together. 30px is a viewport margin rather than a step on
+        // the spacing scale, which is why it is written out.
+        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 px-4 py-[30px]",
         "transition-opacity duration-200 ease-out motion-reduce:transition-none",
         shown ? "opacity-100" : "opacity-0",
       )}
@@ -165,7 +187,13 @@ export function Modal({
         aria-label={label}
         tabIndex={-1}
         className={cn(
-          "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
+          "relative flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
+          PANEL_MAX_HEIGHT,
+          // A definite height, so the panel stops tracking its content. The
+          // body below is already `min-h-0 flex-1 overflow-y-auto`, so the
+          // overflow lands in the right place the moment there is a height to
+          // overflow; the steps push their action bars down to meet it.
+          fillHeight && "h-[calc(100dvh-60px)]",
           // `transition` (not `transition-all`) already covers opacity and
           // transform, and leaves layout properties alone — the panel's height
           // changes between steps and must not animate.

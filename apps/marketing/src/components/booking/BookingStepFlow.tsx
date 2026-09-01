@@ -466,6 +466,16 @@ export function BookingStepFlow({
 
   const showOverview = pane === "overview";
 
+  /**
+   * Whether this screen is one of the three the stepper belongs to — details,
+   * consent, payment. The overview *is* the step list, and the email gate sits
+   * before there is any progress to show, so neither wears the stepper. They
+   * are also the short screens, which is why this is the same answer to whether
+   * the panel should hold its full height: one condition, so the chrome and the
+   * geometry cannot come to disagree about which screens are step screens.
+   */
+  const isStepScreen = !showOverview && step !== "confirm";
+
   return (
     <>
       <BookingSection
@@ -488,17 +498,16 @@ export function BookingStepFlow({
         // parallel list of step names that could drift from the visible titles.
         label={showOverview ? "Your onboarding steps" : headers[step].title}
         header={showOverview ? undefined : stepHeader}
-        // The overview has no stepper — it *is* the step list — and neither does
-        // the email gate, which sits before there is any progress to show.
         banner={
-          showOverview || step === "confirm" ? undefined : (
+          isStepScreen ? (
             <BookingStepper
               furthestStep={furthestStep}
               activeStep={step}
               onSelectStep={selectStep}
             />
-          )
+          ) : undefined
         }
+        fillHeight={isStepScreen}
       >
         {showOverview && (
           <BookingOverviewPane

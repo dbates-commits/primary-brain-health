@@ -130,16 +130,18 @@ export function ConsentForm({
       action={formAction}
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col items-center gap-8 bg-background-default"
+      className="flex min-h-full flex-col items-center gap-8 bg-background-default"
     >
       {/* No hidden `userId`: whose consent this records is decided by the signed
           booking cookie, not by the submission. */}
       {showHeader ? <StepHeader {...consentHeader(track)} /> : null}
 
-      {/* The terms live inside the fieldset so the fieldset spans the scrollable
-          content. A `sticky` child can only travel within its containing block —
-          were the action bar the fieldset's only child, the two would be the same
-          height and it could never pin. */}
+      {/* The fieldset wraps the terms; the action bar below is a sibling of it,
+          not a child. A `fieldset` lays its children out in an anonymous box
+          that does not stretch to the fieldset's own height, so an auto margin
+          inside one can never reach the bottom edge. The form stretches, so the
+          bar hangs off that — which also gives `sticky` the whole form to travel
+          in — and carries the fieldset's `disabled` as explicit props. */}
       <fieldset
         disabled={pending}
         aria-busy={pending}
@@ -176,41 +178,47 @@ export function ConsentForm({
             )}
           </div>
         </div>
-
-        {/* The checkbox is pinned with the button, not just next to it: it gates
-            the submit, so scrolling it out of view would leave a disabled button
-            with no visible way to enable it. Only the terms scroll. */}
-        <StickyActions className="flex flex-col gap-8">
-          <div>
-            <label htmlFor="agreed" className="flex items-center gap-2">
-              <Checkbox
-                id="agreed"
-                name="agreed"
-                checked={agreed}
-                onChange={(e) => handleAgreedChange(e.target.checked)}
-                required
-                aria-required="true"
-                aria-invalid={agreedError ? true : undefined}
-                aria-describedby={agreedError ? "agreed-error" : undefined}
-              />
-              <span className="text-body text-ink-strong">
-                I&rsquo;ve read and agree to the consent form.
-              </span>
-            </label>
-            <FieldError id="agreed-error" message={agreedError} />
-          </div>
-
-          {state.status === "error" && !fieldErrors && (
-            <p role="alert" className="animate-error-in text-body-sm text-error">
-              {state.message}
-            </p>
-          )}
-
-          <Button type="submit" color="primary" className="w-full">
-            {pending ? "Saving…" : "Continue With Payment"}
-          </Button>
-        </StickyActions>
       </fieldset>
+
+      {/* The checkbox is pinned with the button, not just next to it: it gates
+          the submit, so scrolling it out of view would leave a disabled button
+          with no visible way to enable it. Only the terms scroll. */}
+      <StickyActions className="flex w-full flex-col gap-8">
+        <div>
+          <label htmlFor="agreed" className="flex items-center gap-2">
+            <Checkbox
+              id="agreed"
+              name="agreed"
+              checked={agreed}
+              onChange={(e) => handleAgreedChange(e.target.checked)}
+              required
+              disabled={pending}
+              aria-required="true"
+              aria-invalid={agreedError ? true : undefined}
+              aria-describedby={agreedError ? "agreed-error" : undefined}
+            />
+            <span className="text-body text-ink-strong">
+              I&rsquo;ve read and agree to the consent form.
+            </span>
+          </label>
+          <FieldError id="agreed-error" message={agreedError} />
+        </div>
+
+        {state.status === "error" && !fieldErrors && (
+          <p role="alert" className="animate-error-in text-body-sm text-error">
+            {state.message}
+          </p>
+        )}
+
+        <Button
+          type="submit"
+          color="primary"
+          className="w-full"
+          disabled={pending}
+        >
+          {pending ? "Saving…" : "Continue With Payment"}
+        </Button>
+      </StickyActions>
     </form>
   );
 }
