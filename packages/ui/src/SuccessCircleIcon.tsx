@@ -9,8 +9,8 @@ import type { SVGProps } from "react";
  * set here rather than taken from `currentColor` because the disc and the tick
  * differ; the caller sizes it and nothing else.
  *
- * The disc is `--color-accent-green-strong`, which is a different green again
- * from `accent-green` (#85c559) and has no Figma variable — see FIG-02.
+ * The disc is `--color-accent-green-strong` (Figma `accent/green-strong`),
+ * which is a different green again from `accent-green` (#85c559).
  */
 export function SuccessCircleIcon(props: SVGProps<SVGSVGElement>) {
   return (
