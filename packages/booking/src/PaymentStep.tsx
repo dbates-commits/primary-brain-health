@@ -75,6 +75,7 @@ export function PaymentStep({
    */
   const [paid, setPaid] = useState(false);
   const started = useRef(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Guard against React's double-invoke in dev so we mint one session per mount.
@@ -100,6 +101,22 @@ export function PaymentStep({
         setInitError("Couldn't start payment. Please try again.");
       });
   }, [createSession]);
+
+  /**
+   * Move focus to Continue as it appears.
+   *
+   * Stripe's form is a cross-origin iframe, so a customer who has been typing
+   * in it has focus somewhere we cannot see or reach — and a button appearing
+   * outside that iframe is announced to nobody. Focus is the only cue that
+   * crosses the boundary. It is also the sole remaining control on the step, so
+   * there is nothing this can pull focus away from.
+   */
+  useEffect(() => {
+    if (!paid) {
+      return;
+    }
+    actionsRef.current?.querySelector("button")?.focus();
+  }, [paid]);
 
   // Fired once Embedded Checkout finishes the payment (the customer stays on the
   // page). Verify + persist server-side (re-fetches the session from Stripe;
@@ -145,6 +162,16 @@ export function PaymentStep({
     <div className={cn("flex flex-col gap-8", !paid && "pb-6 sm:pb-10")}>
       {showHeader ? <StepHeader {...PAYMENT_HEADER} /> : null}
 
+      {/* Stripe's own "Thanks for your payment" is inside the iframe and
+          announces nothing out here, so this is what tells a screen reader the
+          charge went through. Mounted from the start and filled in later: a
+          live region inserted together with its text is not reliably announced.
+          `status`, not `alert` — good news at the end of a step, not an
+          interruption. */}
+      <p role="status" className="sr-only">
+        {paid ? "Payment confirmed." : ""}
+      </p>
+
       {initError && (
         <p role="alert" className="animate-error-in text-body-sm text-error">
           {initError}
@@ -178,9 +205,11 @@ export function PaymentStep({
 
       {paid && (
         <StickyActions>
-          <Button color="primary" className="w-full" onClick={handleContinue}>
-            Continue
-          </Button>
+          <div ref={actionsRef}>
+            <Button color="primary" className="w-full" onClick={handleContinue}>
+              Continue
+            </Button>
+          </div>
         </StickyActions>
       )}
     </div>
