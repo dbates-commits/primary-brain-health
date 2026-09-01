@@ -72,6 +72,11 @@ test.describe("onboarding payment", () => {
         timeout: 30_000,
       });
 
+      // Stripe's confirmation stays up until the customer dismisses it: the
+      // flow waits on this button rather than a timer, so nothing moves until
+      // it is pressed.
+      await page.getByRole("button", { name: "Continue", exact: true }).click();
+
       // Payment is the last step we own: the flow navigates to /welcome, where
       // the customer picks how to begin.
       await page.waitForURL(/\/welcome$/, { timeout: 30_000 });

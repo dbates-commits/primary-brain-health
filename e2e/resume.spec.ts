@@ -198,6 +198,9 @@ test.describe("resuming an abandoned booking", () => {
     await expect(stripe.getByText(/thanks for your payment/i)).toBeVisible({
       timeout: 30_000,
     });
+    // The confirmation is dismissed by hand, not by a timer — see the same
+    // click in `onboarding.spec.ts`.
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
     await page.waitForURL(/\/welcome$/, { timeout: 30_000 });
 
     // ---- 11. Come back one last time ---------------------------------------
