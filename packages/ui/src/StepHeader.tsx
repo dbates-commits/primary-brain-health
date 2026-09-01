@@ -28,7 +28,10 @@ export function StepHeader({
         {title}
       </h1>
       {subtitle ? (
-        <p data-tina-field={tinaFields?.subtitle} className="text-body-lg text-ink-strong">
+        <p
+          data-tina-field={tinaFields?.subtitle}
+          className="text-body text-text-secondary"
+        >
           {subtitle}
         </p>
       ) : null}
