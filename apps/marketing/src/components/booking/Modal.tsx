@@ -242,9 +242,13 @@ export function Modal({
               // `StickyActions` on the steps that pin their actions, and directly
               // on the ones that don't (payment, done).
               "min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8",
-              // No fixed header → the body owns the top padding (and clears the
-              // close button on the right).
-              header ? "" : "pr-14 pt-6 sm:pt-8",
+              // No fixed header → the body owns the top padding. The gutter for
+              // the close button is *not* here: this box is the whole scrolling
+              // column, so a right padding on it insets every row of every step
+              // by 56px to clear a button that occupies the top corner alone.
+              // The content that actually sits under the button clears it
+              // itself — see `BookingOverviewPane`.
+              header ? "" : "pt-6 sm:pt-8",
             )}
           >
             {children}
