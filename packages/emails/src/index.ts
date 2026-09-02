@@ -32,6 +32,10 @@ export {
   type AccountDeactivatedEmailProps,
 } from "./emails/AccountDeactivatedEmail";
 export {
+  AccountDeletionRequestEmail,
+  type AccountDeletionRequestEmailProps,
+} from "./emails/AccountDeletionRequestEmail";
+export {
   PaymentFailedEmail,
   type PaymentFailedEmailProps,
 } from "./emails/PaymentFailedEmail";
