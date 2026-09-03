@@ -63,7 +63,12 @@ export function BookingOverviewPane({
       : DISPLAY_STEP_MODELS[displayKeyFor(activeStep)].actionLabel;
 
   return (
-    <div className="flex flex-col gap-8 pb-6 sm:pb-8">
+    // `min-h-full` + `mt-auto` on the CTA, so the button sits on the panel's
+    // bottom edge rather than under the step list: the modal now holds every
+    // screen at a fixed height, and this one's content does not reach it. The
+    // scroll container above resolves the height, so on a short viewport the
+    // list overflows normally instead of the button being pushed off.
+    <div className="flex min-h-full flex-col gap-8 pb-6 sm:pb-8">
       {/* `pr-14` only here, matching the gutter `Modal` puts on its pinned
           header region: this is the block that runs under the close button, and
           the rows and the CTA below it have the full width. */}
@@ -89,7 +94,7 @@ export function BookingOverviewPane({
         ))}
       </ol>
 
-      <Button color="primary" onClick={onStart} className="w-full">
+      <Button color="primary" onClick={onStart} className="mt-auto w-full">
         {ctaLabel}
       </Button>
     </div>

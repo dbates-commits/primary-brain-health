@@ -56,14 +56,14 @@ export function BookingStepperTab({
       <span className="sr-only">
         Step {position} of {DISPLAY_STEPS.length}, {STATUS_WORD[status]}.
       </span>
-      <span className="min-w-0 flex-1 text-left font-body text-caption leading-normal">
+      <span className="hidden min-w-0 flex-1 text-left font-body text-caption leading-normal sm:block">
         {model.tabLabel}
       </span>
     </>
   );
 
   const shell = cn(
-    "flex h-[60px] w-full items-center gap-2 overflow-clip px-4",
+    "flex h-[60px] w-full items-center justify-center gap-2 overflow-clip px-4 sm:justify-start",
     status === "current"
       ? "border-b-4 border-brand-default bg-background-brand-subtle text-text-default"
       : "text-text-secondary",

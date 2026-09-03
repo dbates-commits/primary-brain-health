@@ -29,7 +29,12 @@ export function StickyActions({
         // it. Modal.tsx therefore leaves its body's bottom padding to the step.
         // Panel→actions gap is owned by the step's own layout gap (32px), so the
         // bar adds no top padding; bottom padding matches the modal's 32px inset.
-        "sticky bottom-0 z-10 pb-6 pt-0 sm:pb-8",
+        // `mt-auto` is what puts the bar on the bottom edge of a step that
+        // doesn't fill the modal, so the button sits in the same place on every
+        // step. It needs the step's own column to be full height to have any
+        // room to push into, and is inert once the content overflows — from
+        // there `sticky` takes over.
+        "sticky bottom-0 z-10 mt-auto pb-6 pt-0 sm:pb-8",
         "bg-background-default/80 backdrop-blur-md",
         // Fade the scrolling content into the bar instead of cutting it off.
         "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8",

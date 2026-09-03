@@ -38,6 +38,21 @@ const FOCUSABLE =
 const TRANSITION_MS = 200;
 
 /**
+ * The panel's height: the viewport less the margin it is inset by at the top
+ * and bottom — 1.25rem on a phone, where every pixel of panel is worth more
+ * than the gap, and 40px from `sm` up.
+ *
+ * A fixed height, not a cap, and on every screen the modal shows. The booking
+ * steps differ enough in height that a content-sized panel visibly jumped
+ * between them, moving the button the customer was reaching for; holding one
+ * height parks it. The overview and the email gate are held to it too, so the
+ * panel does not resize on the way in or out of them either — neither of those
+ * two pushes its content down to meet the bottom edge yet, so both currently
+ * sit at the top with the slack below them.
+ */
+const PANEL_HEIGHT = "h-[calc(100dvh-2.5rem)] sm:h-[calc(100dvh-80px)]";
+
+/**
  * Accessible modal dialog rendered into a portal on `document.body`. Handles the
  * a11y basics a raw overlay misses: Escape to close, backdrop click to close,
  * body scroll lock, a focus trap (Tab/Shift+Tab cycle within the panel), initial
@@ -152,7 +167,12 @@ export function Modal({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 p-4",
+        // The vertical inset is the panel's margin from the viewport edge, and
+        // `PANEL_MAX_HEIGHT` is its complement — the two are one measurement and
+        // have to move together, which is why the `sm` step appears in both.
+        // These are viewport margins rather than steps on the spacing scale,
+        // which is why they are written out.
+        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 px-4 py-[1.25rem] sm:py-[40px]",
         "transition-opacity duration-200 ease-out motion-reduce:transition-none",
         shown ? "opacity-100" : "opacity-0",
       )}
@@ -165,7 +185,12 @@ export function Modal({
         aria-label={label}
         tabIndex={-1}
         className={cn(
-          "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
+          "relative flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
+          // A definite height, so the panel never tracks its content. The body
+          // below is already `min-h-0 flex-1 overflow-y-auto`, so the overflow
+          // lands in the right place; the steps push their action bars down to
+          // meet the bottom edge.
+          PANEL_HEIGHT,
           // `transition` (not `transition-all`) already covers opacity and
           // transform, and leaves layout properties alone — the panel's height
           // changes between steps and must not animate.

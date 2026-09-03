@@ -466,6 +466,15 @@ export function BookingStepFlow({
 
   const showOverview = pane === "overview";
 
+  /**
+   * Whether this screen is one of the three the stepper belongs to — details,
+   * consent, payment. The overview *is* the step list, and the email gate sits
+   * before there is any progress to show, so neither wears the stepper. It no
+   * longer decides the panel's height: every screen is full height now, so the
+   * modal never resizes on the way between them.
+   */
+  const isStepScreen = !showOverview && step !== "confirm";
+
   return (
     <>
       <BookingSection
@@ -488,16 +497,14 @@ export function BookingStepFlow({
         // parallel list of step names that could drift from the visible titles.
         label={showOverview ? "Your onboarding steps" : headers[step].title}
         header={showOverview ? undefined : stepHeader}
-        // The overview has no stepper — it *is* the step list — and neither does
-        // the email gate, which sits before there is any progress to show.
         banner={
-          showOverview || step === "confirm" ? undefined : (
+          isStepScreen ? (
             <BookingStepper
               furthestStep={furthestStep}
               activeStep={step}
               onSelectStep={selectStep}
             />
-          )
+          ) : undefined
         }
       >
         {showOverview && (
