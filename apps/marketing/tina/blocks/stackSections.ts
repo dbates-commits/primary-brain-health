@@ -1,5 +1,4 @@
 import type { Template } from "tinacms";
-import { IconPicker } from "../fields/IconPicker";
 
 export const stackSectionsBlock: Template = {
   name: "stackSections",
@@ -7,12 +6,14 @@ export const stackSectionsBlock: Template = {
   ui: {
     defaultItem: {
       headline: "How It Works",
-      subheadline: "Move at your own pace, with expert guidance when you want it.",
+      subheadline:
+        "Measure how your brain is working today and connect with a team that will offer personalized guidance.",
       items: [
         {
-          title: "Brain Health Assessment",
-          body: "Evaluate your cognitive function, risk factors, and overall brain health using advanced digital tools and clinical expertise.",
-          icon: "clipboard",
+          eyebrow: "It's easy to start",
+          title: "Book & Complete Your Assessments at Home",
+          body: "Schedule online in under two minutes.",
+          bullets: [{ text: "Cognitive function tests" }],
           image: "/images/woman.png",
         },
       ],
@@ -41,15 +42,22 @@ export const stackSectionsBlock: Template = {
     },
     {
       name: "items",
-      label: "Stack Items",
+      label: "Steps",
       type: "object",
       list: true,
       ui: {
         itemProps: (item) => ({
-          label: item?.title || "Stack Item",
+          label: item?.title || "Step",
         }),
       },
       fields: [
+        {
+          name: "eyebrow",
+          label: "Eyebrow",
+          type: "string",
+          description:
+            "Small uppercase label above the step title (e.g. 'It's easy to start').",
+        },
         {
           name: "title",
           label: "Title",
@@ -63,14 +71,25 @@ export const stackSectionsBlock: Template = {
           ui: { component: "textarea" },
         },
         {
-          name: "icon",
-          label: "Icon",
-          type: "string",
-          description: "Pick a Phosphor icon.",
+          // An object list rather than a list of plain strings: `tinaField()`
+          // needs a node to point at, so this is what keeps each bullet
+          // individually click-to-edit in the visual editor.
+          name: "bullets",
+          label: "Bullets",
+          type: "object",
+          list: true,
           ui: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            component: IconPicker as any,
+            itemProps: (item) => ({
+              label: item?.text || "Bullet",
+            }),
           },
+          fields: [
+            {
+              name: "text",
+              label: "Text",
+              type: "string",
+            },
+          ],
         },
         {
           name: "image",

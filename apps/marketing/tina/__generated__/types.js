@@ -78,9 +78,13 @@ export const PagePartsFragmentDoc = gql`
       subheadline
       items {
         __typename
+        eyebrow
         title
         body
-        icon
+        bullets {
+          __typename
+          text
+        }
         image
       }
     }

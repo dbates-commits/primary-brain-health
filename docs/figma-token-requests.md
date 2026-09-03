@@ -54,6 +54,18 @@ the whole collection reads one way. Cosmetic — the value is right.
 
 ---
 
+### FIG-13 — the How It Works card border is a raw hex, not a variable
+
+`How It Works` (`2267:2770`) draws the white step panels with a 1px `#e7e7e7`
+border that is bound to nothing — every other colour in that frame comes from a
+variable. The nearest existing token is `border/default` (`#d8d8d8`), which the
+code uses today; the hairline therefore renders a shade darker than the design.
+
+**Ask:** bind the panel border to `border/default`, or add the variable the
+`#e7e7e7` is meant to be. Cosmetic, one hairline.
+
+---
+
 ## Resolved
 
 **FIG-01 — one red, two names.** `accent/pink` and `colors/pink/600` are both
