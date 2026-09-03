@@ -10,7 +10,8 @@
         "TINA_TOKEN",
         "NEXT_PUBLIC_TINA_CLIENT_ID",
         "NEXT_PUBLIC_TINA_BRANCH",
-        "TINA_PUBLIC_IS_LOCAL"
+        "TINA_PUBLIC_IS_LOCAL",
+        "VERCEL_ENV"
       ]
     },
     "dev": {
