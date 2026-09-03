@@ -17,6 +17,7 @@ import { Resend } from "resend";
 import { db, users, writeAuditLog } from "@pbh/db";
 import {
   AccountDeactivatedEmail,
+  AccountDeletionRequestEmail,
   AssessmentReadyEmail,
   ConfirmEmailEmail,
   PaymentFailedEmail,
@@ -33,6 +34,20 @@ import {
  * email address; production sets EMAIL_FROM once the domain is verified.
  */
 const DEFAULT_FROM = "Primary Brain Health <onboarding@resend.dev>";
+
+/**
+ * Where a deletion request is announced — Linus's customer-support desk, whose
+ * job it is to deactivate the subject on their side because no API does it yet.
+ *
+ * No default, deliberately: an address baked in here is one an environment
+ * cannot correct, and a deletion request is the last thing that should land in
+ * somebody's inbox by accident. Unset means the notice is skipped and logged,
+ * the same shape as an unset `RESEND_API_KEY`. `||`, not `??`, for the reason
+ * `assessmentsUrl` states: the var ships empty.
+ */
+function deletionNoticeRecipient(): string | null {
+  return process.env.ACCOUNT_DELETION_NOTICE_TO || null;
+}
 
 /**
  * Where a paid customer actually goes: the Linus Engagement App, which owns
@@ -83,12 +98,51 @@ async function sendTemplate(
     return { sent: false, reason: "no-user" };
   }
 
+  return deliver({
+    template,
+    to: recipient.email,
+    subject,
+    userId,
+    buildElement: () => buildElement(recipient),
+  });
+}
+
+/**
+ * Render one element, hand it to Resend, write the `email_sent` row.
+ *
+ * Split out of `sendTemplate` because not every send goes to the customer: the
+ * deletion notice goes to Linus CS and is built from a row `loadRecipient`
+ * never reads. `to` is therefore the caller's to choose, and the env gate stays
+ * above in the two entry points so an unconfigured environment still never
+ * touches the database.
+ *
+ * `buildElement` is a thunk, not an element, so that building it happens inside
+ * the `try`. These are plain function calls, not JSX — `PaymentReceiptEmail`
+ * formats money through `Intl.NumberFormat`, which throws on a currency code
+ * Stripe hands us that ISO doesn't know — and a sender that throws would take
+ * the Stripe webhook down with it *after* the payment was recorded, earning a
+ * redelivery for fulfillment that already happened.
+ */
+async function deliver({
+  template,
+  to,
+  subject,
+  userId,
+  buildElement,
+}: {
+  template: string;
+  to: string;
+  subject: string;
+  /** The account the send is *about* — the audit row's subject, not the inbox. */
+  userId: string;
+  buildElement: () => React.ReactElement;
+}): Promise<SendEmailResult> {
   try {
-    const { html, text } = await renderEmail(buildElement(recipient));
-    const resend = new Resend(apiKey);
+    const { html, text } = await renderEmail(buildElement());
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM ?? DEFAULT_FROM,
-      to: recipient.email,
+      to,
       subject,
       html,
       text,
@@ -313,5 +367,106 @@ export async function sendAccountDeactivatedEmail(
     userId,
     "Your account has been deactivated",
     (recipient) => AccountDeactivatedEmail({ firstName: recipient.firstName }),
+  );
+}
+
+/**
+ * The same deletion request, announced to Linus CS (pbh-qbe).
+ *
+ * **A human doing an API call's job.** `deactivateAccountCore` stamps Neon and
+ * stops there because `@pbh/linus` has no deactivate endpoint to call, so the
+ * subject keeps their name, birth date, sex and education on Linus's side until
+ * somebody over there acts. This mail is how they find out. When the endpoint
+ * lands, this send and its template go.
+ *
+ * **It reads the row, not `loadRecipient`.** The message deliberately carries
+ * no name or address — only the two pseudonymous ids and a timestamp — so the
+ * customer's own fields are never fetched for it. See the note on the template.
+ *
+ * Never throws, like every sender here: the customer's request is already
+ * filed, and a failure to notify Linus must not unfile it. A `send-failed` is
+ * an operational alert, not a caller-visible error.
+ */
+export async function sendAccountDeletionNoticeEmail(
+  userId: string,
+): Promise<SendEmailResult> {
+  const template = "account-deletion-notice";
+
+  if (!process.env.RESEND_API_KEY) {
+    console.log(
+      `[email] RESEND_API_KEY not set — skipped "${template}" for user ${userId}`,
+    );
+    return { sent: false, reason: "not-configured" };
+  }
+
+  const to = deletionNoticeRecipient();
+  if (!to) {
+    console.error(
+      `[email] ACCOUNT_DELETION_NOTICE_TO not set — nobody was told about the ` +
+        `deletion request for user ${userId}`,
+    );
+    return { sent: false, reason: "not-configured" };
+  }
+
+  let user: { linusParticipantId: string | null; deactivatedAt: Date | null };
+  try {
+    const [row] = await db
+      .select({
+        linusParticipantId: users.linusParticipantId,
+        deactivatedAt: users.deactivatedAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (!row) {
+      console.error(`[email] no user ${userId} — skipped send`);
+      return { sent: false, reason: "no-user" };
+    }
+    user = row;
+  } catch (err) {
+    console.error(`[email] lookup for "${template}" failed:`, err);
+    return { sent: false, reason: "send-failed" };
+  }
+
+  return deliver({
+    template,
+    to,
+    // The participant id in the subject so CS can find and de-duplicate a
+    // request without opening it. Pseudonymous, like the body.
+    subject: `Account deletion request — participant ${user.linusParticipantId ?? "not registered"}`,
+    userId,
+    buildElement: () =>
+      AccountDeletionRequestEmail({
+        linusParticipantId: user.linusParticipantId,
+        userId,
+        // The stamp this send was triggered by, not the clock: a retry days
+        // later must still name the moment the customer asked.
+        requestedAt: formatUtc(user.deactivatedAt ?? new Date()),
+        environment: currentEnvironment(),
+      }),
+  });
+}
+
+/** `2 September 2026 at 14:35 UTC` — unambiguous across the two countries. */
+function formatUtc(at: Date): string {
+  const stamp = new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(at);
+  return `${stamp} UTC`;
+}
+
+/**
+ * Which deployment sent this, so a request filed against a preview branch is
+ * not actioned as a real customer's. `DATABASE_ENV` first: it names the data,
+ * which is the thing CS would be acting on.
+ */
+function currentEnvironment(): string {
+  return (
+    process.env.DATABASE_ENV ||
+    process.env.VERCEL_ENV ||
+    process.env.NODE_ENV ||
+    "unknown"
   );
 }

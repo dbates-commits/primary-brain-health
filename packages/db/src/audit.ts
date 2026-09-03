@@ -33,7 +33,14 @@ export type AuditEventType =
   // account is locked out, and the erasure itself is an operator routine. This
   // row is the durable record of when the customer asked. The metadata never
   // carries the address; see the data-minimisation note in `schema/users.ts`.
-  | "account_deactivated";
+  | "account_deactivated"
+  // The deletion notice to Linus CS did not go out. Its own event, not a
+  // failed `email_sent`, because it is the one send with no retry behind it:
+  // the `deactivated_at` claim is idempotent, so a second request for the same
+  // user returns early without re-sending. This row is how the operator
+  // worklist finds a subject Linus was never told about. Metadata carries the
+  // reason, never an address.
+  | "deletion_notice_failed";
 
 export interface AuditEntry {
   eventType: AuditEventType;

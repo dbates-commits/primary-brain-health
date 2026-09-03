@@ -1,7 +1,10 @@
 import "server-only";
 
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { sendAccountDeactivatedEmail } from "@pbh/booking/server";
+import {
+  sendAccountDeactivatedEmail,
+  sendAccountDeletionNoticeEmail,
+} from "@pbh/booking/server";
 import {
   bookingEmailVerifications,
   db,
@@ -127,6 +130,26 @@ export async function deactivateAccountCore(
       console.error(
         `[account] deactivation email not sent (${result.reason}) for user ${userId}`,
       );
+    }
+
+    // Linus CS's copy — the manual stand-in for the deactivate call this file's
+    // TODO describes. After the customer's, and equally unable to fail the
+    // request: if this one never arrives the account is still locked out here,
+    // and `deactivated_at IS NOT NULL` is still the operator's worklist.
+    const notice = await sendAccountDeletionNoticeEmail(userId);
+    if (!notice.sent) {
+      console.error(
+        `[account] Linus deletion notice not sent (${notice.reason}) for user ${userId}`,
+      );
+      // A log line is not enough here. Coming back through this function is a
+      // no-op — the claim above is idempotent and returns success without
+      // re-sending — so an unsent notice is a subject Linus will never hear
+      // about unless something durable records it.
+      await writeAuditLog({
+        eventType: "deletion_notice_failed",
+        userId,
+        metadata: { reason: notice.reason },
+      });
     }
   } catch (err) {
     console.error("deactivateAccountCore cleanup failed:", err);

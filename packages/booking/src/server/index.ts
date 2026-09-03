@@ -32,4 +32,7 @@ export * from "./webhook";
 // Named, not `export *`: the other senders in that module are internal to the
 // booking orchestration and should stay unreachable from an app. Deactivation
 // is initiated from the account page, so this one has to cross.
-export { sendAccountDeactivatedEmail } from "./send-email";
+export {
+  sendAccountDeactivatedEmail,
+  sendAccountDeletionNoticeEmail,
+} from "./send-email";

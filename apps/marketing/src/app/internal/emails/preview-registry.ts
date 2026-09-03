@@ -1,5 +1,6 @@
 import {
   AccountDeactivatedEmail,
+  AccountDeletionRequestEmail,
   AssessmentReadyEmail,
   PaymentFailedEmail,
   PaymentReceiptEmail,
@@ -69,5 +70,17 @@ export const emailPreviews: EmailPreview[] = [
     trigger:
       "Sent when someone files a deletion request from the account page. Copy is placeholder pending Linus-attorney-approved language — and note the request only stamps `deactivated_at`; the erasure it describes is an operator routine.",
     element: AccountDeactivatedEmail(AccountDeactivatedEmail.PreviewProps),
+  },
+  {
+    slug: "account-deletion-notice",
+    name: "Account deletion notice (internal)",
+    subject:
+      "Account deletion request — participant 8f2c41d0-6b19-4a3e-9c77-2ad5e0b41f6a",
+    trigger:
+      "Sent to Linus CS, not the customer, when a deletion request is filed on " +
+      "the account page. It is the manual stand-in for a deactivate API call " +
+      "Linus does not expose yet; it carries the participant and user ids only, " +
+      "never a name or address.",
+    element: AccountDeletionRequestEmail(AccountDeletionRequestEmail.PreviewProps),
   },
 ];
