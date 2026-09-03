@@ -48,11 +48,14 @@ const FOCUSABLE =
 const TRANSITION_MS = 200;
 
 /**
- * The tallest the panel may be: the viewport less the 30px it is inset from the
- * top and bottom edges. `fillHeight` turns this same measurement into a fixed
- * height; without it the panel sizes to its content and this is only a cap.
+ * The tallest the panel may be: the viewport less the margin it is inset by at
+ * the top and bottom — 1.25rem on a phone, where every pixel of panel is worth
+ * more than the gap, and 40px from `sm` up. `fillHeight` turns this same
+ * measurement into a fixed height; without it the panel sizes to its content
+ * and this is only a cap.
  */
-const PANEL_MAX_HEIGHT = "max-h-[calc(100dvh-60px)]";
+const PANEL_MAX_HEIGHT =
+  "max-h-[calc(100dvh-2.5rem)] sm:max-h-[calc(100dvh-80px)]";
 
 /**
  * Accessible modal dialog rendered into a portal on `document.body`. Handles the
@@ -172,9 +175,10 @@ export function Modal({
       className={cn(
         // The vertical inset is the panel's margin from the viewport edge, and
         // `PANEL_MAX_HEIGHT` is its complement — the two are one measurement and
-        // have to move together. 30px is a viewport margin rather than a step on
-        // the spacing scale, which is why it is written out.
-        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 px-4 py-[30px]",
+        // have to move together, which is why the `sm` step appears in both.
+        // These are viewport margins rather than steps on the spacing scale,
+        // which is why they are written out.
+        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 px-4 py-[1.25rem] sm:py-[40px]",
         "transition-opacity duration-200 ease-out motion-reduce:transition-none",
         shown ? "opacity-100" : "opacity-0",
       )}
@@ -193,7 +197,7 @@ export function Modal({
           // body below is already `min-h-0 flex-1 overflow-y-auto`, so the
           // overflow lands in the right place the moment there is a height to
           // overflow; the steps push their action bars down to meet it.
-          fillHeight && "h-[calc(100dvh-60px)]",
+          fillHeight && "h-[calc(100dvh-2.5rem)] sm:h-[calc(100dvh-80px)]",
           // `transition` (not `transition-all`) already covers opacity and
           // transform, and leaves layout properties alone — the panel's height
           // changes between steps and must not animate.
