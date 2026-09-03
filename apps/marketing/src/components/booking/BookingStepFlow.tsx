@@ -469,10 +469,9 @@ export function BookingStepFlow({
   /**
    * Whether this screen is one of the three the stepper belongs to — details,
    * consent, payment. The overview *is* the step list, and the email gate sits
-   * before there is any progress to show, so neither wears the stepper. They
-   * are also the short screens, which is why this is the same answer to whether
-   * the panel should hold its full height: one condition, so the chrome and the
-   * geometry cannot come to disagree about which screens are step screens.
+   * before there is any progress to show, so neither wears the stepper. It no
+   * longer decides the panel's height: every screen is full height now, so the
+   * modal never resizes on the way between them.
    */
   const isStepScreen = !showOverview && step !== "confirm";
 
@@ -507,7 +506,6 @@ export function BookingStepFlow({
             />
           ) : undefined
         }
-        fillHeight={isStepScreen}
       >
         {showOverview && (
           <BookingOverviewPane

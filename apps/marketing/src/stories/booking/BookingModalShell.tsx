@@ -14,10 +14,10 @@ import type { ReactNode } from "react";
  * pinned header region: every step here renders its own header inline, which is
  * the `showHeader` default.
  *
- * Height mirrors `Modal`'s `fillHeight`, which every step screen is rendered
- * with: the viewport less its margin (1.25rem, 40px from `sm`), fixed rather than
- * capped. Without it a story panel would hug its step and the action bar would
- * sit under the last field, which is the one thing these stories exist to show.
+ * Height mirrors `Modal`, which holds every screen at the viewport less its
+ * margin (1.25rem, 40px from `sm`) — fixed, not capped. Without it a story
+ * panel would hug its step and the action bar would sit under the last field,
+ * which is the one thing these stories exist to show.
  */
 export function BookingModalShell({ children }: { children: ReactNode }) {
   return (

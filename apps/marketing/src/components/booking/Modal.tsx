@@ -23,16 +23,6 @@ interface ModalProps {
    * panel cannot live inside.
    */
   banner?: ReactNode;
-  /**
-   * Hold the panel at its full height instead of sizing it to the step.
-   *
-   * The booking step screens (details, consent, payment) differ enough in
-   * height that the panel visibly jumps between them, which moves the button
-   * the customer is reaching for. Fixing the height parks it. The screens that
-   * don't opt in — the overview and the email gate — are short enough that a
-   * full-height panel would be mostly empty box.
-   */
-  fillHeight?: boolean;
   children: ReactNode;
 }
 
@@ -48,14 +38,19 @@ const FOCUSABLE =
 const TRANSITION_MS = 200;
 
 /**
- * The tallest the panel may be: the viewport less the margin it is inset by at
- * the top and bottom — 1.25rem on a phone, where every pixel of panel is worth
- * more than the gap, and 40px from `sm` up. `fillHeight` turns this same
- * measurement into a fixed height; without it the panel sizes to its content
- * and this is only a cap.
+ * The panel's height: the viewport less the margin it is inset by at the top
+ * and bottom — 1.25rem on a phone, where every pixel of panel is worth more
+ * than the gap, and 40px from `sm` up.
+ *
+ * A fixed height, not a cap, and on every screen the modal shows. The booking
+ * steps differ enough in height that a content-sized panel visibly jumped
+ * between them, moving the button the customer was reaching for; holding one
+ * height parks it. The overview and the email gate are held to it too, so the
+ * panel does not resize on the way in or out of them either — neither of those
+ * two pushes its content down to meet the bottom edge yet, so both currently
+ * sit at the top with the slack below them.
  */
-const PANEL_MAX_HEIGHT =
-  "max-h-[calc(100dvh-2.5rem)] sm:max-h-[calc(100dvh-80px)]";
+const PANEL_HEIGHT = "h-[calc(100dvh-2.5rem)] sm:h-[calc(100dvh-80px)]";
 
 /**
  * Accessible modal dialog rendered into a portal on `document.body`. Handles the
@@ -78,7 +73,6 @@ export function Modal({
   label,
   header,
   banner,
-  fillHeight = false,
   children,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -192,12 +186,11 @@ export function Modal({
         tabIndex={-1}
         className={cn(
           "relative flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
-          PANEL_MAX_HEIGHT,
-          // A definite height, so the panel stops tracking its content. The
-          // body below is already `min-h-0 flex-1 overflow-y-auto`, so the
-          // overflow lands in the right place the moment there is a height to
-          // overflow; the steps push their action bars down to meet it.
-          fillHeight && "h-[calc(100dvh-2.5rem)] sm:h-[calc(100dvh-80px)]",
+          // A definite height, so the panel never tracks its content. The body
+          // below is already `min-h-0 flex-1 overflow-y-auto`, so the overflow
+          // lands in the right place; the steps push their action bars down to
+          // meet the bottom edge.
+          PANEL_HEIGHT,
           // `transition` (not `transition-all`) already covers opacity and
           // transform, and leaves layout properties alone — the panel's height
           // changes between steps and must not animate.
