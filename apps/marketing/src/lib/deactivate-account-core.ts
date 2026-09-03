@@ -141,6 +141,15 @@ export async function deactivateAccountCore(
       console.error(
         `[account] Linus deletion notice not sent (${notice.reason}) for user ${userId}`,
       );
+      // A log line is not enough here. Coming back through this function is a
+      // no-op — the claim above is idempotent and returns success without
+      // re-sending — so an unsent notice is a subject Linus will never hear
+      // about unless something durable records it.
+      await writeAuditLog({
+        eventType: "deletion_notice_failed",
+        userId,
+        metadata: { reason: notice.reason },
+      });
     }
   } catch (err) {
     console.error("deactivateAccountCore cleanup failed:", err);

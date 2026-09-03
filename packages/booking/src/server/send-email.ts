@@ -103,7 +103,7 @@ async function sendTemplate(
     to: recipient.email,
     subject,
     userId,
-    element: buildElement(recipient),
+    buildElement: () => buildElement(recipient),
   });
 }
 
@@ -115,23 +115,30 @@ async function sendTemplate(
  * never reads. `to` is therefore the caller's to choose, and the env gate stays
  * above in the two entry points so an unconfigured environment still never
  * touches the database.
+ *
+ * `buildElement` is a thunk, not an element, so that building it happens inside
+ * the `try`. These are plain function calls, not JSX — `PaymentReceiptEmail`
+ * formats money through `Intl.NumberFormat`, which throws on a currency code
+ * Stripe hands us that ISO doesn't know — and a sender that throws would take
+ * the Stripe webhook down with it *after* the payment was recorded, earning a
+ * redelivery for fulfillment that already happened.
  */
 async function deliver({
   template,
   to,
   subject,
   userId,
-  element,
+  buildElement,
 }: {
   template: string;
   to: string;
   subject: string;
   /** The account the send is *about* — the audit row's subject, not the inbox. */
   userId: string;
-  element: React.ReactElement;
+  buildElement: () => React.ReactElement;
 }): Promise<SendEmailResult> {
   try {
-    const { html, text } = await renderEmail(element);
+    const { html, text } = await renderEmail(buildElement());
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM ?? DEFAULT_FROM,
@@ -401,17 +408,24 @@ export async function sendAccountDeletionNoticeEmail(
     return { sent: false, reason: "not-configured" };
   }
 
-  const [user] = await db
-    .select({
-      linusParticipantId: users.linusParticipantId,
-      deactivatedAt: users.deactivatedAt,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-  if (!user) {
-    console.error(`[email] no user ${userId} — skipped send`);
-    return { sent: false, reason: "no-user" };
+  let user: { linusParticipantId: string | null; deactivatedAt: Date | null };
+  try {
+    const [row] = await db
+      .select({
+        linusParticipantId: users.linusParticipantId,
+        deactivatedAt: users.deactivatedAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (!row) {
+      console.error(`[email] no user ${userId} — skipped send`);
+      return { sent: false, reason: "no-user" };
+    }
+    user = row;
+  } catch (err) {
+    console.error(`[email] lookup for "${template}" failed:`, err);
+    return { sent: false, reason: "send-failed" };
   }
 
   return deliver({
@@ -421,14 +435,15 @@ export async function sendAccountDeletionNoticeEmail(
     // request without opening it. Pseudonymous, like the body.
     subject: `Account deletion request — participant ${user.linusParticipantId ?? "not registered"}`,
     userId,
-    element: AccountDeletionRequestEmail({
-      linusParticipantId: user.linusParticipantId,
-      userId,
-      // The stamp this send was triggered by, not the clock: a retry days later
-      // must still name the moment the customer asked.
-      requestedAt: formatUtc(user.deactivatedAt ?? new Date()),
-      environment: currentEnvironment(),
-    }),
+    buildElement: () =>
+      AccountDeletionRequestEmail({
+        linusParticipantId: user.linusParticipantId,
+        userId,
+        // The stamp this send was triggered by, not the clock: a retry days
+        // later must still name the moment the customer asked.
+        requestedAt: formatUtc(user.deactivatedAt ?? new Date()),
+        environment: currentEnvironment(),
+      }),
   });
 }
 

@@ -62,8 +62,8 @@ export function AccountDeletionRequestEmail({
       <Text style={valueStyle}>{environment}</Text>
       <Text style={mutedStyle}>
         No name, email address or date of birth is included by design — look the
-        subject up by participant ID. Reply to this email to reach the PBH team
-        about this request.
+        subject up by participant ID. This address does not take replies; reach
+        the PBH team through your usual contact there.
       </Text>
     </EmailLayout>
   );

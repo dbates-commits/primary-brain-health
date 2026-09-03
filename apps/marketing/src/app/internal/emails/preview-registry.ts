@@ -74,7 +74,8 @@ export const emailPreviews: EmailPreview[] = [
   {
     slug: "account-deletion-notice",
     name: "Account deletion notice (internal)",
-    subject: "Account deletion request — participant {id}",
+    subject:
+      "Account deletion request — participant 8f2c41d0-6b19-4a3e-9c77-2ad5e0b41f6a",
     trigger:
       "Sent to Linus CS, not the customer, when a deletion request is filed on " +
       "the account page. It is the manual stand-in for a deactivate API call " +
