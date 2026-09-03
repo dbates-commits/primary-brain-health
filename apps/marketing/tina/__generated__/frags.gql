@@ -336,8 +336,13 @@ fragment PageParts on Page {
       subheadline
       items {
         __typename
+        eyebrow
         title
         body
+        bullets {
+          __typename
+          text
+        }
         icon
         image
       }
