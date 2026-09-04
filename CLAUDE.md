@@ -74,15 +74,35 @@ The hero lives under `src/components/blocks/Hero/`:
 
 ### Design System
 
-Theme is called "The Cognitive Sanctuary", defined as CSS custom properties in `packages/tokens/theme.css` (`@pbh/tokens`) and wired into Tailwind 4 via `@theme inline`. Each app imports it from its `globals.css` (`@import "@pbh/tokens/theme.css";`). App-specific `@font-face` declarations and keyframes stay in the app's own `globals.css`.
+**Figma is the source of truth.** `packages/tokens/theme.css` (`@pbh/tokens`)
+mirrors the variables of Figma file `SppKdzsaH6rQ14u90UpNSq` under Figma's own
+names and wires them into Tailwind 4 via `@theme inline`. Each app imports it
+from its `globals.css` (`@import "@pbh/tokens/theme.css";`); app-specific
+`@font-face` declarations and keyframes stay in the app's own `globals.css`.
 
-- **Primary**: `#041632` (dark navy)
-- **Secondary**: `#446558` (forest green)
-- **Surface**: `#fbf9f4` (warm off-white) with 7 surface-level variants
-- **Error**: `#ba1a1a`
-- **Fonts**: Manrope (headlines, `font-headline`), Inter (body, `font-body`)
+A token's name is its Figma variable path with `/` replaced by `-`, so a Figma
+variable name is greppable here: `background/default` →
+`--color-background-default` → `bg-background-default`. The stutter in
+`text-text-default` is deliberate — do not collapse it.
 
-Use design token classes (`text-primary`, `bg-surface`, `text-on-surface-variant`, etc.) rather than raw hex values.
+**Two vocabularies are live at once, and only one of them is correct for new
+code.** The Figma set above is what to write. Below it sits a frozen Material 3
+block — `primary` / `secondary` / `surface` / `on-*` / `*-container` — kept
+declared because forty-two files still reference it: nineteen in
+`apps/marketing`, fourteen in `apps/funnel`, nine in `packages/ui`. Never reach
+for those names in anything new. A component that picks one compiles here and
+renders nothing on `staging`, with no error anywhere. Tailwind's stock palette
+(`bg-indigo-600`, `text-gray-600`) is likewise still resolving only because
+twelve un-migrated files need it; it is not part of the design system.
+
+**No values are listed here on purpose.** This section described a navy /
+forest-green / Manrope palette long after it was replaced, because restating
+values is how they go stale. Read `theme.css`.
+
+Headlines are Larken, served by Adobe Fonts (kit `qrz4jhn`, linked from
+`layout.tsx`). There are no Larken files under `public/fonts` — do not add an
+`@font-face` for it, which is what shadowed the kit and dropped every headline
+to Georgia.
 
 ### Path Aliases
 
