@@ -158,8 +158,15 @@ export function IntakeForm({
           )}
         </div>
 
-        {/* Right: Form */}
-        <div data-scroll-item className="bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg">
+        {/* Right: Form. `self-end` rather than the grid's default stretch:
+           the card is shorter than the copy column since the message and
+           "who is this for" fields came out, and stretching it just added
+           dead white below the button. Bottom-aligned, its base lines up
+           with the Includes panel opposite. */}
+        <div
+          data-scroll-item
+          className="self-end bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg"
+        >
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
               <div>
