@@ -120,7 +120,7 @@ export function FAQ({
               {headline && (
                 <h1
                   data-tina-field={tinaFields?.headline}
-                  className="font-headline font-thin text-4xl md:text-h2 lg:text-6xl leading-[1.15] text-ink-strong text-balance"
+                  className="font-headline font-thin text-4xl md:text-h2 leading-[1.15] text-text-default text-balance"
                 >
                   {headline}
                 </h1>
@@ -128,7 +128,7 @@ export function FAQ({
               {subheadline && (
                 <p
                   data-tina-field={tinaFields?.subheadline}
-                  className="text-body md:text-lg text-text-default mt-4 text-balance md:text-wrap"
+                  className="text-body md:text-body-lg text-text-secondary mt-4 text-balance md:text-wrap"
                 >
                   {subheadline}
                 </p>
@@ -146,7 +146,7 @@ export function FAQ({
                     className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span className="font-body text-lg md:text-body-lg font-medium text-ink-strong pr-4">
+                    <span className="font-headline text-lg md:text-subtitle font-thin text-text-heading pr-4">
                       {item.question}
                     </span>
                     <span
