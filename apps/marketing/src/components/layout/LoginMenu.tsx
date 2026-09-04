@@ -94,7 +94,7 @@ export function LoginMenu() {
         className="flex cursor-pointer items-center gap-1 font-body text-body font-medium tracking-tight text-brand-default transition-all hover:brightness-110"
       >
         Login
-        <PhosphorIcon name="CaretDown" size={16} aria-hidden="true" />
+        <PhosphorIcon name="CaretDown" size={16} weight="fill" aria-hidden="true" />
       </button>
 
       {mounted && (

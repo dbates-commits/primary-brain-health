@@ -150,7 +150,7 @@ export function ScrollFillLogo({
           loop. Letting it overflow keeps it fully visible, centered behind the
           text, the same way it renders on desktop. */}
       <div className="sticky top-[20vh] h-[45vh] pt-24 w-full flex items-center justify-center">
-        <div className="relative w-full max-w-4xl mx-auto px-6 md:px-10 text-center">
+        <div className="relative w-full max-w-[1280px] mx-auto px-6 md:px-10 text-center">
           <svg
             ref={svgRef}
             viewBox={LOGO_VIEWBOX}
