@@ -25,7 +25,7 @@ export function BookingIncludesPanel() {
                 aria-hidden="true"
                 size={24}
                 weight="regular"
-                className="shrink-0 text-text-inverse"
+                className="shrink-0 text-brand-wash"
               />
               <span className="text-brand-wash">{item.text}</span>
             </li>
@@ -44,6 +44,9 @@ export function BookingIncludesPanel() {
           This service may be eligible for{" "}
           <span className="text-text-inverse">HSA/FSA reimbursement</span>, depending on
           your plan. We can provide documentation to support submission.
+        </p>
+        <p className="text-caption font-bold leading-normal text-brand-wash">
+          Full refund within 14 days if you haven&apos;t started.
         </p>
       </div>
     </div>

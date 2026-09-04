@@ -326,11 +326,17 @@ export type PageBlocksScrollFillLogo = {
   slides?: Maybe<Array<Maybe<PageBlocksScrollFillLogoSlides>>>;
 };
 
+export type PageBlocksStackSectionsItemsBullets = {
+  __typename?: 'PageBlocksStackSectionsItemsBullets';
+  text?: Maybe<Scalars['String']['output']>;
+};
+
 export type PageBlocksStackSectionsItems = {
   __typename?: 'PageBlocksStackSectionsItems';
+  eyebrow?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   body?: Maybe<Scalars['String']['output']>;
-  icon?: Maybe<Scalars['String']['output']>;
+  bullets?: Maybe<Array<Maybe<PageBlocksStackSectionsItemsBullets>>>;
   image?: Maybe<Scalars['String']['output']>;
 };
 
@@ -460,10 +466,15 @@ export type PageBlocksScrollFillLogoFilter = {
   slides?: InputMaybe<PageBlocksScrollFillLogoSlidesFilter>;
 };
 
+export type PageBlocksStackSectionsItemsBulletsFilter = {
+  text?: InputMaybe<StringFilter>;
+};
+
 export type PageBlocksStackSectionsItemsFilter = {
+  eyebrow?: InputMaybe<StringFilter>;
   title?: InputMaybe<StringFilter>;
   body?: InputMaybe<StringFilter>;
-  icon?: InputMaybe<StringFilter>;
+  bullets?: InputMaybe<PageBlocksStackSectionsItemsBulletsFilter>;
   image?: InputMaybe<ImageFilter>;
 };
 
@@ -1167,10 +1178,15 @@ export type PageBlocksScrollFillLogoMutation = {
   slides?: InputMaybe<Array<InputMaybe<PageBlocksScrollFillLogoSlidesMutation>>>;
 };
 
+export type PageBlocksStackSectionsItemsBulletsMutation = {
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type PageBlocksStackSectionsItemsMutation = {
+  eyebrow?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   body?: InputMaybe<Scalars['String']['input']>;
-  icon?: InputMaybe<Scalars['String']['input']>;
+  bullets?: InputMaybe<Array<InputMaybe<PageBlocksStackSectionsItemsBulletsMutation>>>;
   image?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1354,7 +1370,7 @@ export type FaqMutation = {
   sortOrder?: InputMaybe<Scalars['Float']['input']>;
 };
 
-export type PagePartsFragment = { __typename: 'Page', title: string, description?: string | null, socialImage?: string | null, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', title: string, body?: string | null, icon?: string | null, image?: string | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null };
+export type PagePartsFragment = { __typename: 'Page', title: string, description?: string | null, socialImage?: string | null, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', eyebrow?: string | null, title: string, body?: string | null, image?: string | null, bullets?: Array<{ __typename: 'PageBlocksStackSectionsItemsBullets', text?: string | null } | null> | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null };
 
 type ModalParts_ModalStep_Fragment = { __typename: 'ModalStep', step: string, title?: string | null, subtitle?: string | null };
 
@@ -1377,7 +1393,7 @@ export type PageQueryVariables = Exact<{
 }>;
 
 
-export type PageQuery = { __typename?: 'Query', page: { __typename: 'Page', id: string, title: string, description?: string | null, socialImage?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', title: string, body?: string | null, icon?: string | null, image?: string | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null } };
+export type PageQuery = { __typename?: 'Query', page: { __typename: 'Page', id: string, title: string, description?: string | null, socialImage?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', eyebrow?: string | null, title: string, body?: string | null, image?: string | null, bullets?: Array<{ __typename: 'PageBlocksStackSectionsItemsBullets', text?: string | null } | null> | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null } };
 
 export type PageConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1389,7 +1405,7 @@ export type PageConnectionQueryVariables = Exact<{
 }>;
 
 
-export type PageConnectionQuery = { __typename?: 'Query', pageConnection: { __typename?: 'PageConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'PageConnectionEdges', cursor: string, node?: { __typename: 'Page', id: string, title: string, description?: string | null, socialImage?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', title: string, body?: string | null, icon?: string | null, image?: string | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null } | null } | null> | null } };
+export type PageConnectionQuery = { __typename?: 'Query', pageConnection: { __typename?: 'PageConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'PageConnectionEdges', cursor: string, node?: { __typename: 'Page', id: string, title: string, description?: string | null, socialImage?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, blocks?: Array<{ __typename: 'PageBlocksHero', theme?: string | null, headline?: string | null, subheadlineRich?: any | null, image?: string | null, trustText?: string | null, primaryButtonText?: string | null, primaryButtonTextMobile?: string | null, primaryButtonLink?: string | null } | { __typename: 'PageBlocksFaq', variant?: string | null, theme?: string | null, headline?: string | null, subheadline?: string | null, limit?: number | null, showCategories?: boolean | null, ctaText?: string | null, ctaButtonText?: string | null, ctaLink?: string | null, items?: Array<{ __typename: 'PageBlocksFaqItems', faq?: { __typename: 'Faq', question: string, answer: string, category?: string | null, sortOrder?: number | null, id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } | { __typename: 'PageBlocksIntakeForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null, buttonTextMobile?: string | null, showIncludes?: boolean | null } | { __typename: 'PageBlocksScrollFillLogo', slides?: Array<{ __typename: 'PageBlocksScrollFillLogoSlides', label?: string | null, headline?: string | null } | null> | null } | { __typename: 'PageBlocksStackSections', label?: string | null, headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksStackSectionsItems', eyebrow?: string | null, title: string, body?: string | null, image?: string | null, bullets?: Array<{ __typename: 'PageBlocksStackSectionsItemsBullets', text?: string | null } | null> | null } | null> | null } | { __typename: 'PageBlocksBenefitsList', headline?: string | null, subheadline?: string | null, items?: Array<{ __typename: 'PageBlocksBenefitsListItems', title: string, body?: string | null, icon?: string | null } | null> | null } | { __typename: 'PageBlocksContactForm', headline?: string | null, subheadline?: string | null, buttonText?: string | null } | null> | null } | null } | null> | null } };
 
 export type ModalQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -1578,9 +1594,13 @@ export const PagePartsFragmentDoc = gql`
       subheadline
       items {
         __typename
+        eyebrow
         title
         body
-        icon
+        bullets {
+          __typename
+          text
+        }
         image
       }
     }

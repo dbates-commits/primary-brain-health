@@ -91,10 +91,10 @@ export function LoginMenu() {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-controls={open ? panelId : undefined}
-        className="flex cursor-pointer items-center gap-1 font-body text-body font-medium tracking-tight text-brand-default transition-all hover:brightness-110"
+        className="flex cursor-pointer items-center gap-1 font-body text-body font-medium text-text-default transition-all hover:brightness-110"
       >
         Login
-        <PhosphorIcon name="CaretDown" size={16} aria-hidden="true" />
+        <PhosphorIcon name="CaretDown" size={16} weight="fill" aria-hidden="true" />
       </button>
 
       {mounted && (

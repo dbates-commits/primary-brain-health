@@ -60,20 +60,16 @@ export const ASSESSMENT_PACKAGES: readonly AssessmentPackage[] = [
     priceEnvVar: "STRIPE_ASSESSMENT_PRICE_ID",
     ctaLabel: "Book Basic Assessment",
     includes: [
-      { text: "Brain health assessment (taken online)" },
-      // "specialist" was here until the wellness compliance sweep flagged it
-      // (packages.test.ts): Basic sells the wellness track, and a specialist is
-      // a clinical role this package does not include. Replaced with the
-      // wellness lexicon's own name for the role (`TERMS.wellness["role.reviewer"]`).
-      // The sentence is David's final wording. It names the visit a "1:1"
-      // rather than a "consultation" (clinical) or a "results review"
-      // (`TERMS.wellness["visit.name"]`) — plain language in place of either
-      // track's jargon — and says what the visit is for, not who attends it.
-      {
-        text: "A 1:1 with your Brain Health Navigator to understand your options and decide what's right for you.",
-      },
-      { text: "Clear explanation of findings and risk profile" },
-      { text: "Personalized lifestyle recommendations and next steps" },
+      { text: "Digital brain health assessment." },
+      { text: "Professional review of your results." },
+      // Figma 2267:2772 writes this bullet "Consultation to collect relevant
+      // health history." — `consultation` is a clinical term the wellness
+      // sweep bans (packages.test.ts), and this package sells the wellness
+      // track, so the promise is kept and the clinical noun is not.
+      { text: "A conversation to collect relevant health history." },
+      { text: "Clear explanation of findings and risk profile." },
+      { text: "Personalized recommendations and next steps." },
+      { text: "Optional support from a Brain Health Coach." },
     ],
     purchasable: true,
   },

@@ -32,6 +32,31 @@ function slugify(text?: string): string | undefined {
 // hence a fixed id here rather than one slugified from the copy.
 const BOOKING_ANCHOR_ID = "intake";
 
+// Every section fades up as it scrolls into view, via the `scroll-hidden` /
+// `scroll-visible` pair that `ScrollRevealInit` toggles (and skips outright
+// under `prefers-reduced-motion`). These four opt out:
+//   Hero            — above the fold, and its children already run
+//                     `animate-fade-up` on load.
+//   ScrollFillLogo  — scroll-driven and sticky inside; the reveal leaves a
+//                     `transform` on the wrapper, which changes how
+//                     `position: sticky` resolves within it.
+//   StackSections /
+//   BenefitsList    — already reveal their own header and rows, with a
+//                     stagger a whole-section fade would flatten.
+//   IntakeForm      — the only block that paints a background of its own. A
+//                     reveal on this wrapper translates the teal with the
+//                     content and opens a white gap above it for the length
+//                     of the transition, which is most of the screen on a
+//                     phone. `BookingSection` reveals its inner column
+//                     instead, so the background never moves.
+const SELF_REVEALING_BLOCKS = new Set([
+  "PageBlocksHero",
+  "PageBlocksScrollFillLogo",
+  "PageBlocksStackSections",
+  "PageBlocksBenefitsList",
+  "PageBlocksIntakeForm",
+]);
+
 export function BlockRenderer({
   blocks,
   data,
@@ -226,14 +251,27 @@ export function BlockRenderer({
             return null;
         }
 
+        const revealProps = SELF_REVEALING_BLOCKS.has(block.__typename)
+          ? {}
+          : { "data-scroll-reveal-self": true };
+
         if (sectionId) {
           return (
-            <div key={index} id={sectionId} className="scroll-mt-20">
+            <div
+              key={index}
+              id={sectionId}
+              className="scroll-mt-20"
+              {...revealProps}
+            >
               {content}
             </div>
           );
         }
-        return <div key={index}>{content}</div>;
+        return (
+          <div key={index} {...revealProps}>
+            {content}
+          </div>
+        );
       })}
     </>
   );

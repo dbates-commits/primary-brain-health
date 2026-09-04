@@ -152,10 +152,15 @@ type PageBlocksScrollFillLogo {
   slides: [PageBlocksScrollFillLogoSlides]
 }
 
+type PageBlocksStackSectionsItemsBullets {
+  text: String
+}
+
 type PageBlocksStackSectionsItems {
+  eyebrow: String
   title: String!
   body: String
-  icon: String
+  bullets: [PageBlocksStackSectionsItemsBullets]
   image: String
 }
 
@@ -280,10 +285,15 @@ input PageBlocksScrollFillLogoFilter {
   slides: PageBlocksScrollFillLogoSlidesFilter
 }
 
+input PageBlocksStackSectionsItemsBulletsFilter {
+  text: StringFilter
+}
+
 input PageBlocksStackSectionsItemsFilter {
+  eyebrow: StringFilter
   title: StringFilter
   body: StringFilter
-  icon: StringFilter
+  bullets: PageBlocksStackSectionsItemsBulletsFilter
   image: ImageFilter
 }
 
@@ -836,10 +846,15 @@ input PageBlocksScrollFillLogoMutation {
   slides: [PageBlocksScrollFillLogoSlidesMutation]
 }
 
+input PageBlocksStackSectionsItemsBulletsMutation {
+  text: String
+}
+
 input PageBlocksStackSectionsItemsMutation {
+  eyebrow: String
   title: String
   body: String
-  icon: String
+  bullets: [PageBlocksStackSectionsItemsBulletsMutation]
   image: String
 }
 
