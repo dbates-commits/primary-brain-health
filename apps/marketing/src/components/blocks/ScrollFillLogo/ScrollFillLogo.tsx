@@ -222,7 +222,11 @@ export function ScrollFillLogo({
                 >
                   {slide.label && (
                     <Eyebrow
-                      className={`mb-6 md:mb-10${isFirst ? " animate-fade-up" : ""}`}
+                      // Figma 2267:2768 sets this eyebrow in body/large at
+                      // weight 400 with no tracking — the shared primitive's
+                      // bold/0.18em treatment belongs to the other frames that
+                      // use it, so it is overridden here rather than changed.
+                      className={`text-body-lg font-normal tracking-normal mb-6 md:mb-10${isFirst ? " animate-fade-up" : ""}`}
                       style={isFirst ? { animationDelay: "550ms" } : undefined}
                       data-tina-field={getSlideField(
                         slide.originalIndex,
@@ -234,7 +238,7 @@ export function ScrollFillLogo({
                   )}
                   {slide.headline && (
                     <p
-                      className={`font-headline font-thin text-subtitle md:text-h5 lg:text-3xl leading-[1.3] text-balance text-ink-strong${
+                      className={`font-headline font-thin text-h5 md:text-h4 lg:text-h2 leading-[1.3] text-balance text-text-heading${
                         isFirst ? " animate-fade-up" : ""
                       }`}
                       style={isFirst ? { animationDelay: "750ms" } : undefined}
