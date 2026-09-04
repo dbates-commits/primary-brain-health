@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@pbh/ui/utils";
 import { Button } from "@pbh/ui";
-import { Heading } from "@pbh/ui";
+import { PhosphorIcon } from "@pbh/ui";
 import { Section } from "@pbh/ui";
 
 export interface IntakeFormProps {
@@ -59,13 +59,6 @@ export function IntakeForm({
       educationLevel: (
         form.elements.namedItem("educationLevel") as HTMLSelectElement
       ).value,
-      patientIdentification: (
-        form.querySelector(
-          'input[name="patientIdentification"]:checked'
-        ) as HTMLInputElement
-      )?.value,
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement)
-        .value,
     };
 
     try {
@@ -110,51 +103,70 @@ export function IntakeForm({
             </p>
           )}
           {showIncludes && (
-            <div data-scroll-item className="p-6 sm:p-8 bg-primary-container rounded-[1.25rem] flex-1 flex flex-col">
-              <Heading as="h4" size="sm" className="mb-4 text-white">
-                Includes:
-              </Heading>
-              <ul className="space-y-3 text-on-primary-container">
-                {[
-                  "Digital brain health assessment",
-                  "Clinician review of your results",
-                  "Consultation to collect relevant health history",
-                  "Clear explanation of findings and risk profile",
-                  "Personalized recommendations and next steps",
-                  "Optional support from a Brain Health Navigator",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-secondary-fixed mt-0.5 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            /* The frame's panel: a darker ground than the section, seals and
+               bullet copy in the same wash, then price and terms under a rule.
+               Radius stays at the section's 1.25rem so it matches the form
+               card beside it rather than the design-system default. */
+            <div
+              data-scroll-item
+              className="flex flex-1 flex-col gap-10 rounded-[1.25rem] bg-brand-850 p-6 sm:p-8"
+            >
+              <div className="flex flex-col gap-4">
+                <h3 className="font-headline text-subtitle font-thin leading-none text-text-inverse">
+                  Includes
+                </h3>
+                <ul className="flex flex-col gap-4">
+                  {[
+                    "Digital brain health assessment.",
+                    "Professional review of your results.",
+                    "Consultation to collect relevant health history.",
+                    "Clear explanation of findings and risk profile.",
+                    "Personalized recommendations and next steps.",
+                    "Optional support from a Brain Health Coach.",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-4">
+                      <PhosphorIcon
+                        name="SealCheck"
+                        aria-hidden="true"
+                        size={24}
+                        weight="regular"
+                        className="shrink-0 text-brand-wash"
                       />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-10 pt-8 border-t border-white/15">
-                <span className="text-3xl font-normal text-white font-headline">$149</span>
-                <p className="text-on-primary-container/60 text-sm mt-2">
-                  This service may be eligible for{' '}
-                  <span className="text-white">HSA/FSA reimbursement</span>
-                  . We can provide documentation to support submission.
+                      <span className="text-brand-wash">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Pushed to the panel's base so the price sits against it
+                  however many bullets the list carries. */}
+              <div className="mt-auto flex flex-col gap-4">
+                <hr className="border-t border-border-inverse/20" />
+                <p className="font-headline text-h2 font-thin leading-none text-text-inverse">
+                  $149
+                </p>
+                <p className="text-caption leading-normal text-brand-wash">
+                  This service may be eligible for{" "}
+                  <span className="text-text-inverse">HSA/FSA reimbursement</span>, depending
+                  on your plan. We can provide documentation to support submission.
+                </p>
+                <p className="text-caption font-bold leading-normal text-brand-wash">
+                  Full refund within 14 days if you haven&apos;t started.
                 </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right: Form */}
-        <div data-scroll-item className="bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg">
+        {/* Right: Form. `self-end` rather than the grid's default stretch:
+           the card is shorter than the copy column since the message and
+           "who is this for" fields came out, and stretching it just added
+           dead white below the button. Bottom-aligned, its base lines up
+           with the Includes panel opposite. */}
+        <div
+          data-scroll-item
+          className="self-end bg-surface-container-lowest p-5 sm:p-8 md:p-10 rounded-[1.25rem] text-on-surface shadow-lg"
+        >
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
               <div>
@@ -351,57 +363,6 @@ export function IntakeForm({
                   />
                 </svg>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                Who is this consultation for?
-              </label>
-              <div
-                role="radiogroup"
-                aria-label="Who is this consultation for?"
-                className="grid grid-cols-2 gap-1 p-1 bg-surface-container-low rounded-full"
-              >
-                <label className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="patientIdentification"
-                    value="Self"
-                    defaultChecked
-                    className="peer sr-only"
-                  />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
-                    Myself
-                  </span>
-                </label>
-                <label className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="patientIdentification"
-                    value="Someone else"
-                    className="peer sr-only"
-                  />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
-                    Someone Else
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-semibold mb-2"
-              >
-                Message (Optional)
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={4}
-                placeholder="Tell us more about your concerns..."
-                className={inputClasses}
-              />
             </div>
 
             <Button

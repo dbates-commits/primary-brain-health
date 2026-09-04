@@ -7,21 +7,499 @@
      @import "tailwindcss";
      @import "@pbh/tokens/theme.css";
 
-   Color token naming follows the Material Design 3 convention
-   (primary / secondary / surface / error / outline / inverse with
-   on-*, *-container, *-fixed, *-variant modifiers). Use the token
-   classes (`bg-primary`, `text-on-surface`, …) rather than raw hex.
+   FIGMA IS THE SOURCE OF TRUTH. Tokens mirror the Primitives, Colors
+   and Fonts collections of Figma file SppKdzsaH6rQ14u90UpNSq under
+   Figma's own variable names: the variable path with `/` replaced by
+   `-`, so `background/default` is `--color-background-default` and a
+   Figma variable name is greppable in this repo.
+
+   The stutter in `text-text-default` is deliberate and must not be
+   "tidied". Tailwind 4 has a single `--color-*` namespace, and
+   `default` is a leaf name in five Figma groups (background, border,
+   brand, teal, text); `subtle` in four. Collapse it and `bg-default`
+   and `text-default` become the same colour.
+
+   Two groups are renamed, and only because Tailwind already ships
+   those names: `colors/neutral/*` -> `grey-*` and `teal/*` -> `aqua-*`.
+   MAP BY VALUE, NEVER BY INDEX — Figma's step numbers do not match the
+   pre-sync code ramp (Figma's neutral/100 is the old neutral-50).
+
+   See docs/design-tokens.md.
+
+   The sync is MANUAL — the Figma plan tier is `starter`, so the
+   Variables REST API is unavailable and the only complete read is the
+   Plugin API via the Figma MCP, which needs the desktop app open. To
+   re-sync: enumerate `figma.variables.getLocalVariableCollectionsAsync()`
+   and diff against docs/design-tokens-figma-export.json.
    ============================================================= */
 
-/* Register the shared design-system component source so Tailwind 4
-   generates the utility classes used *inside* @pbh/ui (Button, Card,
-   …). Automatic content detection skips node_modules, where pnpm
-   symlinks workspace packages — without this, those classes are only
-   emitted by accident when an app's own source happens to use them
-   (which is why funnel rendered @pbh/ui unstyled). Path is relative to
-   this file; every app inherits it by importing @pbh/tokens/theme.css. */
+/* Register the shared design-system component sources so Tailwind 4
+   generates the utility classes used *inside* them (@pbh/ui: Button,
+   Card, …; @pbh/booking: the step forms). Automatic content detection
+   skips node_modules, where pnpm symlinks workspace packages — without
+   this, those classes are only emitted by accident when an app's own
+   source happens to use them (which is why funnel rendered @pbh/ui
+   unstyled, and why the booking fieldsets lost their `space-y-6`). Any
+   new @pbh/* package that ships className strings must be added here.
+   Paths are relative to this file; every app inherits them by importing
+   @pbh/tokens/theme.css. */
 @source "../ui/src";
 
+:root {
+  /* ===========================================================
+     FIGMA PRIMITIVES — collection `Primitives`
+     Raw ramps. Components should reach for the semantic tokens
+     below, not for these; a step number carries no meaning.
+     =========================================================== */
+  --color-brand-50: #eff6f9;
+  --color-brand-100: #b5ddf2;
+  --color-brand-200: #afd2e3;
+  --color-brand-300: #5eaeb3;
+  --color-brand-400: #4a9ba0;
+  --color-brand-500: #008db8;
+  --color-brand-600: #007dad;
+  --color-brand-700: #006e8a;
+  --color-brand-800: #346b89;
+  --color-brand-850: #224b60;
+  --color-brand-900: #033246;
+
+  /* `colors/neutral/*`. Renamed because Tailwind owns `--color-neutral-*`.
+     The step numbers are FIGMA's — they do not match the retired
+     `--color-neutral-*` ramp above (Figma's 100 is that ramp's 50). */
+  --color-grey-50: #fafafa;
+  --color-grey-100: #f6f6f6;
+  --color-grey-200: #f3f4f6;
+  --color-grey-300: #d9d9d9;
+  --color-grey-350: #d8d8d8;
+  --color-grey-400: #d1d5db;
+  --color-grey-450: #9ca3af;
+  --color-grey-500: #888884;
+  --color-grey-550: #6f706e;
+  --color-grey-600: #6b7280;
+  --color-grey-700: #4b5563;
+  --color-grey-750: #45474d;
+  --color-grey-800: #374151;
+  --color-grey-850: #1b1c19;
+  --color-grey-900: #111827;
+
+  /* `teal/*`. Renamed because Tailwind owns `--color-teal-*`. */
+  --color-aqua-50: #e5efef;
+  --color-aqua-100: #a0e6ea;
+  --color-aqua-500: #009ea1;
+  --color-aqua-700: #495e55;
+
+  --color-green-100: #e2f6e9;
+  --color-green-500: #85c559;
+  --color-green-600: #4dc78c;
+  --color-mint-100: #e2efef;
+  --color-yellow-100: #feffc8;
+  --color-warm-50: #f5f3ee;
+  --color-warm-100: #f0eee9;
+  --color-warm-900: #231815;
+  --color-ink-900: #1f262e;
+
+  /* ===========================================================
+     FIGMA SEMANTICS — collection `Colors`
+     Every one is an alias in Figma too, so the `var()` chain here
+     is the same shape the design has. These are what components
+     should use.
+     =========================================================== */
+  --color-background-default: #ffffff;
+  --color-background-subtle: var(--color-grey-50);
+  --color-background-warm: var(--color-warm-50);
+  --color-background-brand: var(--color-brand-700);
+  /* The ground the signed-in screens sit on (Account Settings, 2092:13081).
+     Page, header and footer all share it so they blend rather than band. */
+  --color-background-brand-subtle: var(--color-brand-50);
+  --color-background-teal-subtle: var(--color-aqua-50);
+  /* The panel ground inside the transactional emails, one step
+     warmer/darker than `background-warm`. */
+  --color-background-warm-strong: var(--color-warm-100);
+
+  --color-text-default: var(--color-grey-750);
+  --color-text-heading: #000000;
+  /* Sub-copy under an account-card heading (2092:13144), and the label of a
+     field that is permanently locked rather than merely busy. */
+  --color-text-secondary: var(--color-grey-550);
+  --color-text-tertiary: var(--color-grey-500);
+  --color-text-label: var(--color-grey-800);
+  --color-text-disabled: var(--color-grey-450);
+  --color-text-brand: var(--color-brand-700);
+  --color-text-supporting: var(--color-aqua-700);
+  --color-text-warm-dark: var(--color-warm-900);
+  --color-text-inverse: #ffffff;
+  --color-text-inverse-secondary: var(--color-brand-200);
+
+  --color-border-default: var(--color-grey-350);
+  /* The hairline around each account card (2092:13108, 2092:13144). One step
+     off `border-default`; Figma keeps them apart, so we do too. */
+  --color-border-subtle: var(--color-grey-300);
+  /* The outline on the Cancel button in the Delete Account modal (2060:7053),
+     the one place the design outlines a button in grey. Shares a hex with
+     `text-tertiary` and is deliberately a separate name. */
+  --color-border-strong: var(--color-grey-500);
+  --color-border-brand: var(--color-brand-700);
+  /* White as a border/ring on a dark ground — `text/inverse` covers text
+     only, and Figma now names this separately. */
+  --color-border-inverse: #ffffff;
+
+  --color-brand-default: var(--color-brand-700);
+  --color-brand-hover: var(--color-brand-600);
+  --color-brand-active: var(--color-brand-800);
+  /* Drawn on the Save button while nothing has been edited (2092:13168). A
+     state, not a role — it says "this button has nothing to do yet". */
+  --color-brand-muted: var(--color-brand-200);
+  --color-brand-subtle: var(--color-brand-50);
+  --color-brand-on-brand: #ffffff;
+
+  --color-aqua-default: var(--color-aqua-500);
+  --color-aqua-subtle: var(--color-aqua-50);
+  /* The mint behind a benefit tile and the booking modal's navigator note.
+     A different near-mint from `accent-green-container` (#e2f6e9), which is
+     a badge ground — Figma keeps the two apart, so we do too. */
+  --color-mint-subtle: var(--color-mint-100);
+
+  --color-accent-green: var(--color-green-500);
+  /* The tick disc in the toast glyph. */
+  --color-accent-green-strong: var(--color-green-600);
+  /* Pale ground under the account page's `Active` plan badge. */
+  --color-accent-green-container: var(--color-green-100);
+  --color-icon-brand-teal: var(--color-brand-400);
+
+  /* The toast ground. Near-black with a blue cast, cooler than anything
+     in the grey ramp. */
+  --color-toast-surface: var(--color-ink-900);
+
+  /* The destructive-action red: the Delete Account button and its confirm.
+     Figma named this `accent/pink` AND `colors/pink/600` until FIG-01 was
+     resolved; it is now one variable, named for its role. It is the one
+     `Colors` entry Figma leaves as a raw value rather than an alias. */
+  --color-danger: #d60012;
+  --color-on-danger: #ffffff;
+
+  /* `stepper/*` — the booking stepper is the only consumer, but Figma
+     models it as a semantic group rather than a component group, so it
+     is mirrored as one. */
+  --color-stepper-active: var(--color-brand-default);
+  --color-stepper-inactive: var(--color-border-default);
+  --color-stepper-circle-bg: var(--color-background-default);
+  --color-stepper-icon-active: var(--color-brand-on-brand);
+  --color-stepper-line-inactive: var(--color-border-subtle);
+  --color-stepper-text-active: var(--color-brand-default);
+  --color-stepper-text-inactive: var(--color-text-secondary);
+
+  /* ===========================================================
+     RADII — collection `Components`
+     The only component-scoped Figma variables exported as tokens;
+     the rest resolve to a primitive and are consumed as one.
+     =========================================================== */
+  --radius-button: 40px;          /* button/radius */
+  --radius-modal: 12px;           /* modal/corner-radius */
+  --radius-form-card: 12px;       /* form-card/radius */
+  --radius-input: 8px;            /* form-field/input-radius */
+  --radius-hero: 20px;            /* hero/radius */
+  --radius-step-card-icon: 40px;  /* step-card/icon-radius */
+
+  /* ===========================================================
+     TYPE SCALE — collection `Fonts`
+     Sizes are Figma's. LINE HEIGHTS ARE NOT, and now confirmed so:
+     all 17 text styles report `lineHeight: AUTO` (FIG-06 — "never
+     configured" was the answer). Weights are real and are the design's:
+     every heading style is Larken **Thin**, body is Inter Regular /
+     Medium / Bold, captions Regular / Semi Bold. The body steps carry
+     the line height Tailwind's text-sm/base/xl pair with them, which is
+     what these sizes render with today; the heading steps use a ratio,
+     which is the code's own choice and has nothing to match in Figma.
+
+     `heading/subtitle` now aliases `body/large` in Figma, and
+     `heading/small` aliases `body/base` (FIG-05 — deliberate aliases).
+     Both names are kept: they are still separate variables.
+
+     FIG-04 IS STILL OPEN. The scale has no step for 18, 30, 36, 60, 72
+     or 13px, so ~100 call sites at those sizes stay on stock Tailwind.
+     =========================================================== */
+  --text-display: 80px;
+  --text-display--line-height: 1.1;
+  --text-h1: 56px;
+  --text-h1--line-height: 1.1;
+  --text-h2: 48px;
+  --text-h2--line-height: 1.1;
+  --text-h3: 40px;
+  --text-h3--line-height: 1.15;
+  --text-h4: 32px;
+  --text-h4--line-height: 1.2;
+  --text-h5: 24px;
+  --text-h5--line-height: 32px;
+  --text-subtitle: 20px;
+  --text-subtitle--line-height: 28px;
+  --text-heading-small: 16px;
+  --text-heading-small--line-height: 1.25;
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 28px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+
+  /* ===========================================================
+     NO FIGMA VARIABLE YET
+     Values the code needs that the design system does not name.
+     Every entry here has a numbered request in
+     docs/figma-token-requests.md. Do not grow this block without
+     adding one.
+     =========================================================== */
+  /* Retained from the MD3 set because the code needs them and
+     Figma names no equivalent. Renamed into the Figma style so the whole
+     file reads one way; the old MD3 names are what they were called. */
+  /* was `primary-container` — the deep teal behind the intake form. */
+  --color-brand-deep: #004d61;
+  /* was `on-primary-container` — pale teal text/rule on that deep ground. */
+  --color-brand-wash: #a3d4e4;
+  /* was `primary-fixed` — pale teal fill, read as a raw var() by
+     ScrollFillLogo. */
+  --color-brand-pale: #d1eaf2;
+  /* was `primary-fixed-dim` — the focus ring on a field over a pale ground. */
+  --color-focus-ring: #8ec7da;
+  /* was `secondary-container` / `secondary-fixed` — the aqua card on the
+     thank-you screens. */
+  --color-aqua-container: #b3e8e9;
+  /* was `on-secondary-container` — text on that aqua card. */
+  --color-on-aqua-container: #007577;
+  /* was `outline` / `outline-variant` — hairlines with no Figma border
+     variable at their value; `border/*` covers the rest. */
+  --color-outline: #75777e;
+  --color-outline-variant: #c5c6ce;
+  /* was `neutral-200` — a grey with no counterpart anywhere in Figma's
+     ramp (the nearest, colors/neutral/300, is #d9d9d9). */
+  --color-grey-warm-200: #dfdfdf;
+  /* was `on-surface` — the darkest ink, used as body text on light grounds
+     and as the ground of the dark Button. Figma's darkest *named* text is
+     `text/heading` (pure black); this is `colors/neutral/850`, which the
+     design uses constantly but never gives a semantic name. Called `ink`
+     rather than `text-*` because it is a ground as often as a colour. */
+  --color-ink-strong: var(--color-grey-850);
+
+  /* was `error` — MD3's red, which the design reserves for message text.
+     Distinct from `danger` (#d60012), the destructive-action red. */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+
+  /* ELEVATION — Figma effect styles `elevation/*` (FIG-03, resolved).
+     These are effect STYLES, not variables, so they are not part of the
+     `getLocalVariableCollectionsAsync` enumeration — re-read them with
+     `getLocalEffectStylesAsync` at the next sync. Figma tints every one
+     with pure black; the earlier hand-written values were re-tinted onto
+     the ink, which is why they read lighter than the design. */
+  --shadow-card: 0 2px 12px rgb(0 0 0 / 0.12);          /* elevation/card */
+  --shadow-menu: 0 8px 24px rgb(0 0 0 / 0.08);          /* elevation/menu-popover */
+  --shadow-header: 0 -1px 24px rgb(0 0 0 / 0.12);       /* elevation/sticky-header */
+  --shadow-toast: 0 4px 16px rgb(0 0 0 / 0.2);          /* elevation/toast */
+}
+
+/* Figma defines white and black as primitives, so they are declared here
+   rather than inherited as Tailwind leftovers.
+
+   `staging` also carries `--color-*: initial` in this block, which disables
+   Tailwind's stock palette so that reaching for `bg-indigo-600` fails loudly.
+   It is deliberately absent on this branch: `main` still ships twelve files
+   that use the stock palette — the starter blocks, `/projects`, and the
+   no-content fallback in `app/page.tsx` — and resetting it here would blank
+   them with no error anywhere. It comes back when those files do, together
+   with the Material 3 block at the foot of this file. */
+@theme {
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+
+@theme inline {
+  /* === FONT TOGGLE ===
+     Active: Larken for headlines, Inter for everything else (body,
+     buttons, nav, eyebrows). To revert to the original Gilda Display
+     + Interstate pairing, comment the two ACTIVE lines below and
+     uncomment the two ORIGINAL lines. Nothing else needs to change. */
+
+  /* ACTIVE (Larken + Inter) */
+  --font-headline: "Larken", Georgia, serif;
+  --font-body: var(--font-inter, "Inter"), system-ui, sans-serif;
+
+  /* ORIGINAL (revert) */
+  /* --font-headline: var(--font-gilda-display), Georgia, serif; */
+
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-danger: var(--color-danger);
+  --color-on-danger: var(--color-on-danger);
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+
+  /* ===========================================================
+     FIGMA-NAMED MIRRORS. Every token above must appear here or
+     Tailwind emits no utility for it — silently. Guarded by
+     apps/marketing/src/tokens.node.test.ts.
+     =========================================================== */
+  /* --- Figma primitives --- */
+  --color-brand-50: var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-850: var(--color-brand-850);
+  --color-brand-900: var(--color-brand-900);
+  --color-grey-50: var(--color-grey-50);
+  --color-grey-100: var(--color-grey-100);
+  --color-grey-200: var(--color-grey-200);
+  --color-grey-300: var(--color-grey-300);
+  --color-grey-350: var(--color-grey-350);
+  --color-grey-400: var(--color-grey-400);
+  --color-grey-450: var(--color-grey-450);
+  --color-grey-500: var(--color-grey-500);
+  --color-grey-550: var(--color-grey-550);
+  --color-grey-600: var(--color-grey-600);
+  --color-grey-700: var(--color-grey-700);
+  --color-grey-750: var(--color-grey-750);
+  --color-grey-800: var(--color-grey-800);
+  --color-grey-850: var(--color-grey-850);
+  --color-grey-900: var(--color-grey-900);
+  --color-aqua-50: var(--color-aqua-50);
+  --color-aqua-100: var(--color-aqua-100);
+  --color-aqua-500: var(--color-aqua-500);
+  --color-aqua-700: var(--color-aqua-700);
+  --color-green-100: var(--color-green-100);
+  --color-green-500: var(--color-green-500);
+  --color-green-600: var(--color-green-600);
+  --color-mint-100: var(--color-mint-100);
+  --color-yellow-100: var(--color-yellow-100);
+  --color-warm-50: var(--color-warm-50);
+  --color-warm-100: var(--color-warm-100);
+  --color-warm-900: var(--color-warm-900);
+  --color-ink-900: var(--color-ink-900);
+
+  /* --- Figma semantics --- */
+  --color-background-default: var(--color-background-default);
+  --color-background-subtle: var(--color-background-subtle);
+  --color-background-warm: var(--color-background-warm);
+  --color-background-brand: var(--color-background-brand);
+  --color-background-brand-subtle: var(--color-background-brand-subtle);
+  --color-background-teal-subtle: var(--color-background-teal-subtle);
+  --color-background-warm-strong: var(--color-background-warm-strong);
+  --color-text-default: var(--color-text-default);
+  --color-text-heading: var(--color-text-heading);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-label: var(--color-text-label);
+  --color-text-disabled: var(--color-text-disabled);
+  --color-text-brand: var(--color-text-brand);
+  --color-text-supporting: var(--color-text-supporting);
+  --color-text-warm-dark: var(--color-text-warm-dark);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-inverse-secondary: var(--color-text-inverse-secondary);
+  --color-border-default: var(--color-border-default);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-brand: var(--color-border-brand);
+  --color-brand-default: var(--color-brand-default);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-brand-active: var(--color-brand-active);
+  --color-brand-muted: var(--color-brand-muted);
+  --color-brand-subtle: var(--color-brand-subtle);
+  --color-brand-on-brand: var(--color-brand-on-brand);
+  --color-aqua-default: var(--color-aqua-default);
+  --color-aqua-subtle: var(--color-aqua-subtle);
+  --color-mint-subtle: var(--color-mint-subtle);
+  --color-accent-green: var(--color-accent-green);
+  --color-accent-green-strong: var(--color-accent-green-strong);
+  --color-accent-green-container: var(--color-accent-green-container);
+  --color-icon-brand-teal: var(--color-icon-brand-teal);
+  --color-toast-surface: var(--color-toast-surface);
+  --color-stepper-active: var(--color-stepper-active);
+  --color-stepper-inactive: var(--color-stepper-inactive);
+  --color-stepper-circle-bg: var(--color-stepper-circle-bg);
+  --color-stepper-icon-active: var(--color-stepper-icon-active);
+  --color-stepper-line-inactive: var(--color-stepper-line-inactive);
+  --color-stepper-text-active: var(--color-stepper-text-active);
+  --color-stepper-text-inactive: var(--color-stepper-text-inactive);
+  --color-border-inverse: var(--color-border-inverse);
+
+  /* --- Radii --- */
+  --radius-button: var(--radius-button);
+  --radius-modal: var(--radius-modal);
+  --radius-form-card: var(--radius-form-card);
+  --radius-input: var(--radius-input);
+  --radius-hero: var(--radius-hero);
+  --radius-step-card-icon: var(--radius-step-card-icon);
+
+  /* --- Type scale --- */
+  --text-display: var(--text-display);
+  --text-display--line-height: var(--text-display--line-height);
+  --text-h1: var(--text-h1);
+  --text-h1--line-height: var(--text-h1--line-height);
+  --text-h2: var(--text-h2);
+  --text-h2--line-height: var(--text-h2--line-height);
+  --text-h3: var(--text-h3);
+  --text-h3--line-height: var(--text-h3--line-height);
+  --text-h4: var(--text-h4);
+  --text-h4--line-height: var(--text-h4--line-height);
+  --text-h5: var(--text-h5);
+  --text-h5--line-height: var(--text-h5--line-height);
+  --text-subtitle: var(--text-subtitle);
+  --text-subtitle--line-height: var(--text-subtitle--line-height);
+  --text-heading-small: var(--text-heading-small);
+  --text-heading-small--line-height: var(--text-heading-small--line-height);
+  --text-body-lg: var(--text-body-lg);
+  --text-body-lg--line-height: var(--text-body-lg--line-height);
+  --text-body: var(--text-body);
+  --text-body--line-height: var(--text-body--line-height);
+  --text-body-sm: var(--text-body-sm);
+  --text-body-sm--line-height: var(--text-body-sm--line-height);
+  --text-caption: var(--text-caption);
+  --text-caption--line-height: var(--text-caption--line-height);
+
+  /* --- No Figma variable yet --- */
+  --color-ink-strong: var(--color-ink-strong);
+  --color-brand-deep: var(--color-brand-deep);
+  --color-brand-wash: var(--color-brand-wash);
+  --color-brand-pale: var(--color-brand-pale);
+  --color-focus-ring: var(--color-focus-ring);
+  --color-aqua-container: var(--color-aqua-container);
+  --color-on-aqua-container: var(--color-on-aqua-container);
+  --color-grey-warm-200: var(--color-grey-warm-200);
+  --shadow-card: var(--shadow-card);
+  --shadow-menu: var(--shadow-menu);
+  --shadow-header: var(--shadow-header);
+  --shadow-toast: var(--shadow-toast);
+}
+
+
+/* =============================================================
+   Material 3 vocabulary — LEGACY, frozen
+   -------------------------------------------------------------
+   The names `main` used before the Figma set arrived: primary /
+   secondary / surface / error / outline / inverse, with on-*,
+   *-container, *-fixed and *-variant modifiers. Forty-two files
+   still reference them — nineteen in apps/marketing, fourteen in
+   apps/funnel (the live booking app) and nine in packages/ui — so
+   they stay declared until those files are migrated.
+
+   Do not write new code against these names. Anything new uses the
+   Figma vocabulary above; a component that picks a Material 3 name
+   compiles here and renders nothing on `staging`, silently.
+
+   The five names the two vocabularies share — outline,
+   outline-variant, error, on-error, error-container — carry
+   identical values in both, so the order of these blocks does not
+   matter.
+
+   Retirement is tracked separately from the redesign, because
+   apps/funnel is a production change on its own merits.
+   ============================================================= */
 :root {
   /* Primary palette — Dark Teal per identity guide */
   --color-primary: #006e8a;
@@ -72,20 +550,6 @@
 }
 
 @theme inline {
-  /* === FONT TOGGLE ===
-     Active: Larken for headlines, Inter for everything else (body,
-     buttons, nav, eyebrows). To revert to the original Gilda Display
-     + Interstate pairing, comment the two ACTIVE lines below and
-     uncomment the two ORIGINAL lines. Nothing else needs to change. */
-
-  /* ACTIVE (Larken + Inter) */
-  --font-headline: "Larken", Georgia, serif;
-  --font-body: var(--font-inter, "Inter"), system-ui, sans-serif;
-
-  /* ORIGINAL (revert) */
-  /* --font-headline: var(--font-gilda-display), Georgia, serif; */
-  /* --font-body: "Interstate", system-ui, sans-serif; */
-
   --color-primary: var(--color-primary);
   --color-primary-container: var(--color-primary-container);
   --color-on-primary: var(--color-on-primary);

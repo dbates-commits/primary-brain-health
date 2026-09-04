@@ -34,44 +34,10 @@
   font-display: swap;
 }
 
-/* Larken — Pangram Pangram Foundry. Drop font files into
-   /public/fonts/Larken/ named exactly as the URLs below. Either
-   .woff2 or .otf will be picked up — whichever exists wins. */
-@font-face {
-  font-family: "Larken";
-  src: url("/fonts/Larken/Larken-Light.woff2") format("woff2"),
-       url("/fonts/Larken/Larken-Light.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Larken";
-  src: url("/fonts/Larken/Larken-Regular.woff2") format("woff2"),
-       url("/fonts/Larken/Larken-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Larken";
-  src: url("/fonts/Larken/Larken-Medium.woff2") format("woff2"),
-       url("/fonts/Larken/Larken-Medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Larken";
-  src: url("/fonts/Larken/Larken-Bold.woff2") format("woff2"),
-       url("/fonts/Larken/Larken-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Larken is served by Adobe Fonts (kit qrz4jhn), linked from `layout.tsx` —
+   there are no Larken files under /public/fonts. The self-hosted @font-face
+   block that used to live here 404'd on every request and, because it was
+   declared after the kit's faces, shadowed them. */
 
 /* ---- Animation keyframes ---- */
 
