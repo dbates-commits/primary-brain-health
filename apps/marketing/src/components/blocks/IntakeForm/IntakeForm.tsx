@@ -59,13 +59,6 @@ export function IntakeForm({
       educationLevel: (
         form.elements.namedItem("educationLevel") as HTMLSelectElement
       ).value,
-      patientIdentification: (
-        form.querySelector(
-          'input[name="patientIdentification"]:checked'
-        ) as HTMLInputElement
-      )?.value,
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement)
-        .value,
     };
 
     try {
@@ -363,57 +356,6 @@ export function IntakeForm({
                   />
                 </svg>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                Who is this consultation for?
-              </label>
-              <div
-                role="radiogroup"
-                aria-label="Who is this consultation for?"
-                className="grid grid-cols-2 gap-1 p-1 bg-surface-container-low rounded-full"
-              >
-                <label className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="patientIdentification"
-                    value="Self"
-                    defaultChecked
-                    className="peer sr-only"
-                  />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
-                    Myself
-                  </span>
-                </label>
-                <label className="relative cursor-pointer">
-                  <input
-                    type="radio"
-                    name="patientIdentification"
-                    value="Someone else"
-                    className="peer sr-only"
-                  />
-                  <span className="flex items-center justify-center px-4 py-3 rounded-full text-sm font-medium text-on-surface-variant transition-colors peer-checked:bg-surface-container-lowest peer-checked:text-on-secondary-container peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-primary-fixed-dim hover:text-on-secondary-container">
-                    Someone Else
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-semibold mb-2"
-              >
-                Message (Optional)
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={4}
-                placeholder="Tell us more about your concerns..."
-                className={inputClasses}
-              />
             </div>
 
             <Button
