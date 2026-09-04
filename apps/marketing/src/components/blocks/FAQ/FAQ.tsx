@@ -37,26 +37,39 @@ export interface FAQProps {
   };
 }
 
+/**
+ * The two grounds this block can sit on, in design-system tokens.
+ *
+ * Figma models the FAQ's own colours as `FAQs/question-color`,
+ * `FAQs/answer-color` and `FAQs/border-color`, which alias `text/heading`,
+ * `text/default` and `border/default` — that is the `light` row. Figma has no
+ * dark FAQ, so `dark` is the brand ground the design uses elsewhere for an
+ * inverted section, rather than the neutral near-black it inherited from the
+ * Tina starter.
+ */
 const themeStyles = {
   light: {
-    bg: "bg-white",
-    headline: "text-gray-900",
-    subheadline: "text-gray-600",
-    question: "text-gray-900",
-    answer: "text-gray-600",
-    border: "border-gray-200",
-    hoverBg: "hover:bg-gray-50",
-    cardBg: "bg-gray-50",
+    bg: "bg-background-default",
+    headline: "text-text-heading",
+    subheadline: "text-text-default",
+    // FAQs/question-color -> text/heading
+    question: "text-text-heading",
+    // FAQs/answer-color -> text/default
+    answer: "text-text-default",
+    // FAQs/border-color -> border/default
+    border: "border-border-default",
+    hoverBg: "hover:bg-background-subtle",
+    cardBg: "bg-background-subtle",
   },
   dark: {
-    bg: "bg-gray-900",
-    headline: "text-white",
-    subheadline: "text-gray-400",
-    question: "text-white",
-    answer: "text-gray-300",
-    border: "border-gray-700",
-    hoverBg: "hover:bg-gray-800",
-    cardBg: "bg-gray-800",
+    bg: "bg-background-brand",
+    headline: "text-text-inverse",
+    subheadline: "text-text-inverse-secondary",
+    question: "text-text-inverse",
+    answer: "text-text-inverse-secondary",
+    border: "border-border-inverse/20",
+    hoverBg: "hover:bg-brand-active",
+    cardBg: "bg-brand-active",
   },
 };
 
@@ -107,7 +120,7 @@ export function FAQ({
               {headline && (
                 <h1
                   data-tina-field={tinaFields?.headline}
-                  className="font-headline font-thin text-4xl md:text-5xl lg:text-6xl leading-[1.15] text-on-surface text-balance"
+                  className="font-headline font-thin text-4xl md:text-h2 leading-[1.15] text-text-default text-balance"
                 >
                   {headline}
                 </h1>
@@ -115,7 +128,7 @@ export function FAQ({
               {subheadline && (
                 <p
                   data-tina-field={tinaFields?.subheadline}
-                  className="text-base md:text-lg text-on-surface-variant mt-4 text-balance md:text-wrap"
+                  className="text-body md:text-body-lg text-text-secondary mt-4 text-balance md:text-wrap"
                 >
                   {subheadline}
                 </p>
@@ -133,7 +146,7 @@ export function FAQ({
                     className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span className="font-body text-lg md:text-xl font-medium text-on-surface pr-4">
+                    <span className="font-headline text-lg md:text-subtitle font-thin text-text-heading pr-4">
                       {item.question}
                     </span>
                     <span
@@ -143,8 +156,8 @@ export function FAQ({
                       )}
                       aria-hidden="true"
                     >
-                      <span className="absolute top-1/2 left-0 right-0 h-px bg-on-surface -translate-y-1/2" />
-                      <span className="absolute left-1/2 top-0 bottom-0 w-px bg-on-surface -translate-x-1/2" />
+                      <span className="absolute top-1/2 left-0 right-0 h-px bg-ink-strong -translate-y-1/2" />
+                      <span className="absolute left-1/2 top-0 bottom-0 w-px bg-ink-strong -translate-x-1/2" />
                     </span>
                   </button>
 
@@ -155,7 +168,7 @@ export function FAQ({
                     )}
                   >
                     <div className="overflow-hidden">
-                      <div className="pb-6 -mt-1 text-on-surface-variant leading-relaxed max-w-3xl">
+                      <div className="pb-6 -mt-1 text-text-default leading-relaxed max-w-3xl">
                         {renderRichText(item.answer)}
                       </div>
                     </div>
@@ -170,7 +183,7 @@ export function FAQ({
               {ctaText && (
                 <p
                   data-tina-field={tinaFields?.ctaText}
-                  className="mb-4 text-on-surface-variant"
+                  className="mb-4 text-text-default"
                 >
                   {ctaText}
                 </p>
@@ -260,7 +273,7 @@ export function FAQ({
             {items.map((item, index) => (
               <div key={index} className={cn("rounded-xl p-6", styles.cardBg)}>
                 <h3 className={cn("font-semibold mb-3", styles.question)}>{item.question}</h3>
-                <p className={cn("text-sm", styles.answer)}>{renderRichText(item.answer)}</p>
+                <p className={cn("text-body-sm", styles.answer)}>{renderRichText(item.answer)}</p>
               </div>
             ))}
           </div>
