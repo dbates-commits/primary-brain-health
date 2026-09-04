@@ -43,11 +43,18 @@ const BOOKING_ANCHOR_ID = "intake";
 //   StackSections /
 //   BenefitsList    — already reveal their own header and rows, with a
 //                     stagger a whole-section fade would flatten.
+//   IntakeForm      — the only block that paints a background of its own. A
+//                     reveal on this wrapper translates the teal with the
+//                     content and opens a white gap above it for the length
+//                     of the transition, which is most of the screen on a
+//                     phone. `BookingSection` reveals its inner column
+//                     instead, so the background never moves.
 const SELF_REVEALING_BLOCKS = new Set([
   "PageBlocksHero",
   "PageBlocksScrollFillLogo",
   "PageBlocksStackSections",
   "PageBlocksBenefitsList",
+  "PageBlocksIntakeForm",
 ]);
 
 export function BlockRenderer({

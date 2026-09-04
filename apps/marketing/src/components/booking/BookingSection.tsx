@@ -50,7 +50,15 @@ export function BookingSection({
       id="booking"
       className="bg-brand-default px-6 py-16 text-brand-on-brand md:px-20 md:py-20"
     >
-      <div className="mx-auto flex max-w-6xl flex-col items-stretch gap-10 lg:flex-row lg:gap-[60px]">
+      {/* `Section` always emits `data-scroll-reveal`, and a section with no
+          `[data-scroll-item]` inside is revealed by moving *itself* — teal
+          background and all — which is the white band that opens above it
+          mid-transition. Marking this column as the item is what confines the
+          fade to the content. */}
+      <div
+        data-scroll-item
+        className="mx-auto flex max-w-6xl flex-col items-stretch gap-10 lg:flex-row lg:gap-[60px]"
+      >
         {/* Equal halves. `flex-1` on both with a zero basis splits the row
             evenly whatever the content measures — the design's 659px left
             column is close to half of its own frame. Below `lg` they stack and
