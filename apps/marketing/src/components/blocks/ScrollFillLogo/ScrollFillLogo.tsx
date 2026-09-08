@@ -26,7 +26,7 @@ const LOGO_VIEWBOX = "0 0 1291 1291";
 // Sourced from the design system (--color-primary-fixed). Slightly
 // deeper than the prior off-white (#F2F8FA) so the logo reads against
 // the warm surface bg without losing its watercolor softness.
-const LOGO_FILL = "var(--color-primary-fixed)";
+const LOGO_FILL = "var(--color-brand-pale)";
 const BRUSH_STROKE_WIDTH = 170;
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t);
@@ -143,14 +143,14 @@ export function ScrollFillLogo({
   }, [count]);
 
   return (
-    <section ref={containerRef} className="relative bg-surface h-[110vh]">
+    <section ref={containerRef} className="relative bg-background-default h-[110vh]">
       {/* Sticky stage is pinned 20vh from the viewport top. No overflow clip:
           the logomark is sized in vmin, so on short/landscape viewports it can
           be taller than the 45vh band — clipping it there sliced the mark's top
           loop. Letting it overflow keeps it fully visible, centered behind the
           text, the same way it renders on desktop. */}
       <div className="sticky top-[20vh] h-[45vh] pt-24 w-full flex items-center justify-center">
-        <div className="relative w-full max-w-4xl mx-auto px-6 md:px-10 text-center">
+        <div className="relative w-full max-w-[1280px] mx-auto px-6 md:px-10 text-center">
           <svg
             ref={svgRef}
             viewBox={LOGO_VIEWBOX}
@@ -222,7 +222,11 @@ export function ScrollFillLogo({
                 >
                   {slide.label && (
                     <Eyebrow
-                      className={`mb-6 md:mb-10${isFirst ? " animate-fade-up" : ""}`}
+                      // Figma 2267:2768 sets this eyebrow in body/large at
+                      // weight 400 with no tracking — the shared primitive's
+                      // bold/0.18em treatment belongs to the other frames that
+                      // use it, so it is overridden here rather than changed.
+                      className={`text-body-lg font-normal tracking-normal mb-6 md:mb-10${isFirst ? " animate-fade-up" : ""}`}
                       style={isFirst ? { animationDelay: "550ms" } : undefined}
                       data-tina-field={getSlideField(
                         slide.originalIndex,
@@ -234,7 +238,7 @@ export function ScrollFillLogo({
                   )}
                   {slide.headline && (
                     <p
-                      className={`font-headline font-thin text-xl md:text-2xl lg:text-3xl leading-[1.3] text-balance text-on-surface${
+                      className={`font-headline font-thin text-h5 md:text-h4 lg:text-h2 leading-[1.3] text-balance text-text-heading${
                         isFirst ? " animate-fade-up" : ""
                       }`}
                       style={isFirst ? { animationDelay: "750ms" } : undefined}

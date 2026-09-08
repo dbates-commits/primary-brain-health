@@ -14,8 +14,6 @@ interface IntakeBody {
   yearOfBirth?: string;
   gender?: string;
   educationLevel?: string;
-  patientIdentification?: string;
-  message?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -42,11 +40,6 @@ export async function POST(request: NextRequest) {
     { name: "year_of_birth", value: body.yearOfBirth ?? "" },
     { name: "gender", value: body.gender ?? "" },
     { name: "education_level", value: body.educationLevel ?? "" },
-    {
-      name: "patient_identification",
-      value: body.patientIdentification ?? "",
-    },
-    { name: "message", value: body.message ?? "" },
   ];
 
   const referer = request.headers.get("referer") ?? undefined;
