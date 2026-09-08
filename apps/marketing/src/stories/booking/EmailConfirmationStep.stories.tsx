@@ -26,7 +26,7 @@ const meta = {
   args: { resend: resendConfirmationAction },
   decorators: [
     (Story) => (
-      <BookingModalShell>
+      <BookingModalShell sizeToContent>
         <Story />
       </BookingModalShell>
     ),

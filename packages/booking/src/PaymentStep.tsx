@@ -159,7 +159,7 @@ export function PaymentStep({
   // Continue button appears, `StickyActions` owns that padding instead — keeping
   // both would double it.
   return (
-    <div className={cn("flex flex-col gap-8", !paid && "pb-6 sm:pb-10")}>
+    <div className={cn("flex min-h-full flex-col gap-8", !paid && "pb-6 sm:pb-10")}>
       {showHeader ? <StepHeader {...PAYMENT_HEADER} /> : null}
 
       {/* Stripe's own "Thanks for your payment" is inside the iframe and

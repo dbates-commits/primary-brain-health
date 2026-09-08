@@ -23,6 +23,16 @@ interface ModalProps {
    * panel cannot live inside.
    */
   banner?: ReactNode;
+  /**
+   * Take the height of the content rather than the viewport's, hanging from the
+   * top margin instead of centred on it.
+   *
+   * For the screens outside the stepper — Arian's call on the email gate: three
+   * lines of copy have no business being as tall as the step behind them, and
+   * the jump between the two costs nothing precisely because that screen is not
+   * one of the steps whose heights had to stop moving.
+   */
+  sizeToContent?: boolean;
   children: ReactNode;
 }
 
@@ -36,6 +46,26 @@ const FOCUSABLE =
  * animation or leaves an invisible overlay swallowing clicks.
  */
 const TRANSITION_MS = 200;
+
+/**
+ * The viewport less the margin the panel is inset by at the top and bottom —
+ * 1.25rem on a phone, where every pixel of panel is worth more than the gap,
+ * and 40px from `sm` up.
+ *
+ * A fixed height, not a cap, on the screens that step. Those differ enough in
+ * height that a content-sized panel visibly jumped between them, moving the
+ * button the customer was reaching for; holding one height parks it. The
+ * overview is held to it too, being the way in and out of them.
+ */
+const PANEL_HEIGHT = "h-[calc(100dvh-2.5rem)] sm:h-[calc(100dvh-80px)]";
+
+/**
+ * The same measurement as a ceiling rather than a height, for `sizeToContent`.
+ * The panel hangs from the top margin and grows down; past the viewport it
+ * stops growing and the body scrolls, as it does on the fixed-height screens.
+ */
+const PANEL_MAX_HEIGHT =
+  "max-h-[calc(100dvh-2.5rem)] sm:max-h-[calc(100dvh-80px)]";
 
 /**
  * Accessible modal dialog rendered into a portal on `document.body`. Handles the
@@ -58,6 +88,7 @@ export function Modal({
   label,
   header,
   banner,
+  sizeToContent = false,
   children,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -152,7 +183,18 @@ export function Modal({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-ink-strong/50 p-4",
+        // The vertical inset is the panel's margin from the viewport edge, and
+        // the two height constants above are its complement — one measurement,
+        // so the `sm` step has to appear in all three. These are viewport
+        // margins rather than steps on the spacing scale, which is why they are
+        // written out.
+        "fixed inset-0 z-50 flex justify-center overflow-hidden bg-ink-strong/50 px-4 py-[1.25rem] sm:py-[40px]",
+        // A full-height panel fills the inset either way, so centred and
+        // top-aligned are the same placement for it. The two part company for a
+        // `sizeToContent` panel, which hangs from the top margin — the
+        // measurement it shares with every other screen — rather than floating
+        // in the middle of the gap.
+        sizeToContent ? "items-start" : "items-center",
         "transition-opacity duration-200 ease-out motion-reduce:transition-none",
         shown ? "opacity-100" : "opacity-0",
       )}
@@ -165,7 +207,14 @@ export function Modal({
         aria-label={label}
         tabIndex={-1}
         className={cn(
-          "relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
+          "relative flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-background-default shadow-2xl focus:outline-none",
+          // A definite height, so the panel never tracks its content. The body
+          // below is already `min-h-0 flex-1 overflow-y-auto`, so the overflow
+          // lands in the right place; the steps push their action bars down to
+          // meet the bottom edge. Under `sizeToContent` the same measurement
+          // becomes the ceiling instead, and the body scrolls only once the
+          // content has grown past it.
+          sizeToContent ? PANEL_MAX_HEIGHT : PANEL_HEIGHT,
           // `transition` (not `transition-all`) already covers opacity and
           // transform, and leaves layout properties alone — the panel's height
           // changes between steps and must not animate.

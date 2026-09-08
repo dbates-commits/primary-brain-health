@@ -116,16 +116,24 @@ export function DetailsForm({
   }, [state, onComplete]);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex min-h-full flex-col gap-8">
       {showHeader ? <StepHeader {...DETAILS_HEADER} /> : null}
 
       {/* No hidden `userId`: the action reads it from the signed booking
           cookie, so the form carries profile data only. */}
-      <form action={formAction} noValidate>
+      {/* `flex flex-1 flex-col` here and on the fieldset carries the modal's
+          height down to `StickyActions`, which parks itself on the bottom edge.
+          Without the chain the bar has nothing to push against and rides up
+          under the last field. */}
+      <form
+        action={formAction}
+        noValidate
+        className="flex flex-1 flex-col gap-8"
+      >
         <fieldset
           disabled={pending}
           aria-busy={pending}
-          className="m-0 min-w-0 space-y-6 border-0 p-0 transition-opacity disabled:opacity-60"
+          className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0 transition-opacity disabled:opacity-60"
         >
           {/* Leads the form because everything below describes this person:
               the account holder, prefilled from signup. */}
@@ -297,13 +305,24 @@ export function DetailsForm({
               {state.message}
             </p>
           )}
-
-          <StickyActions>
-            <Button type="submit" color="primary" className="w-full">
-              {pending ? "Saving…" : "Submit"}
-            </Button>
-          </StickyActions>
         </fieldset>
+
+        {/* Outside the fieldset on purpose. A `fieldset` lays its children out
+            in an anonymous box that does not stretch to the fieldset's own
+            height, so an auto margin inside one can never reach the bottom
+            edge — the bar would sit under the last field however tall the modal
+            got. The form stretches, so the bar hangs off that instead, and
+            takes the fieldset's `disabled` with it as an explicit prop. */}
+        <StickyActions>
+          <Button
+            type="submit"
+            color="primary"
+            className="w-full"
+            disabled={pending}
+          >
+            {pending ? "Saving…" : "Submit"}
+          </Button>
+        </StickyActions>
       </form>
     </div>
   );

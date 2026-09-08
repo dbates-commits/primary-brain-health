@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { Button, Checkbox, FieldError, StepHeader } from "@pbh/ui";
+import { Button, Checkbox, FieldError, StepHeader, cn } from "@pbh/ui";
 import { copyFor, type Track } from "@pbh/copy";
 import { StickyActions } from "./StickyActions";
 import {
@@ -130,87 +130,108 @@ export function ConsentForm({
       action={formAction}
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col items-center gap-8 bg-background-default"
+      aria-busy={pending}
+      className={cn(
+        // `h-full`, not `min-h-full` like the other steps: the terms below are
+        // sized by what is left over, and leftovers only exist if the column has
+        // an exact height to divide up. With a minimum the form would grow to
+        // the terms instead and they would never scroll.
+        "flex h-full flex-col items-center gap-8 bg-background-default",
+        // What the fieldset's `disabled:opacity-60` used to do. The fieldset is
+        // gone — see the terms region below — so the dimming and the disabling
+        // are both spelled out now.
+        "transition-opacity",
+        pending && "opacity-60",
+      )}
     >
       {/* No hidden `userId`: whose consent this records is decided by the signed
           booking cookie, not by the submission. */}
       {showHeader ? <StepHeader {...consentHeader(track)} /> : null}
 
-      {/* The terms live inside the fieldset so the fieldset spans the scrollable
-          content. A `sticky` child can only travel within its containing block —
-          were the action bar the fieldset's only child, the two would be the same
-          height and it could never pin. */}
-      <fieldset
-        disabled={pending}
-        aria-busy={pending}
-        className="m-0 flex w-full min-w-0 flex-col gap-8 border-0 p-0 transition-opacity disabled:opacity-60"
+      {/* The terms take whatever height the modal leaves them — `flex-1` against
+          the form's full height, rather than the 337px they used to be fixed at,
+          which left a band of empty panel under them once the modal stopped
+          sizing itself to its content. The `min-h` is a floor, and the reason
+          this is not `min-h-0`: on a viewport too short to hold the header, the
+          consent line and the button, the terms stop shrinking and the modal
+          body takes over the scrolling rather than collapsing them to nothing.
+
+          No `fieldset` around them any more. It held nothing that `disabled`
+          could act on once the action bar moved out, and it actively prevented
+          this: a fieldset lays its children out in an anonymous box that does
+          not stretch to the fieldset's own height, so nothing inside one can
+          fill it. The controls it used to disable say so themselves now. */}
+      <div
+        role="region"
+        aria-label="Terms and conditions"
+        tabIndex={0}
+        className="w-full min-h-[8rem] flex-1 overflow-y-auto rounded-md border border-grey-warm-200 bg-grey-100 py-6 pl-6 pr-10 [scrollbar-color:var(--color-grey-400)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-brand-default [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-grey-400"
       >
-        <div
-          role="region"
-          aria-label="Terms and conditions"
-          tabIndex={0}
-          className="h-[337px] w-full overflow-y-auto rounded-md border border-grey-warm-200 bg-grey-100 py-6 pl-6 pr-10 [scrollbar-color:var(--color-grey-400)_transparent] [scrollbar-width:thin] focus:outline-none focus:ring-1 focus:ring-brand-default [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-grey-400"
-        >
-          <div className="flex flex-col gap-6">
-            {terms ?? (
-              <>
-                <p className="text-body-sm leading-normal text-grey-700">
-                  {TERMS_INTRO}
-                </p>
+        <div className="flex flex-col gap-6">
+          {terms ?? (
+            <>
+              <p className="text-body-sm leading-normal text-grey-700">
+                {TERMS_INTRO}
+              </p>
 
-                {LEGAL_SECTIONS.map((section) => (
-                  <div key={section.title} className="flex flex-col gap-2">
-                    <p className="text-body-sm font-bold text-grey-900">
-                      {section.title}
-                    </p>
-                    <p className="text-body-sm leading-normal text-grey-700">
-                      {section.body}
-                    </p>
-                  </div>
-                ))}
+              {LEGAL_SECTIONS.map((section) => (
+                <div key={section.title} className="flex flex-col gap-2">
+                  <p className="text-body-sm font-bold text-grey-900">
+                    {section.title}
+                  </p>
+                  <p className="text-body-sm leading-normal text-grey-700">
+                    {section.body}
+                  </p>
+                </div>
+              ))}
 
-                <p className="text-[13px] italic text-grey-450">
-                  {TERMS_UPDATED}
-                </p>
-              </>
-            )}
-          </div>
+              <p className="text-[13px] italic text-grey-450">
+                {TERMS_UPDATED}
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* The checkbox is pinned with the button, not just next to it: it gates
+          the submit, so scrolling it out of view would leave a disabled button
+          with no visible way to enable it. Only the terms scroll. */}
+      <StickyActions className="flex w-full flex-col gap-8">
+        <div>
+          <label htmlFor="agreed" className="flex items-center gap-2">
+            <Checkbox
+              id="agreed"
+              name="agreed"
+              checked={agreed}
+              onChange={(e) => handleAgreedChange(e.target.checked)}
+              required
+              disabled={pending}
+              aria-required="true"
+              aria-invalid={agreedError ? true : undefined}
+              aria-describedby={agreedError ? "agreed-error" : undefined}
+            />
+            <span className="text-body text-ink-strong">
+              I&rsquo;ve read and agree to the consent form.
+            </span>
+          </label>
+          <FieldError id="agreed-error" message={agreedError} />
         </div>
 
-        {/* The checkbox is pinned with the button, not just next to it: it gates
-            the submit, so scrolling it out of view would leave a disabled button
-            with no visible way to enable it. Only the terms scroll. */}
-        <StickyActions className="flex flex-col gap-8">
-          <div>
-            <label htmlFor="agreed" className="flex items-center gap-2">
-              <Checkbox
-                id="agreed"
-                name="agreed"
-                checked={agreed}
-                onChange={(e) => handleAgreedChange(e.target.checked)}
-                required
-                aria-required="true"
-                aria-invalid={agreedError ? true : undefined}
-                aria-describedby={agreedError ? "agreed-error" : undefined}
-              />
-              <span className="text-body text-ink-strong">
-                I&rsquo;ve read and agree to the consent form.
-              </span>
-            </label>
-            <FieldError id="agreed-error" message={agreedError} />
-          </div>
+        {state.status === "error" && !fieldErrors && (
+          <p role="alert" className="animate-error-in text-body-sm text-error">
+            {state.message}
+          </p>
+        )}
 
-          {state.status === "error" && !fieldErrors && (
-            <p role="alert" className="animate-error-in text-body-sm text-error">
-              {state.message}
-            </p>
-          )}
-
-          <Button type="submit" color="primary" className="w-full">
-            {pending ? "Saving…" : "Continue With Payment"}
-          </Button>
-        </StickyActions>
-      </fieldset>
+        <Button
+          type="submit"
+          color="primary"
+          className="w-full"
+          disabled={pending}
+        >
+          {pending ? "Saving…" : "Continue With Payment"}
+        </Button>
+      </StickyActions>
     </form>
   );
 }
