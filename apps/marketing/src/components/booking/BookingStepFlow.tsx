@@ -506,6 +506,12 @@ export function BookingStepFlow({
             />
           ) : undefined
         }
+        // The email gate is the one screen that sizes to its content. It stands
+        // outside the stepper, so the height jump between it and the wizard
+        // costs nothing — and three lines of copy held at the full viewport
+        // height is mostly empty panel. Arian's call; the overview keeps the
+        // fixed height, being the way in and out of the steps.
+        sizeToContent={!showOverview && step === "confirm"}
       >
         {showOverview && (
           <BookingOverviewPane
