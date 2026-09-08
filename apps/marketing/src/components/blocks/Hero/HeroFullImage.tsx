@@ -90,7 +90,7 @@ export function HeroFullImage({
                 // rather than silently taking on the subhead's size.
                 components={{
                   p: (props?: { children?: ReactNode }) => (
-                    <p className="font-headline font-thin text-body-lg md:text-h5 lg:text-h4 text-text-inverse-secondary text-pretty">
+                    <p className="font-headline font-thin text-body-lg md:text-h5 lg:text-h4 text-text-inverse text-pretty">
                       {props?.children}
                     </p>
                   ),
