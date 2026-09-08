@@ -119,7 +119,7 @@ export function IntakeForm({
                     "Consultation to collect relevant health history.",
                     "Clear explanation of findings and risk profile.",
                     "Personalized recommendations and next steps.",
-                    "Optional support from a Brain Health Coach.",
+                    "Optional support from a Brain Health Navigator.",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-4">
                       <PhosphorIcon
