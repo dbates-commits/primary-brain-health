@@ -1,7 +1,13 @@
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
- * One row per sign-in attempt, used to throttle the magic-link form.
+ * One row per sign-in attempt, used to throttle the magic-link sign-in form.
+ *
+ * **Unused since Sep 2026.** The form it guarded is gone — Auth0 is the only
+ * provider, and the address is typed on Auth0's screen, so the enumeration
+ * bound this provided lives in Auth0's attack protection now. The table is left
+ * in place because dropping one is a destructive migration and a separate
+ * decision; see the "Auth0" section of docs/auth.md.
  *
  * Sign-in tells the caller whether an address has an account (see the
  * disclosure note in `docs/auth.md`), which makes the form an enumeration

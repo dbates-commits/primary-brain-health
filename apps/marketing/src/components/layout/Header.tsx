@@ -6,10 +6,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { cn } from "@pbh/ui/utils";
 import { Button, PhosphorIcon } from "@pbh/ui";
-import { requestLoginLinkInline } from "@/app/login/actions";
 import { useSignOut } from "@/lib/use-sign-out";
-import { LoginMenu } from "./LoginMenu";
-import { MobileLoginModal } from "./MobileLoginModal";
+import { Auth0SignInButton } from "./Auth0SignInButton";
 import { UserMenu } from "./UserMenu";
 import { USER_MENU_LINKS, userMenuItemClass } from "./user-menu-items";
 
@@ -30,7 +28,6 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -43,31 +40,12 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
   // rather than restored by the modal on unmount: by then the drawer may be
   // `inert`, and focusing an inert node drops focus to `<body>` in silence.
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const loginRowRef = useRef<HTMLButtonElement>(null);
   // The desktop fallback: at `lg` the hamburger and the drawer's rows are all
   // `lg:hidden`, so the logo is the only control from this nav still on screen.
   const logoRef = useRef<HTMLAnchorElement>(null);
 
-  /**
-   * Close the drawer and the login modal together. The drawer is animated shut
-   * rather than unmounted, so a modal left open over it would still be there —
-   * over an invisible, zero-height menu — with no way back.
-   */
   function closeMobileMenu() {
     setMobileMenuOpen(false);
-    setLoginModalOpen(false);
-  }
-
-  /** Dismiss the whole stack and put focus back on the hamburger. */
-  function closeFromLoginModal() {
-    closeMobileMenu();
-    menuButtonRef.current?.focus();
-  }
-
-  /** Step back to the drawer, which has been open underneath all along. */
-  function backToMenu() {
-    setLoginModalOpen(false);
-    loginRowRef.current?.focus();
   }
 
   useEffect(() => {
@@ -77,29 +55,21 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Crossing into desktop with the drawer or the modal open would strand both:
-  // the drawer is `lg:hidden` and so is the hamburger, so the full-screen
-  // overlay — and its scroll lock — would have no reachable control left to
-  // dismiss them. `lg` here is the same 1024px the classNames below use.
+  // Crossing into desktop with the drawer open would strand it: the drawer is
+  // `lg:hidden` and so is the hamburger, so the overlay — and its scroll lock —
+  // would have no reachable control left to dismiss it. `lg` here is the same
+  // 1024px the classNames below use.
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1024px)");
     const onChange = () => {
-      if (!desktop.matches) {
-        return;
-      }
-      // Focus has to be placed, not just dropped: with the modal open it is
-      // inside a portal that is about to go, and the two deliberate exits
-      // above both aim at controls that are `lg:hidden` at this width.
-      const focusWasInTheModal = loginModalOpen;
-      closeMobileMenu();
-      if (focusWasInTheModal) {
-        logoRef.current?.focus();
+      if (desktop.matches) {
+        closeMobileMenu();
       }
     };
     onChange();
     desktop.addEventListener("change", onChange);
     return () => desktop.removeEventListener("change", onChange);
-  }, [loginModalOpen]);
+  }, []);
 
   function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -230,7 +200,11 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
 
             {/* Not part of `nav`: that array feeds the IntersectionObserver
                 below, and neither of these is a scroll anchor. */}
-            {firstName ? <UserMenu firstName={firstName} /> : <LoginMenu auth0Enabled={auth0Enabled} />}
+            {firstName ? (
+              <UserMenu firstName={firstName} />
+            ) : (
+              auth0Enabled && <Auth0SignInButton label="Login" variant="nav" />
+            )}
           </div>
 
           {/* CTA Button. Not rendered for a signed-in customer — they have
@@ -262,10 +236,6 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
           }}
           aria-label="Toggle menu"
         >
-          {/* Phosphor, not a hand-drawn path: this X and the one in
-              `MobileLoginModal` sit in the same place at the same size, so
-              drawing them from different sources shows up as the glyph
-              changing weight the moment the modal opens. */}
           <PhosphorIcon
             name={mobileMenuOpen ? "X" : "List"}
             size={24}
@@ -330,16 +300,13 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
                   </button>
                 </>
               ) : (
-                // A plain row now, not a disclosure: it opens
-                // `MobileLoginModal` over the drawer (Figma 2155:12505).
-                <button
-                  ref={loginRowRef}
-                  type="button"
-                  onClick={() => setLoginModalOpen(true)}
-                  className="py-2 text-left font-body text-body font-semibold text-brand-default"
-                >
-                  Login
-                </button>
+                // A plain row: there is nothing to disclose any more. It used
+                // to open `MobileLoginModal` over the drawer (Figma 2155:12505)
+                // to hold the magic-link form; the destination is now Auth0's
+                // own screen, so it leaves the site directly.
+                auth0Enabled && (
+                  <Auth0SignInButton label="Login" variant="nav-mobile" />
+                )
               )}
 
               {!firstName && (
@@ -359,16 +326,6 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
         </div>
       </div>
 
-      {/* Outside the drawer, and portalled out of the nav entirely — the nav's
-          `backdrop-blur` would otherwise become the containing block for its
-          `fixed` overlay. The drawer stays open underneath it. */}
-      <MobileLoginModal
-        open={loginModalOpen}
-        onBack={backToMenu}
-        onClose={closeFromLoginModal}
-        action={requestLoginLinkInline}
-        auth0Enabled={auth0Enabled}
-      />
     </nav>
   );
 }

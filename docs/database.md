@@ -17,7 +17,7 @@ Locked in pending PBH counsel sign-off on the conservative HIPAA posture. See "O
 | `consents` | Versioned wellness consent + HIPAA NPP acknowledgments. Stored with version number, timestamp, IP hash | PII; HIPAA-adjacent (consent to receive a health-related service) |
 | `payments` | Internal payment record mirror of Stripe events: stripe_payment_intent_id, amount, status, HSA/FSA flag, last-4 | PII; financial |
 | `audit_log` | Append-only log of significant events: signup, consent, payment, login | Mixed; supports SAQ-A + HIPAA audit-trail requirements |
-| `sessions`, `accounts`, `verification_tokens` | Auth.js tables for magic-link sign-in — see [`auth.md`](./auth.md) | PII |
+| `sessions`, `accounts`, `verification_tokens` | Auth.js tables; `accounts` holds the Auth0 identity. `verification_tokens` is unused since the magic link went — see [`auth.md`](./auth.md) | PII |
 
 **Not in this database**:
 - Card numbers / CVV / full PAN - never; lives only at Stripe
@@ -133,7 +133,7 @@ What the request does, in order (`apps/marketing/src/lib/deactivate-account-core
    sends `AccountDeactivatedEmail`.
 
 Sign-in is closed by `findAuthUserByEmail`, which stops treating a deactivated
-address as an account — so both the magic-link callback and the send path refuse
+address as an account — so the sign-in callback refuses
 it, and the login form's "Not an active user" message becomes literally true.
 
 **Nothing is anonymized or deleted, on purpose.** `payments`, `consents`,

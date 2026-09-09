@@ -67,7 +67,7 @@ Two consequences worth knowing:
   with no way forward. There is no non-Auth0 path to a verified address.
 - **The 24-hour "come back later from the email" resume is gone.** Closing the
   tab at the Auth0 screen means starting sign-in again — which the confirm step
-  now offers as a button, and which the magic link also still covers.
+  now offers as a button.
 
 ## The happy path
 
@@ -214,7 +214,7 @@ rather than by widening either lifetime:
    only the read path the fallback and a signed-in customer sees their step and
    then fails on submit with "we couldn't find your booking", which is the dead
    end signing in was meant to fix. A session is the stronger of the two proofs
-   (it took a magic link to the address) and grants nothing on its own; there is
+   (it took an Auth0 sign-in as the address) and grants nothing on its own; there is
    still no fallback to anything the client sends, which is the vulnerability the
    booking cookie exists to close.
 3. `/welcome` bounces an unpaid-but-identified visitor to `/?booking=resume`
@@ -350,12 +350,10 @@ Emails carry links only — never assessment results or report content.
 
 | Email | Fired from | Trigger |
 |---|---|---|
-| Confirm your email | `email-verification.ts` | signup |
 | Welcome | `email-verified.ts` | address proven at Auth0 |
 | Payment receipt | `fulfill.ts` | first `succeeded` write |
 | Payment failed | `fulfill.ts` | first `failed` write per intent, unless already paid |
 | Payment refunded | `fulfill.ts` | `charge.refunded` |
-| Magic link | `apps/marketing/src/auth.ts` | `/login` request |
 
 Welcome deliberately fires on **verification**, not signup: the flow is blocked on
 Auth0, and two emails arriving together buries the one the
@@ -377,7 +375,7 @@ reports are read in the Engagement App, which owns notifying about them.
 | Email verification | none — Auth0 owns the code | Auth0's OTP expiry | Auth0-side, single-use |
 | Booking cookie (`pbh_booking_session`) | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry |
 | Consent stamp (`consentStamp` form field) | `BOOKING_RESUME_SECRET`, domain-tagged | none, by design | no — it is a label, not an authorization |
-| Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` |
+| Sign-in | Auth0 owns it entirely | Auth0's OTP expiry | Auth0-side, single-use |
 
 There used to be another — the cross-app payment handoff, signed with
 `AUTH_HANDOFF_SECRET`. It existed only to carry a session across an origin
@@ -398,16 +396,19 @@ recorded in one place so the numbers here can't drift from the ones in the code.
 
 ---
 
-## Alternative entry: magic link
+## Alternative entry: signing in
 
-Independent of booking. `/login` → `requestMagicLink` → Auth.js. The `signIn`
-callback rejects addresses with no account (login-only, and it stops a
-`verification_tokens` row being minted for a stranger); `requestMagicLink`
-swallows the resulting `AccessDenied` so the response is identical either way and
-cannot be used to discover who is registered. A redeemed link lands on
-`/welcome`.
+Independent of booking. `/login` → Auth0 → back to `/welcome`. The `signIn`
+callback rejects an address with no PBH account, so signing in can never create
+one — and because the rejection happens before Auth.js reaches the adapter, no
+row of any kind is written for a stranger.
 
-Used by anyone returning after the booking cookie has expired.
+Used by anyone returning after the booking cookie has expired. It is the same
+door the booking flow uses mid-signup, which is why an abandoned booking can be
+picked up simply by signing in.
+
+The magic link that used to live here was removed in Sep 2026; see
+[`auth.md`](./auth.md), particularly what happened to the enumeration throttle.
 
 ---
 
@@ -444,8 +445,9 @@ Documented so nobody mistakes them for intent:
   three Linus campaigns. There is no per-package fulfilment, and the consent copy is still the
   wellness + HIPAA NPP text rather than anything written for a diagnostic
   service. Tracked on `pbh-eaj`.
-- **No rate limiting on `requestMagicLink`** — an unauthenticated action that
-  emails any registered address.
+- **The account-enumeration bound now lives in Auth0**, not in our code, and is
+  unverified. See [`auth.md`](./auth.md) — it is the open compliance item from
+  removing the magic link.
 - **Retired columns still in the schema** — `users.welcome_seen_at`,
   `users.password_hash`, `payments.handoff_consumed_at`. Left in place so a
   revert stays clean; a follow-up drops them.

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { Container, Section } from "@pbh/ui";
+import { Container, Heading, Section } from "@pbh/ui";
 import { auth } from "@/auth";
+import { Auth0SignInButton } from "@/components/layout/Auth0SignInButton";
 import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
-import { LoginForm } from "./LoginForm";
 
 export const metadata = {
   title: "Sign in",
@@ -10,29 +10,40 @@ export const metadata = {
 };
 
 /**
- * Passwordless sign-in page. Already-authenticated users skip straight to the
- * welcome screen; everyone else gets the magic-link request form.
+ * Sign-in page. Already-authenticated visitors skip straight to the welcome
+ * screen; everyone else gets one button out to Auth0.
  *
- * A `?email=…` query param prefills the field, so anyone arriving from an email
- * link only needs to confirm to get their sign-in link.
+ * Kept as a page even though it holds a single control, because `pages.signIn`
+ * in `auth.ts` points Auth.js here — this is where an unauthenticated request
+ * and a failed callback both land.
+ *
+ * There is no email field any more: the magic link was removed once Auth0
+ * became the only provider, and the address is now typed on Auth0's own screen.
+ * The `?email=…` prefill went with it — `login_hint` does that job from the
+ * booking flow instead.
  */
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ email?: string | string[] }>;
-}) {
+export default async function LoginPage() {
   const session = await auth();
   if (session?.user?.id) {
     redirect("/welcome");
   }
 
-  const { email } = await searchParams;
-  const initialEmail = (Array.isArray(email) ? email[0] : email) ?? "";
-
   return (
     <Section className="py-24">
       <Container size="narrow">
-        <LoginForm initialEmail={initialEmail} auth0Enabled={AUTH0_ENABLED} />
+        <div className="flex flex-col gap-8">
+          <div>
+            <Heading as="h1" size="lg" className="mb-2">
+              Sign in
+            </Heading>
+            <p className="text-text-default">
+              {AUTH0_ENABLED
+                ? "We\u2019ll send a code to the email on your account."
+                : "Sign-in is unavailable right now. Please try again shortly."}
+            </p>
+          </div>
+          {AUTH0_ENABLED && <Auth0SignInButton />}
+        </div>
       </Container>
     </Section>
   );

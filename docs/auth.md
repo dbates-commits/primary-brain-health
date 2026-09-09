@@ -1,129 +1,58 @@
 # Auth
 
-Passwordless magic-link sign-in, Auth.js v5 (NextAuth) with database sessions in
-Neon, plus an optional second provider — see [Auth0](#auth0), which
-authenticates but does not own the session. Implemented in `apps/marketing/src/auth.ts` and `src/lib/auth-*.ts`; the
-routes are `/login`, `/login/check-email` and `/api/auth/[...nextauth]`.
+Auth.js v5 (NextAuth) with database sessions in Neon, and **Auth0 as the only
+sign-in provider**. Implemented in `apps/marketing/src/auth.ts` and
+`src/lib/auth-*.ts`; the routes are `/login` and `/api/auth/[...nextauth]`.
 
-Two entry points, one action. The full-page form at `/login` and the header
-popover (`components/layout/LoginMenu`) both call `sendLoginLink` in
-`src/app/login/actions.ts`, so they can never give different answers for the
-same address. `/login` navigates to the check-your-email page on success; the
-popover reports success in place.
+Auth0 authenticates; Auth.js owns the session. That split is the load-bearing
+decision here and the [Auth0](#auth0) section explains why.
 
 Sign-in is the *alternative* entry, not the main one: a customer who has just
 paid gets a session minted directly by the checkout action (see
-[`booking-flow.md`](./booking-flow.md)). The magic link is how someone comes back
+[`booking-flow.md`](./booking-flow.md)). Signing in is how someone comes back
 later, once the 2h booking cookie has expired.
 
-**Login-only.** Accounts are created by the booking flow, never by a magic link.
-That is enforced twice: the `signIn` callback rejects an address with no account
-before a `verification_tokens` row is minted, and `adapter.createUser` throws.
-`sendMagicLinkEmail` also refuses to email an unknown address.
+**Login-only.** Accounts are created by the booking flow, never by signing in.
+That is enforced twice: the `signIn` callback rejects an address with no
+account, and `adapter.createUser` throws.
 
-**Sign-in discloses whether an address has an account.** An unregistered address
-gets "Not an active user. Try checking spelling or another email."; a registered
-one gets the sent state. This is a deliberate product decision (Aug 2026), taken
-from the login designs — Figma `1988:10890` draws the error, and the trade was
-put to the team before it was built. It reverses the earlier behaviour, where
-the caller swallowed the `AccessDenied` rejection so the two responses were
-identical and nothing revealed who was registered.
+## What the magic link took with it
 
-What that costs, so it is on the record: the sign-in form is an account-
-enumeration oracle. Anyone can test an address against the customer list, and
-for a brain-health service the mere fact of being a customer is sensitive. What
-keeps that bounded is the throttle below — the disclosure is per-attempt, so
-limiting attempts limits the disclosure.
+Passwordless magic-link sign-in was removed in Sep 2026, once Auth0 had also
+taken over verifying the address at signup. Gone with it: the Resend email
+provider, `/login/check-email`, `lib/auth-email.ts`, the `MagicLinkEmail`
+template, the login server actions, and the header's login popover and mobile
+modal (`LoginMenu`, `LoginPanel`, `MobileLoginModal` — the header item is now a
+plain button straight out to Auth0).
 
-## Sign-in throttling
+**And the sign-in throttle, which matters more than the rest.** `lib/rate-limit.ts`
+and the wrapper on `POST /api/auth/signin/*` are deleted. They existed for one
+reason: our sign-in form told an anonymous caller whether an address had an
+account — a deliberate product decision (Figma `1988:10890`) that made the form
+an account-enumeration oracle, and for a brain-health service the mere fact of
+being a customer is sensitive. Five attempts per IP and five per address, per
+15 minutes, in Postgres (`auth_rate_limits`), was the bound on that.
 
-`sendLoginLink` is rate-limited per IP and per address, in
-`apps/marketing/src/lib/rate-limit.ts`. So is Auth.js's own
-`POST /api/auth/signin/:provider`, in the route handler: it reaches the same
-`signIn` callback and discloses the same thing by which page it redirects to, so
-guarding only the server action would have guarded only the door our UI uses.
+**That oracle has moved, not closed.** No address is typed on our site any more;
+it is typed on Auth0's screen, and Auth0's passwordless connection has the same
+property — more so with "Disable Sign Ups" on, which Auth0's own docs flag as a
+user-enumeration exposure. So the bound now has to come from **Auth0's attack
+protection** (Suspicious IP Throttling and Brute-force Protection), which is
+tenant configuration, not code in this repo.
 
-| Limit | Ceiling | Window |
-|---|---|---|
-| Per IP | **5** attempts | 15 minutes |
-| Per address | **5** attempts | 15 minutes |
-
-The per-IP limit is the one that bites an enumeration sweep: it tries a
-different address every time, so it never approaches the per-address ceiling.
-The per-address limit is a separate concern — it stops one inbox being flooded
-with sign-in links from a spread of sources, which the per-IP limit does not
-see.
-
-The per-IP number started at 10 and was cut to 5 (Aug 2026): 10 in a
-quarter-hour is ~960 attempts a day from one address, a loose bound on the
-thing the throttle exists to stop. The floor on lowering it further is shared
-IPs — an office or household behind one NAT can genuinely have two or three
-people signing in at once, and they all count against one bucket.
-
-Counting happens in Postgres (`auth_rate_limits`), not Redis. There is no Redis
-here, and the argument above for keeping sessions in Neon applies equally to a
-table of hashes with a fifteen-minute lifespan: one data posture, no
-third-party residency to audit. Per-attempt writes are the cost; at this volume
-they are noise. Reach for a dedicated store if that stops being true.
-
-Details worth knowing before changing it:
-
-- **Buckets are hashed**, with the same keyed hash as `audit_log.ip_hash`
-  (`hashIdentifier`, keyed by `IP_HASH_SECRET`). The raw column would otherwise
-  become a list of addresses people typed into a brain-health site, most of
-  which have no account and never consented to anything. **`IP_HASH_SECRET` has
-  to be set in every scope.** Without it `hashIdentifier` falls back to plain
-  SHA-256, and an email address has a small enough keyspace that a dictionary
-  walks it — the bucket becomes that list again, just encoded. Any deployed boot
-  without the secret throws (`assertIdentifierHashSecret`, called from
-  `instrumentation.ts`); local only logs, loudly. Each scope has its own key —
-  production, preview and development do not share one, so a digest from one
-  environment cannot be lined up against another.
-- **A refused attempt writes nothing.** The count happens before the insert, and
-  a refusal returns without recording. The other ordering is the tempting one —
-  it keeps the window rolling forward under a hammering — but it lets one
-  already-throttled IP keep filling a victim's *email* bucket for free, and so
-  lock that address out of sign-in permanently. The IP ceiling is also checked
-  first and short-circuits, so an IP over its own limit never touches the email
-  bucket at all.
-- **It fails open.** If the database is unreachable the attempt is allowed —
-  sign-in needs the database anyway, so a failure there was going to fail the
-  request regardless, and failing closed would turn a database blip into a
-  total sign-in outage.
-- **The refusal says nothing.** Not which limit was hit, not how long is left.
-  "You've tried this address five times" hands back the signal the throttle
-  exists to withhold.
-- **A refusal is audited** as `signin_rate_limited`, with the hashed IP and
-  which limit tripped. The `auth_rate_limits` rows themselves are disposable
-  and swept on each check; the audit row is the record.
-- **A malformed address costs nothing** — it is rejected before the throttle,
-  because it never reaches the oracle.
-- **Every attempt counts, successes included.** A magic link that actually
-  sends costs a slot exactly like a probe does; the format check is free, and so
-  is an attempt that was refused.
-  Signing out is free too, but the next sign-in needs a new link, so repeated
-  login/logout rounds burn the window fast.
-
-Which makes testing painful, so both ceilings can be raised outside production
-via `SIGNIN_MAX_PER_IP` and `SIGNIN_MAX_PER_EMAIL`. **The overrides are ignored
-when `VERCEL_ENV=production`** — these bound account enumeration, and a limit
-that can be relaxed with a variable will eventually be relaxed by accident.
-
-Two things to know when a limit fires unexpectedly:
-
-- **Locally there is no `x-forwarded-for`**, so every request falls into a
-  single `ip:hash("unknown")` bucket.
-- **A shared egress IP is one bucket.** Everyone testing a preview from the
-  same office counts against each other.
+> **Open, and compliance-relevant.** The original throttle was part of what was
+> signed off. Nobody has yet confirmed the equivalent is enabled on the tenant —
+> and which tenant it will even be is still open with Linus. Confirm this before
+> production. The `auth_rate_limits` table is left in the database, unused;
+> dropping it is a destructive migration and a separate decision.
 
 ## Auth0
 
-Since Sep 2026 there is a second way in: **Continue with Auth0**, alongside the
-magic link. It exists because Linus decided the **Linus Engagement App** is the
-entry point for both PBH experiences, and that app authenticates with Auth0. If
-PBH signs people in against the same Auth0 tenant, one Universal Login gets
+The only way in. Linus decided the **Linus Engagement App** is the entry point
+for both PBH experiences, and that app authenticates with Auth0; signing PBH
+customers in against the same Auth0 tenant means one Universal Login gets
 someone into both products — SSO — instead of two unrelated logins for one
-customer.
+person.
 
 **Auth0 authenticates. It does not own the session.** `session.strategy` stays
 `"database"`, and this is the load-bearing decision, not a detail:
@@ -154,7 +83,7 @@ an Auth0 session by the time `/welcome` offers the Engagement App link. See
 [`booking-flow.md`](./booking-flow.md).
 
 **Still login-only.** The `signIn` callback gates the Auth0 path exactly as it
-gates the magic link: an address with no PBH account is refused, so accounts are
+always has: an address with no PBH account is refused, so accounts are
 still born only in the booking flow. Two details make that safe:
 
 - The callback runs *before* Auth.js hands the profile to the adapter, so a
@@ -171,7 +100,9 @@ still born only in the booking flow. Two details make that safe:
 provider is not registered, the button does not render, and nothing about
 sign-in changes. Registered conditionally rather than with empty-string
 fallbacks because an OAuth provider missing its issuer fails Auth.js's
-`assertConfig` on every request — it would take the magic link down with it.
+`assertConfig` on every request. With `AUTH0_*` unset there is now no way to
+sign in at all, and no way to finish a signup — which is the honest outcome,
+since there is no second provider left.
 Note these are **not** the `LINUS_*` variables, which are machine-to-machine
 credentials for the Linus Public API that happens to sit behind Auth0 too.
 
@@ -194,22 +125,18 @@ server-side check and the panel is a client component.
   Enterprise-tier item — the same objection that ruled out Clerk below. If the
   tenant is Linus's, their BAA may cover it; that needs confirming in writing.
 
-### Before Auth0 becomes the only door
+### What survived the magic link's removal, and why
 
-The intent is for Auth0 to replace the magic link, but that is not this change,
-and it is not a deletion. Two things in this document stop applying the moment
-Universal Login becomes the door:
+- The **automatic-logoff controls** below. They survive only because the session
+  is still ours — see the split at the top of this section. They would need
+  re-stating against Auth0's session model if that ever changed.
+- The **login-only rule**. Auth0 authenticates; it still cannot create a PBH
+  account.
 
-- The **sign-in throttle** above sits in front of *our* server action and *our*
-  `/api/auth/signin/*` route. It does not sit in front of Auth0. The
-  account-enumeration bound it provides has to be re-derived from Auth0's own
-  attack protection before the magic link goes.
-- The **automatic-logoff controls** survive only because the session is still
-  ours. They would need re-stating against Auth0's session model if that ever
-  changes.
-
-Neither is a refactor decision. Both were signed off by compliance; re-opening
-them means going back to compliance.
+What did *not* survive is the account-enumeration throttle. That is written up
+under [What the magic link took with it](#what-the-magic-link-took-with-it), and
+it is the one item here that needs an answer from Auth0's side before
+production.
 
 ## Why Auth.js and not Clerk
 
@@ -287,8 +214,10 @@ it wrong and the session is silently never found, because one half writes
 
 ## Known gaps
 
-- **No rate limiting on `requestMagicLink`** — an unauthenticated action that
-  emails any registered address. Tracked on `pbh-gzv`.
+- **The enumeration bound is unconfirmed.** Our throttle is gone with the magic
+  link; Auth0's attack protection has to take its place, and nobody has verified
+  it is on. See the section above — this is the one open compliance item.
 - **No MFA and no account-deletion flow.** Phase 2+, not in the current
   estimate. Social login is no longer on this list — whatever connections the
-  Auth0 tenant enables come through the provider above.
+  Auth0 tenant enables come through the provider above, and MFA is now an Auth0
+  setting rather than something to build.
