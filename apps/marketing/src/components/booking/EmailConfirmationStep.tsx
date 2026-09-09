@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { StickyActions } from "@pbh/booking";
+import { Button } from "@pbh/ui";
 
 /**
  * Header copy for this step, exported rather than inlined at the call site so
@@ -13,69 +14,52 @@ import { StickyActions } from "@pbh/booking";
 export const CONFIRM_HEADER = { title: "Email Confirmation" } as const;
 
 /**
- * Blocking step shown straight after signup (Figma 1088:2121): we've emailed a
- * confirmation link and the flow can't continue until it's clicked.
+ * The "address not proven yet" step.
  *
- * `expired` covers the customer arriving back from a link that had already been
- * used or had run out — same screen, different opening line, so a dead link
- * never reads as a dead end.
+ * Signup sends the customer straight to Auth0, which emails them a code — so on
+ * the happy path this screen is never seen. It is what someone lands on if they
+ * abandoned at the Auth0 screen and came back on the booking cookie: their
+ * `users` row exists, `emailVerified` is still null, and
+ * `resolveBookingResumeState` holds them here. The button puts them back where
+ * they dropped out.
  *
- * `resend` is injected rather than imported, like every other step's action.
- * Importing it directly made this the one step whose preview at
- * `/internal/modals/confirm` still fired a real send — on a route that is
- * deliberately reachable in production.
+ * It used to say "we've emailed you a link" and offer a re-send. There is no
+ * link of ours any more — Auth0's code is the proof, and asking for a fresh one
+ * means starting its flow again, which is exactly what this button does.
+ *
+ * `verify` is injected rather than imported, like every other step's action, so
+ * the preview at `/internal/modals/confirm` doesn't start a real sign-in on a
+ * route that is deliberately reachable in production.
  */
-export function EmailConfirmationStep({
-  expired = false,
-  resend,
-}: {
-  expired?: boolean;
-  /** Re-send the confirmation email. Takes no argument: the server derives the
-   * recipient from the booking cookie, so it can't be aimed at another inbox. */
-  resend: () => Promise<{ ok: true }>;
-}) {
+export function EmailConfirmationStep({ verify }: { verify: () => Promise<void> }) {
   const [pending, startTransition] = useTransition();
-  const [resent, setResent] = useState(false);
 
-  function handleResend() {
+  function handleVerify() {
     startTransition(async () => {
-      await resend();
-      // Always reported as sent. The action throttles silently, and saying
-      // "too soon" would expose how recently a link went out.
-      setResent(true);
+      await verify();
     });
   }
 
   return (
     <div className="flex flex-col gap-8">
       <p className="text-body-lg leading-relaxed text-ink-strong">
-        {expired
-          ? "That confirmation link has expired or was already used. Send yourself a fresh one and we’ll pick up where you left off."
-          : "Thanks for starting the process with us. We’ve sent you an email. Please check your inbox and confirm this is you."}
+        Thanks for starting the process with us. We just need to check this
+        email is yours — we’ll send you a code to enter, and then pick up right
+        where you left off.
       </p>
 
       <hr className="border-t border-grey-warm-200" />
 
       <StickyActions>
-        <p className="text-center text-body text-ink-strong">
-          {resent ? (
-            <span aria-live="polite">
-              Sent. Check your inbox — it can take a minute to arrive.
-            </span>
-          ) : (
-            <>
-              Didn’t receive the email?{" "}
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={pending}
-                className="font-bold text-brand-default underline underline-offset-2 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {pending ? "Sending…" : "Re-send confirmation email."}
-              </button>
-            </>
-          )}
-        </p>
+        <Button
+          type="button"
+          color="primary"
+          onClick={handleVerify}
+          disabled={pending}
+          className="w-full"
+        >
+          {pending ? "One moment…" : "Send me a code"}
+        </Button>
       </StickyActions>
     </div>
   );

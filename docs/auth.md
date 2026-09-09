@@ -143,6 +143,16 @@ timeouts are all still ours. SSO into the Engagement App still works, because
 Universal Login sets Auth0's *own* SSO cookie on the tenant domain on the way
 through.
 
+**Auth0 also verifies the address at signup.** Since Sep 2026 the booking flow
+sends a new customer to Auth0 straight after the name/email form, instead of
+emailing our own one-time confirmation link. Entering Auth0's code proves the
+address, so the `signIn` event calls `markEmailVerified` — which stamps
+`users.email_verified`, audits it, and sends the welcome email once. That is
+what `resolveBookingResumeState` reads to move them past the confirm step. The
+reason to do it there rather than at checkout: the customer then already holds
+an Auth0 session by the time `/welcome` offers the Engagement App link. See
+[`booking-flow.md`](./booking-flow.md).
+
 **Still login-only.** The `signIn` callback gates the Auth0 path exactly as it
 gates the magic link: an address with no PBH account is refused, so accounts are
 still born only in the booking flow. Two details make that safe:

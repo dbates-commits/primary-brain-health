@@ -54,8 +54,8 @@ export const previewFinalize: PaymentFinalizeAction = async () => ({
 });
 
 /**
- * Reports success without sending, which is exactly what the real action looks
- * like from here: it never tells the browser whether an email went out, so the
- * preview reads identically to the live step.
+ * Goes nowhere, which is the point: the real action redirects to Auth0's login,
+ * and a preview route that is deliberately reachable in production must not
+ * start a real sign-in. The button reads identically either way.
  */
-export const previewResend = async (): Promise<{ ok: true }> => ({ ok: true });
+export const previewVerify = async (): Promise<void> => {};

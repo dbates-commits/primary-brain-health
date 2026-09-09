@@ -15,6 +15,7 @@ import {
 } from "@pbh/db";
 import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
 import { auth0SignInAddress } from "@/lib/auth0-gate";
+import { markEmailVerified } from "@pbh/booking/server";
 import { sendMagicLinkEmail } from "@/lib/auth-email";
 import { findAuthUserByEmail } from "@/lib/auth-user";
 
@@ -314,6 +315,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
       } catch (err) {
         console.error("[auth] audit write for login failed:", err);
+      }
+
+      // Auth0 emailed this customer a code and they entered it, so the address
+      // is proven — which is the whole job the `/booking/confirm` link used to
+      // do at this point in the booking flow. Stamping it here is what lets
+      // `resolveBookingResumeState` move them past the confirm step.
+      //
+      // Fires on every Auth0 sign-in, not just the first; `markEmailVerified`
+      // is idempotent and only sends the welcome email on the transition.
+      // Best-effort: a failure here must not fail a sign-in that has already
+      // succeeded — it costs the customer a re-verify, not their session.
+      if (account?.provider === "auth0") {
+        try {
+          await markEmailVerified(user.id);
+        } catch (err) {
+          console.error("[auth] stamping email_verified failed:", err);
+        }
       }
     },
     /**

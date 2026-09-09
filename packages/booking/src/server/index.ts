@@ -20,7 +20,7 @@ export * from "./fulfill";
 export * from "./entitlement";
 export * from "./register-and-enroll";
 export * from "./signup-core";
-export * from "./email-verification";
+export * from "./email-verified";
 export * from "./resume";
 export * from "./booking-session";
 export * from "./details-core";

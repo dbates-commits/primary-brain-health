@@ -40,6 +40,35 @@ the **only** thing that says which account a booking step may write to — see
 
 ---
 
+## Who proves the email
+
+Auth0, since Sep 2026. The signup form takes first name, last name and email,
+writes the `users` row and the booking cookie, and then **redirects to Auth0**,
+which emails a code. Entering it stamps `users.email_verified` (see
+`markEmailVerified`, called from the `signIn` event in `apps/marketing/src/auth.ts`)
+and returns the customer to `/?booking=resume`, where the resume state machine
+puts them on Details.
+
+The point is not the verification — our own one-time link did that perfectly
+well. The point is that the customer now also holds an **Auth0 session**, which
+is what makes the Engagement App link on `/welcome` a plain link rather than a
+second login. Doing it at signup rather than at checkout means the session is
+already there by the time it is needed.
+
+What this replaced, and is gone: `booking_email_verifications` writes, the
+`/booking/confirm` route, `email-verification.ts`, `sendConfirmEmail` and the
+`confirm-email` template. The **table itself is still in the database** —
+dropping it is a destructive migration and a separate, deliberate decision.
+
+Two consequences worth knowing:
+
+- **Signup now requires Auth0 to be configured.** With `AUTH0_*` unset,
+  `signupAction` refuses rather than silently stranding a customer on a step
+  with no way forward. There is no non-Auth0 path to a verified address.
+- **The 24-hour "come back later from the email" resume is gone.** Closing the
+  tab at the Auth0 screen means starting sign-in again — which the confirm step
+  now offers as a button, and which the magic link also still covers.
+
 ## The happy path
 
 ```mermaid
@@ -49,6 +78,7 @@ sequenceDiagram
     participant M as Marketing
     participant DB as Neon
     participant R as Resend
+    participant A as Auth0
     participant S as Stripe
     participant E as Linus Engagement App
 
@@ -56,14 +86,14 @@ sequenceDiagram
     Note over M: one package, so packageKey is always the default
     M->>DB: users row (+ selected_package_key)
     M-->>C: Signed pbh_booking_session cookie (identity, 2h)
-    M->>DB: booking_email_verifications (token HASH, 24h)
-    M->>R: Confirmation email
-    M-->>C: Email Confirmation modal (BLOCKING)
+    M-->>C: Redirect to Auth0 (login_hint = the address just typed)
 
-    C->>M: GET /booking/confirm?token=…
-    M->>DB: claim consumed_at, set users.email_verified
+    C->>A: Enter the emailed code
+    A-->>M: /api/auth/callback/auth0
+    M->>DB: accounts row, sessions row → Auth.js session cookie
+    M->>DB: set users.email_verified
     M->>R: Welcome email
-    M-->>C: Fresh pbh_booking_session cookie → /?booking=resume
+    M-->>C: → /?booking=resume
 
     C->>M: Resume
     M->>DB: resolveBookingResumeState → step + packageKey
@@ -79,6 +109,7 @@ sequenceDiagram
         M->>S: Re-fetch session + intent
         M->>DB: payments row, audit, receipt email
         M->>DB: sessions row → Auth.js session cookie
+        Note over M: still minted here — the Auth0 session is already live
     and Webhook path (backstop)
         S->>M: payment_intent.succeeded
         M->>DB: same idempotent writes
@@ -92,7 +123,7 @@ sequenceDiagram
 
 ## Where a customer resumes
 
-The email-confirmation step is **blocking**, so every customer leaves the site and
+The verification step is **blocking**, so every customer leaves the site and
 comes back to a fresh page. Their step is therefore recomputed from persisted
 state — never from anything the browser claims.
 
@@ -106,7 +137,7 @@ not started yet has no modal to be at.
 stateDiagram-v2
     [*] --> signup
     signup --> confirm: users row created (on-page form)
-    confirm --> details: users.email_verified set
+    confirm --> details: users.email_verified set (by Auth0)
     details --> consent: users.date_of_birth set
     consent --> payment: consents row exists
     payment --> done: payments.status = 'succeeded'
@@ -121,7 +152,7 @@ left, and one button into the next thing. It greets by state rather than
 identity: **"Welcome Back!"** once anything is behind them, **"Welcome!"** when
 nothing is.
 
-**It does not show on the way into the confirmation gate.** Filling in a name and
+**It does not show on the way into the verification gate.** Filling in a name and
 an email opens the modal straight at the gate: a summary of four untaken steps in
 front of someone who has taken none is an obstacle, not orientation. The same
 goes for an expired link, which lands on that gate whatever else is done — so in
@@ -138,7 +169,7 @@ Its rows and the stepper band above the step body (2060:5600) both come from
 `components/booking/step-model.ts`, which is a **display** list and deliberately
 not the same four:
 
-- **`confirm` has no row.** Proving the address is a precondition, not a step: it
+- **`confirm` has no row of ours.** Proving the address is a precondition, not a step: it
   happens once, before there is any progress to show, and both designs omit it.
   Someone at the gate sees the step with no stepper and no overview.
 - **`assessments` is not a modal step at all** — it is `/welcome`, shown as the
@@ -170,8 +201,9 @@ to fix one field would have to retype five.
 
 ### When the cookie has aged out
 
-The booking cookie lives two hours; the confirmation token lives 24 and is
-single-use. So someone who abandons **after** confirming and returns the next day
+The booking cookie lives two hours. There is no confirmation token any more —
+the Auth0 session is what survives instead. So someone who abandons **after**
+verifying and returns the next day
 has a dead cookie and a spent link. They are routed back in through sign-in
 rather than by widening either lifetime:
 
@@ -202,8 +234,8 @@ All server actions live in `apps/marketing/src/components/booking/actions.ts` an
 | Step | Client | Action | Shared core | Writes |
 |---|---|---|---|---|
 | Signup | `BookingSection` → `SignupForm`, on the page | `signupAction` | `createAccountCore` | `users` row incl. `selected_package_key`; audit `signup`; issues `pbh_booking_session` |
-| — | — | — | `sendBookingConfirmation` | `booking_email_verifications`; audit `email_verification_sent` |
-| Confirm | `EmailConfirmationStep` | `GET /booking/confirm` | `consumeBookingConfirmation` | `consumed_at`, `users.email_verified`; audit `email_verified` |
+| — | — | — | (redirect to Auth0) | — |
+| Confirm | `EmailConfirmationStep` | Auth0 Universal Login | `markEmailVerified` (from the `signIn` event) | `accounts`, `sessions`, `users.email_verified`; audit `email_verified` |
 | Resume | `BookingStepFlow` (on mount) | `getBookingResumeState` | `resolveBookingResumeState` | — (read only) |
 | Details | `DetailsForm` | `detailsAction` | `completeProfileCore` | `users` demographics (DOB, zip, phone, gender, education) + the account holder's name |
 | Consent | `ConsentForm` | `consentAction` | `recordConsentCore` | two `consents` rows — `wellness` + `hipaa_npp` — with `ip_hash`, `user_agent` and the terms `version` |
@@ -227,7 +259,7 @@ nothing and kept only for the rows that answered it.
 ### The chosen package
 
 Captured at signup and stored on `users.selected_package_key`, because the
-confirmation gate destroys in-memory state before payment. That stored value —
+verification gate destroys in-memory state before payment. That stored value —
 not the key the client re-sends — is what `createCheckoutSessionCore` charges.
 Trusting the client would let someone drive the $449 flow while checking out at
 the $149 price, and fulfilment would accept it, since it validates the amount
@@ -319,14 +351,14 @@ Emails carry links only — never assessment results or report content.
 | Email | Fired from | Trigger |
 |---|---|---|
 | Confirm your email | `email-verification.ts` | signup |
-| Welcome | `email-verification.ts` | confirmation redeemed |
+| Welcome | `email-verified.ts` | address proven at Auth0 |
 | Payment receipt | `fulfill.ts` | first `succeeded` write |
 | Payment failed | `fulfill.ts` | first `failed` write per intent, unless already paid |
 | Payment refunded | `fulfill.ts` | `charge.refunded` |
 | Magic link | `apps/marketing/src/auth.ts` | `/login` request |
 
-Welcome deliberately fires on **confirmation**, not signup: the flow is blocked on
-the confirmation link, and two emails arriving together buries the one the
+Welcome deliberately fires on **verification**, not signup: the flow is blocked on
+Auth0, and two emails arriving together buries the one the
 customer has to act on.
 
 Every link is built from `siteBaseUrl()` in `@pbh/emails` (`BOOKING_BASE_URL` →
@@ -342,7 +374,7 @@ reports are read in the Engagement App, which owns notifying about them.
 
 | Token | Signed with | TTL | Single-use via |
 |---|---|---|---|
-| Email confirmation | none — random, SHA-256 hashed at rest | 24h | `booking_email_verifications.consumed_at` |
+| Email verification | none — Auth0 owns the code | Auth0's OTP expiry | Auth0-side, single-use |
 | Booking cookie (`pbh_booking_session`) | `BOOKING_RESUME_SECRET` | 2h | no — re-readable until expiry |
 | Consent stamp (`consentStamp` form field) | `BOOKING_RESUME_SECRET`, domain-tagged | none, by design | no — it is a label, not an authorization |
 | Magic link | `AUTH_SECRET` (Auth.js) | 15 min | `verification_tokens` |
@@ -385,10 +417,10 @@ Each of these has actually happened:
 
 | Symptom | Cause |
 |---|---|
-| Signup or `/booking/confirm` throws | `BOOKING_RESUME_SECRET` missing — it signs the booking cookie |
+| Signup throws | `BOOKING_RESUME_SECRET` missing — it signs the booking cookie |
 | Every step after signup says "We couldn't find your booking" | The `pbh_booking_session` cookie is absent, expired (2h), or signed with a different `BOOKING_RESUME_SECRET` than the one reading it |
 | Welcome screen's buttons do nothing | Expected — both are `#` until scheduling and the assessments hand-off land |
-| No email arrives; flow stalls at the confirmation modal | `RESEND_API_KEY` unset — sends become logged no-ops and the confirmation URL is printed to the server console instead. This is how local testing works |
+| No code arrives; flow stalls at Auth0 | Auth0-side: the passwordless Email connection is off, has "Disable Sign Ups" on, or the tenant has no real email provider. Check Auth0 → Monitoring → Logs, not ours |
 | Session silently never found | Cookie-name mismatch: Auth.js derives the `__Secure-` prefix from the request protocol, not `NODE_ENV` |
 
 `"Couldn't register with Linus (status …)"` no longer reaches a customer — it is

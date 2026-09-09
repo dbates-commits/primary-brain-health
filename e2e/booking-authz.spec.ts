@@ -15,11 +15,19 @@ import { BOOKING_COOKIE, reachConsentStep, submitConsent } from "./helpers/booki
  */
 const FULL_FLOW = process.env.E2E_FULL_FLOW === "1";
 
-test.describe("booking authorization", () => {
-  test.skip(
-    !FULL_FLOW,
-    "Set E2E_FULL_FLOW=1 with a test DB to run the authorization path.",
-  );
+test.describe.skip(// Skipped, not deleted, and deliberately not repaired with a shortcut.
+//
+// These specs drove signup by reading the `/booking/confirm` URL back out of
+// the marketing server log (`helpers/confirm.ts`). Signup now goes through
+// Auth0, which emails a code to a real inbox — there is no URL in any log to
+// read, and no way to fake one that would not amount to forging a verified
+// address in the money path.
+//
+// Restoring them needs a decision, not a patch: a mailbox API to read the
+// OTP, an Auth0 database connection with a fixed E2E user, or an explicitly
+// reviewed test-only bypass. Tracked on pbh-mgr.
+"booking authorization", () => {
+  test.skip(!FULL_FLOW, "Set E2E_FULL_FLOW=1 with a test DB to run the authorization path.");
 
   test("consent with a forged or absent booking cookie writes nothing", async ({
     page,
@@ -28,32 +36,22 @@ test.describe("booking authorization", () => {
     test.setTimeout(120_000);
     await reachConsentStep(page);
 
-    const [real] = (await context.cookies()).filter(
-      (c) => c.name === BOOKING_COOKIE,
-    );
+    const [real] = (await context.cookies()).filter((c) => c.name === BOOKING_COOKIE);
     expect(real, "signup should have issued the booking cookie").toBeTruthy();
-    expect(real.httpOnly, "booking cookie must not be readable by script").toBe(
-      true,
-    );
+    expect(real.httpOnly, "booking cookie must not be readable by script").toBe(true);
 
     // Forged: a real user id and expiry with the signature replaced — i.e.
     // exactly what an attacker who learned a user id can produce.
     const [userId, expiry] = real.value.split(".");
-    await context.addCookies([
-      { ...real, value: `${userId}.${expiry}.${"0".repeat(64)}` },
-    ]);
+    await context.addCookies([{ ...real, value: `${userId}.${expiry}.${"0".repeat(64)}` }]);
     await submitConsent(page);
-    await expect(
-      page.getByText(/couldn.t find your booking/i),
-    ).toBeVisible();
+    await expect(page.getByText(/couldn.t find your booking/i)).toBeVisible();
 
     // Absent: same refusal, no crash. The step is still on screen, so this
     // submits with no cookie at all rather than testing the resume path.
     await context.clearCookies({ name: BOOKING_COOKIE });
     await submitConsent(page);
-    await expect(
-      page.getByText(/couldn.t find your booking/i),
-    ).toBeVisible();
+    await expect(page.getByText(/couldn.t find your booking/i)).toBeVisible();
 
     // Nothing was written: with the genuine cookie back, the flow still resumes
     // at consent. Had either attempt landed a `consents` row, this would resume
@@ -70,12 +68,8 @@ test.describe("booking authorization", () => {
     // the step the server resolved to. Had either refused attempt landed a
     // `consents` row, this would read "Complete Payment" instead.
     const overview = page.getByRole("dialog");
-    await expect(
-      overview.getByRole("heading", { name: "Welcome Back!" }),
-    ).toBeVisible();
+    await expect(overview.getByRole("heading", { name: "Welcome Back!" })).toBeVisible();
     await overview.getByRole("button", { name: "Sign Consent Form" }).click();
-    await expect(
-      page.getByRole("button", { name: /continue with payment/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /continue with payment/i })).toBeVisible();
   });
 });
