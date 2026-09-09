@@ -95,7 +95,23 @@ export async function signupAction(
     // Back to the home page with the marker the booking modal reopens on; the
     // resume state machine reads `emailVerified` and lands them on Details.
     { redirectTo: "/?booking=resume#booking" },
-    { login_hint: result.email },
+    {
+      login_hint: result.email,
+      // **Force re-authentication. This is not a nicety.**
+      //
+      // Auth0 keeps an SSO cookie on its own domain, and signing out of PBH
+      // does not clear it (see `auth0LogoutUrl`). Without `prompt=login`, a
+      // brand-new customer signing up on a browser where somebody else used
+      // Auth0 would be silently authenticated as *that* person: the booking
+      // cookie would point at the row we just inserted while the Auth.js
+      // session belonged to someone else, so `markEmailVerified` would stamp
+      // the wrong user, mail them a second welcome, and leave the new customer
+      // stuck on the confirm step with no way forward.
+      //
+      // The address is already in `login_hint`, so the cost is one screen the
+      // customer was going to see anyway.
+      prompt: "login",
+    },
   );
 
   return result;
@@ -225,6 +241,12 @@ export async function verifyEmailAction(): Promise<void> {
   await signIn(
     "auth0",
     { redirectTo: "/?booking=resume#booking" },
-    profile?.email ? { login_hint: profile.email } : undefined,
+    {
+      ...(profile?.email ? { login_hint: profile.email } : {}),
+      // Same reason as `signupAction`: this booking belongs to whoever holds
+      // the cookie, and a stale Auth0 session would verify a different person's
+      // address against it.
+      prompt: "login",
+    },
   );
 }

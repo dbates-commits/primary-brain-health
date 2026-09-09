@@ -125,6 +125,30 @@ server-side check and the panel is a client component.
   Enterprise-tier item — the same objection that ruled out Clerk below. If the
   tenant is Linus's, their BAA may cover it; that needs confirming in writing.
 
+### Signing out has two halves
+
+Deleting our `sessions` row ends our session. It does **not** end Auth0's — that
+lives in an SSO cookie on the tenant domain, and nothing we can delete reaches
+it. So `signOutAction` destroys our session and then returns Auth0's
+`/v2/logout` URL, which `useSignOut` navigates to; Auth0 clears its cookie and
+sends the browser back to our origin. `returnTo` must be in the application's
+**Allowed Logout URLs** or Auth0 refuses the request.
+
+Without that second leg, "log out" means "log out until you press login": the
+next `/authorize` is silently re-authenticated as the same person. On a shared
+computer that is a privacy problem on its own.
+
+**The worse failure it also prevents, and the reason `prompt=login` exists.** A
+brand-new customer signing up on a browser carrying somebody else's Auth0 SSO
+cookie would be silently authenticated as *that* person. The booking cookie
+would point at the row signup just inserted while the Auth.js session belonged
+to someone else — so `markEmailVerified` would stamp the wrong user, mail them a
+second welcome, and leave the new customer stuck on the confirm step. Both
+`signupAction` and `verifyEmailAction` therefore force re-authentication.
+
+Plain `/login` deliberately does **not**: silent SSO is the entire point of
+sharing a tenant with the Engagement App.
+
 ### What survived the magic link's removal, and why
 
 - The **automatic-logoff controls** below. They survive only because the session
