@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Container, Section } from "@pbh/ui";
 import { auth } from "@/auth";
+import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
 import { LoginForm } from "./LoginForm";
 
 export const metadata = {
@@ -31,7 +32,7 @@ export default async function LoginPage({
   return (
     <Section className="py-24">
       <Container size="narrow">
-        <LoginForm initialEmail={initialEmail} />
+        <LoginForm initialEmail={initialEmail} auth0Enabled={AUTH0_ENABLED} />
       </Container>
     </Section>
   );

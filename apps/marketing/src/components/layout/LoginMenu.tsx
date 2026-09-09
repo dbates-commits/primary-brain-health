@@ -20,7 +20,7 @@ import { usePopoverTransition } from "./use-popover-transition";
  * full-screen surface — one form and one server action either way, with only
  * the chrome around it differing.
  */
-export function LoginMenu() {
+export function LoginMenu({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
   const [open, setOpen] = useState(false);
   const { mounted, shown } = usePopoverTransition(open);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -99,6 +99,7 @@ export function LoginMenu() {
 
       {mounted && (
         <LoginPanel
+          auth0Enabled={auth0Enabled}
           id={panelId}
           role="dialog"
           aria-label="Login"

@@ -28,7 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Contact", link: "/contact" },
 ];
 
-export function Header() {
+export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
@@ -230,7 +230,7 @@ export function Header() {
 
             {/* Not part of `nav`: that array feeds the IntersectionObserver
                 below, and neither of these is a scroll anchor. */}
-            {firstName ? <UserMenu firstName={firstName} /> : <LoginMenu />}
+            {firstName ? <UserMenu firstName={firstName} /> : <LoginMenu auth0Enabled={auth0Enabled} />}
           </div>
 
           {/* CTA Button. Not rendered for a signed-in customer — they have
@@ -367,6 +367,7 @@ export function Header() {
         onBack={backToMenu}
         onClose={closeFromLoginModal}
         action={requestLoginLinkInline}
+        auth0Enabled={auth0Enabled}
       />
     </nav>
   );

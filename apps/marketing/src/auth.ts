@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import type { Adapter } from "next-auth/adapters";
+import Auth0 from "next-auth/providers/auth0";
 import Resend from "next-auth/providers/resend";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
@@ -12,6 +13,7 @@ import {
   verificationTokens,
   writeAuditLog,
 } from "@pbh/db";
+import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
 import { sendMagicLinkEmail } from "@/lib/auth-email";
 import { findAuthUserByEmail } from "@/lib/auth-user";
 
@@ -51,6 +53,10 @@ export const ABSOLUTE_SESSION_MAX_SECONDS = 60 * 60 * 8;
  *  - **Branded, env-gated email**: sending goes through `@pbh/emails` + the same
  *    Resend path as the rest of the app, so with `RESEND_API_KEY` unset every
  *    send is a logged no-op and local dev still works (the sign-in URL is logged).
+ *
+ * Since Sep 2026 there is a second provider, Auth0 — see `AUTH0_ENABLED` below
+ * and the "Auth0" section of `docs/auth.md`. It authenticates; it does not own
+ * the session. Everything above still holds.
  */
 
 // The adapter's table generic only allows plain text/varchar for `email`, but
@@ -76,12 +82,14 @@ function buildAdapter(): Adapter {
 
   return {
     ...base,
-    // Refuse to auto-create an account from a magic link. This should never fire
-    // (sendMagicLinkEmail doesn't email unknown addresses, so no token is ever
-    // minted for one) — it's a hard backstop against a nameless user being
-    // created if a token for an unknown email were somehow redeemed.
+    // Refuse to auto-create an account from any sign-in. This should never fire
+    // — the `signIn` callback below rejects an unknown address on both paths
+    // before the adapter is reached, and sendMagicLinkEmail never emails one —
+    // it's a hard backstop against a nameless user being created if a magic-link
+    // token for an unknown email were somehow redeemed, or if an Auth0 identity
+    // arrived for an address with no PBH account.
     createUser: async () => {
-      throw new Error("SIGNUP_VIA_MAGIC_LINK_DISABLED");
+      throw new Error("SIGNUP_VIA_SIGNIN_DISABLED");
     },
 
     /**
@@ -173,6 +181,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   providers: [
+    // Registered conditionally rather than with empty-string fallbacks like the
+    // Resend provider below: an OAuth provider missing its issuer fails Auth.js's
+    // `assertConfig` on *every* request, which would take the magic link down
+    // too wherever Auth0 credentials aren't set. Unset means the app behaves
+    // exactly as it did before Auth0 existed.
+    ...(AUTH0_ENABLED
+      ? [
+          Auth0({
+            issuer: process.env.AUTH0_ISSUER,
+            clientId: process.env.AUTH0_CLIENT_ID,
+            clientSecret: process.env.AUTH0_CLIENT_SECRET,
+            // Attach an Auth0 identity to the PBH `users` row the booking flow
+            // already created for that address, instead of minting a second
+            // user for the same person. "Dangerous" is Auth.js warning that a
+            // provider which lies about `email_verified` could take over an
+            // account — which is why the `signIn` callback below refuses any
+            // Auth0 profile that isn't verified, before this ever applies.
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
     Resend({
       id: "magic-link",
       name: "Email",
@@ -202,7 +231,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * into this callback — the login server action and the Auth.js sign-in
      * route. See the disclosure note in `docs/auth.md` before widening either.
      */
-    async signIn({ user, email }) {
+    async signIn({ user, account, profile, email }) {
+      // Auth0 sign-in. The same login-only rule as the magic link, and for the
+      // same reason — accounts are born in the booking flow — but it has to be
+      // checked here explicitly: the `email.verificationRequest` guard below
+      // waves every non-email provider straight through.
+      //
+      // Refusing here also stops the account being created at all: Auth.js runs
+      // this callback before it hands the profile to the adapter, so a rejection
+      // never reaches `createUser` (which would throw) or `linkAccount`.
+      if (account?.provider === "auth0") {
+        // `email_verified` is what makes the account linking below it safe. An
+        // Auth0 tenant that let someone sign up with an unverified address
+        // could otherwise claim any PBH account by typing its email.
+        if (profile?.email_verified !== true) {
+          return false;
+        }
+        const address = profile.email ?? user.email;
+        if (!address) {
+          return false;
+        }
+        return (await findAuthUserByEmail(address)) !== null;
+      }
+
       if (!email?.verificationRequest) {
         return true;
       }
@@ -253,7 +304,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * `login` entry for the programmatic path; this covers magic-link sign-ins,
      * which otherwise produced only a `magic_link_sent` and no access record.
      */
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       if (!user.id) {
         return;
       }
@@ -261,7 +312,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         await writeAuditLog({
           eventType: "login",
           userId: user.id,
-          metadata: { method: "magic-link" },
+          metadata: { method: account?.provider ?? "magic-link" },
         });
       } catch (err) {
         console.error("[auth] audit write for login failed:", err);

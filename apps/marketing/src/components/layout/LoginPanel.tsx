@@ -11,6 +11,7 @@ import {
   fieldClass,
 } from "@pbh/ui";
 import type { LoginState } from "@/app/login/actions";
+import { Auth0SignInButton } from "./Auth0SignInButton";
 
 const initialState: LoginState = { status: "idle" };
 
@@ -29,11 +30,16 @@ const initialState: LoginState = { status: "idle" };
  */
 export function LoginPanel({
   action,
+  auth0Enabled = false,
   onDone,
   className,
   ...rest
 }: {
   action: (prev: LoginState, formData: FormData) => Promise<LoginState>;
+  /** Offer "Continue with Auth0" beneath the form. Drilled from the root layout,
+   * which is where `AUTH0_ENABLED` can actually be read — see
+   * `lib/auth0-enabled.ts`. */
+  auth0Enabled?: boolean;
   /** Dismiss the panel from the confirmation screen's "Done" button. */
   onDone?: () => void;
   className?: string;
@@ -141,6 +147,20 @@ export function LoginPanel({
             </Button>
           </fieldset>
         </form>
+      )}
+
+      {/* Outside the form on purpose: this button redirects to Auth0 rather
+          than submitting anything, and the form's `fieldset` disables itself
+          while a magic link is sending — which would take this with it.
+
+          Not "or sign in another way": both doors reach the same account. The
+          magic link stays first because it is the one every existing customer
+          already has. */}
+      {auth0Enabled && state.status !== "sent" && (
+        <>
+          <p className="text-center text-body-sm text-text-secondary">or</p>
+          <Auth0SignInButton />
+        </>
       )}
     </div>
   );

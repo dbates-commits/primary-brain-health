@@ -1,7 +1,8 @@
 # Auth
 
 Passwordless magic-link sign-in, Auth.js v5 (NextAuth) with database sessions in
-Neon. Implemented in `apps/marketing/src/auth.ts` and `src/lib/auth-*.ts`; the
+Neon, plus an optional second provider — see [Auth0](#auth0), which
+authenticates but does not own the session. Implemented in `apps/marketing/src/auth.ts` and `src/lib/auth-*.ts`; the
 routes are `/login`, `/login/check-email` and `/api/auth/[...nextauth]`.
 
 Two entry points, one action. The full-page form at `/login` and the header
@@ -115,6 +116,91 @@ Two things to know when a limit fires unexpectedly:
 - **A shared egress IP is one bucket.** Everyone testing a preview from the
   same office counts against each other.
 
+## Auth0
+
+Since Sep 2026 there is a second way in: **Continue with Auth0**, alongside the
+magic link. It exists because Linus decided the **Linus Engagement App** is the
+entry point for both PBH experiences, and that app authenticates with Auth0. If
+PBH signs people in against the same Auth0 tenant, one Universal Login gets
+someone into both products — SSO — instead of two unrelated logins for one
+customer.
+
+**Auth0 authenticates. It does not own the session.** `session.strategy` stays
+`"database"`, and this is the load-bearing decision, not a detail:
+
+- `finalizeCheckoutSession` signs a customer in the moment their payment
+  verifies, by calling `createSessionForUser` (`lib/auth-session.ts`). You
+  cannot fabricate an Auth0 session server-side, so an Auth0-owned session would
+  mean bouncing a paying customer out to Universal Login mid-checkout.
+- The automatic-logoff controls below — 15-minute idle, 8-hour absolute — are
+  enforced against `sessions.created_at` by our own `getSessionAndUser`
+  override. Auth0's session settings do not express the absolute cap the same
+  way, and loosening a compliance-signed-off control as a side effect of adding
+  a provider is not a trade anyone agreed to.
+
+So Auth0 is the authentication event; the `sessions` row, the cookie and the
+timeouts are all still ours. SSO into the Engagement App still works, because
+Universal Login sets Auth0's *own* SSO cookie on the tenant domain on the way
+through.
+
+**Still login-only.** The `signIn` callback gates the Auth0 path exactly as it
+gates the magic link: an address with no PBH account is refused, so accounts are
+still born only in the booking flow. Two details make that safe:
+
+- The callback runs *before* Auth.js hands the profile to the adapter, so a
+  rejection never reaches `createUser` (which throws) or `linkAccount`.
+- `allowDangerousEmailAccountLinking` is on for Auth0, which is what attaches an
+  Auth0 identity to the `users` row the booking flow already created rather than
+  minting a second user for the same person. It is only sound because the
+  callback refuses any profile without `email_verified` — a tenant that let
+  someone sign up with an unverified address could otherwise claim any PBH
+  account by typing its email.
+
+**Configuration is tenant-agnostic on purpose.** `AUTH0_ISSUER`,
+`AUTH0_CLIENT_ID` and `AUTH0_CLIENT_SECRET`; leave all three unset and the
+provider is not registered, the button does not render, and nothing about
+sign-in changes. Registered conditionally rather than with empty-string
+fallbacks because an OAuth provider missing its issuer fails Auth.js's
+`assertConfig` on every request — it would take the magic link down with it.
+Note these are **not** the `LINUS_*` variables, which are machine-to-machine
+credentials for the Linus Public API that happens to sit behind Auth0 too.
+
+`AUTH0_ENABLED` lives in `lib/auth0-enabled.ts` rather than `auth.ts` so the
+root layout can read it without pulling NextAuth into every page's module graph;
+it is drilled to the header's sign-in panel as a prop, because it is a
+server-side check and the panel is a client component.
+
+### What is not decided
+
+- **Which tenant** holds PBH's users in production — Linus's (`prod-linus-us` /
+  `stgint-linus-us`) or a PBH-owned one. If theirs, Linus must provision our
+  application and callback URLs; if ours, they must configure federation between
+  the two tenants or there is no SSO at all. Nothing in the code assumes an
+  answer.
+- **What the Engagement App expects** on arrival — a plain URL once the user has
+  an Auth0 session, or a specific route. That is what would turn the `/welcome`
+  CTA back into a real hand-off; today it is still a `#`.
+- **A BAA.** Putting PBH customer identity in Auth0 needs one, and it is an
+  Enterprise-tier item — the same objection that ruled out Clerk below. If the
+  tenant is Linus's, their BAA may cover it; that needs confirming in writing.
+
+### Before Auth0 becomes the only door
+
+The intent is for Auth0 to replace the magic link, but that is not this change,
+and it is not a deletion. Two things in this document stop applying the moment
+Universal Login becomes the door:
+
+- The **sign-in throttle** above sits in front of *our* server action and *our*
+  `/api/auth/signin/*` route. It does not sit in front of Auth0. The
+  account-enumeration bound it provides has to be re-derived from Auth0's own
+  attack protection before the magic link goes.
+- The **automatic-logoff controls** survive only because the session is still
+  ours. They would need re-stating against Auth0's session model if that ever
+  changes.
+
+Neither is a refactor decision. Both were signed off by compliance; re-opening
+them means going back to compliance.
+
 ## Why Auth.js and not Clerk
 
 Clerk is the obvious easy mode, and its BAA is Enterprise-only:
@@ -193,5 +279,6 @@ it wrong and the session is silently never found, because one half writes
 
 - **No rate limiting on `requestMagicLink`** — an unauthenticated action that
   emails any registered address. Tracked on `pbh-gzv`.
-- **No MFA, no social login, no account-deletion flow.** All Phase 2+, none in
-  the current estimate.
+- **No MFA and no account-deletion flow.** Phase 2+, not in the current
+  estimate. Social login is no longer on this list — whatever connections the
+  Auth0 tenant enables come through the provider above.

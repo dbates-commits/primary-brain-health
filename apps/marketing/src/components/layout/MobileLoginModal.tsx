@@ -16,6 +16,10 @@ interface MobileLoginModalProps {
   /** Dismiss the whole stack — this and the drawer. */
   onClose: () => void;
   action: (prev: LoginState, formData: FormData) => Promise<LoginState>;
+  /** Whether to offer "Continue with Auth0" in the sign-in panel. Read from the
+   * environment in the root layout — `AUTH0_ENABLED` is server-side only — and
+   * drilled down from there. */
+  auth0Enabled?: boolean;
 }
 
 /**
@@ -41,6 +45,7 @@ export function MobileLoginModal({
   onBack,
   onClose,
   action,
+  auth0Enabled = false,
 }: MobileLoginModalProps) {
   const { mounted, shown } = usePopoverTransition(open);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -119,6 +124,7 @@ export function MobileLoginModal({
         )}
       >
         <LoginPanel
+          auth0Enabled={auth0Enabled}
           action={action}
           onDone={onClose}
           className="gap-4 p-5 shadow-card"

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Button, Heading, Label, fieldClass } from "@pbh/ui";
+import { Auth0SignInButton } from "@/components/layout/Auth0SignInButton";
 import { requestMagicLink, type LoginState } from "./actions";
 
 const initialState: LoginState = { status: "idle" };
@@ -18,7 +19,15 @@ const initialState: LoginState = { status: "idle" };
  * here with `?email=…` after they've already paid + enrolled, so they only need
  * to confirm to get their sign-in link.
  */
-export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
+export function LoginForm({
+  initialEmail = "",
+  auth0Enabled = false,
+}: {
+  initialEmail?: string;
+  /** Offer "Continue with Auth0" below the form. Passed by the page, which is a
+   * Server Component and so can read `AUTH0_ENABLED`. */
+  auth0Enabled?: boolean;
+}) {
   const [state, action, pending] = useActionState(
     requestMagicLink,
     initialState,
@@ -78,6 +87,16 @@ export function LoginForm({ initialEmail = "" }: { initialEmail?: string }) {
           </Button>
         </fieldset>
       </form>
+
+      {/* Outside the form: this redirects to Auth0's Universal Login rather
+          than submitting, and the fieldset above disables itself while a magic
+          link is sending. Both doors reach the same account. */}
+      {auth0Enabled && (
+        <div className="flex flex-col gap-4">
+          <p className="text-center text-body-sm text-text-secondary">or</p>
+          <Auth0SignInButton />
+        </div>
+      )}
     </div>
   );
 }
