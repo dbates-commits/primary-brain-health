@@ -26,7 +26,7 @@ type AdapterAccountType = "oauth" | "oidc" | "email" | "webauthn";
  *    JS property keys stay exactly as the adapter expects (`sessionToken`,
  *    `providerAccountId`, …), which is what the adapter references.
  *
- * `accounts` exists for future OAuth providers — the magic-link (email) flow
+ * `accounts` holds the Auth0 identity linked to each user — the email flow
  * never writes it. `sessions` backs the database session strategy (revocable,
  * see auth.ts). `verificationTokens` holds single-use magic-link tokens.
  */

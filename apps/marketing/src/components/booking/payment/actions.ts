@@ -59,7 +59,7 @@ export async function createAssessmentCheckoutSession(
  *
  * The sign-in used to need a signed token handed to a second app on another
  * origin; with one app it is just a cookie we set here, so a customer who comes
- * back later reaches `/welcome` without asking for a magic link.
+ * back later reaches `/welcome` without signing in again.
  *
  * A `success` state sends the customer on to `/welcome`.
  */

@@ -16,15 +16,15 @@ export const dynamic = "force-dynamic";
 /**
  * The screen after payment: the customer picks how to begin (Figma 1988:7030).
  * The booking modal sends them straight here once payment succeeds, and it is
- * also where a returning customer lands after a magic-link sign-in.
+ * also where a returning customer lands after signing in through Auth0.
  *
- * Identity comes from either an Auth.js session (the magic-link path) or the
+ * Identity comes from either an Auth.js session (the sign-in path) or the
  * booking cookie — the latter covers a customer whose post-payment session mint
  * failed, or who came back within the cookie's 2h life.
  *
  * **Whichever proves identity, the payment is what grants access.** Accounts
  * exist from signup, before anyone pays, so a session alone means nothing here:
- * an abandoned signup can request a magic link like anybody else, and without
+ * an abandoned signup can sign in through Auth0 like anybody else, and without
  * this check they would land on "Your payment is confirmed" and a CTA into the
  * Engagement App having never paid.
  *

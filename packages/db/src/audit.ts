@@ -14,7 +14,7 @@ export type AuditEventType =
   | "payment_refunded"
   | "token_issued"
   | "email_sent"
-  // Authentication / session lifecycle (magic-link login, programmatic
+  // Authentication / session lifecycle (Auth0 login, programmatic
   // post-payment login, sign-out) — access events a HIPAA audit expects.
   | "magic_link_sent"
   | "login"

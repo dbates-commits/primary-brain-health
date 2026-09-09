@@ -3,7 +3,7 @@
  *
  * That module is `"use server"` and pulls in `next/headers` plus
  * `@pbh/booking/server` (database, Stripe, Resend), so no story can import it.
- * `EmailConfirmationStep.stories.tsx` injects `resendConfirmationAction` from
+ * `EmailConfirmationStep.stories.tsx` injects `verifyEmailAction` from
  * here as a prop; `.storybook/main.ts` also aliases the real module to this
  * file, which catches anything that reaches it transitively — a story rendering
  * the whole `BookingStepFlow`, say. Storybook builds only; the app is
@@ -15,12 +15,14 @@
 
 import type { ConsentState, DetailsState, SignupState } from "@pbh/booking";
 
-/** Matches the real action's shape. Resolves after a beat so `pending` shows. */
-export async function resendConfirmationAction(): Promise<{ ok: true }> {
+/**
+ * Matches the real action's shape. Resolves after a beat so `pending` shows —
+ * the real one never resolves at all, because `signIn` redirects by throwing.
+ */
+export async function verifyEmailAction(): Promise<void> {
   await new Promise((resolve) => {
     setTimeout(resolve, 600);
   });
-  return { ok: true };
 }
 
 // The remaining exports exist so anything else reaching for this module in a

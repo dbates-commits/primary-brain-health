@@ -8,7 +8,6 @@ import {
   hashIp,
   readConsentStamp,
   recordConsentCore,
-  resendBookingConfirmation,
   resolveBookingResumeState,
   type BookingResumeState,
 } from "@pbh/booking/server";
@@ -20,6 +19,8 @@ import {
   type DetailsState,
   type SignupState,
 } from "@pbh/booking";
+import { signIn } from "@/auth";
+import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
 import { resolveActorId } from "@/lib/booking-actor";
 import { getProfileValues } from "@/lib/profile";
 
@@ -43,14 +44,77 @@ const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
 
+/**
+ * Create the partial account, then hand the customer to Auth0 to prove the
+ * address they just typed.
+ *
+ * Auth0 emails them a code; entering it stamps `users.emailVerified` (see the
+ * `signIn` event in `auth.ts`) and, just as importantly, leaves them holding an
+ * **Auth0 session** as well as a PBH one. That is what makes the Engagement App
+ * link on `/welcome` a plain link later instead of a second login — the whole
+ * reason the flow goes through Auth0 at this point rather than at checkout.
+ *
+ * It replaces the one-time confirmation link we used to email. Both prove the
+ * same thing; only one of them also produces the Auth0 session.
+ *
+ * `signIn` redirects by throwing, so nothing after it runs on the happy path.
+ * `login_hint` pre-fills the address on Auth0's screen, so the customer doesn't
+ * type it twice.
+ */
 export async function signupAction(
   _prev: SignupState,
   formData: FormData,
 ): Promise<SignupState> {
-  return createAccountCore(formData, {
+  const result = await createAccountCore(formData, {
     source: "marketing-booking",
     cookies: await cookies(),
   });
+
+  if (result.status !== "success") {
+    return result;
+  }
+
+  // Signup now depends on Auth0 being configured — it is the only thing that
+  // can verify the address. Failing loudly here beats stranding a customer on a
+  // step with no way forward, which is what silently skipping it would do.
+  if (!AUTH0_ENABLED) {
+    console.error("[booking] signup reached with AUTH0_* unset — cannot verify");
+    return {
+      status: "error",
+      message: "Sign-up is unavailable right now. Please try again shortly.",
+      values: {
+        firstName: result.firstName,
+        lastName: result.lastName,
+        email: result.email,
+      },
+    };
+  }
+
+  await signIn(
+    "auth0",
+    // Back to the home page with the marker the booking modal reopens on; the
+    // resume state machine reads `emailVerified` and lands them on Details.
+    { redirectTo: "/?booking=resume#booking" },
+    {
+      login_hint: result.email,
+      // **Force re-authentication. This is not a nicety.**
+      //
+      // Auth0 keeps an SSO cookie on its own domain, and signing out of PBH
+      // does not clear it (see `auth0LogoutUrl`). Without `prompt=login`, a
+      // brand-new customer signing up on a browser where somebody else used
+      // Auth0 would be silently authenticated as *that* person: the booking
+      // cookie would point at the row we just inserted while the Auth.js
+      // session belonged to someone else, so `markEmailVerified` would stamp
+      // the wrong user, mail them a second welcome, and leave the new customer
+      // stuck on the confirm step with no way forward.
+      //
+      // The address is already in `login_hint`, so the cost is one screen the
+      // customer was going to see anyway.
+      prompt: "login",
+    },
+  );
+
+  return result;
 }
 
 export async function detailsAction(
@@ -159,16 +223,30 @@ export async function getBookingDetailsValues(): Promise<DetailsInitialValues | 
 }
 
 /**
- * Re-send the confirmation email to whoever is acting.
+ * Put a customer whose address is still unproven back through Auth0.
  *
- * Takes no argument: the recipient comes from the cookie or the session, so this
- * can't be pointed at another customer's inbox. Throttled inside
- * `resendBookingConfirmation`.
+ * The counterpart to the redirect at the end of `signupAction`, for the person
+ * who abandoned at the Auth0 screen and came back on their booking cookie. The
+ * recipient comes from that cookie, never from the client, so this cannot be
+ * aimed at another customer's inbox.
+ *
+ * Returns nothing: on success `signIn` redirects by throwing.
  */
-export async function resendConfirmationAction(): Promise<{ ok: true }> {
+export async function verifyEmailAction(): Promise<void> {
   const userId = await resolveActorId();
-  if (!userId) {
-    return { ok: true };
+  if (!userId || !AUTH0_ENABLED) {
+    return;
   }
-  return resendBookingConfirmation(userId);
+  const profile = await getProfileValues(userId);
+  await signIn(
+    "auth0",
+    { redirectTo: "/?booking=resume#booking" },
+    {
+      ...(profile?.email ? { login_hint: profile.email } : {}),
+      // Same reason as `signupAction`: this booking belongs to whoever holds
+      // the cookie, and a stale Auth0 session would verify a different person's
+      // address against it.
+      prompt: "login",
+    },
+  );
 }

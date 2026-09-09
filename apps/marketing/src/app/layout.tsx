@@ -3,6 +3,7 @@ import { Gilda_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { Header } from "@/components/layout/Header";
+import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollRevealInit } from "@/components/ScrollRevealInit";
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -100,7 +101,7 @@ export default function RootLayout({
             pages inside stay server-rendered — `children` is passed through a
             client component as a slot, not rendered by it. */}
         <AuthProvider>
-          <Header />
+          <Header auth0Enabled={AUTH0_ENABLED} />
           <main className="pt-20">{children}</main>
         </AuthProvider>
         <Footer />
