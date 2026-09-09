@@ -14,6 +14,7 @@ import {
   writeAuditLog,
 } from "@pbh/db";
 import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
+import { auth0SignInAddress } from "@/lib/auth0-gate";
 import { sendMagicLinkEmail } from "@/lib/auth-email";
 import { findAuthUserByEmail } from "@/lib/auth-user";
 
@@ -241,13 +242,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // this callback before it hands the profile to the adapter, so a rejection
       // never reaches `createUser` (which would throw) or `linkAccount`.
       if (account?.provider === "auth0") {
-        // `email_verified` is what makes the account linking below it safe. An
-        // Auth0 tenant that let someone sign up with an unverified address
-        // could otherwise claim any PBH account by typing its email.
-        if (profile?.email_verified !== true) {
-          return false;
-        }
-        const address = profile.email ?? user.email;
+        // Refuses anything without a verified address — the check that makes
+        // `allowDangerousEmailAccountLinking` safe. Tested in
+        // `lib/auth0-gate.node.test.ts`.
+        const address = auth0SignInAddress(profile, user.email);
         if (!address) {
           return false;
         }
