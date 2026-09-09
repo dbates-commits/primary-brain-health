@@ -10,11 +10,6 @@ const BOOKING_ACTIONS_MOCK = resolve(
   here,
   '../src/stories/booking/booking-actions.mock.ts',
 );
-const LOGIN_ACTIONS = resolve(here, '../src/app/login/actions');
-const LOGIN_ACTIONS_MOCK = resolve(
-  here,
-  '../src/stories/layout/login-actions.mock.ts',
-);
 const SIGN_OUT = resolve(here, '../src/app/welcome/sign-out');
 const SIGN_OUT_MOCK = resolve(here, '../src/stories/layout/sign-out.mock.ts');
 
@@ -73,9 +68,6 @@ const config: StorybookConfig = {
         // builds only; the app is untouched.
         if (target === BOOKING_ACTIONS) {
           return BOOKING_ACTIONS_MOCK;
-        }
-        if (target === LOGIN_ACTIONS) {
-          return LOGIN_ACTIONS_MOCK;
         }
         if (target === SIGN_OUT) {
           return SIGN_OUT_MOCK;
