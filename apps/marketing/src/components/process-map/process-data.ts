@@ -588,7 +588,7 @@ export const EDGES: ProcessEdge[] = [
   { from: "paid", to: "declined", label: "no" },
   // Stripe's own callback, running beside the browser's path rather than after
   // it — either may win, and both writes are idempotent.
-  { from: "paid", to: "webhook", label: "and, server to server", kind: "async" },
+  { from: "paid", to: "webhook", label: "in parallel", kind: "async" },
   { from: "webhook", to: "linus_register" },
   { from: "linus_register", to: "linus_enroll" },
   { from: "linus_enroll", to: "assessments_ready" },

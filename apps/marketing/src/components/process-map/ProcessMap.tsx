@@ -112,7 +112,7 @@ export function ProcessMap() {
         },
         labelStyle: { fill: "var(--color-text-secondary)", fontSize: 10 },
         labelBgStyle: { fill: "var(--color-background-default)" },
-        labelBgPadding: [4, 2] as [number, number],
+        labelBgPadding: [5, 3] as [number, number],
         labelBgBorderRadius: 4,
       };
     });

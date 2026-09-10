@@ -30,8 +30,13 @@ export function EventNode({ data, selected }: NodeProps<EventNodeType>) {
           selected && "border-brand-default ring-2 ring-brand-pale",
         )}
       />
-      <p className="absolute top-full left-1/2 mt-1 w-36 -translate-x-1/2 text-center text-[10px] leading-tight text-text-secondary">
-        {node.name}
+      {/* The name sits over whatever line runs beneath it, so it carries the
+          background with it. `box-decoration-clone` keeps the padding on every
+          line of a name that wraps. */}
+      <p className="absolute top-full left-1/2 mt-1 w-36 -translate-x-1/2 text-center text-[10px] leading-tight">
+        <span className="box-decoration-clone bg-background-default px-1 py-0.5 text-text-secondary">
+          {node.name}
+        </span>
       </p>
       {node.sends.length > 0 ? (
         <span className="absolute top-full left-1/2 mt-6 block -translate-x-1/2">

@@ -20,14 +20,16 @@ export function TaskNode({ data, selected }: NodeProps<TaskNodeType>) {
   return (
     <div
       className={cn(
-        "group relative flex flex-col justify-center rounded-xl border bg-background-default px-3 text-center transition-shadow",
+        "group relative flex flex-col items-center justify-center gap-1 rounded-xl border bg-background-default px-3 text-center transition-shadow",
         STATE_BORDER[node.state],
         selected && "border-brand-default shadow-md ring-2 ring-brand-pale",
       )}
       style={{ width: size.width, height: size.height }}
     >
       <NodeHandles />
-      <Icon weight="regular" className="absolute top-2 left-2 size-3.5 text-text-tertiary" />
+      {/* In the flow above the name rather than pinned to the corner: a
+          two-line name grew into the corner and sat against the glyph. */}
+      <Icon weight="regular" className="size-3.5 shrink-0 text-text-tertiary" />
       {node.plannedNote ? (
         <span className="absolute top-1.5 right-2 text-[10px] text-aqua-default">◇</span>
       ) : null}

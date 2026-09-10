@@ -32,8 +32,12 @@ export function GatewayNode({ data, selected }: NodeProps<GatewayNodeType>) {
       <span className="pointer-events-none absolute inset-0 grid place-items-center text-sm text-text-tertiary">
         {glyph}
       </span>
-      <p className="absolute top-full left-1/2 mt-2 w-40 -translate-x-1/2 text-center text-[10px] leading-tight text-text-secondary">
-        {node.name}
+      {/* Carries its own background: the question sits directly over the line
+          leaving the gateway. */}
+      <p className="absolute top-full left-1/2 mt-2 w-40 -translate-x-1/2 text-center text-[10px] leading-tight">
+        <span className="box-decoration-clone bg-background-default px-1 py-0.5 text-text-secondary">
+          {node.name}
+        </span>
       </p>
       <NodeHoverCard node={node} />
     </div>

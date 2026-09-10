@@ -31,7 +31,7 @@ export function RoutedEdge({
       {label ? (
         <EdgeLabelRenderer>
           <div
-            className="nodrag nopan pointer-events-none absolute top-0 left-0 rounded bg-background-default px-1 text-[10px] text-text-secondary"
+            className="nodrag nopan pointer-events-none absolute top-0 left-0 rounded bg-background-default px-1.5 py-0.5 text-[10px] text-text-secondary"
             style={{
               transform: `translate(-50%, -50%) translate(${(sourceX + targetX) / 2}px, ${viaY}px)`,
             }}
