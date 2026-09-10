@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { InternalTabs } from "@/components/internal/InternalTabs";
 import { MapLegend, MapStats, ProcessMap } from "@/components/process-map";
 
 // Evaluate the gate per request (and skip build-time prerendering entirely).
@@ -37,6 +38,9 @@ export default function CustomerJourneyPage() {
           Landing page → booking → payment → what happens after. Click any step for what it does,
           which vendors it calls, what it writes down, who owns it and how it fails.
         </p>
+        <div className="mt-2">
+          <InternalTabs active="/internal/flow" />
+        </div>
       </header>
       <MapStats />
       <ProcessMap />
