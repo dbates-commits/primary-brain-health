@@ -1,41 +1,47 @@
-import {
-  DIAGRAM_EYEBROW,
-  DIAGRAM_LEDE,
-  DIAGRAM_LEGEND,
-  DIAGRAM_TITLE,
-  SequenceFlow,
-} from "@/components/flow";
+import { notFound } from "next/navigation";
+
+import { MapLegend, MapStats, ProcessMap } from "@/components/process-map";
+
+// Evaluate the gate per request (and skip build-time prerendering entirely).
+export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Booking flow — Primary Brain Health",
+  title: "Customer journey — Primary Brain Health",
   robots: { index: false, follow: false },
 };
 
 /**
- * Stakeholder view of the booking flow as a sequence diagram, mirroring the
- * Figma board "PBH — Overview". Internal, like the email previews next door:
- * it describes the flow, it is not part of it.
+ * Stakeholder view of the customer journey as a process map.
+ *
+ * Internal, like the email previews next door: `/internal/` is disallowed in
+ * `robots.ts`, this page sets its own noindex, and production hides it unless
+ * PROCESS_MAP_ENABLED=1 is set. It describes the flow; it is not part of it.
  */
-export default function BookingFlowDiagramPage() {
+export default function CustomerJourneyPage() {
+  const hidden = process.env.VERCEL_ENV === "production" && process.env.PROCESS_MAP_ENABLED !== "1";
+  if (hidden) {
+    notFound();
+  }
+
   return (
-    // 5rem is the site header above this page — take it off so the canvas
-    // fills the rest of the viewport instead of pushing the page into a scroll.
-    <div className="flex h-[calc(100dvh-5rem)] flex-col bg-background-warm">
-      <header className="shrink-0 px-8 pt-8 pb-5">
+    // Fixed and full-bleed: this screen is a canvas, and the site header and
+    // footer around it are chrome for customers, not for a diagram. Covering
+    // them from the page keeps the root layout — and every other route — alone.
+    <div className="fixed inset-0 z-50 flex flex-col gap-3 overflow-hidden bg-background-warm px-6 py-5">
+      <header className="shrink-0">
         <p className="text-[11px] font-semibold tracking-widest text-brand-default uppercase">
-          {DIAGRAM_EYEBROW}
+          Primary Brain Health · staging, as it runs today
         </p>
-        <h1 className="mt-2 font-headline text-3xl text-text-heading">
-          {DIAGRAM_TITLE}
-        </h1>
-        <p className="mt-2 max-w-4xl text-body-sm text-text-default">
-          {DIAGRAM_LEDE}{" "}
-          <span className="text-aqua-default">{DIAGRAM_LEGEND}</span>
+        <h1 className="mt-1 font-headline text-3xl text-text-heading">Customer journey</h1>
+        <p className="mt-1 max-w-4xl text-body-sm text-text-default">
+          Landing page → booking → payment → what happens after. Click any step for what it does,
+          which vendors it calls, what it writes down, who owns it and how it fails. Filter to one
+          vendor, or to what actually runs today.
         </p>
       </header>
-      <div className="min-h-0 flex-1 border-t border-border-default">
-        <SequenceFlow />
-      </div>
+      <MapStats />
+      <ProcessMap />
+      <MapLegend />
     </div>
   );
 }
