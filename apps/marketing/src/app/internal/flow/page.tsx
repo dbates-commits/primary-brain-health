@@ -35,8 +35,7 @@ export default function CustomerJourneyPage() {
         <h1 className="mt-1 font-headline text-3xl text-text-heading">Customer journey</h1>
         <p className="mt-1 max-w-4xl text-body-sm text-text-default">
           Landing page → booking → payment → what happens after. Click any step for what it does,
-          which vendors it calls, what it writes down, who owns it and how it fails. Filter to one
-          vendor, or to what actually runs today.
+          which vendors it calls, what it writes down, who owns it and how it fails.
         </p>
       </header>
       <MapStats />

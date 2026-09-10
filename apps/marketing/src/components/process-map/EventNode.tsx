@@ -1,6 +1,7 @@
 import type { Node, NodeProps } from "@xyflow/react";
 import { cn } from "@pbh/ui/utils";
 
+import { EmailBadge } from "./EmailBadge";
 import { NODE_SIZE } from "./map-layout";
 import { NodeHandles } from "./NodeHandles";
 import { NodeHoverCard } from "./NodeHoverCard";
@@ -32,6 +33,11 @@ export function EventNode({ data, selected }: NodeProps<EventNodeType>) {
       <p className="absolute top-full left-1/2 mt-1 w-36 -translate-x-1/2 text-center text-[10px] leading-tight text-text-secondary">
         {node.name}
       </p>
+      {node.sends.length > 0 ? (
+        <span className="absolute top-full left-1/2 mt-6 block -translate-x-1/2">
+          <EmailBadge sends={node.sends} />
+        </span>
+      ) : null}
       <NodeHoverCard node={node} />
     </div>
   );

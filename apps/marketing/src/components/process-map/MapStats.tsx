@@ -4,34 +4,37 @@ import { isPlanned } from "./process-model";
 const steps = NODES;
 
 const STATS: { value: number; label: string }[] = [
-  { value: steps.length, label: "steps in the journey" },
+  { value: steps.length, label: "steps" },
   {
     value: steps.filter((node) => node.systems.length > 0).length,
-    label: "steps that call a vendor",
+    label: "call a vendor",
+  },
+  {
+    value: steps.filter((node) => node.sends.length > 0).length,
+    label: "send an email",
   },
   {
     value: steps.filter((node) => node.state === "blocked").length,
-    label: "blocked, with nothing behind them",
+    label: "blocked",
   },
-  {
-    value: steps.filter(isPlanned).length,
-    label: "carrying planned work",
-  },
+  { value: steps.filter(isPlanned).length, label: "carry planned work" },
 ];
 
-/** The counts above the map — computed from the model, never typed in. */
+/**
+ * The counts, as one line rather than a row of cards — on this screen the
+ * canvas is what deserves the vertical space. Computed from the model, never
+ * typed in.
+ */
 export function MapStats() {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      {STATS.map((stat) => (
-        <div
-          key={stat.label}
-          className="rounded-xl border border-border-default bg-background-default px-4 py-3"
-        >
-          <p className="text-2xl font-semibold text-text-heading tabular-nums">{stat.value}</p>
-          <p className="text-[12px] text-text-secondary">{stat.label}</p>
-        </div>
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-text-secondary">
+      {STATS.map((stat, index) => (
+        <span key={stat.label} className="flex items-center gap-1.5">
+          {index > 0 ? <span className="text-text-tertiary">·</span> : null}
+          <span className="font-semibold text-text-heading tabular-nums">{stat.value}</span>
+          {stat.label}
+        </span>
       ))}
-    </div>
+    </p>
   );
 }

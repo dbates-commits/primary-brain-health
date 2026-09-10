@@ -1,7 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 
 import { EDGES, LANES, MAP_WIDTH, NODES } from "./process-data";
-import type { NodeKind, ProcessNode } from "./process-model";
+import type { EdgeKind, NodeKind, ProcessNode } from "./process-model";
 
 /**
  * Turns the process model into React Flow's arrays.
@@ -71,11 +71,20 @@ export function buildNodes(): Node[] {
 /**
  * Which side an edge leaves and enters by.
  *
- * A flow runs along the lane unless it changes lane, in which case it leaves
- * from the bottom and enters by whichever side it is actually coming from —
- * entering a step from behind reads as a loop back.
+ * A flow runs along the row unless it changes row, in which case it leaves from
+ * the bottom and enters by whichever side it is actually coming from — entering
+ * a step from behind reads as a loop back. A wrap always drops from the bottom
+ * into the top, because that is the shape a reader already knows from a line of
+ * text running out of width.
  */
-function handlesFor(from: ProcessNode, to: ProcessNode) {
+function handlesFor(from: ProcessNode, to: ProcessNode, kind?: EdgeKind) {
+  if (kind === "wrap") {
+    return { source: "s-b", target: "t-t" };
+  }
+  if (kind === "loop") {
+    return { source: "s-t", target: "t-t" };
+  }
+
   const dx = to.x - from.x;
   const dy = to.y - from.y;
 
@@ -99,7 +108,8 @@ export function buildEdges(): Edge[] {
     if (!from || !to) {
       return [];
     }
-    const handles = handlesFor(from, to);
+    const handles = handlesFor(from, to, edge.kind);
+    const routed = edge.kind === "wrap" || edge.kind === "loop";
     return [
       {
         id: `flow-${edge.from}-${edge.to}`,
@@ -107,8 +117,14 @@ export function buildEdges(): Edge[] {
         target: edge.to,
         sourceHandle: handles.source,
         targetHandle: handles.target,
-        type: "smoothstep",
+        type: routed ? "routed" : "smoothstep",
+        animated: edge.kind !== undefined,
         label: edge.label,
+        data: {
+          kind: edge.kind,
+          viaY: edge.via,
+          blocked: to.state === "blocked",
+        },
       },
     ];
   });

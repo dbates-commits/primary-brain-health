@@ -58,10 +58,27 @@ export type ProcessNode = {
   y: number;
 };
 
+/**
+ * How a flow is drawn.
+ *
+ * `wrap` is the jump from the end of one lane to the start of the next, `loop`
+ * is a path back to a step already passed, and `async` is work that runs beside
+ * the customer rather than after them. All three move in dashes — each is a
+ * line the eye would otherwise try to read as the next step along.
+ */
+export type EdgeKind = "wrap" | "loop" | "async";
+
 export type ProcessEdge = {
   from: string;
   to: string;
   label?: string;
+  kind?: EdgeKind;
+  /**
+   * For a `wrap` or `loop`: the y its horizontal leg runs along. Chosen by hand
+   * in `process-data.ts` so the line travels a corridor between the bands
+   * rather than the midpoint `smoothstep` would pick, which is inside a row.
+   */
+  via?: number;
 };
 
 export type Lane = {

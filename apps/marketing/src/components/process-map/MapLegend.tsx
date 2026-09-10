@@ -1,7 +1,7 @@
 /** What each shape and each colour means. */
 export function MapLegend() {
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-border-default bg-background-default px-4 py-3 text-[12px] text-text-secondary">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-text-secondary">
       <span className="flex items-center gap-2">
         <span className="size-3.5 rounded-full border border-grey-400" />
         Start
@@ -21,6 +21,16 @@ export function MapLegend() {
       <span className="flex items-center gap-2">
         <span className="h-px w-6 bg-grey-500" />
         Flow of the journey
+      </span>
+      <span className="flex items-center gap-2">
+        <span className="h-0 w-6 border-t border-dashed border-brand-default" />
+        Continues elsewhere, loops back, or runs in parallel
+      </span>
+      <span className="flex items-center gap-2">
+        <span className="rounded-full border border-brand-default bg-brand-subtle px-1 text-[9px] text-brand-default">
+          ✉
+        </span>
+        Sends an email
       </span>
       <span className="flex items-center gap-2">
         <span className="size-2 rounded-full bg-aqua-default" />◇ Planned

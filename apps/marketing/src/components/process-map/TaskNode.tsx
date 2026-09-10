@@ -2,6 +2,7 @@ import { GearSix, User } from "@phosphor-icons/react";
 import type { Node, NodeProps } from "@xyflow/react";
 import { cn } from "@pbh/ui/utils";
 
+import { EmailBadge } from "./EmailBadge";
 import { NODE_SIZE } from "./map-layout";
 import { NodeHandles } from "./NodeHandles";
 import { NodeHoverCard } from "./NodeHoverCard";
@@ -31,6 +32,7 @@ export function TaskNode({ data, selected }: NodeProps<TaskNodeType>) {
         <span className="absolute top-1.5 right-2 text-[10px] text-aqua-default">◇</span>
       ) : null}
       <p className="text-[11.5px] leading-snug font-medium text-text-heading">{node.name}</p>
+      {node.sends.length > 0 ? <EmailBadge sends={node.sends} /> : null}
       <NodeHoverCard node={node} />
     </div>
   );
