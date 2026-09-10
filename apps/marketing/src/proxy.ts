@@ -14,12 +14,12 @@ import { UNLOCK_COOKIE, UNLOCK_PATH, tokensMatch, unlockToken } from "@/lib/inte
  * sets its own `noindex`, and the header below repeats it on every response —
  * including on production, where `next.config.ts` deliberately stops adding it.
  *
- * Runs on the Node runtime rather than the edge: nothing here needs to be
- * closer to the reader than the page it guards.
+ * A proxy always runs on the Node runtime, and declaring a `runtime` here is a
+ * build error ("Route segment config is not allowed in Proxy file") — hence
+ * only a matcher.
  */
 export const config = {
   matcher: "/internal/:path*",
-  runtime: "nodejs",
 };
 
 const NOINDEX = "noindex, nofollow, noarchive";
