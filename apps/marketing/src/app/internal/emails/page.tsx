@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { renderEmail } from "@pbh/emails";
+import { InternalTabs } from "@/components/internal/InternalTabs";
 import { EmailPreviewCard } from "./EmailPreviewCard";
 import { emailPreviews } from "./preview-registry";
 
@@ -19,8 +20,7 @@ export const metadata = {
  */
 export default async function EmailsPreviewPage() {
   const hidden =
-    process.env.VERCEL_ENV === "production" &&
-    process.env.EMAIL_PREVIEW_ENABLED !== "1";
+    process.env.VERCEL_ENV === "production" && process.env.EMAIL_PREVIEW_ENABLED !== "1";
   if (hidden) {
     notFound();
   }
@@ -33,16 +33,19 @@ export default async function EmailsPreviewPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background-warm px-4 py-10">
+    // Full-bleed, like the other internal tabs: switching between them should
+    // not make the site header appear and disappear.
+    <div className="fixed inset-0 z-50 overflow-auto bg-background-warm px-6 py-6">
       <div className="mx-auto max-w-6xl">
-        <h1 className="font-headline text-3xl text-ink-strong">
-          Email templates
-        </h1>
-        <p className="mt-2 max-w-2xl text-body-sm text-text-default">
-          Every transactional email the site sends, rendered with sample data.
-          These are live previews of the actual templates — what ships is what
-          you see here.
+        <p className="text-[11px] font-semibold tracking-widest text-brand-default uppercase">
+          Primary Brain Health · internal
         </p>
+        <h1 className="mt-1 font-headline text-3xl text-text-heading">Email templates</h1>
+        <p className="mt-1 mb-4 max-w-2xl text-body-sm text-text-default">
+          Every transactional email the site sends, rendered with sample data. These are live
+          previews of the actual templates — what ships is what you see here.
+        </p>
+        <InternalTabs active="/internal/emails" />
         <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-body-sm">
           {rendered.map((preview) => (
             <a
