@@ -36,13 +36,13 @@ export const LANES: Lane[] = [
 ];
 
 /** The column grid every step is placed on. */
-const COL = [210, 440, 670, 900, 1130, 1360, 1590];
+const COL = [210, 425, 640, 855, 1070, 1285, 1500, 1715];
 
 /** Row centres, and the corridors between the bands. */
 const ROW = { marketing: 95, booking: 265, pay1: 465, pay2: 580, after1: 735, after2: 835 };
 const VIA = { toBooking: 180, resend: 212, toPayment: 385, toAfter: 655 };
 
-export const MAP_WIDTH = 1800;
+export const MAP_WIDTH = 1880;
 export const MAP_HEIGHT = 900;
 
 export const NODES: ProcessNode[] = [
@@ -157,7 +157,8 @@ export const NODES: ProcessNode[] = [
     x: COL[1],
     y: ROW.booking,
     name: "Sends the confirmation",
-    description: "A random token, SHA-256 hashed at rest, good for 24 hours and single-use.",
+    description:
+      "A random token, SHA-256 hashed at rest, good for 24 hours and single-use. The flow stops dead here: nothing downstream is reachable until the address is proven.",
     systems: ["resend", "neon"],
     writes: ["booking_email_verifications row", "audit: email_verification_sent"],
     sends: ["confirm-email"],
@@ -171,41 +172,17 @@ export const NODES: ProcessNode[] = [
     state: "built",
   },
   {
-    id: "clicked",
-    kind: "gateway-xor",
-    lane: "booking",
-    x: COL[2],
-    y: ROW.booking,
-    name: "Clicked the link?",
-    description:
-      "The flow stops dead here. Nothing downstream is reachable until the address is proven, and the link lasts 24 hours.",
-    systems: [],
-    writes: [],
-    sends: [],
-    owner: {
-      package: "@pbh/booking",
-      file: "packages/booking/src/server/email-verification.ts",
-      team: "Platform",
-    },
-    failure: "Expired or already used → they are offered a fresh link, once a minute.",
-    state: "built",
-  },
-  {
     id: "click_link",
     kind: "user",
     lane: "booking",
-    x: COL[3],
+    x: COL[2],
     y: ROW.booking,
-    name: "Clicks the link",
+    name: "Opens the link",
     description:
-      "Possibly on another device. Burns the token, marks the address proven and renews the booking cookie. The welcome email fires here, not at signup — two emails at once buries the one they have to act on.",
-    systems: ["resend", "neon"],
-    writes: [
-      "booking_email_verifications.consumed_at",
-      "users.email_verified",
-      "audit: email_verified",
-    ],
-    sends: ["welcome"],
+      "Possibly on another device — the link is the only way past this point, and nothing downstream is reachable until it is opened.",
+    systems: [],
+    writes: [],
+    sends: [],
     owner: {
       package: "marketing",
       file: "apps/marketing/src/app/booking/confirm/route.ts",
@@ -214,10 +191,53 @@ export const NODES: ProcessNode[] = [
     state: "built",
   },
   {
-    id: "resume",
+    id: "link_valid",
+    kind: "gateway-xor",
+    lane: "booking",
+    x: COL[3],
+    y: ROW.booking,
+    name: "Link still good?",
+    description:
+      "The token is single-use and lasts 24 hours. One click is all it takes — but a link that has already been used, or has aged out, is refused rather than replayed.",
+    systems: ["neon"],
+    writes: [],
+    sends: [],
+    owner: {
+      package: "@pbh/booking",
+      file: "packages/booking/src/server/email-verification.ts",
+      team: "Platform",
+    },
+    failure: "Expired or already used → they are offered a fresh one, once a minute.",
+    state: "built",
+  },
+  {
+    id: "verified",
     kind: "service",
     lane: "booking",
     x: COL[4],
+    y: ROW.booking,
+    name: "Address proven",
+    description:
+      "Burns the token, marks the address verified and renews the booking cookie. The welcome email fires here rather than at signup — two emails at once buries the one they have to act on.",
+    systems: ["resend", "neon"],
+    writes: [
+      "booking_email_verifications.consumed_at",
+      "users.email_verified",
+      "audit: email_verified",
+    ],
+    sends: ["welcome"],
+    owner: {
+      package: "@pbh/booking",
+      file: "packages/booking/src/server/email-verification.ts",
+      team: "Platform",
+    },
+    state: "built",
+  },
+  {
+    id: "resume",
+    kind: "service",
+    lane: "booking",
+    x: COL[5],
     y: ROW.booking,
     name: "Works out where they left off",
     description:
@@ -238,7 +258,7 @@ export const NODES: ProcessNode[] = [
     id: "details",
     kind: "user",
     lane: "booking",
-    x: COL[5],
+    x: COL[6],
     y: ROW.booking,
     name: "Gives their details",
     description:
@@ -258,7 +278,7 @@ export const NODES: ProcessNode[] = [
     id: "consent",
     kind: "user",
     lane: "booking",
-    x: COL[6],
+    x: COL[7],
     y: ROW.booking,
     name: "Consents",
     description:
@@ -547,16 +567,17 @@ export const EDGES: ProcessEdge[] = [
   { from: "cta", to: "signup", label: "yes", kind: "wrap", via: VIA.toBooking },
 
   { from: "signup", to: "send_confirm" },
-  { from: "send_confirm", to: "clicked" },
-  { from: "clicked", to: "click_link", label: "yes" },
+  { from: "send_confirm", to: "click_link" },
+  { from: "click_link", to: "link_valid" },
+  { from: "link_valid", to: "verified", label: "yes" },
   {
-    from: "clicked",
+    from: "link_valid",
     to: "send_confirm",
     label: "no · another link, once a minute",
     kind: "loop",
     via: VIA.resend,
   },
-  { from: "click_link", to: "resume" },
+  { from: "verified", to: "resume" },
   { from: "resume", to: "details" },
   { from: "details", to: "consent" },
   { from: "consent", to: "checkout", kind: "wrap", via: VIA.toPayment },
