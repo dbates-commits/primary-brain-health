@@ -16,10 +16,12 @@ import type { EdgeKind, NodeKind, ProcessNode } from "./process-model";
 export const NODE_SIZE: Record<NodeKind, { width: number; height: number }> = {
   start: { width: 34, height: 34 },
   end: { width: 34, height: 34 },
-  user: { width: 152, height: 62 },
-  service: { width: 152, height: 62 },
-  "gateway-xor": { width: 52, height: 52 },
-  "gateway-and": { width: 52, height: 52 },
+  user: { width: 152, height: 72 },
+  service: { width: 152, height: 72 },
+  // 74 so the 52px square inside can rotate: its diagonal is 73.5, and a box
+  // the size of the square's side clips the two points off it.
+  "gateway-xor": { width: 74, height: 74 },
+  "gateway-and": { width: 74, height: 74 },
 };
 
 /** The gutter on the left of each band that holds the rotated lane label. */
