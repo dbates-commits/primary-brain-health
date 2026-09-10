@@ -21,6 +21,9 @@ export function TaskNode({ data, selected }: NodeProps<TaskNodeType>) {
     <div
       className={cn(
         "group relative flex flex-col items-center justify-center gap-1 rounded-xl border bg-background-default px-3 text-center transition-shadow",
+        // The email pill straddles the bottom border, so a step that sends one
+        // lifts its name clear of it.
+        node.sends.length > 0 && "pb-3.5",
         STATE_BORDER[node.state],
         selected && "border-brand-default shadow-md ring-2 ring-brand-pale",
       )}
