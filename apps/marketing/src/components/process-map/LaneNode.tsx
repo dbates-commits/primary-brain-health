@@ -15,10 +15,20 @@ export function LaneNode({ data }: NodeProps<LaneNodeType>) {
       style={{ width: data.width, height: data.height }}
     >
       <div
-        className="absolute inset-y-0 left-0 grid place-items-center border-r border-border-subtle"
+        className="absolute inset-y-0 left-0 border-r border-border-subtle"
         style={{ width: LANE_GUTTER }}
       >
-        <span className="-rotate-90 text-[11px] font-medium tracking-wide whitespace-nowrap text-text-secondary uppercase">
+        {/* Sized to the band's height and rotated about its own centre, rather
+            than centred by the layout: a label longer than the 56px gutter
+            overflows its box, and the browser resolves that by shifting it —
+            which is why the four names did not line up with each other. */}
+        <span
+          className="absolute top-1/2 left-1/2 block text-center text-[11px] font-medium tracking-wide whitespace-nowrap text-text-secondary uppercase"
+          style={{
+            width: data.height,
+            transform: "translate(-50%, -50%) rotate(-90deg)",
+          }}
+        >
           {data.label}
         </span>
       </div>
