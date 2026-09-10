@@ -9,11 +9,20 @@ const HIDDEN = {
   background: "transparent",
 } as const;
 
+/**
+ * How far outside the shape each handle sits.
+ *
+ * An edge begins and ends at its handle, so this is the gap between a step and
+ * the arrow leaving or arriving — without it the arrowhead is welded to the
+ * border and the two read as one object.
+ */
+const GAP = 9;
+
 const SIDES = [
-  { id: "t", position: Position.Top },
-  { id: "r", position: Position.Right },
-  { id: "b", position: Position.Bottom },
-  { id: "l", position: Position.Left },
+  { id: "t", position: Position.Top, offset: { top: -GAP } },
+  { id: "r", position: Position.Right, offset: { right: -GAP } },
+  { id: "b", position: Position.Bottom, offset: { bottom: -GAP } },
+  { id: "l", position: Position.Left, offset: { left: -GAP } },
 ];
 
 /**
@@ -34,7 +43,7 @@ export function NodeHandles() {
           type="source"
           position={side.position}
           isConnectable={false}
-          style={HIDDEN}
+          style={{ ...HIDDEN, ...side.offset }}
         />
       ))}
       {SIDES.map((side) => (
@@ -44,7 +53,7 @@ export function NodeHandles() {
           type="target"
           position={side.position}
           isConnectable={false}
-          style={HIDDEN}
+          style={{ ...HIDDEN, ...side.offset }}
         />
       ))}
     </>
