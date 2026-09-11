@@ -5,7 +5,6 @@ import { cn } from "@pbh/ui/utils";
 import { STATE_DOT } from "./node-styles";
 import { STATE_LABELS, SYSTEM_LABELS, type NodeState, type SystemId } from "./process-model";
 
-const SYSTEMS: SystemId[] = ["neon", "resend", "stripe", "linus"];
 const STATES: NodeState[] = ["built", "planned", "blocked"];
 
 export type MapFilters = {
@@ -15,6 +14,8 @@ export type MapFilters = {
 
 type MapToolbarProps = {
   filters: MapFilters;
+  /** The vendors any step actually calls, derived from the model. */
+  systems: SystemId[];
   onChange: (next: MapFilters) => void;
 };
 
@@ -30,12 +31,12 @@ function toggle<T>(list: T[], value: T): T[] {
  * "show me everything", not "show me nothing", which is what a reader opening
  * the page expects to see.
  */
-export function MapToolbar({ filters, onChange }: MapToolbarProps) {
+export function MapToolbar({ filters, systems, onChange }: MapToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] tracking-wide text-text-secondary uppercase">Touches</span>
-        {SYSTEMS.map((system) => {
+        {systems.map((system) => {
           const on = filters.systems.includes(system);
           return (
             <button

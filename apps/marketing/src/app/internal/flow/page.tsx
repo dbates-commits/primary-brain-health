@@ -1,7 +1,16 @@
 import { notFound } from "next/navigation";
 
 import { InternalTabs } from "@/components/internal/InternalTabs";
-import { MapLegend, MapStats, ProcessMap } from "@/components/process-map";
+import { internalPagesHidden } from "@/lib/internal-gate";
+import {
+  buildEdges,
+  buildNeighbours,
+  buildNodes,
+  MapLegend,
+  MapStats,
+  ProcessMap,
+  usedSystems,
+} from "@/components/process-map";
 
 // Evaluate the gate per request (and skip build-time prerendering entirely).
 export const dynamic = "force-dynamic";
@@ -16,11 +25,15 @@ export const metadata = {
  *
  * Internal, like the email previews next door: `/internal/` is disallowed in
  * `robots.ts`, this page sets its own noindex, and production hides it unless
- * PROCESS_MAP_ENABLED=1 is set. It describes the flow; it is not part of it.
+ * INTERNAL_PAGES_ENABLED=1 is set. It describes the flow; it is not part of it.
+ *
+ * The map is built here rather than in the canvas component. Everything it says
+ * about the system would otherwise be bundled into a public `/_next/static`
+ * chunk — a URL the password never sees — instead of travelling with this page,
+ * which it guards.
  */
 export default function CustomerJourneyPage() {
-  const hidden = process.env.VERCEL_ENV === "production" && process.env.PROCESS_MAP_ENABLED !== "1";
-  if (hidden) {
+  if (internalPagesHidden()) {
     notFound();
   }
 
@@ -43,7 +56,12 @@ export default function CustomerJourneyPage() {
         </div>
       </header>
       <MapStats />
-      <ProcessMap />
+      <ProcessMap
+        nodes={buildNodes()}
+        edges={buildEdges()}
+        neighbours={buildNeighbours()}
+        systems={usedSystems()}
+      />
       <MapLegend />
     </div>
   );

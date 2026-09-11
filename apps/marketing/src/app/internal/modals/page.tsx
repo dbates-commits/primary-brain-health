@@ -19,14 +19,11 @@ export default function ModalsIndexPage() {
   return (
     <div className="min-h-screen bg-background-warm px-4 py-10">
       <div className="mx-auto max-w-4xl">
-        <h1 className="font-headline text-3xl text-ink-strong">
-          Booking modal steps
-        </h1>
+        <h1 className="font-headline text-3xl text-ink-strong">Booking modal steps</h1>
         <p className="mt-2 max-w-2xl text-body-sm text-text-default">
-          The four steps inside the booking modal, in the order a customer meets
-          them. Open one to see it exactly as it renders, and — from the Tina
-          admin — to edit its heading beside it. Everything else on these
-          screens is code-owned, and the forms are inert.
+          The four steps inside the booking modal, in the order a customer meets them. Open one to
+          see it exactly as it renders, and — from the Tina admin — to edit its heading beside it.
+          Everything else on these screens is code-owned, and the forms are inert.
         </p>
         <ul className="mt-8 flex flex-col gap-4">
           {STEP_LIST.map((item) => (
@@ -35,9 +32,7 @@ export default function ModalsIndexPage() {
                 href={`/internal/modals/${item.step}`}
                 className="block rounded-2xl bg-background-default p-6 shadow-sm transition-colors hover:bg-background-warm"
               >
-                <span className="font-headline text-subtitle text-ink-strong">
-                  {item.name}
-                </span>
+                <span className="font-headline text-subtitle text-ink-strong">{item.name}</span>
                 <span className="mt-1 block max-w-2xl text-body-sm text-text-default">
                   {item.when}
                 </span>

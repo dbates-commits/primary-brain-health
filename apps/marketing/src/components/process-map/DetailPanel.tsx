@@ -4,12 +4,13 @@ import { useEffect, useRef } from "react";
 import { X } from "@phosphor-icons/react";
 import { cn } from "@pbh/ui/utils";
 
-import { neighboursOf } from "./map-layout";
+import type { NeighbourLink } from "./map-layout";
 import { STATE_DOT } from "./node-styles";
 import { KIND_LABELS, STATE_LABELS, SYSTEM_LABELS, type ProcessNode } from "./process-model";
 
 type DetailPanelProps = {
   node: ProcessNode | null;
+  neighbours: NeighbourLink[];
   onClose: () => void;
   onSelect: (id: string) => void;
 };
@@ -18,24 +19,57 @@ type DetailPanelProps = {
  * The slide-over: everything about one step, and a way to walk to its
  * neighbours without going back to the canvas.
  */
-export function DetailPanel({ node, onClose, onSelect }: DetailPanelProps) {
+export function DetailPanel({ node, neighbours, onClose, onSelect }: DetailPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  const openedBy = useRef<HTMLElement | null>(null);
 
+  /**
+   * It claims `aria-modal`, so it has to behave like one: focus moves in, Tab
+   * stays inside, and closing puts focus back where it came from. Without the
+   * trap, Tab walked out into the canvas behind the overlay — which is exactly
+   * the content the overlay says is unavailable.
+   */
   useEffect(() => {
     if (!node) {
       return;
     }
+    openedBy.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeRef.current?.focus();
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
+        return;
+      }
+      if (event.key !== "Tab" || !panelRef.current) {
+        return;
+      }
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) {
+        return;
+      }
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !panelRef.current.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [node, onClose]);
 
-  const neighbours = node ? neighboursOf(node.id) : [];
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      openedBy.current?.focus();
+    };
+  }, [node, onClose]);
 
   return (
     <>
@@ -48,6 +82,7 @@ export function DetailPanel({ node, onClose, onSelect }: DetailPanelProps) {
         )}
       />
       <aside
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={node ? node.name : "Step detail"}
@@ -159,12 +194,12 @@ export function DetailPanel({ node, onClose, onSelect }: DetailPanelProps) {
                   <div className="mt-1 flex flex-col gap-1.5">
                     {neighbours.map((link) => (
                       <button
-                        key={`${link.direction}-${link.other.id}`}
+                        key={`${link.direction}-${link.id}`}
                         type="button"
-                        onClick={() => onSelect(link.other.id)}
+                        onClick={() => onSelect(link.id)}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border-default px-3 py-2 text-left text-body-sm text-text-default hover:bg-background-warm"
                       >
-                        <span>{link.other.name}</span>
+                        <span>{link.name}</span>
                         <span className="text-[11px] text-text-secondary">
                           {link.direction}
                           {link.label ? ` · ${link.label}` : ""}

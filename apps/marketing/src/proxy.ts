@@ -54,6 +54,9 @@ export default async function proxy(request: NextRequest) {
   }
 
   const unlock = new URL(UNLOCK_PATH, request.url);
-  unlock.searchParams.set("next", request.nextUrl.pathname);
+  // Path *and* query: `/internal/modals/[step]?variant=…` has to come back with
+  // its parameters, or the reviewer lands on a different page than they asked
+  // for.
+  unlock.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
   return withHeaders(NextResponse.redirect(unlock));
 }

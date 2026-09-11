@@ -34,8 +34,7 @@ export type Owner = {
 export type ProcessNode = {
   id: string;
   kind: NodeKind;
-  /** Absent means the partner pool below the lanes. */
-  lane?: LaneId;
+  lane: LaneId;
   name: string;
   description: string;
   systems: SystemId[];

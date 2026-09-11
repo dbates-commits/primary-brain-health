@@ -1,4 +1,7 @@
+import { notFound } from "next/navigation";
+
 import { InternalTabs } from "@/components/internal/InternalTabs";
+import { internalPagesHidden } from "@/lib/internal-gate";
 import { ServiceList } from "@/components/services";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +16,10 @@ export const metadata = {
  * written for someone who does not work in the code.
  */
 export default function ServicesPage() {
+  if (internalPagesHidden()) {
+    notFound();
+  }
+
   return (
     // Full-bleed like the journey tab next door: these pages are their own
     // thing, and the customer-facing header and footer are not part of it.

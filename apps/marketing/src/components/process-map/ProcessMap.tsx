@@ -19,8 +19,8 @@ import { LaneNode } from "./LaneNode";
 import { MapToolbar, type MapFilters } from "./MapToolbar";
 import { RoutedEdge } from "./RoutedEdge";
 import { TaskNode } from "./TaskNode";
-import { buildEdges, buildNodes, findNode } from "./map-layout";
-import { isPlanned, type ProcessNode } from "./process-model";
+import type { NeighbourLink } from "./map-layout";
+import { isPlanned, type ProcessNode, type SystemId } from "./process-model";
 
 /** Stable identities: React Flow re-renders every node if these change. */
 const NODE_TYPES = {
@@ -59,23 +59,49 @@ function matches(node: ProcessNode, filters: MapFilters): boolean {
   return bySystem && byState;
 }
 
+export type ProcessMapProps = {
+  nodes: Node[];
+  edges: Edge[];
+  neighbours: Record<string, NeighbourLink[]>;
+  systems: SystemId[];
+};
+
 /**
  * The customer journey as a swimlane process map.
+ *
+ * Takes the built arrays as props rather than building them: everything the map
+ * says about the system would otherwise be bundled into a public
+ * `/_next/static` chunk, outside the password on `/internal`. See the note in
+ * `map-layout.ts`.
  *
  * Filters **dim** rather than hide, so a reader keeps the shape of the whole
  * journey while looking at one slice of it. Nothing is draggable: the lanes
  * carry meaning, so a step moved out of one would be a lie.
  */
-export function ProcessMap() {
+export function ProcessMap({
+  nodes: baseNodes,
+  edges: baseEdges,
+  neighbours,
+  systems,
+}: ProcessMapProps) {
   const [filters, setFilters] = useState<MapFilters>(EMPTY_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const baseNodes = useMemo(() => buildNodes(), []);
-  const baseEdges = useMemo(() => buildEdges(), []);
+  /** The model behind each node, for filtering and for the panel. */
+  const models = useMemo(() => {
+    const map = new Map<string, ProcessNode>();
+    for (const node of baseNodes) {
+      const model = (node.data as { node?: ProcessNode } | undefined)?.node;
+      if (model) {
+        map.set(node.id, model);
+      }
+    }
+    return map;
+  }, [baseNodes]);
 
   const nodes = useMemo<Node[]>(() => {
     return baseNodes.map((node) => {
-      const model = findNode(node.id);
+      const model = models.get(node.id);
       if (!model) {
         return node;
       }
@@ -86,13 +112,13 @@ export function ProcessMap() {
         style: { opacity: dim ? DIM_OPACITY : 1 },
       };
     });
-  }, [baseNodes, filters, selectedId]);
+  }, [baseNodes, models, filters, selectedId]);
 
   const edges = useMemo<Edge[]>(() => {
     return baseEdges.map((edge) => {
       const data = edge.data as { kind?: string; blocked?: boolean } | undefined;
-      const from = findNode(edge.source);
-      const to = findNode(edge.target);
+      const from = models.get(edge.source);
+      const to = models.get(edge.target);
       const dim = (from ? !matches(from, filters) : false) || (to ? !matches(to, filters) : false);
       // A flow into a dead end is drawn in the dead end's colour: the reader
       // should see where the journey stops without reading a single label.
@@ -116,7 +142,7 @@ export function ProcessMap() {
         labelBgBorderRadius: 4,
       };
     });
-  }, [baseEdges, filters]);
+  }, [baseEdges, models, filters]);
 
   const onNodeClick = useCallback((_: unknown, node: Node) => {
     if (node.type === "lane") {
@@ -125,11 +151,11 @@ export function ProcessMap() {
     setSelectedId(node.id);
   }, []);
 
-  const selected = selectedId ? (findNode(selectedId) ?? null) : null;
+  const selected = selectedId ? (models.get(selectedId) ?? null) : null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <MapToolbar filters={filters} onChange={setFilters} />
+      <MapToolbar filters={filters} systems={systems} onChange={setFilters} />
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border-default bg-background-default">
         <ReactFlow
           nodes={nodes}
@@ -150,7 +176,12 @@ export function ProcessMap() {
           <Controls showInteractive={false} position="top-right" />
         </ReactFlow>
       </div>
-      <DetailPanel node={selected} onClose={() => setSelectedId(null)} onSelect={setSelectedId} />
+      <DetailPanel
+        node={selected}
+        neighbours={selected ? (neighbours[selected.id] ?? []) : []}
+        onClose={() => setSelectedId(null)}
+        onSelect={setSelectedId}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import type { Node, NodeProps } from "@xyflow/react";
-import { LANE_GUTTER } from "./map-layout";
+import { LANE_GUTTER } from "./node-sizes";
 
 export type LaneNodeType = Node<{ label: string; width: number; height: number }, "lane">;
 

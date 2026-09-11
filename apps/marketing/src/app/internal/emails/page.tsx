@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { renderEmail } from "@pbh/emails";
 import { InternalTabs } from "@/components/internal/InternalTabs";
+import { internalPagesHidden } from "@/lib/internal-gate";
 import { EmailPreviewCard } from "./EmailPreviewCard";
 import { emailPreviews } from "./preview-registry";
 
@@ -15,13 +16,11 @@ export const metadata = {
 /**
  * Stakeholder preview of every transactional email template, rendered from
  * `@pbh/emails` with the same sample data as the react-email dev preview.
- * Available on dev/preview deployments; hidden in production unless
- * EMAIL_PREVIEW_ENABLED=1 is set.
+ * Available on dev/preview deployments behind the shared password; hidden in
+ * production unless INTERNAL_PAGES_ENABLED=1 is set.
  */
 export default async function EmailsPreviewPage() {
-  const hidden =
-    process.env.VERCEL_ENV === "production" && process.env.EMAIL_PREVIEW_ENABLED !== "1";
-  if (hidden) {
+  if (internalPagesHidden()) {
     notFound();
   }
 

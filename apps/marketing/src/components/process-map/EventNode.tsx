@@ -2,7 +2,7 @@ import type { Node, NodeProps } from "@xyflow/react";
 import { cn } from "@pbh/ui/utils";
 
 import { EmailBadge } from "./EmailBadge";
-import { NODE_SIZE } from "./map-layout";
+import { NODE_SIZE } from "./node-sizes";
 import { NodeHandles } from "./NodeHandles";
 import { NodeHoverCard } from "./NodeHoverCard";
 import { STATE_BORDER } from "./node-styles";

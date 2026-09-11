@@ -30,6 +30,15 @@ describe("process map data", () => {
     }
   });
 
+  it("names a vendor on every step that calls one", () => {
+    // The filter chips are derived from this set, so a vendor that appears on a
+    // step and nowhere else still gets a chip.
+    const used = new Set(NODES.flatMap((node) => node.systems));
+    for (const system of used) {
+      expect(Object.keys(SYSTEM_LABELS)).toContain(system);
+    }
+  });
+
   it("names a real system on every call", () => {
     for (const node of NODES) {
       for (const system of node.systems) {
