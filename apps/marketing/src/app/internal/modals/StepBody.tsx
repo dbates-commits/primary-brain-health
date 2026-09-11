@@ -52,9 +52,7 @@ export function StepBody({
           // the terms that ship in code — the same fallback a customer gets.
           // An element that renders nothing would leave an empty box instead.
           terms={
-            resolveConsentTerms(copy).content ? (
-              <ConsentTerms content={copy?.terms} />
-            ) : undefined
+            resolveConsentTerms(copy).content ? <ConsentTerms content={copy?.terms} /> : undefined
           }
         />
       );

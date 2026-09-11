@@ -11,13 +11,7 @@ interface EmailPreviewCardProps {
  * One template's preview: metadata header plus the rendered email at desktop
  * and phone widths. The iframes isolate the email's own styles from the app.
  */
-export function EmailPreviewCard({
-  slug,
-  name,
-  subject,
-  trigger,
-  html,
-}: EmailPreviewCardProps) {
+export function EmailPreviewCard({ slug, name, subject, trigger, html }: EmailPreviewCardProps) {
   return (
     <section id={slug} className="scroll-mt-6">
       <div className="rounded-2xl bg-background-default p-6 shadow-sm">
