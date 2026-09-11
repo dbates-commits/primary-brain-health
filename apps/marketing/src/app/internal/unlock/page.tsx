@@ -1,3 +1,6 @@
+import { notFound } from "next/navigation";
+
+import { internalPagesHidden } from "@/lib/internal-gate";
 import { safeNext } from "@/lib/internal-unlock";
 
 import { UnlockForm } from "./UnlockForm";
@@ -18,6 +21,12 @@ export default async function UnlockPage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
+  // Gone with the pages it opens: on production, with them switched off, a
+  // prompt that accepts the password and then 404s is worse than no prompt.
+  if (internalPagesHidden()) {
+    notFound();
+  }
+
   const next = safeNext((await searchParams).next);
 
   return (
