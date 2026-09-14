@@ -23,6 +23,7 @@ export function Auth0SignInButton({
   callbackUrl = "/welcome",
   label = "Continue with Auth0",
   variant = "block",
+  forceLogin = false,
 }: {
   callbackUrl?: string;
   /** Overridden in the header, where the control is just "Login". */
@@ -33,6 +34,13 @@ export function Auth0SignInButton({
    * links in appearance and so never take the `Button` chrome.
    */
   variant?: "block" | "nav" | "nav-mobile";
+  /**
+   * Send `prompt=login`, so Auth0 asks for an address instead of silently
+   * reusing its SSO cookie. Set where the previous identity is known to be the
+   * wrong one — `/login` after a refusal. The booking flow's two server-side
+   * redirects force it for the same reason.
+   */
+  forceLogin?: boolean;
 }) {
   const [pending, setPending] = useState(false);
 
@@ -41,7 +49,11 @@ export function Auth0SignInButton({
       return;
     }
     setPending(true);
-    void signIn("auth0", { callbackUrl }).catch((err: unknown) => {
+    void signIn(
+      "auth0",
+      { callbackUrl },
+      forceLogin ? { prompt: "login" } : undefined,
+    ).catch((err: unknown) => {
       console.error("[auth] Auth0 sign-in failed to start:", err);
       setPending(false);
     });
