@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import type { Adapter } from "next-auth/adapters";
 import Auth0 from "next-auth/providers/auth0";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { after } from "next/server";
 import {
   accounts,
   db,
@@ -12,10 +13,11 @@ import {
   verificationTokens,
   writeAuditLog,
 } from "@pbh/db";
-import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
+import { AUTH0_ENABLED, AUTH0_ISSUER_URL } from "@/lib/auth0-enabled";
 import { auth0SignInAddress } from "@/lib/auth0-gate";
 import { markEmailVerified } from "@pbh/booking/server";
 import { findAuthUserByEmail } from "@/lib/auth-user";
+import { revokeSessionCookieUnless } from "@/lib/session-revoke";
 
 /**
  * Session and link lifetimes, set from PBH's security review (Bill, 2026-07-22).
@@ -34,6 +36,13 @@ export const IDLE_SESSION_MAX_SECONDS = 60 * 15;
  * `getSessionAndUser` below.
  */
 export const ABSOLUTE_SESSION_MAX_SECONDS = 60 * 60 * 8;
+
+/**
+ * How long one trip out to Auth0 may take — the life of the PKCE, state and
+ * nonce cookies. Long enough to go and read an emailed code; see `cookies`
+ * below.
+ */
+export const AUTH0_LEG_MAX_SECONDS = 60 * 30;
 
 /**
  * Auth.js (NextAuth v5) — session and identity for the app, with Auth0 as the
@@ -168,6 +177,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: IDLE_SESSION_MAX_SECONDS,
     updateAge: 0,
   },
+  cookies: {
+    // The OAuth leg's one-shot cookies, whose default is 15 minutes
+    // (`@auth/core/lib/utils/cookie.js`). That was sized for a redirect the
+    // browser makes in one go. Ours now spans the customer leaving to find a
+    // code in their inbox — often on a different device — so the default
+    // expires mid-flow and the callback fails `InvalidCheck`, stranding them
+    // with an unverified row and a spent booking.
+    //
+    // Half an hour, not longer: these bind one authorization request to one
+    // browser, and the window is how long a stolen `state` stays replayable.
+    pkceCodeVerifier: { options: { maxAge: AUTH0_LEG_MAX_SECONDS } },
+    state: { options: { maxAge: AUTH0_LEG_MAX_SECONDS } },
+    nonce: { options: { maxAge: AUTH0_LEG_MAX_SECONDS } },
+  },
   pages: {
     // No `verifyRequest`: that page existed for the magic link's "check your
     // email" state. Auth0 shows its own code screen, on its own domain.
@@ -182,7 +205,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...(AUTH0_ENABLED
       ? [
           Auth0({
-            issuer: process.env.AUTH0_ISSUER,
+            issuer: AUTH0_ISSUER_URL,
             clientId: process.env.AUTH0_CLIENT_ID,
             clientSecret: process.env.AUTH0_CLIENT_SECRET,
             // Attach an Auth0 identity to the PBH `users` row the booking flow
@@ -213,7 +236,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!address) {
         return false;
       }
-      return (await findAuthUserByEmail(address)) !== null;
+      const account = await findAuthUserByEmail(address);
+      if (!account) {
+        return false;
+      }
+
+      // Drop a session belonging to somebody else before Auth.js reads it.
+      // Left in place, an unseen Auth0 identity is linked to whoever the
+      // session cookie names rather than to the address just verified — a
+      // permanent account takeover on any shared or family browser. See
+      // `revokeSessionCookieUnless`.
+      await revokeSessionCookieUnless(account.id);
+      return true;
     },
     session({ session, user }) {
       // Return a deliberately minimal session rather than passing through what
@@ -260,32 +294,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!user.id) {
         return;
       }
-      try {
-        await writeAuditLog({
-          eventType: "login",
-          userId: user.id,
-          metadata: { method: account?.provider ?? "unknown" },
-        });
-      } catch (err) {
-        console.error("[auth] audit write for login failed:", err);
-      }
-
-      // Auth0 emailed this customer a code and they entered it, so the address
-      // is proven — which is the whole job the `/booking/confirm` link used to
-      // do at this point in the booking flow. Stamping it here is what lets
-      // `resolveBookingResumeState` move them past the confirm step.
-      //
-      // Fires on every Auth0 sign-in, not just the first; `markEmailVerified`
-      // is idempotent and only sends the welcome email on the transition.
-      // Best-effort: a failure here must not fail a sign-in that has already
-      // succeeded — it costs the customer a re-verify, not their session.
-      if (account?.provider === "auth0") {
-        try {
-          await markEmailVerified(user.id);
-        } catch (err) {
-          console.error("[auth] stamping email_verified failed:", err);
-        }
-      }
+      // `@auth/core` awaits this event before it returns the redirect that
+      // carries the session cookie, and everything below is a database round
+      // trip or an outbound email. On the money path — every new signup — that
+      // is a second of blank screen, and a slow Resend call can time the
+      // function out *after* the account row and the verification stamp are
+      // written but before the browser is given its session.
+      const userId = user.id;
+      const provider = account?.provider ?? "unknown";
+      after(async () => {
+        await recordSignIn(userId, provider);
+      });
     },
     /**
      * Audit sign-outs that go through Auth.js's own `/api/auth/signout`
@@ -293,8 +312,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * audits itself — this covers the endpoint, so neither path is silent.
      */
     async signOut(message) {
-      const userId =
-        "session" in message ? message.session?.userId : message.token?.sub;
+      const userId = "session" in message ? message.session?.userId : message.token?.sub;
       if (!userId) {
         return;
       }
@@ -306,3 +324,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+/**
+ * The audit entry and the verification stamp that follow a sign-in.
+ *
+ * Off the response path (see the `signIn` event): five serial Neon round trips
+ * and, on the first Auth0 sign-in, an outbound welcome email. Best-effort
+ * throughout — a failure here costs the customer a re-verify, never the session
+ * they have already been granted.
+ */
+async function recordSignIn(userId: string, provider: string): Promise<void> {
+  try {
+    await writeAuditLog({
+      eventType: "login",
+      userId,
+      metadata: { method: provider },
+    });
+  } catch (err) {
+    console.error("[auth] audit write for login failed:", err);
+  }
+
+  // Auth0 emailed this customer a code and they entered it, so the address
+  // is proven — which is the whole job the `/booking/confirm` link used to
+  // do at this point in the booking flow. Stamping it here is what lets
+  // `resolveBookingResumeState` move them past the confirm step.
+  //
+  // Fires on every Auth0 sign-in, not just the first; `markEmailVerified`
+  // is idempotent and only sends the welcome email on the transition.
+  // Best-effort: a failure here must not fail a sign-in that has already
+  // succeeded — it costs the customer a re-verify, not their session.
+  if (provider === "auth0") {
+    try {
+      await markEmailVerified(userId);
+    } catch (err) {
+      console.error("[auth] stamping email_verified failed:", err);
+    }
+  }
+}
