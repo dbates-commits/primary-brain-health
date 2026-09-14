@@ -23,6 +23,7 @@ export * from "./signup-core";
 export * from "./email-verified";
 export * from "./resume";
 export * from "./booking-session";
+export * from "./verify-binding";
 export * from "./details-core";
 export * from "./consent-core";
 export * from "./consent-stamp";

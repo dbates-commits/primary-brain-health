@@ -125,6 +125,33 @@ server-side check and the panel is a client component.
   Enterprise-tier item — the same objection that ruled out Clerk below. If the
   tenant is Linus's, their BAA may cover it; that needs confirming in writing.
 
+### The booking leg says which address it is for
+
+`login_hint` pre-fills the address on Universal Login; it does not fix it. Edit
+it there and you prove a different account while the booking cookie still points
+at the one you signed up with — which stays unverified, so the confirm step holds
+you there for good, with nothing on screen saying why.
+
+So `signupAction` and `verifyEmailAction` set `pbh_verify_for`, a signed,
+HttpOnly cookie naming the address that trip is supposed to prove, and the
+`signIn` callback refuses a profile that disagrees. `/login` reads the same
+cookie to say *which* address to confirm, and sends the customer back into the
+booking rather than round the sign-in again. `getBookingResumeState` drops it:
+by then the leg is over, and a binding left set would narrow the next sign-in
+from that browser.
+
+**Only those two actions issue it**, which is what keeps a plain sign-in from
+the header out of it — including the case where a customer who has already paid
+starts a booking for a family member and then signs in as themselves. It expires
+with the Auth0 leg (30 minutes) and grants nothing on its own: it can only ever
+narrow what a sign-in may do. See `packages/booking/src/server/verify-binding.ts`
+and its tests.
+
+A tenant-side half is still worth having — an Action comparing `login_hint` with
+the authenticated email, so people don't fall in by accident — but it waits on
+[which tenant we end up on](#what-is-not-decided). The cookie is what closes it,
+since `login_hint` is a query parameter anyone can edit.
+
 ### Signing out has two halves
 
 Deleting our `sessions` row ends our session. It does **not** end Auth0's — that
@@ -242,19 +269,6 @@ it wrong and the session is silently never found, because one half writes
 
 ## Known gaps
 
-- **Nothing binds the verified address to the booking.** `login_hint` pre-fills
-  the address on Auth0's screen; it does not fix it. Edit it there and you prove
-  a different account while the booking cookie still points at the unverified
-  one — the confirm step then holds you forever, since the row it reads is still
-  unverified. The happy path is to leave the pre-filled address alone, and there
-  is nothing in the flow that insists on it.
-
-  Two halves to a fix, neither taken yet: on our side a short signed cookie
-  naming the address that trip is for, refused in the `signIn` callback when it
-  disagrees (scoped to the booking leg, so a plain header sign-in is unaffected);
-  on the tenant side an Action comparing `login_hint` with the authenticated
-  email. The second is Auth0 configuration, which depends on [which tenant we
-  end up on](#what-is-not-decided). Tracked as `pbh-mtf`.
 - **The enumeration bound is unconfirmed.** Our throttle is gone with the magic
   link; Auth0's attack protection has to take its place, and nobody has verified
   it is on. See the section above — this is the one open compliance item.

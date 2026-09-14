@@ -1,5 +1,7 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Container, Heading, Section } from "@pbh/ui";
+import { readVerifyBinding, VERIFY_BINDING_COOKIE } from "@pbh/booking/server";
+import { Button, Container, Heading, Section } from "@pbh/ui";
 import { auth } from "@/auth";
 import { Auth0SignInButton } from "@/components/layout/Auth0SignInButton";
 import { AUTH0_ENABLED } from "@/lib/auth0-enabled";
@@ -44,6 +46,25 @@ export default async function LoginPage({
   const error = Array.isArray(raw) ? raw[0] : raw;
   const refused = error === "AccessDenied";
 
+  // A refusal with a verification binding still set is a different refusal: not
+  // "this address has no account" but "that is not the address your booking is
+  // for" — the customer confirmed the wrong one at Auth0. Worth saying in those
+  // words, and the way out is back into the booking rather than another
+  // sign-in. See `verify-binding.ts`.
+  const boundTo = refused
+    ? readVerifyBinding((await cookies()).get(VERIFY_BINDING_COOKIE)?.value)
+    : null;
+
+  const message = boundTo
+    ? `That isn\u2019t the email your booking was started with. Pick up your booking and we\u2019ll send a code to ${boundTo}.`
+    : !AUTH0_ENABLED
+      ? "Sign-in is unavailable right now. Please try again shortly."
+      : refused
+        ? "That email doesn\u2019t have an active Primary Brain Health account. Sign in with the address you booked with, or book a consultation to create one."
+        : error
+          ? "Sign-in didn\u2019t complete. Please try again."
+          : "We\u2019ll send a code to the email on your account.";
+
   return (
     <Section className="py-24">
       <Container size="narrow">
@@ -52,24 +73,26 @@ export default async function LoginPage({
             <Heading as="h1" size="lg" className="mb-2">
               Sign in
             </Heading>
-            <p className="text-text-default">
-              {!AUTH0_ENABLED
-                ? "Sign-in is unavailable right now. Please try again shortly."
-                : refused
-                  ? "That email doesn\u2019t have an active Primary Brain Health account. Sign in with the address you booked with, or book a consultation to create one."
-                  : error
-                    ? "Sign-in didn\u2019t complete. Please try again."
-                    : "We\u2019ll send a code to the email on your account."}
-            </p>
+            <p className="text-text-default">{message}</p>
           </div>
-          {AUTH0_ENABLED && (
-            // After a refusal, force Auth0's own login screen: its SSO cookie
-            // still names the identity we just turned away, so anything else
-            // repeats the same refusal without ever asking for an address.
-            <Auth0SignInButton
-              forceLogin={refused}
-              label={refused ? "Try a different email" : undefined}
-            />
+          {boundTo ? (
+            <Button
+              href="/?booking=resume#booking"
+              color="primary"
+              className="h-14 w-full text-body"
+            >
+              Back to my booking
+            </Button>
+          ) : (
+            AUTH0_ENABLED && (
+              // After a refusal, force Auth0's own login screen: its SSO cookie
+              // still names the identity we just turned away, so anything else
+              // repeats the same refusal without ever asking for an address.
+              <Auth0SignInButton
+                forceLogin={refused}
+                label={refused ? "Try a different email" : undefined}
+              />
+            )
           )}
         </div>
       </Container>

@@ -6,6 +6,8 @@ import {
   createAccountCore,
   getClientIp,
   hashIp,
+  issueVerifyBinding,
+  clearVerifyBinding,
   readConsentStamp,
   recordConsentCore,
   resolveBookingResumeState,
@@ -96,6 +98,11 @@ export async function signupAction(
     return result;
   }
 
+  // Say which address this trip is for. `login_hint` below only pre-fills the
+  // field; this is what the `signIn` callback checks, so verifying a different
+  // address at Auth0 is refused instead of quietly stranding the booking.
+  issueVerifyBinding(await cookies(), result.email);
+
   await signIn(
     "auth0",
     // Back to the home page with the marker the booking modal reopens on; the
@@ -180,7 +187,11 @@ export async function consentAction(
  *
  * Called from the client on mount rather than resolved in the page, so the
  * marketing home page stays statically rendered — only a customer actually
- * returning from a confirmation link pays for the round-trip.
+ * coming back into the flow pays for the round-trip.
+ *
+ * That makes it the end of the Auth0 leg, so it is also where the verification
+ * binding is dropped: the redirect it described is over, and a binding left set
+ * would narrow the next, unrelated sign-in from this browser.
  *
  * Returns null for a missing, forged, or expired cookie with no session behind
  * it, and for a user that no longer exists. The step is computed from persisted
@@ -190,6 +201,7 @@ export async function consentAction(
  * their booking cookie aged out is recognised here too.
  */
 export async function getBookingResumeState(): Promise<BookingResumeState | null> {
+  clearVerifyBinding(await cookies());
   const userId = await resolveActorId();
   if (!userId) {
     return null;
@@ -254,6 +266,10 @@ export async function verifyEmailAction(): Promise<VerifyEmailState> {
     };
   }
   const profile = await getProfileValues(userId);
+  if (profile?.email) {
+    // Same binding as `signupAction`; see there.
+    issueVerifyBinding(await cookies(), profile.email);
+  }
   await signIn(
     "auth0",
     { redirectTo: "/?booking=resume#booking" },

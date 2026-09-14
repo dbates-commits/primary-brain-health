@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import type { Adapter } from "next-auth/adapters";
 import Auth0 from "next-auth/providers/auth0";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { cookies } from "next/headers";
 import { after } from "next/server";
 import {
   accounts,
@@ -15,7 +16,12 @@ import {
 } from "@pbh/db";
 import { AUTH0_ENABLED, AUTH0_ISSUER_URL } from "@/lib/auth0-enabled";
 import { auth0SignInAddress } from "@/lib/auth0-gate";
-import { markEmailVerified } from "@pbh/booking/server";
+import {
+  markEmailVerified,
+  normalizeEmail,
+  readVerifyBinding,
+  VERIFY_BINDING_COOKIE,
+} from "@pbh/booking/server";
 import { findAuthUserByEmail } from "@/lib/auth-user";
 import { revokeSessionCookieUnless } from "@/lib/session-revoke";
 
@@ -238,6 +244,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       const account = await findAuthUserByEmail(address);
       if (!account) {
+        return false;
+      }
+
+      // A sign-in that the booking flow started has to land on the address that
+      // booking is for. `login_hint` pre-fills it and nothing more, so without
+      // this a customer who edits the field proves a different account while
+      // their own stays unverified — and the confirm step then holds them for
+      // good. Only the booking flow sets this cookie, so a sign-in from the
+      // header is unaffected. See `verify-binding.ts`.
+      const boundTo = readVerifyBinding((await cookies()).get(VERIFY_BINDING_COOKIE)?.value);
+      if (boundTo && boundTo !== normalizeEmail(address)) {
         return false;
       }
 
