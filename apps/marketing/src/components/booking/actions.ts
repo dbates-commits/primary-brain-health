@@ -43,6 +43,9 @@ import { getProfileValues } from "@/lib/profile";
 const NO_BOOKING_SESSION =
   "We couldn't find your booking. Please start again from the top.";
 
+/** What `verifyEmailAction` reports when it cannot send the customer to Auth0. */
+export type VerifyEmailState = { status: "error"; message: string };
+
 
 /**
  * Create the partial account, then hand the customer to Auth0 to prove the
@@ -65,6 +68,25 @@ export async function signupAction(
   _prev: SignupState,
   formData: FormData,
 ): Promise<SignupState> {
+  // Before the insert, not after it. Signup depends on Auth0 being configured —
+  // it is the only thing that can verify the address — and a row written here
+  // with nowhere to go is worse than a refusal: the modal never opens (the form
+  // advances on `success` alone), and the address is now taken, so every retry
+  // fails on the unique constraint and sends them to a sign-in that is equally
+  // unavailable. Refusing first leaves them able to try again.
+  if (!AUTH0_ENABLED) {
+    console.error("[booking] signup reached with AUTH0_* unset — cannot verify");
+    return {
+      status: "error",
+      message: "Sign-up is unavailable right now. Please try again shortly.",
+      values: {
+        firstName: String(formData.get("firstName") ?? ""),
+        lastName: String(formData.get("lastName") ?? ""),
+        email: String(formData.get("email") ?? ""),
+      },
+    };
+  }
+
   const result = await createAccountCore(formData, {
     source: "marketing-booking",
     cookies: await cookies(),
@@ -72,22 +94,6 @@ export async function signupAction(
 
   if (result.status !== "success") {
     return result;
-  }
-
-  // Signup now depends on Auth0 being configured — it is the only thing that
-  // can verify the address. Failing loudly here beats stranding a customer on a
-  // step with no way forward, which is what silently skipping it would do.
-  if (!AUTH0_ENABLED) {
-    console.error("[booking] signup reached with AUTH0_* unset — cannot verify");
-    return {
-      status: "error",
-      message: "Sign-up is unavailable right now. Please try again shortly.",
-      values: {
-        firstName: result.firstName,
-        lastName: result.lastName,
-        email: result.email,
-      },
-    };
   }
 
   await signIn(
@@ -230,12 +236,22 @@ export async function getBookingDetailsValues(): Promise<DetailsInitialValues | 
  * recipient comes from that cookie, never from the client, so this cannot be
  * aimed at another customer's inbox.
  *
- * Returns nothing: on success `signIn` redirects by throwing.
+ * On success `signIn` redirects by throwing, so nothing is returned. Both
+ * refusals return a message instead of resolving silently: this button is the
+ * only control on the step, and a booking cookie that aged out while the modal
+ * sat open otherwise looks exactly like a button that does nothing.
  */
-export async function verifyEmailAction(): Promise<void> {
+export async function verifyEmailAction(): Promise<VerifyEmailState> {
   const userId = await resolveActorId();
-  if (!userId || !AUTH0_ENABLED) {
-    return;
+  if (!userId) {
+    return { status: "error", message: NO_BOOKING_SESSION };
+  }
+  if (!AUTH0_ENABLED) {
+    console.error("[booking] verify reached with AUTH0_* unset — cannot verify");
+    return {
+      status: "error",
+      message: "Email confirmation is unavailable right now. Please try again shortly.",
+    };
   }
   const profile = await getProfileValues(userId);
   await signIn(
@@ -249,4 +265,7 @@ export async function verifyEmailAction(): Promise<void> {
       prompt: "login",
     },
   );
+
+  // Unreachable: `signIn` redirects by throwing. Here for the return type.
+  return { status: "error", message: NO_BOOKING_SESSION };
 }

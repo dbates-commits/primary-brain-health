@@ -15,14 +15,21 @@
 
 import type { ConsentState, DetailsState, SignupState } from "@pbh/booking";
 
+import type { VerifyEmailState } from "@/components/booking/actions";
+
 /**
  * Matches the real action's shape. Resolves after a beat so `pending` shows —
- * the real one never resolves at all, because `signIn` redirects by throwing.
+ * the real one only resolves when it *cannot* redirect, which is the error
+ * state the step renders.
  */
-export async function verifyEmailAction(): Promise<void> {
+export async function verifyEmailAction(): Promise<VerifyEmailState> {
   await new Promise((resolve) => {
     setTimeout(resolve, 600);
   });
+  return {
+    status: "error",
+    message: "We couldn't find your booking. Please start again from the top.",
+  };
 }
 
 // The remaining exports exist so anything else reaching for this module in a

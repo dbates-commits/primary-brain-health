@@ -1,8 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { StickyActions } from "@pbh/booking";
 import { Button } from "@pbh/ui";
+
+import type { VerifyEmailState } from "./actions";
 
 /**
  * Header copy for this step, exported rather than inlined at the call site so
@@ -30,13 +32,27 @@ export const CONFIRM_HEADER = { title: "Email Confirmation" } as const;
  * `verify` is injected rather than imported, like every other step's action, so
  * the preview at `/internal/modals/confirm` doesn't start a real sign-in on a
  * route that is deliberately reachable in production.
+ *
+ * It answers instead of redirecting only when it cannot send them to Auth0 — an
+ * aged-out booking cookie, or Auth0 unconfigured. That message is shown here,
+ * because this button is the only control on the step and a silent no-op is
+ * indistinguishable from a broken one.
  */
-export function EmailConfirmationStep({ verify }: { verify: () => Promise<void> }) {
+export function EmailConfirmationStep({
+  verify,
+}: {
+  verify: () => Promise<VerifyEmailState>;
+}) {
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   function handleVerify() {
+    setError(null);
     startTransition(async () => {
-      await verify();
+      const result = await verify();
+      if (result?.status === "error") {
+        setError(result.message);
+      }
     });
   }
 
@@ -47,6 +63,12 @@ export function EmailConfirmationStep({ verify }: { verify: () => Promise<void> 
         email is yours — we’ll send you a code to enter, and then pick up right
         where you left off.
       </p>
+
+      {error ? (
+        <p role="alert" className="animate-error-in text-body-sm text-error">
+          {error}
+        </p>
+      ) : null}
 
       <hr className="border-t border-grey-warm-200" />
 
