@@ -30,7 +30,13 @@ export async function unlockToken(password: string): Promise<string> {
     .replaceAll("=", "");
 }
 
-/** Compares in time that doesn't depend on where the first difference is. */
+/**
+ * Compares in time that doesn't depend on where the first difference is.
+ *
+ * Only safe on values of a fixed length — the early return leaks the length of
+ * `expected`, which for the raw password is something an attacker wants. Both
+ * callers compare {@link unlockToken} digests for that reason.
+ */
 export function tokensMatch(given: string, expected: string): boolean {
   if (given.length !== expected.length) {
     return false;
@@ -48,9 +54,20 @@ export function tokensMatch(given: string, expected: string): boolean {
  * Only paths under `/internal` are honoured — the target arrives in the query
  * string, and anything else there is somebody trying to use this page as an
  * open redirect.
+ *
+ * The unlock page itself is not honoured either. The proxy builds `next` from
+ * the raw pathname, so `/internal/unlock/` — a trailing slash, not equal to
+ * {@link UNLOCK_PATH} — arrives here; sending a correct password back to the
+ * password form reads as a login that failed.
  */
 export function safeNext(next: string | null | undefined): string {
-  if (next && next.startsWith("/internal/") && !next.startsWith("//")) {
+  const path = next?.split("?")[0]?.replace(/\/+$/, "");
+  if (
+    next &&
+    next.startsWith("/internal/") &&
+    !next.startsWith("//") &&
+    path !== UNLOCK_PATH
+  ) {
     return next;
   }
   return "/internal/flow";
