@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { siteBaseUrl } from "@pbh/emails";
 import { destroyCurrentSession } from "@/lib/auth-session";
 import { auth0LogoutUrl } from "@/lib/auth0-logout";
 
@@ -26,13 +26,13 @@ import { auth0LogoutUrl } from "@/lib/auth0-logout";
 export async function signOutAction(): Promise<{ redirectTo: string }> {
   await destroyCurrentSession();
 
-  // Auth0 needs an absolute `returnTo`, and it has to match the deployment the
-  // request actually came from — localhost, a preview, or production — so it is
-  // read from the request rather than from a build-time constant.
-  const h = await headers();
-  const host = h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const origin = host ? `${proto}://${host}` : "";
-
-  return { redirectTo: (origin && auth0LogoutUrl(origin)) || "/" };
+  // Auth0 needs an absolute `returnTo`, and it must be one of the tenant's
+  // Allowed Logout URLs. `siteBaseUrl()` is that list's one entry per
+  // environment — the same origin Stripe returns to and every email links to.
+  //
+  // Not the request's `Host`: on a preview that is a new hostname per build,
+  // which cannot be in the allowlist, so Auth0 would refuse and strand the
+  // customer on its error page with their session already destroyed. It is also
+  // attacker-controlled, and `x-forwarded-proto` is wrong behind two proxies.
+  return { redirectTo: auth0LogoutUrl(siteBaseUrl()) || "/" };
 }
