@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, type BrowserContext, type Page } from "@playwright/test";
 import { waitForConfirmUrlForUser } from "./confirm";
+import { addBookingCookie, seedVerifiedUser, type SeededUser } from "./seed";
 
 /**
  * The signed, HttpOnly cookie the booking flow uses as identity. Named here at
@@ -138,6 +139,32 @@ export async function reachConsentStep(page: Page): Promise<void> {
   await fillDetails(page);
 
   await expect(page.getByRole("checkbox")).toBeVisible();
+}
+
+/**
+ * The same destination, reached from a seeded account instead of the signup
+ * journey: the address is already proven, so the flow resumes at details.
+ *
+ * Exists because signup now goes out to Auth0, which emails a code no test can
+ * read. The specs that are *about* that journey stay off (pbh-mgr); this is for
+ * the ones that only need a booking in progress — the authorization regression,
+ * whose subject is which account a mutation writes to.
+ *
+ * Returns the genuine cookie, which is what those specs then tamper with.
+ */
+export async function reachConsentStepSeeded(
+  page: Page,
+  baseURL: string,
+): Promise<SeededUser> {
+  const user = await seedVerifiedUser();
+  await addBookingCookie(page.context(), user.id, baseURL);
+
+  await page.goto(RESUME_URL);
+  await openFromOverview(page, "Complete Personal Information");
+  await fillDetails(page);
+
+  await expect(page.getByRole("checkbox")).toBeVisible();
+  return user;
 }
 
 /** Tick the agreement box and submit the consent step. */

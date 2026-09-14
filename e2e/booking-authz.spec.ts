@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { BOOKING_COOKIE, reachConsentStep, submitConsent } from "./helpers/booking";
+import { BOOKING_COOKIE, reachConsentStepSeeded, submitConsent } from "./helpers/booking";
 
 /**
  * Authorization regression for pbh-9yb.2: booking mutations act on the account
@@ -10,34 +10,30 @@ import { BOOKING_COOKIE, reachConsentStep, submitConsent } from "./helpers/booki
  * — onto their account. This drives the real browser against the real action;
  * the cookie is the only thing changed.
  *
- * Needs the database (signup → confirm → details), so it runs under the same
- * E2E_FULL_FLOW opt-in as the money path. It touches no Stripe.
+ * Needs the database, so it runs under the same E2E_FULL_FLOW opt-in as the
+ * money path. It touches no Stripe and no Auth0: the account is seeded verified
+ * and the genuine cookie is minted by the test (`helpers/seed.ts`), because the
+ * signup journey now goes out to an identity provider that emails a code to a
+ * human. The two specs that are *about* that journey are still switched off —
+ * see pbh-mgr — but this one never was about it. Its subject is which account a
+ * booking mutation writes to, and every byte that decides that is still real:
+ * the cookie on the wire, the server's HMAC, and the action behind the form.
  */
 const FULL_FLOW = process.env.E2E_FULL_FLOW === "1";
 
-test.describe.skip(// Skipped, not deleted, and deliberately not repaired with a shortcut.
-//
-// These specs drove signup by reading the `/booking/confirm` URL back out of
-// the marketing server log (`helpers/confirm.ts`). Signup now goes through
-// Auth0, which emails a code to a real inbox — there is no URL in any log to
-// read, and no way to fake one that would not amount to forging a verified
-// address in the money path.
-//
-// Restoring them needs a decision, not a patch: a mailbox API to read the
-// OTP, an Auth0 database connection with a fixed E2E user, or an explicitly
-// reviewed test-only bypass. Tracked on pbh-mgr.
-"booking authorization", () => {
+test.describe("booking authorization", () => {
   test.skip(!FULL_FLOW, "Set E2E_FULL_FLOW=1 with a test DB to run the authorization path.");
 
   test("consent with a forged or absent booking cookie writes nothing", async ({
     page,
     context,
+    baseURL,
   }) => {
     test.setTimeout(120_000);
-    await reachConsentStep(page);
+    await reachConsentStepSeeded(page, baseURL!);
 
     const [real] = (await context.cookies()).filter((c) => c.name === BOOKING_COOKIE);
-    expect(real, "signup should have issued the booking cookie").toBeTruthy();
+    expect(real, "the booking cookie should be in the jar").toBeTruthy();
     expect(real.httpOnly, "booking cookie must not be readable by script").toBe(true);
 
     // Forged: a real user id and expiry with the signature replaced — i.e.

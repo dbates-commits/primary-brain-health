@@ -33,26 +33,32 @@ First-time browser install (once per machine): `npx playwright install chromium`
 | Spec | Needs | Runs by default |
 |---|---|---|
 | `booking-smoke.spec.ts` | the app only, no secrets | ✅ yes |
-| `booking-authz.spec.ts` | a way past Auth0 | ⛔ off — `describe.skip`, see below |
+| `booking-authz.spec.ts` | test DB | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
 | `onboarding.spec.ts` (payment path) | a way past Auth0 | ⛔ off — `describe.skip`, see below |
 | `resume.spec.ts` (abandon + return) | a way past Auth0 | ⛔ off — `describe.skip`, see below |
 
 The smoke spec proves the harness + booking entry work with no secrets.
 
-**The other three do not run at all, `E2E_FULL_FLOW=1` or not.** They drove
-signup by reading our own confirmation link out of the server log; Auth0 emails
-a code instead, and there is no log to read. `E2E_FULL_FLOW=1` is still their
-inner guard, but the `describe.skip` above it wins — so the environment below
-buys you nothing until one of these lands (pbh-mgr):
+`booking-authz.spec.ts` needs a booking in progress but nothing about how it got
+there, so it seeds a verified account straight into the test database and mints
+its own booking cookie (`helpers/seed.ts`). Nothing in the app changes and no
+production path learns a way past Auth0 — it is a test writing a fixture row —
+and every byte the spec is actually about stays real: the cookie on the wire,
+the server's HMAC, and the action behind the form.
+
+**The other two do not run at all, `E2E_FULL_FLOW=1` or not.** They are about the
+signup journey itself, and drove it by reading our own confirmation link out of
+the server log; Auth0 emails a code instead, and there is no log to read.
+`E2E_FULL_FLOW=1` is still their inner guard, but the `describe.skip` above it
+wins — so the environment below buys you nothing until one of these lands
+(pbh-mgr):
 
 - a mailbox API the test can read the Auth0 code from,
 - a dedicated Auth0 test connection, or
 - an explicitly reviewed test-only bypass.
 
 Faking a verified address in the money path was not on the list of things to add
-unreviewed, which is why they are off rather than patched. Note what goes with
-them: `booking-authz.spec.ts` was the only executable proof that a forged or
-absent `pbh_booking_session` writes no `consents` row (pbh-9yb.2).
+unreviewed, which is why they are off rather than patched.
 
 `resume.spec.ts` is the abandon-and-return path: it stops after every step,
 leaves, comes back to `/?booking=resume#booking`, and asserts the step the

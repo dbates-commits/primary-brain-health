@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@neondatabase/serverless':
+        specifier: ^1.0.1
+        version: 1.1.0
       '@playwright/test':
         specifier: ^1.61.1
         version: 1.61.1
@@ -1477,8 +1480,8 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@graphql-codegen/plugin-helpers@7.2.1':
-    resolution: {integrity: sha512-Jw2HPaioMEa4DKG7sgqzL1uWQiIWQu774FwKXx4p83/y3o5GgnRMRdTFtuQQ7Tq6PYyrI5ZITi1jAxeX/Vh2Uw==}
+  '@graphql-codegen/plugin-helpers@7.3.0':
+    resolution: {integrity: sha512-aaGfI/8Q8wmdO1nx1NMWGoZn/5Tl5TNOVQSI2qkGhk8h8Z8Uc6grFH0O6//HdHfqnUsiruBbe3IaK4/ah3sWcQ==}
     engines: {node: '>=16'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -9360,7 +9363,7 @@ snapshots:
       lodash: 4.17.23
       tslib: 2.6.3
 
-  '@graphql-codegen/plugin-helpers@7.2.1(graphql@15.8.0)':
+  '@graphql-codegen/plugin-helpers@7.3.0(graphql@15.8.0)':
     dependencies:
       '@graphql-tools/utils': 11.2.0(graphql@15.8.0)
       change-case-all: 2.1.0
@@ -10990,7 +10993,7 @@ snapshots:
   '@tinacms/cli@2.5.0(@codemirror/language@6.0.0)(@types/node@20.19.43)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(abstract-level@1.0.4)(immer@10.2.0)(lightningcss@1.32.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rollup@3.30.0)(scheduler@0.27.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(tsx@4.22.4)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.9.0)':
     dependencies:
       '@graphql-codegen/core': 2.6.8(graphql@15.8.0)
-      '@graphql-codegen/plugin-helpers': 7.2.1(graphql@15.8.0)
+      '@graphql-codegen/plugin-helpers': 7.3.0(graphql@15.8.0)
       '@graphql-codegen/typescript': 4.1.6(graphql@15.8.0)
       '@graphql-codegen/typescript-operations': 4.6.1(graphql@15.8.0)
       '@graphql-codegen/visitor-plugin-common': 4.1.2(graphql@15.8.0)
