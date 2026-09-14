@@ -144,6 +144,11 @@ export function ProcessMap({
     });
   }, [baseEdges, models, filters]);
 
+  // Stable: `DetailPanel`'s focus trap keys off it, and a fresh closure each
+  // render makes the trap tear down and re-arm — which puts focus back on
+  // whatever opened the panel mid-use.
+  const closeDetail = useCallback(() => setSelectedId(null), []);
+
   const onNodeClick = useCallback((_: unknown, node: Node) => {
     if (node.type === "lane") {
       return;
@@ -179,7 +184,7 @@ export function ProcessMap({
       <DetailPanel
         node={selected}
         neighbours={selected ? (neighbours[selected.id] ?? []) : []}
-        onClose={() => setSelectedId(null)}
+        onClose={closeDetail}
         onSelect={setSelectedId}
       />
     </div>

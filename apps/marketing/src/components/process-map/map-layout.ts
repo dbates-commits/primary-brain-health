@@ -32,10 +32,6 @@ const NODE_TYPE: Record<NodeKind, string> = {
 
 const byId = new Map(NODES.map((node) => [node.id, node]));
 
-export function findNode(id: string): ProcessNode | undefined {
-  return byId.get(id);
-}
-
 export function buildNodes(): Node[] {
   const lanes: Node[] = LANES.map((lane) => ({
     id: `lane-${lane.id}`,

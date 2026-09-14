@@ -84,7 +84,12 @@ export function DetailPanel({ node, neighbours, onClose, onSelect }: DetailPanel
       <aside
         ref={panelRef}
         role="dialog"
-        aria-modal="true"
+        // Only while it is open. `aria-modal` marks everything outside the
+        // dialog as unavailable, so leaving it on the closed panel hides the
+        // whole map from a screen reader from first paint.
+        aria-modal={node ? true : undefined}
+        aria-hidden={node ? undefined : true}
+        inert={node ? undefined : true}
         aria-label={node ? node.name : "Step detail"}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-[min(26rem,100%)] flex-col border-l border-border-default bg-background-default transition-transform duration-200",

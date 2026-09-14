@@ -21,8 +21,6 @@ import type { Lane, ProcessEdge, ProcessNode } from "./process-model";
  * they are the reader's cue that the line continues elsewhere.
  */
 
-export const POOL_LABEL = "Primary Brain Health";
-
 /**
  * The bands, with 20px of clear air between them. That gap is not decoration:
  * it is the corridor the four `wrap` and `loop` flows run along, which is what
@@ -43,7 +41,6 @@ const ROW = { marketing: 95, booking: 265, pay1: 465, pay2: 580, after1: 735, af
 const VIA = { toBooking: 180, resend: 212, toPayment: 385, toAfter: 655 };
 
 export const MAP_WIDTH = 1880;
-export const MAP_HEIGHT = 900;
 
 export const NODES: ProcessNode[] = [
   // ---- Marketing site ----
