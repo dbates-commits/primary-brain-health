@@ -26,9 +26,11 @@ type AdapterAccountType = "oauth" | "oidc" | "email" | "webauthn";
  *    JS property keys stay exactly as the adapter expects (`sessionToken`,
  *    `providerAccountId`, …), which is what the adapter references.
  *
- * `accounts` holds the Auth0 identity linked to each user — the email flow
- * never writes it. `sessions` backs the database session strategy (revocable,
- * see auth.ts). `verificationTokens` holds single-use magic-link tokens.
+ * `accounts` holds the Auth0 identity linked to each user, and is deleted when
+ * an account is deactivated. `sessions` backs the database session strategy
+ * (revocable, see auth.ts). `verificationTokens` held single-use magic-link
+ * tokens and is now written by nothing — the table is kept because dropping one
+ * is a destructive migration and a separate decision.
  */
 
 export const accounts = pgTable(

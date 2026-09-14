@@ -20,9 +20,9 @@ export interface AuthUser {
  * A deactivated account is deliberately not "an existing account" here. Filing a
  * deletion request stamps `users.deactivated_at` but keeps the row and the
  * address (see `deactivate-account-core.ts`), so without this clause the person
- * could sign back in the moment after asking to be deleted. Both doors
- * into sign-in run through this function, so one predicate closes both — and the
- * form's existing "Not an active user" wording is then literally true.
+ * could sign back in the moment after asking to be deleted. Sign-in is the only
+ * door left, and it runs through this function — which is also what `/login`
+ * turns into the "no active account" message it shows after a refusal.
  */
 export async function findAuthUserByEmail(
   rawEmail: string,

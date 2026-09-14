@@ -13,6 +13,26 @@ import type { NextConfig } from "next";
 const isProduction = process.env.VERCEL_ENV === "production";
 
 const nextConfig: NextConfig = {
+  /**
+   * `/booking/confirm` was the magic link's landing route, deleted with the
+   * rest of the magic link. Links to it were mailed for as long as 24 hours
+   * before the deploy that removed it, and they keep arriving after — so the
+   * route answers with the resume marker instead of a 404, which puts the
+   * customer back in the modal at whatever step they had reached.
+   *
+   * Temporary, not permanent: the URL is gone rather than moved, and a 308
+   * would be cached in the browsers of the people it is here to rescue.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/booking/confirm",
+        destination: "/?booking=resume#booking",
+        permanent: false,
+      },
+    ];
+  },
+
   async headers() {
     if (isProduction) {
       return [];

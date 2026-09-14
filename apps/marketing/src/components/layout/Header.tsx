@@ -36,12 +36,12 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
   const { data: session } = useSession();
   const firstName = session?.user?.firstName;
   const { signOut, pending: signingOut } = useSignOut();
-  // Focus goes back to whichever of these the user came from. Held as refs
-  // rather than restored by the modal on unmount: by then the drawer may be
-  // `inert`, and focusing an inert node drops focus to `<body>` in silence.
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  // The desktop fallback: at `lg` the hamburger and the drawer's rows are all
-  // `lg:hidden`, so the logo is the only control from this nav still on screen.
+  // Where focus goes when the drawer is closed *by the breakpoint* rather than
+  // by a control: at `lg` the hamburger and every row in the drawer is
+  // `lg:hidden`, and focusing a hidden node drops focus to `<body>` in silence,
+  // so the logo is the only control from this nav still on screen. Every other
+  // way out of the drawer either keeps focus where it is (the toggle) or takes
+  // it to the link that was followed.
   const logoRef = useRef<HTMLAnchorElement>(null);
 
   function closeMobileMenu() {
@@ -63,7 +63,10 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
     const desktop = window.matchMedia("(min-width: 1024px)");
     const onChange = () => {
       if (desktop.matches) {
-        closeMobileMenu();
+        setMobileMenuOpen(false);
+        // Not `closeMobileMenu`: the hamburger it focuses is `lg:hidden` by the
+        // time this runs, so focus would land on nothing.
+        logoRef.current?.focus();
       }
     };
     onChange();
@@ -225,7 +228,6 @@ export function Header({ auth0Enabled = false }: { auth0Enabled?: boolean }) {
 
         {/* Mobile Menu Button */}
         <button
-          ref={menuButtonRef}
           className="lg:hidden p-2 text-brand-default"
           onClick={() => {
             if (mobileMenuOpen) {

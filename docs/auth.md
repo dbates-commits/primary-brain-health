@@ -199,7 +199,7 @@ the Linus report.
 |---|---|---|
 | Inactivity timeout | **15 minutes** | Auth.js `session.maxAge` with `updateAge: 0` |
 | Absolute session cap | **8 hours** | our `getSessionAndUser` override — Auth.js has no built-in |
-| Sign-in link | **15 minutes**, single-use | provider `maxAge`; Auth.js deletes the token on redeem |
+| One trip out to Auth0 | **30 minutes** | the PKCE / state / nonce cookies' `maxAge` (Auth.js defaults to 15 min) |
 
 - **Scope is the whole authenticated area**, with no page-level carve-out.
 - **Inactivity, not lifetime.** Auth.js slides the deadline forward on activity;
@@ -212,7 +212,11 @@ the Linus report.
 
 The values live in one place, `apps/marketing/src/auth.ts`
 (`IDLE_SESSION_MAX_SECONDS`, `ABSOLUTE_SESSION_MAX_SECONDS`,
-`MAGIC_LINK_TTL_SECONDS`); this doc records the requirement they satisfy.
+`AUTH0_LEG_MAX_SECONDS`); this doc records the requirement they satisfy.
+
+The third is not a session control. It bounds one authorization request, and it
+is longer than Auth.js's default because the customer now leaves to find a code
+in their inbox — often on another device — between the two halves of it.
 
 > Since `apps/app` was retired the only thing behind a session is `/welcome`,
 > which renders an external link — the report is no longer reachable from here,

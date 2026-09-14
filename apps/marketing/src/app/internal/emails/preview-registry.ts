@@ -29,7 +29,7 @@ export const emailPreviews: EmailPreview[] = [
     slug: "welcome",
     name: "Welcome",
     subject: "Welcome to Primary Brain Health",
-    trigger: "Sent when the emailed confirmation link is redeemed at signup.",
+    trigger: "Sent when the customer proves their address at Auth0, on the first sign-in that stamps it verified.",
     element: WelcomeEmail(WelcomeEmail.PreviewProps),
   },
   {

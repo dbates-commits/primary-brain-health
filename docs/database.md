@@ -126,9 +126,11 @@ What the request does, in order (`apps/marketing/src/lib/deactivate-account-core
    replayed POST can only win once. Neon's HTTP driver has no interactive
    transaction, so this one statement is the atomic point.
 2. Deletes every `sessions` row for the user — all devices, not just this one.
-3. Deletes `verification_tokens` for that address, and unconsumed
-   `booking_email_verifications` rows. Both are live credentials. **Consumed**
-   verification rows are kept, as evidence of when the address was confirmed.
+3. Deletes the user's `accounts` rows — the Auth0 identity, which is the only
+   live credential left since the magic link and the booking-confirm link went.
+   `verification_tokens` and unconsumed `booking_email_verifications` were
+   deleted here too until Sep 2026; nothing writes either table any more, so
+   those statements were no-ops dressed as a control.
 4. Writes an `account_deactivated` audit row (no address in the metadata) and
    sends `AccountDeactivatedEmail`.
 
