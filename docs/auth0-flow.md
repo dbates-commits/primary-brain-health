@@ -90,19 +90,6 @@ checkout mints a session server-side the moment payment verifies.
 | Binding | 30 minutes, matching the leg, then dropped by `getBookingResumeState` |
 | At checkout | keep the session if it is theirs; revoke and re-mint if it is not — never orphan a row |
 
-## Two places the flow is deliberately rude
-
-**`prompt=login` on every leg.** Auth0's SSO cookie survives a PBH sign-out.
-Without forcing re-authentication, a new customer on a browser someone else
-used would be silently authenticated as that person — stamping the wrong row
-and mailing them a second welcome. The address is already in `login_hint`, so
-it costs one screen.
-
-**Sign-out makes a second trip.** Deleting our row is half a sign-out.
-`signOutAction` hands back `/v2/logout?returnTo=siteBaseUrl()` — the fixed
-origin, never the request `Host`, which on a preview is a new hostname per
-build and would not be in the Allowed Logout URLs.
-
 ## Still open
 
 Everything above runs against a **personal Auth0 account**. Nothing in the code
