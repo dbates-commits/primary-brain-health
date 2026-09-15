@@ -15,26 +15,22 @@ description of the flow lives in [`auth.md`](auth.md) and
 sequenceDiagram
     autonumber
     actor B as Browser
-    participant P as PBH (Next.js)
+    participant P as PBH app
     participant D as Postgres
     participant A as Auth0
 
-    B->>P: submit form → signupAction
+    B->>P: submit form, signupAction
     Note over P: refuse if AUTH0_* unset —<br/>before the insert, not after
-    P->>D: INSERT users · emailVerified null
-    P-->>B: Set-Cookie pbh_verify_for<br/>(signed, 30 min, names the address)
+    P->>D: INSERT users, emailVerified null
+    P-->>B: Set-Cookie pbh_verify_for<br/>signed, 30 min, names the address
     P-->>B: 302 /authorize<br/>login_hint + prompt=login
     B->>A: Universal Login
-    A-->>B: emails a code; customer enters it
-    A-->>P: 302 /api/auth/callback/auth0 (code, via the browser)
-
-    rect rgba(31, 79, 168, 0.08)
-        Note over P: signIn callback — four gates<br/>email_verified === true · PBH account exists<br/>binding matches · foreign session revoked<br/>any refusal → /login?error, nothing is written
-    end
-
-    P->>D: link accounts row · INSERT sessions
-    P-->>B: Set-Cookie session · 302 /?booking=resume#booking
-    P->>D: after(): audit login · stamp email_verified · welcome email (once)
+    A-->>B: emails a code, customer enters it
+    A-->>P: 302 /api/auth/callback/auth0<br/>code, via the browser
+    Note over P: signIn callback — four gates<br/>email_verified === true · PBH account exists<br/>binding matches · foreign session revoked<br/>any refusal lands on /login?error, nothing is written
+    P->>D: link accounts row, INSERT sessions
+    P-->>B: Set-Cookie session, 302 /?booking=resume#booking
+    P->>D: after&#40;&#41;: audit login · stamp email_verified · welcome email
 ```
 
 `verifyEmailAction` re-enters at the `pbh_verify_for` step, for a customer who
@@ -44,14 +40,14 @@ abandoned at the Auth0 screen and came back on their booking cookie.
 
 ```mermaid
 flowchart TD
-    C([Auth0 callback]) --> G1{email_verified<br/>=== true?}
-    G1 -- no --> R[/login?error<br/>nothing written/]
-    G1 -- yes --> G2{PBH account<br/>for this address?}
+    C(["Auth0 callback"]) --> G1{"email_verified<br/>is exactly true?"}
+    G1 -- no --> R["/login?error<br/>nothing is written"]
+    G1 -- yes --> G2{"PBH account<br/>for this address?"}
     G2 -- no --> R
-    G2 -- yes --> G3{pbh_verify_for<br/>matches?}
+    G2 -- yes --> G3{"pbh_verify_for<br/>matches?"}
     G3 -- no --> R
-    G3 -- yes --> G4[revoke a session cookie<br/>belonging to someone else]
-    G4 --> L([link identity · mint session])
+    G3 -- yes --> G4["revoke a session cookie<br/>belonging to someone else"]
+    G4 --> L(["link identity, mint session"])
 ```
 
 1. **The address is verified at Auth0.** `profile.email_verified` must be
