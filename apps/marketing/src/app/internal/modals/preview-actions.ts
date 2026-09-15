@@ -21,8 +21,7 @@ import type { VerifyEmailState } from "@/components/booking/actions";
  * production, so a visitor holding a booking cookie could mail themselves from
  * it.
  */
-const PREVIEW_NOTICE =
-  "Preview only — this form isn't submitted and no booking is created.";
+const PREVIEW_NOTICE = "Preview only — this form isn't submitted and no booking is created.";
 
 export const previewDetails: DetailsAction = async (_prev, formData) => ({
   status: "error",

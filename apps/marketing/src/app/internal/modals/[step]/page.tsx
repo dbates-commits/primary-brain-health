@@ -38,11 +38,7 @@ export const metadata = {
  * is noindexed here and disallowed in `robots.ts`, holds no customer data, and
  * every action on it is inert.
  */
-export default async function ModalStepPage({
-  params,
-}: {
-  params: Promise<{ step: string }>;
-}) {
+export default async function ModalStepPage({ params }: { params: Promise<{ step: string }> }) {
   const { step } = await params;
   // Called before the query, never inside its `try`: `notFound()` works by
   // throwing, and a bare `catch` would swallow it into a broken success page.
@@ -68,17 +64,13 @@ export default async function ModalStepPage({
             Booking modal steps
           </Link>
         </p>
-        <h1 className="mt-2 font-headline text-3xl text-ink-strong">
-          {STEP_META[step].name}
-        </h1>
-        <p className="mt-1 max-w-2xl text-body-sm text-text-default">
-          {STEP_META[step].when}
-        </p>
+        <h1 className="mt-2 font-headline text-3xl text-ink-strong">{STEP_META[step].name}</h1>
+        <p className="mt-1 max-w-2xl text-body-sm text-text-default">{STEP_META[step].when}</p>
         {!result ? (
           <p className="mt-4 max-w-2xl rounded-lg bg-background-default p-4 text-body-sm text-text-default">
-            Showing the wording that ships in code — the CMS copy for this step
-            couldn’t be loaded. On a preview deployment that is expected until
-            the Modals collection reaches the main branch.
+            Showing the wording that ships in code — the CMS copy for this step couldn’t be loaded.
+            On a preview deployment that is expected until the Modals collection reaches the main
+            branch.
           </p>
         ) : null}
         <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-body-sm">
