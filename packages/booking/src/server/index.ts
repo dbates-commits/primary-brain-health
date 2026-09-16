@@ -36,3 +36,7 @@ export {
   sendAccountDeactivatedEmail,
   sendAccountDeletionNoticeEmail,
 } from "./send-email";
+
+// `hubspot-contact` is deliberately absent: it is reached only from the signup
+// and payment cores above. An app writing CRM properties directly is how the
+// no-PHI-to-HubSpot rule in that module gets quietly broken.

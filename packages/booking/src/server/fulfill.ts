@@ -8,9 +8,12 @@ import "server-only";
  * PaymentIntent — Stripe redelivers events and the two paths routinely race —
  * so each write is guarded to be a no-op after the first effective one.
  *
- * These functions ONLY touch the `payments` mirror + `audit_log`. Linus
- * registration/enrollment is the webhook's job alone (pbh-73g) and is not done
- * here, so the client-confirm path can never dead-end on a Linus outage.
+ * These functions touch the `payments` mirror + `audit_log`, and hang the two
+ * effects that belong to the transition itself off the first effective write:
+ * the receipt email and the HubSpot paid flag, both best-effort and neither
+ * able to throw. Linus registration/enrollment is the webhook's job alone
+ * (pbh-73g) and is NOT done here, so the client-confirm path can never
+ * dead-end on a Linus outage.
  */
 
 import { and, eq, ne } from "drizzle-orm";
@@ -18,6 +21,7 @@ import type Stripe from "stripe";
 import { db, payments, writeAuditLog } from "@pbh/db";
 import { getAssessmentCatalogEntry } from "@pbh/payments";
 import { getPackage, resolvePackageKey } from "../packages";
+import { markHubSpotContactPaid } from "./hubspot-contact";
 import {
   sendPaymentFailedEmail,
   sendPaymentReceiptEmail,
@@ -127,6 +131,10 @@ export async function recordSucceededPayment(
       cardBrand: card?.brand ?? null,
       cardLast4: card?.last4 ?? null,
     });
+    // Same once-only gate: the contact is flagged as paying on the transition,
+    // so `paid_on_date` is the date of the payment rather than of whichever
+    // redelivery ran last. Never throws — see hubspot-contact.ts.
+    await markHubSpotContactPaid(userId, new Date());
   }
 
   return { status: "recorded", userId, firstWrite };

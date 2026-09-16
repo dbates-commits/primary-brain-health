@@ -7,6 +7,7 @@ import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
 import { resolvePackageKey } from "../packages";
 import { sendBookingConfirmation } from "./email-verification";
+import { createHubSpotContactAtSignup } from "./hubspot-contact";
 
 /**
  * Create the partial account at signup: validate the first/last/email, insert a
@@ -82,6 +83,11 @@ export async function createAccountCore(
     // two emails arriving together buries the one they have to act on. Welcome
     // is sent on successful confirmation instead.
     await sendBookingConfirmation(created.id);
+
+    // The CRM contact exists from here on, before there is any payment to
+    // report — a booking abandoned at the next step is still a lead marketing
+    // can see. Best-effort and env-gated, exactly like the send above.
+    await createHubSpotContactAtSignup({ email, firstName, lastName });
 
     return {
       status: "success",
