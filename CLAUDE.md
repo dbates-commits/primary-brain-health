@@ -111,7 +111,11 @@ Cross-app shared code is imported from the `@pbh/*` workspace packages, not via 
 
 ### API
 
-`src/app/api/intake/route.ts` handles consultation form POST submissions. HubSpot integration is planned but not yet implemented.
+`src/app/api/intake/route.ts` handles consultation form POST submissions,
+forwarding them to a HubSpot form. The booking flow writes to HubSpot too, but
+through the CRM object API and from `@pbh/booking/server` — see
+`packages/booking/src/server/hubspot-contact.ts`, which also states what may
+and may not be sent there.
 
 ### Booking flow
 
