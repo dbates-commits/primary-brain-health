@@ -6,6 +6,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollRevealInit } from "@/components/ScrollRevealInit";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ConsentModeDefaults } from "@/components/consent/ConsentModeDefaults";
+import { CookieConsent } from "@/components/consent/CookieConsent";
 
 const gildaDisplay = Gilda_Display({
   variable: "--font-gilda-display",
@@ -80,6 +82,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth bg-background-brand-subtle">
       <head>
+        {/* First in the head, before the font stylesheets and before anything
+            React mounts: Consent Mode's defaults only bind tags that load after
+            them. */}
+        <ConsentModeDefaults />
         {/* Adobe Fonts (Typekit) — delivers "larken" + "indivisible" */}
         <link
           rel="preconnect"
@@ -104,6 +110,7 @@ export default function RootLayout({
           <main className="pt-20">{children}</main>
         </AuthProvider>
         <Footer />
+        <CookieConsent />
       </body>
     </html>
   );

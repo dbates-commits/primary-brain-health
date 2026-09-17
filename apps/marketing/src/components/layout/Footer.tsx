@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CookieChoicesButton } from "@/components/consent/CookieChoicesButton";
 
 export function Footer() {
   return (
@@ -90,6 +91,9 @@ export function Footer() {
                 >
                   Privacy Policy
                 </Link>
+              </li>
+              <li>
+                <CookieChoicesButton className="text-ink-strong/70 hover:text-ink-strong transition-colors text-body-sm cursor-pointer" />
               </li>
             </ul>
           </div>

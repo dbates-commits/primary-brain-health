@@ -3,6 +3,7 @@ export * from "./Card";
 export * from "./CheckIcon";
 export * from "./Checkbox";
 export * from "./Container";
+export * from "./CookieConsentBanner";
 export * from "./Eyebrow";
 export * from "./FieldError";
 export * from "./format-phone";
