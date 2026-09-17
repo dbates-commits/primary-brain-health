@@ -7,8 +7,8 @@
  * `components/booking/step-model.ts` makes against `BookingResumeStep`.
  */
 
-/** The systems a step can reach out to. Ours plus the four vendors. */
-export type SystemId = "neon" | "resend" | "stripe" | "linus" | "authjs";
+/** The systems a step can reach out to. Ours plus the five vendors. */
+export type SystemId = "neon" | "resend" | "stripe" | "linus" | "authjs" | "auth0";
 
 export type NodeKind = "start" | "end" | "user" | "service" | "gateway-xor" | "gateway-and";
 
@@ -93,6 +93,7 @@ export const SYSTEM_LABELS: Record<SystemId, string> = {
   stripe: "Stripe",
   linus: "Linus",
   authjs: "Auth.js",
+  auth0: "Auth0",
 };
 
 export const STATE_LABELS: Record<NodeState, string> = {
