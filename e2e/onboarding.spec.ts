@@ -55,7 +55,18 @@ async function reachPaymentStep(page: Page): Promise<FrameLocator> {
   return stripeFrame(page);
 }
 
-test.describe("onboarding payment", () => {
+test.describe.skip(// Skipped, not deleted, and deliberately not repaired with a shortcut.
+//
+// These specs drove signup by reading the `/booking/confirm` URL back out of
+// the marketing server log (`helpers/confirm.ts`). Signup now goes through
+// Auth0, which emails a code to a real inbox — there is no URL in any log to
+// read, and no way to fake one that would not amount to forging a verified
+// address in the money path.
+//
+// Restoring them needs a decision, not a patch: a mailbox API to read the
+// OTP, an Auth0 database connection with a fixed E2E user, or an explicitly
+// reviewed test-only bypass. Tracked on pbh-mgr.
+"onboarding payment", () => {
   test.skip(
     !FULL_FLOW,
     "Set E2E_FULL_FLOW=1 with a test DB + Stripe test keys to run the money path.",
@@ -82,18 +93,16 @@ test.describe("onboarding payment", () => {
       await page.waitForURL(/\/welcome$/, { timeout: 30_000 });
       // By role, not text: the route announcer also carries the page title, and
       // matching by role keeps this on the <h1> itself.
-      await expect(
-        page.getByRole("heading", { name: /choose how to start/i }),
-      ).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByRole("heading", { name: /choose how to start/i })).toBeVisible({
+        timeout: 30_000,
+      });
       // Both cards render. Their destinations are still `#` placeholders, so
       // there is no href worth asserting until scheduling and the assessments
       // hand-off are wired up.
       await expect(
         page.getByRole("heading", { name: /talk to a brain health coach/i }),
       ).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: /start with assessments/i }),
-      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: /start with assessments/i })).toBeVisible();
     });
   }
 

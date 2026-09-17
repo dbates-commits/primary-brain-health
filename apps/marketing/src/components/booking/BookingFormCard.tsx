@@ -6,13 +6,17 @@ import { SignupForm, type SignupAction, type SignupResult } from "@pbh/booking";
 /**
  * The white card on the left of the booking section (Figma 1804:17908): the
  * signup form itself, on the page rather than behind a CTA. Submitting it
- * creates the account and sends the confirmation email — the modal opens
- * straight at "confirm your email".
+ * creates the account and hands the customer to Auth0 to prove the address.
  *
- * Once that has happened the form must not stay submittable. It is still
+ * Once an account exists the form must not stay submittable. It is still
  * mounted behind the modal, React has reset its fields, and a second submit
- * would fail on the unique-email constraint — so the card swaps to a short
- * "check your inbox" state with a way back into the modal.
+ * would fail on the unique-email constraint — so the card swaps to a state
+ * whose only control is the way back into the modal.
+ *
+ * That state is also what a customer sees on the resume path, after they come
+ * back from Auth0 and close the modal — so it must not describe an email of
+ * ours that is waiting to be opened. There is no confirmation link any more;
+ * the code is Auth0's, on its own screen, and the way back is this button.
  */
 export function BookingFormCard({
   action,
@@ -39,11 +43,10 @@ export function BookingFormCard({
       {signedUp ? (
         <div className="flex flex-col gap-6">
           <p className="text-lg text-ink-strong">
-            We&rsquo;ve emailed you a link to confirm your address. Open it to
-            pick up where you left off.
+            Your booking is under way. Pick up where you left off.
           </p>
           <Button type="button" color="primary" className="w-full" onClick={onReopen}>
-            I haven&rsquo;t received it
+            Continue my booking
           </Button>
         </div>
       ) : (

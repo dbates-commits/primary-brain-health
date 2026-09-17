@@ -19,7 +19,6 @@ import {
   AccountDeactivatedEmail,
   AccountDeletionRequestEmail,
   AssessmentReadyEmail,
-  ConfirmEmailEmail,
   PaymentFailedEmail,
   PaymentReceiptEmail,
   PaymentRefundedEmail,
@@ -184,46 +183,7 @@ async function loadRecipient(userId: string): Promise<Recipient | null> {
   return user;
 }
 
-/**
- * Signup completed → confirm the address before the flow can continue.
- *
- * Builds the link from the raw token (the DB stores only its hash) and, when
- * Resend is unconfigured, logs the URL so local dev can still complete the flow
- * — the same affordance the magic-link email has. That log is the only place
- * the raw token appears outside the recipient's inbox.
- */
-export async function sendConfirmEmail(
-  userId: string,
-  rawToken: string,
-): Promise<SendEmailResult> {
-  const confirmUrl = `${siteBaseUrl()}/booking/confirm?token=${encodeURIComponent(rawToken)}`;
-
-  const result = process.env.RESEND_API_KEY
-    ? await sendTemplate(
-        "confirm-email",
-        userId,
-        "Confirm your email to continue",
-        () => ConfirmEmailEmail({ confirmUrl }),
-      )
-    : ({ sent: false, reason: "not-configured" } as const);
-
-  // Outside production, print the link whenever it did not reach an inbox — not
-  // only when Resend is unconfigured. A sandbox Resend key refuses every
-  // recipient except the account owner's own address, so without this a
-  // developer testing with any other address hits a blocking confirmation step
-  // with no way past it. Never in production: this is the raw token, and the
-  // whole point of storing only its hash is that it exists nowhere else.
-  if (!result.sent && process.env.NODE_ENV !== "production") {
-    console.log(
-      `[email] confirmation email not delivered (${result.reason}).\n` +
-        `[email] Dev confirmation URL for user ${userId}:\n${confirmUrl}`,
-    );
-  }
-
-  return result;
-}
-
-/** Email confirmed → welcome + how to get back in. */
+/** Address proven (by Auth0) → welcome + how to get back in. */
 export async function sendWelcomeEmail(userId: string): Promise<SendEmailResult> {
   return sendTemplate(
     "welcome",

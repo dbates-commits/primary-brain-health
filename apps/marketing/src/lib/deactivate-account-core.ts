@@ -5,14 +5,7 @@ import {
   sendAccountDeactivatedEmail,
   sendAccountDeletionNoticeEmail,
 } from "@pbh/booking/server";
-import {
-  bookingEmailVerifications,
-  db,
-  sessions,
-  users,
-  verificationTokens,
-  writeAuditLog,
-} from "@pbh/db";
+import { accounts, db, sessions, users, writeAuditLog } from "@pbh/db";
 import type { DeleteAccountState } from "./delete-account-state";
 
 /**
@@ -47,8 +40,6 @@ import type { DeleteAccountState } from "./delete-account-state";
 export async function deactivateAccountCore(
   userId: string,
 ): Promise<DeleteAccountState> {
-  let email: string;
-
   try {
     // The stamp and the idempotency claim in one statement. Neon's HTTP driver
     // gives no interactive transaction (see `packages/db/src/client.ts`), so
@@ -59,7 +50,7 @@ export async function deactivateAccountCore(
       .update(users)
       .set({ deactivatedAt: sql`now()` })
       .where(and(eq(users.id, userId), isNull(users.deactivatedAt)))
-      .returning({ email: users.email });
+      .returning({ id: users.id });
 
     if (!claimed) {
       // Either there is no such row, or the account was already deactivated.
@@ -82,8 +73,6 @@ export async function deactivateAccountCore(
       // second audit row would say nothing the first one didn't.
       return { status: "success" };
     }
-
-    email = claimed.email;
   } catch (err) {
     console.error("deactivateAccountCore failed:", err);
     return {
@@ -101,23 +90,18 @@ export async function deactivateAccountCore(
     // are not deleting, so the revocation has to be explicit.
     await db.delete(sessions).where(eq(sessions.userId, userId));
 
-    // Magic links already in flight. `verification_tokens` is Auth.js's table
-    // and carries no FK — it is keyed by the address, which is why the UPDATE
-    // above returns it.
-    await db
-      .delete(verificationTokens)
-      .where(eq(verificationTokens.identifier, email));
-
-    // Live booking-confirm credentials only. Consumed rows stay: that table is
-    // deliberately kept as evidence of when an address was confirmed.
-    await db
-      .delete(bookingEmailVerifications)
-      .where(
-        and(
-          eq(bookingEmailVerifications.userId, userId),
-          isNull(bookingEmailVerifications.consumedAt),
-        ),
-      );
+    // The Auth0 link. This is the live credential now that the magic link and
+    // the booking-confirm link are gone: leave it and the address can be signed
+    // in again at Auth0, which `findAuthUserByEmail` would refuse — but only
+    // because it filters on `deactivated_at`, i.e. one predicate away from a
+    // deactivated account being reachable again. `accounts` holds no PII of its
+    // own; it is a pointer to a tenant identity.
+    //
+    // `verification_tokens` and `booking_email_verifications` were deleted here
+    // too until Sep 2026. Nothing writes to either any more — see the note on
+    // both tables in docs/database.md — so those deletes were no-ops, and a
+    // no-op is a worse compliance claim than an honest absence.
+    await db.delete(accounts).where(eq(accounts.userId, userId));
 
     // No address in the metadata — the row points at a `users` row that still
     // holds it, and duplicating it here would put PII in an append-only table.

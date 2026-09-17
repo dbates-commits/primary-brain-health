@@ -5,6 +5,8 @@ import type {
   PaymentFinalizeAction,
 } from "@pbh/booking";
 
+import type { VerifyEmailState } from "@/components/booking/actions";
+
 /**
  * Inert stand-ins for the step actions, so the preview renders the real forms
  * without touching the booking a visitor might have in progress.
@@ -53,8 +55,12 @@ export const previewFinalize: PaymentFinalizeAction = async () => ({
 });
 
 /**
- * Reports success without sending, which is exactly what the real action looks
- * like from here: it never tells the browser whether an email went out, so the
- * preview reads identically to the live step.
+ * Goes nowhere, which is the point: the real action redirects to Auth0's login,
+ * and a preview route that is deliberately reachable in production must not
+ * start a real sign-in. It returns the shape the real one returns when it
+ * cannot redirect, so the preview also shows the step's error state.
  */
-export const previewResend = async (): Promise<{ ok: true }> => ({ ok: true });
+export const previewVerify = async (): Promise<VerifyEmailState> => ({
+  status: "error",
+  message: "Preview only — no code is sent from this page.",
+});

@@ -13,6 +13,7 @@ import type {
 } from "@pbh/booking";
 import { resolveActorId } from "@/lib/booking-actor";
 import { createSessionForUser } from "@/lib/auth-session";
+import { revokeSessionCookieUnless } from "@/lib/session-revoke";
 
 // User-facing failure copy. Kept deliberately vague — the real cause goes to the
 // server logs, never to the customer.
@@ -59,7 +60,7 @@ export async function createAssessmentCheckoutSession(
  *
  * The sign-in used to need a signed token handed to a second app on another
  * origin; with one app it is just a cookie we set here, so a customer who comes
- * back later reaches `/welcome` without asking for a magic link.
+ * back later reaches `/welcome` without signing in again.
  *
  * A `success` state sends the customer on to `/welcome`.
  */
@@ -96,9 +97,17 @@ export async function finalizeCheckoutSession(
   // when there is no proxy (a local `next dev`), which keeps the helper's
   // NODE_ENV fallback — the case it is actually correct for.
   try {
-    const proto = (await headers()).get("x-forwarded-proto") ?? undefined;
-    const cookie = await createSessionForUser(id, { protocol: proto });
-    (await cookies()).set(cookie.name, cookie.value, cookie.options);
+    // The confirm step now signs the customer in at Auth0, so by here they
+    // usually already hold a session. Minting a second one unconditionally
+    // would leave the first row behind — Logout only deletes the token in the
+    // current cookie, and the absolute cap is applied when a row is read, so an
+    // abandoned row is un-revocable, un-audited and never expires. Keep theirs
+    // if it is theirs; revoke it if it belongs to someone else.
+    if ((await revokeSessionCookieUnless(id)) !== "kept") {
+      const proto = (await headers()).get("x-forwarded-proto") ?? undefined;
+      const cookie = await createSessionForUser(id, { protocol: proto });
+      (await cookies()).set(cookie.name, cookie.value, cookie.options);
+    }
   } catch (err) {
     console.error("post-payment session mint failed:", err);
   }

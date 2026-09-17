@@ -11,9 +11,11 @@ import type { Lane, ProcessEdge, ProcessNode } from "./process-model";
  * from the running code, so it goes stale the way a diagram does: change the
  * flow, change this file.
  *
- * **Sign-in is the magic link.** `tuily/auth0-provider` is unmerged; if it
- * lands, the confirmation-link mechanism below disappears entirely — email
- * verification moves to Auth0 and `/booking/confirm` goes with it.
+ * **Sign-in is Auth0.** The one-time confirmation link we used to email is
+ * gone, and `/booking/confirm` with it: the address is now proven by the code
+ * Auth0 mails, and the same trip produces the session. Auth.js still holds that
+ * session. The leg, and the four gates on the way back, are drawn below from
+ * `docs/auth0-flow.md`.
  *
  * Positions are on a column grid (see `COL`) so the map reads like lines of
  * text: left to right, then down and back to the left. The three edges that
@@ -38,7 +40,7 @@ const COL = [210, 425, 640, 855, 1070, 1285, 1500, 1715];
 
 /** Row centres, and the corridors between the bands. */
 const ROW = { marketing: 95, booking: 265, pay1: 465, pay2: 580, after1: 735, after2: 835 };
-const VIA = { toBooking: 180, resend: 212, toPayment: 385, toAfter: 655 };
+const VIA = { toBooking: 180, retry: 212, toPayment: 385, toAfter: 655 };
 
 export const MAP_WIDTH = 1880;
 
@@ -129,12 +131,13 @@ export const NODES: ProcessNode[] = [
     y: ROW.booking,
     name: "Signs up",
     description:
-      "Name, email and the chosen package. The package is stored on the row because the confirmation gate destroys in-memory state before payment.",
+      "Name, email and the chosen package. The package is stored on the row because the trip out to Auth0 destroys in-memory state before payment.",
     systems: ["neon"],
     writes: [
       "users row, incl. selected_package_key",
       "audit: signup",
       "pbh_booking_session cookie — signed, 2 hours",
+      "pbh_verify_for cookie — signed, 30 min, names the address the Auth0 leg must land on",
     ],
     sends: [],
     owner: {
@@ -142,69 +145,73 @@ export const NODES: ProcessNode[] = [
       file: "packages/booking/src/server/signup-core.ts",
       team: "Platform",
     },
-    failure: "BOOKING_RESUME_SECRET missing → signup throws; it is what signs the booking cookie.",
+    failure:
+      "BOOKING_RESUME_SECRET missing → signup throws; it is what signs the booking cookie. AUTH0_* unset → refused before the insert, because a row with nowhere to verify takes the address and strands every retry.",
     state: "built",
     plannedNote:
       "for me | for someone else — the marker Stefanie asked for, kept on the signup event and carried to payment and paid so the funnel can be split.",
   },
   {
-    id: "send_confirm",
+    id: "to_auth0",
     kind: "service",
     lane: "booking",
     x: COL[1],
     y: ROW.booking,
-    name: "Sends the confirmation",
+    name: "Hands off to Auth0",
     description:
-      "A random token, SHA-256 hashed at rest, good for 24 hours and single-use. The flow stops dead here: nothing downstream is reachable until the address is proven.",
-    systems: ["resend", "neon"],
-    writes: ["booking_email_verifications row", "audit: email_verification_sent"],
-    sends: ["confirm-email"],
+      "A 302 to Universal Login carrying `login_hint` and `prompt=login`. The forced re-authentication is not a nicety: Auth0's own SSO cookie would otherwise sign a new customer in as whoever last used Auth0 on this browser.",
+    systems: ["auth0"],
+    writes: ["PKCE, state and nonce cookies — 30 min, the length of the leg"],
+    sends: [],
     owner: {
-      package: "@pbh/booking",
-      file: "packages/booking/src/server/email-verification.ts",
+      package: "marketing",
+      file: "apps/marketing/src/components/booking/actions.ts",
       team: "Platform",
     },
     failure:
-      "RESEND_API_KEY unset → sends become logged no-ops and the URL is printed to the server console. That is how local testing works.",
+      "AUTH0_* unset → signup refuses before writing anything, rather than stranding a row with no way to verify it.",
     state: "built",
   },
   {
-    id: "click_link",
+    id: "universal_login",
     kind: "user",
     lane: "booking",
     x: COL[2],
     y: ROW.booking,
-    name: "Opens the link",
+    name: "Enters the code Auth0 emails",
     description:
-      "Possibly on another device — the link is the only way past this point, and nothing downstream is reachable until it is opened.",
-    systems: [],
+      "On Auth0's screen, possibly on another device. This is the step that proves the address — nothing downstream is reachable until Auth0 asserts `email_verified`. We neither send this mail nor see the code.",
+    systems: ["auth0"],
     writes: [],
     sends: [],
     owner: {
       package: "marketing",
-      file: "apps/marketing/src/app/booking/confirm/route.ts",
+      file: "apps/marketing/src/lib/auth0-gate.ts",
       team: "Platform",
     },
+    failure:
+      "Abandoned at Auth0 → they come back on the booking cookie and `verifyEmailAction` re-enters the leg. The sign-in throttle this replaced now has to come from Auth0 Attack Protection, which nobody has confirmed is on.",
     state: "built",
   },
   {
-    id: "link_valid",
+    id: "auth0_gates",
     kind: "gateway-xor",
     lane: "booking",
     x: COL[3],
     y: ROW.booking,
-    name: "Link still good?",
+    name: "All four gates pass?",
     description:
-      "The token is single-use and lasts 24 hours. One click is all it takes — but a link that has already been used, or has aged out, is refused rather than replayed.",
-    systems: ["neon"],
+      "On the callback, in order: `email_verified` is exactly true · a PBH account exists for the address · `pbh_verify_for` names that same address · any session cookie belonging to someone else is revoked first. Any refusal lands on /login?error with nothing written.",
+    systems: ["auth0", "authjs", "neon"],
     writes: [],
     sends: [],
     owner: {
-      package: "@pbh/booking",
-      file: "packages/booking/src/server/email-verification.ts",
+      package: "marketing",
+      file: "apps/marketing/src/auth.ts",
       team: "Platform",
     },
-    failure: "Expired or already used → they are offered a fresh one, once a minute.",
+    failure:
+      "Gate 3 is the one a customer can trip by hand: `login_hint` only pre-fills, so editing the address at Auth0 verifies a different account and this refuses the trip rather than stranding the booking.",
     state: "built",
   },
   {
@@ -213,19 +220,19 @@ export const NODES: ProcessNode[] = [
     lane: "booking",
     x: COL[4],
     y: ROW.booking,
-    name: "Address proven",
+    name: "Address proven, and signed in",
     description:
-      "Burns the token, marks the address verified and renews the booking cookie. The welcome email fires here rather than at signup — two emails at once buries the one they have to act on.",
-    systems: ["resend", "neon"],
+      "Links the Auth0 identity to the PBH row, mints the Auth.js session, then stamps the address verified. The stamp only lands while the column is null — which is what stops a returning customer being welcomed again on every login.",
+    systems: ["authjs", "neon", "resend"],
     writes: [
-      "booking_email_verifications.consumed_at",
+      "accounts row, sessions row",
       "users.email_verified",
-      "audit: email_verified",
+      "audit: login, email_verified",
     ],
     sends: ["welcome"],
     owner: {
       package: "@pbh/booking",
-      file: "packages/booking/src/server/email-verification.ts",
+      file: "packages/booking/src/server/email-verified.ts",
       team: "Platform",
     },
     state: "built",
@@ -563,16 +570,16 @@ export const EDGES: ProcessEdge[] = [
   { from: "cta", to: "bounce", label: "no" },
   { from: "cta", to: "signup", label: "yes", kind: "wrap", via: VIA.toBooking },
 
-  { from: "signup", to: "send_confirm" },
-  { from: "send_confirm", to: "click_link" },
-  { from: "click_link", to: "link_valid" },
-  { from: "link_valid", to: "verified", label: "yes" },
+  { from: "signup", to: "to_auth0" },
+  { from: "to_auth0", to: "universal_login" },
+  { from: "universal_login", to: "auth0_gates" },
+  { from: "auth0_gates", to: "verified", label: "yes" },
   {
-    from: "link_valid",
-    to: "send_confirm",
-    label: "no · another link, once a minute",
+    from: "auth0_gates",
+    to: "to_auth0",
+    label: "no · /login?error, nothing written",
     kind: "loop",
-    via: VIA.resend,
+    via: VIA.retry,
   },
   { from: "verified", to: "resume" },
   { from: "resume", to: "details" },

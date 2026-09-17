@@ -3,29 +3,9 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { db, sessions, writeAuditLog } from "@pbh/db";
 import { IDLE_SESSION_MAX_SECONDS } from "@/auth";
+import { secureCookiesEnabled, sessionCookieName } from "@/lib/session-cookie";
 
-/**
- * Whether Auth.js is using secure cookies (and so the `__Secure-` name prefix).
- *
- * Auth.js derives this from the **request protocol**, not from NODE_ENV
- * (`@auth/core/lib/init.js`: `config.useSecureCookies ?? url.protocol ===
- * "https:"`). Callers that have the request must pass its protocol; guessing
- * from NODE_ENV diverges for a production build served over http — we would
- * write `__Secure-…` (which the browser then refuses over http) while `auth()`
- * reads the unprefixed name, and the session would silently never be found.
- */
-function secureCookiesEnabled(protocol?: string): boolean {
-  if (protocol) {
-    return protocol.startsWith("https");
-  }
-  return process.env.NODE_ENV === "production";
-}
-
-export function sessionCookieName(protocol?: string): string {
-  return secureCookiesEnabled(protocol)
-    ? "__Secure-authjs.session-token"
-    : "authjs.session-token";
-}
+export { sessionCookieName };
 
 /** The cookie a caller must set for `auth()` to find the session it describes. */
 export interface SessionCookie {

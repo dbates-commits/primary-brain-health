@@ -10,7 +10,7 @@ import {
   previewConsent,
   previewDetails,
   previewFinalize,
-  previewResend,
+  previewVerify,
 } from "./preview-actions";
 
 /**
@@ -30,7 +30,7 @@ export function StepBody({
 }) {
   switch (step) {
     case "confirm":
-      return <EmailConfirmationStep resend={previewResend} />;
+      return <EmailConfirmationStep verify={previewVerify} />;
     case "details":
       return (
         <DetailsForm

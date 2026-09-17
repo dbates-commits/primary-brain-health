@@ -34,12 +34,31 @@ First-time browser install (once per machine): `npx playwright install chromium`
 |---|---|---|
 | `booking-smoke.spec.ts` | the app only, no secrets | ✅ yes |
 | `booking-authz.spec.ts` | test DB | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
-| `onboarding.spec.ts` (payment path) | test DB + Stripe test keys | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
-| `resume.spec.ts` (abandon + return) | test DB + Stripe test keys | ⏭️ skipped unless `E2E_FULL_FLOW=1` |
+| `onboarding.spec.ts` (payment path) | a way past Auth0 | ⛔ off — `describe.skip`, see below |
+| `resume.spec.ts` (abandon + return) | a way past Auth0 | ⛔ off — `describe.skip`, see below |
 
-The smoke spec proves the harness + booking entry work with no secrets. The rest
-are skipped (not failed) unless you opt in, so a missing secret is never a false
-red.
+The smoke spec proves the harness + booking entry work with no secrets.
+
+`booking-authz.spec.ts` needs a booking in progress but nothing about how it got
+there, so it seeds a verified account straight into the test database and mints
+its own booking cookie (`helpers/seed.ts`). Nothing in the app changes and no
+production path learns a way past Auth0 — it is a test writing a fixture row —
+and every byte the spec is actually about stays real: the cookie on the wire,
+the server's HMAC, and the action behind the form.
+
+**The other two do not run at all, `E2E_FULL_FLOW=1` or not.** They are about the
+signup journey itself, and drove it by reading our own confirmation link out of
+the server log; Auth0 emails a code instead, and there is no log to read.
+`E2E_FULL_FLOW=1` is still their inner guard, but the `describe.skip` above it
+wins — so the environment below buys you nothing until one of these lands
+(pbh-mgr):
+
+- a mailbox API the test can read the Auth0 code from,
+- a dedicated Auth0 test connection, or
+- an explicitly reviewed test-only bypass.
+
+Faking a verified address in the money path was not on the list of things to add
+unreviewed, which is why they are off rather than patched.
 
 `resume.spec.ts` is the abandon-and-return path: it stops after every step,
 leaves, comes back to `/?booking=resume#booking`, and asserts the step the
@@ -75,8 +94,10 @@ HSA/FSA cards are covered as ordinary branded charges.)
   way.
 
 Put these in `apps/marketing/.env.local`. The config disables `RESEND_API_KEY`
-for the run and tees the marketing server log so the test can read back the
-email-confirmation link (signup gates on it) instead of needing a mailbox.
+for the run and tees the marketing server log — which is how the specs used to
+read back our own confirmation link. That link no longer exists, which is why
+all three are switched off above; this section describes what they will need
+again once there is a way past Auth0.
 
 ```bash
 E2E_FULL_FLOW=1 pnpm test:e2e --project=marketing

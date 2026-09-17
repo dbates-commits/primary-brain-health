@@ -17,11 +17,11 @@ export interface StepPreviewMeta {
 export const STEP_META: Record<ModalStep, StepPreviewMeta> = {
   confirm: {
     name: "1 · Email Confirmation",
-    when: "Straight after signup, while the confirmation link sits unclicked in their inbox. The flow stops here until it is.",
+    when: "Only seen by someone who dropped out at Auth0's code screen and came back — signup goes there directly. The flow stops here until the address is proven.",
   },
   details: {
     name: "2 · Your Details",
-    when: "First step after the link is clicked. Asks about the person being assessed; the name fields arrive prefilled with the account holder's.",
+    when: "First step after the address is proven at Auth0. Asks about the person being assessed; the name fields arrive prefilled with the account holder's.",
   },
   consent: {
     name: "3 · Consent",

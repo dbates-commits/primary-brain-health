@@ -21,9 +21,6 @@ const isProduction = process.env.VERCEL_ENV === "production";
  * with no business in an index. Each of those routes also sets
  * `robots: { index: false }` in its own metadata — this is the crawl-level half
  * of the same statement.
- *
- * `/booking/confirm` carries a single-use token in the URL; keeping crawlers off
- * it means a shared or leaked link can't be burned by a bot.
  */
 export default function robots(): MetadataRoute.Robots {
   if (!isProduction) {
@@ -39,7 +36,6 @@ export default function robots(): MetadataRoute.Robots {
         "/welcome",
         "/profile",
         "/internal/",
-        "/booking/confirm",
         "/api/",
       ],
     },

@@ -13,9 +13,15 @@
  * Keep the exported name in step with the real module.
  */
 
-/** Records the submit so a story can assert it, and goes no further. */
-export async function signOutAction(): Promise<void> {
+/**
+ * Records the submit so a story can assert it, and goes no further.
+ *
+ * Returns "/" as the redirect rather than an Auth0 logout URL: the real action
+ * ends the Auth0 session too, and a story has none to end.
+ */
+export async function signOutAction(): Promise<{ redirectTo: string }> {
   await new Promise((resolve) => {
     setTimeout(resolve, 200);
   });
+  return { redirectTo: "/" };
 }

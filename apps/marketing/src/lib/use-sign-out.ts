@@ -28,12 +28,18 @@ export function useSignOut(): { signOut: () => void; pending: boolean } {
     }
     setPending(true);
     void signOutAction()
+      .then(({ redirectTo }) => {
+        // Auth0's logout endpoint, which clears its SSO cookie and then sends
+        // the browser back to our origin. Falls back to "/" when Auth0 isn't
+        // configured.
+        window.location.assign(redirectTo);
+      })
       .catch((err: unknown) => {
         // The session may well be gone anyway; leaving the page is still the
-        // right outcome, so this only records why the revoke didn't land.
+        // right outcome, so this only records why the revoke didn't land. Home
+        // rather than Auth0: without a URL from the server there is nothing to
+        // send them to, and our session is the one that mattered most.
         console.error("[auth] sign-out failed:", err);
-      })
-      .finally(() => {
         window.location.assign("/");
       });
   }

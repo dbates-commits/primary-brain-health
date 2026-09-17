@@ -2,8 +2,10 @@ import { db } from "./client";
 import { auditLog } from "./schema";
 
 /**
- * Significant events worth an immutable audit-trail entry. Keep this union in
- * sync with what compliance expects to see (SAQ-A + HIPAA).
+ * Significant events worth an immutable audit-trail entry. Keep the live half of
+ * this union in sync with what compliance expects to see (SAQ-A + HIPAA) — and
+ * in sync with what the code actually writes, which is the half that makes the
+ * first claim true. Events no longer emitted are listed separately at the end.
  */
 export type AuditEventType =
   | "signup"
@@ -12,21 +14,14 @@ export type AuditEventType =
   | "payment_succeeded"
   | "payment_failed"
   | "payment_refunded"
-  | "token_issued"
   | "email_sent"
-  // Authentication / session lifecycle (magic-link login, programmatic
+  // Authentication / session lifecycle (Auth0 login, programmatic
   // post-payment login, sign-out) — access events a HIPAA audit expects.
-  | "magic_link_sent"
   | "login"
   | "logout"
-  // A sign-in request refused by the throttle. Worth a row of its own: it is
-  // the signal that someone is walking addresses through the form, and the
-  // rate-limit table it comes from is swept every fifteen minutes.
-  | "signin_rate_limited"
-  // Booking email confirmation: the link sent at signup, and its redemption.
-  // `email_verified` is the record that this address was proven to be reachable
-  // by the person who booked.
-  | "email_verification_sent"
+  // The address was proven reachable by the person who booked. Written when
+  // Auth0 reports a verified address on the first sign-in; the email itself is
+  // Auth0's, so there is no longer a "we sent one" event to pair it with.
   | "email_verified"
   // Account lifecycle: a deletion request filed from the account page. Nothing
   // is erased when this is written — `users.deactivated_at` is stamped and the
@@ -40,7 +35,16 @@ export type AuditEventType =
   // user returns early without re-sending. This row is how the operator
   // worklist finds a subject Linus was never told about. Metadata carries the
   // reason, never an address.
-  | "deletion_notice_failed";
+  | "deletion_notice_failed"
+  // Historical. Nothing emits these any more — they belonged to the magic link,
+  // the booking-confirm link and the sign-in throttle that went with them when
+  // Auth0 became the only door (Sep 2026). Kept in the union because the rows
+  // are still in `audit_log`, which is append-only: reading one back must not
+  // be a type error. Do not add to this group; add to the live list above.
+  | "token_issued"
+  | "magic_link_sent"
+  | "signin_rate_limited"
+  | "email_verification_sent";
 
 export interface AuditEntry {
   eventType: AuditEventType;

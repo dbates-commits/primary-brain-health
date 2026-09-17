@@ -20,6 +20,7 @@
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@neondatabase/serverless": "^1.0.1",
     "@playwright/test": "^1.61.1",
     "prettier": "^3.4.2",
     "turbo": "^2.9.18"

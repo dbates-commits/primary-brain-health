@@ -44,6 +44,7 @@ export function getBookingSecret(): string {
  */
 export const BOOKING_SESSION_DOMAIN = "";
 export const CONSENT_STAMP_DOMAIN = "consent-stamp";
+export const VERIFY_BINDING_DOMAIN = "verify-binding";
 
 /**
  * NUL, so a tag can't be spelled out of the payload's own leading characters.

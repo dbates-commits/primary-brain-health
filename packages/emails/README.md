@@ -18,9 +18,7 @@ sample data.
 
 | Template | Trigger |
 | --- | --- |
-| `WelcomeEmail` | Email confirmation redeemed (`email-verification.ts`) |
-| `ConfirmEmailEmail` | Signup completes (`email-verification.ts`) |
-| `MagicLinkEmail` | Sign-in requested (`apps/marketing/src/lib/auth-email.ts`) |
+| `WelcomeEmail` | Address proven at Auth0, on the sign-in that stamps `users.email_verified` (`markEmailVerified`) |
 | `PaymentReceiptEmail` | Payment succeeds (`fulfill.ts` / Stripe webhook) |
 | `AssessmentReadyEmail` | Linus enrollment lands (`register-and-enroll.ts`) |
 | `PaymentRefundedEmail` | Refund recorded (`recordRefundedPayment`) |

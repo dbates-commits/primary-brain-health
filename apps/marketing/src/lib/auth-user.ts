@@ -10,10 +10,9 @@ export interface AuthUser {
 }
 
 /**
- * Look up an account by email for the magic-link flow. Shared by the login-only
- * `signIn` callback (which rejects unknown addresses before a token is minted)
- * and by `sendMagicLinkEmail` (which needs the first name for the greeting), so
- * both agree on exactly what counts as an existing account.
+ * Look up an account by email — the login-only gate. Called from the `signIn`
+ * callback in `auth.ts`, which rejects an unknown address before Auth.js hands
+ * the profile to the adapter, so no user is ever created by signing in.
  *
  * `users.email` is Postgres `citext`, so this is case-insensitive; we normalize
  * anyway to match how the rest of the app writes addresses.
@@ -21,9 +20,9 @@ export interface AuthUser {
  * A deactivated account is deliberately not "an existing account" here. Filing a
  * deletion request stamps `users.deactivated_at` but keeps the row and the
  * address (see `deactivate-account-core.ts`), so without this clause the person
- * could ask for a magic link the moment after asking to be deleted. Both doors
- * into sign-in run through this function, so one predicate closes both — and the
- * form's existing "Not an active user" wording is then literally true.
+ * could sign back in the moment after asking to be deleted. Sign-in is the only
+ * door left, and it runs through this function — which is also what `/login`
+ * turns into the "no active account" message it shows after a refusal.
  */
 export async function findAuthUserByEmail(
   rawEmail: string,

@@ -55,9 +55,9 @@ async function expectOverview(
   expected: { cta: string; rows: string[] },
 ): Promise<void> {
   const overview = overviewPane(page);
-  await expect(
-    overview.getByRole("heading", { name: "Welcome Back!" }),
-  ).toBeVisible({ timeout: 20_000 });
+  await expect(overview.getByRole("heading", { name: "Welcome Back!" })).toBeVisible({
+    timeout: 20_000,
+  });
 
   const rows = overview.getByRole("listitem");
   await expect(rows).toHaveCount(expected.rows.length);
@@ -68,9 +68,7 @@ async function expectOverview(
   // `exact`: the details row's edit button is labelled "… — completed, edit",
   // which substring-matches the CTA's name. The two never coexist, but the
   // locator shouldn't depend on that.
-  await expect(
-    overview.getByRole("button", { name: expected.cta, exact: true }),
-  ).toBeVisible();
+  await expect(overview.getByRole("button", { name: expected.cta, exact: true })).toBeVisible();
 }
 
 /** Which tab the step pane says is current. */
@@ -80,16 +78,24 @@ async function expectCurrentTab(page: Page, label: string): Promise<void> {
   ).toContainText(label);
 }
 
-test.describe("resuming an abandoned booking", () => {
+test.describe.skip(// Skipped, not deleted, and deliberately not repaired with a shortcut.
+//
+// These specs drove signup by reading the `/booking/confirm` URL back out of
+// the marketing server log (`helpers/confirm.ts`). Signup now goes through
+// Auth0, which emails a code to a real inbox — there is no URL in any log to
+// read, and no way to fake one that would not amount to forging a verified
+// address in the money path.
+//
+// Restoring them needs a decision, not a patch: a mailbox API to read the
+// OTP, an Auth0 database connection with a fixed E2E user, or an explicitly
+// reviewed test-only bypass. Tracked on pbh-mgr.
+"resuming an abandoned booking", () => {
   test.skip(
     !FULL_FLOW,
     "Set E2E_FULL_FLOW=1 with a test DB + Stripe test keys to run the resume path.",
   );
 
-  test("every return lands on the step the server resolved", async ({
-    page,
-    context,
-  }) => {
+  test("every return lands on the step the server resolved", async ({ page, context }) => {
     // Longer than the money path's 120s: this walks the same flow with a
     // navigation and a fresh resume between every step.
     test.setTimeout(240_000);
@@ -101,17 +107,15 @@ test.describe("resuming an abandoned booking", () => {
     // The gate is a precondition, not a step: no overview to survey and no
     // progress band, because nothing is behind them yet.
     await expect(overviewPane(page)).toHaveCount(0);
-    await expect(page.locator('nav[aria-label="Booking progress"]')).toHaveCount(
-      0,
-    );
+    await expect(page.locator('nav[aria-label="Booking progress"]')).toHaveCount(0);
 
     // ---- 2. Leave while still unconfirmed --------------------------------
     await page.goto("about:blank");
     await page.goto(RESUME_URL);
 
-    await expect(
-      page.getByRole("heading", { name: /email confirmation/i }),
-    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: /email confirmation/i })).toBeVisible({
+      timeout: 20_000,
+    });
     await expect(overviewPane(page)).toHaveCount(0);
 
     // ---- 3. Confirm the address ------------------------------------------
@@ -176,9 +180,7 @@ test.describe("resuming an abandoned booking", () => {
     // ---- 9. Sign back in ---------------------------------------------------
     await page.goto("/login");
     await page.getByLabel("Email").fill(email);
-    await page
-      .getByRole("button", { name: "Email me a sign-in link" })
-      .click();
+    await page.getByRole("button", { name: "Email me a sign-in link" }).click();
     await page.goto(await waitForSignInUrl(email));
 
     // Auth.js lands them on /welcome, which bounces an unpaid visitor to the
@@ -210,9 +212,9 @@ test.describe("resuming an abandoned booking", () => {
     // already-paid guard (pbh-ypf).
     await page.goto(RESUME_URL);
     await page.waitForURL(/\/welcome$/, { timeout: 30_000 });
-    await expect(
-      page.getByRole("heading", { name: /choose how to start/i }),
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /choose how to start/i })).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 });

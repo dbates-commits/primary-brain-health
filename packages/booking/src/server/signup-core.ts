@@ -6,7 +6,6 @@ import { issueBookingSession, type BookingCookieJar } from "./booking-session";
 import { isPgError, PgErrorCode } from "./db-errors";
 import { isValidEmail, normalizeEmail } from "./email";
 import { resolvePackageKey } from "../packages";
-import { sendBookingConfirmation } from "./email-verification";
 
 /**
  * Create the partial account at signup: validate the first/last/email, insert a
@@ -71,17 +70,17 @@ export async function createAccountCore(
       metadata: { source: opts.source },
     });
 
-    // Issued before the confirmation email is sent, so the very next step
-    // already has an identity to act on. It proves nothing about the address —
-    // `resolveBookingResumeState` still gates on `users.emailVerified`.
+    // Issued before the customer leaves for Auth0, so the very next step
+    // already has an identity to act on when they come back. It proves nothing
+    // about the address — `resolveBookingResumeState` still gates on
+    // `users.emailVerified`, which only Auth0 now stamps.
     issueBookingSession(opts.cookies, created.id);
 
-    // Best-effort (never throws): a failed send must not fail signup — they can
-    // re-send from the confirmation step. The welcome email deliberately does
-    // NOT go out here: the flow is now blocked until this link is clicked, and
-    // two emails arriving together buries the one they have to act on. Welcome
-    // is sent on successful confirmation instead.
-    await sendBookingConfirmation(created.id);
+    // No confirmation email from us any more. The caller sends the customer to
+    // Auth0 next, which emails them a code; entering it is what proves the
+    // address and stamps `emailVerified` (see `markEmailVerified`). The welcome
+    // email rides on that same transition, so it still lands only once the
+    // address is real.
 
     return {
       status: "success",

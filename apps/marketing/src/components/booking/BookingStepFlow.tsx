@@ -36,7 +36,7 @@ import {
   signupAction,
   detailsAction,
   consentAction,
-  resendConfirmationAction,
+  verifyEmailAction,
   getBookingResumeState,
   getBookingDetailsValues,
 } from "./actions";
@@ -127,7 +127,6 @@ export function BookingStepFlow({
   const [stepIndex, setStepIndex] = useState(0);
   const [packageKey, setPackageKey] = useState<PackageKey>(DEFAULT_PACKAGE_KEY);
   const [context, setContext] = useState<FlowContext>(EMPTY_CONTEXT);
-  const [expiredLink, setExpiredLink] = useState(false);
   /**
    * An account exists for this visit, so the on-page form must stop accepting
    * submissions — it is still mounted behind the modal, React has reset its
@@ -261,14 +260,18 @@ export function BookingStepFlow({
   );
 
   /**
-   * The account now exists and the confirmation email is out, so open the modal
-   * at the gate the customer has to clear. `confirm` is index 0 — the modal no
-   * longer owns the step that just ran.
+   * The account now exists, so open the modal at the gate the customer has to
+   * clear. `confirm` is index 0 — the modal no longer owns the step that just
+   * ran.
+   *
+   * On the happy path this is barely seen: `signupAction` redirects to Auth0,
+   * so the browser is already leaving. It matters when that redirect could not
+   * happen (Auth0 unconfigured), which is the one case that leaves a customer
+   * here with an unproven address.
    */
   const completeSignup = useCallback((result: SignupResult) => {
     setContext({ firstName: result.firstName, lastName: result.lastName });
     setSignedUp(true);
-    setExpiredLink(false);
     setFurthestStep("confirm");
     openModal(0);
   }, [openModal]);
@@ -341,17 +344,21 @@ export function BookingStepFlow({
   }, [paid, completePayment]);
 
   /**
-   * Reopen the flow for someone returning from a confirmation link.
+   * Reopen the flow for someone coming back from Auth0.
    *
-   * The confirm route redirects here with `?booking=resume` (or `expired`) and a
-   * signed httpOnly cookie; the marker in the URL carries no identity of its own.
-   * Resolving the step through a server action rather than in the page keeps the
-   * home page statically rendered — only a returning customer pays the
-   * round-trip. `router` is stable, so this still runs once on mount.
+   * Auth0 returns to `/?booking=resume#booking` with our session cookie set; the
+   * marker in the URL carries no identity of its own. Resolving the step through
+   * a server action rather than in the page keeps the home page statically
+   * rendered — only a returning customer pays the round-trip. `router` is
+   * stable, so this still runs once on mount.
+   *
+   * There used to be an `expired` marker too, for a confirmation link that had
+   * run out or been used. Auth0's code has no equivalent — a code that fails
+   * just leaves the customer on Auth0's own screen to ask for another.
    */
   useEffect(() => {
     const marker = new URLSearchParams(window.location.search).get("booking");
-    if (marker !== "resume" && marker !== "expired") {
+    if (marker !== "resume") {
       return;
     }
     let cancelled = false;
@@ -360,8 +367,7 @@ export function BookingStepFlow({
         return;
       }
       // The server still calls a fully-paid booking "done"; that is no longer a
-      // modal step, so send them to the screen it stands for. Checked before the
-      // expired-link branch below, since a paid customer's address is proven.
+      // modal step, so send them to the screen it stands for.
       if (resumed.step === "done") {
         router.replace(WELCOME_PATH);
         return;
@@ -374,20 +380,13 @@ export function BookingStepFlow({
       setSignedUp(true);
       // Without this the flow would fall back to the default package and charge
       // the basic price for a Comprehensive booking — every customer passes
-      // through here, because the confirmation gate is blocking.
+      // through here, because the verification gate is blocking.
       setPackageKey(resumed.packageKey);
-      // An expired link lands on the confirmation step whatever else is done,
-      // since the address still isn't proven.
-      const target = marker === "expired" ? "confirm" : resumed.step;
-      // Both, and together: an unproven address invalidates everything after it,
-      // so an expired link must clamp the progress as well as the step. Letting
-      // the two disagree would greet someone "Welcome Back!" over a list whose
-      // rows the flow will not actually let them reach.
+      const target = resumed.step;
       setFurthestStep(target);
-      setExpiredLink(marker === "expired");
       // The overview only for someone with progress to survey. `confirm` means
-      // the address still isn't proven — whether that is a first visit or an
-      // expired link — so there is nothing to summarise and one thing to do.
+      // the address still isn't proven — they dropped out at Auth0 — so there
+      // is nothing to summarise and one thing to do.
       openModal(MODAL_STEPS.indexOf(target), {
         overview: target !== "confirm",
       });
@@ -524,10 +523,7 @@ export function BookingStepFlow({
           />
         )}
         {!showOverview && step === "confirm" && (
-          <EmailConfirmationStep
-            expired={expiredLink}
-            resend={resendConfirmationAction}
-          />
+          <EmailConfirmationStep verify={verifyEmailAction} />
         )}
         {!showOverview && step === "details" && detailsPending && (
           <p className="text-body-sm text-text-default">Loading your details…</p>
