@@ -317,6 +317,79 @@ export const DIMENSIONS: Dimension[] = [
     ],
   },
   {
+    id: "accounts",
+    name: "Signed-in pages and accounts",
+    whyItMatters:
+      "Three pages are behind a login today — the sign-in screen, the post-payment welcome screen and the account settings page.",
+    ours: {
+      summary: "Ours, with Auth0 as the identity provider.",
+      claim: {
+        plain:
+          "We run the login ourselves, so a signed-in page can show anything and the account details stay in our own database.",
+        technical:
+          "Auth.js with database-backed sessions in Neon and Auth0 as the sole identity provider (PR #85). `/profile` gates on a session; `/welcome` additionally requires an entitlement.",
+      },
+      pros: [
+        "A signed-in page can read anything we hold, including payment and plan data.",
+        "Auth0 is an OIDC provider and the session is a row in our own database.",
+        "Sessions carry a 15-minute idle timeout and an 8-hour cap, set from a security review.",
+      ],
+      cons: [
+        "Auth0 is on a personal tenant today; the production tenant is still an open ask.",
+        "It is ours to run, and a login outage is a customer who cannot get back in.",
+      ],
+    },
+    hubspot: {
+      summary: "Memberships, but every member is a CRM contact.",
+      claim: {
+        plain:
+          "HubSpot can put pages behind a login. The catch is that every person who logs in becomes a contact record in the CRM — which is the thing we have been keeping the booking flow out of.",
+        technical:
+          "Memberships are Content Hub Professional and up, built on the CRM: the account system leverages HubSpot CRM and CRM Lists, so a member is a contact. SSO is SAML-only, Professional and up, documented for Okta and OneLogin.",
+      },
+      pros: [
+        "Login, registration and password reset come built in, with no code.",
+        "SSO exists, and Auth0 can act as a SAML provider, so it is probably reachable.",
+      ],
+      cons: [
+        "A member is a CRM contact by construction — the booking flow's “leaves no trace in HubSpot” property could not survive it.",
+        "SAML only. Our Auth0 setup is OIDC, and Auth0 is not among the documented providers.",
+        "A signed-in page could not show plan or payment data without an Enterprise serverless function calling our database.",
+        "SSO is enabled per subdomain, not globally.",
+      ],
+    },
+    verdict: "ours",
+    takeaway:
+      "HubSpot can gate a page, but it gates it by making the visitor a CRM contact. That is the opposite of the data rule we are working to.",
+    toConfirm:
+      "Auth0 is not named in HubSpot's SSO documentation, which lists Okta and OneLogin. Auth0 does speak SAML, so it would likely work — but nobody has tried it, and it is Professional-and-up either way.",
+    sources: [
+      {
+        label: "Our sign-in and session model",
+        href: "docs/auth.md",
+      },
+      {
+        label: "The Auth0 provider, still in review",
+        href: "https://github.com/dbates-commits/primary-brain-health/pull/85",
+      },
+      {
+        label: "HubSpot — memberships are built on the CRM",
+        href: "https://developers.hubspot.com/docs/cms/data/memberships",
+        vendor: true,
+      },
+      {
+        label: "HubSpot — membership SSO is SAML-only, Okta and OneLogin",
+        href: "https://developers.hubspot.com/docs/cms/start-building/features/memberships/sso",
+        vendor: true,
+      },
+      {
+        label: "HubSpot — private content needs Content Hub Professional or Enterprise",
+        href: "https://knowledge.hubspot.com/website-pages/require-member-registration-to-access-private-content",
+        vendor: true,
+      },
+    ],
+  },
+  {
     id: "booking",
     name: "The booking and payment flow",
     whyItMatters:
