@@ -79,12 +79,6 @@ export const VERDICT_LABELS: Record<Verdict, string> = {
   depends: "Depends on the call",
 };
 
-/** The closing caveat, and where its numbers come from. */
-export type Caveat = {
-  text: string;
-  sources: Source[];
-};
-
 /** A named site, and the one thing it is evidence of. */
 export type Example = {
   name: string;

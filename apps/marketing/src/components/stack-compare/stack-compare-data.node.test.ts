@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { DIMENSIONS, EXAMPLES_CAVEAT, HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
+import { DIMENSIONS, HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
 import { VERDICT_LABELS } from "./stack-compare-model";
 
 /**
@@ -117,7 +117,7 @@ describe("stack comparison data", () => {
     // else would catch it — these strings are rendered, never imported.
     // `vitest --project=content` runs from apps/marketing, so repo root is two up.
     const repoRoot = path.resolve(process.cwd(), "../..");
-    const paths = [...DIMENSIONS.flatMap((d) => d.sources), ...EXAMPLES_CAVEAT.sources]
+    const paths = DIMENSIONS.flatMap((d) => d.sources)
       .map((source) => source.href)
       .filter((href) => !href.startsWith("http"));
 
@@ -125,12 +125,5 @@ describe("stack comparison data", () => {
     for (const href of paths) {
       expect(fs.existsSync(path.join(repoRoot, href)), href).toBe(true);
     }
-  });
-
-  it("keeps the caveat on the examples", () => {
-    // The examples section is the one most likely to be screenshotted without
-    // its context, so the context is data rather than markup.
-    expect(EXAMPLES_CAVEAT.text).not.toBe("");
-    expect(EXAMPLES_CAVEAT.sources.length).toBeGreaterThan(0);
   });
 });

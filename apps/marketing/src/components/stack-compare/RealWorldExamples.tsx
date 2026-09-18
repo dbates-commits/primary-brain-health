@@ -1,6 +1,5 @@
 import { ExampleList } from "./ExampleList";
-import { SourceList } from "./SourceList";
-import { EXAMPLES_CAVEAT, HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
+import { HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
 
 /**
  * "When I told people what React Native was, I'd show them Facebook and
@@ -25,16 +24,6 @@ export function RealWorldExamples() {
       <div className="grid gap-4 md:grid-cols-2">
         <ExampleList heading="Next.js, the way we build" examples={OUR_EXAMPLES} />
         <ExampleList heading="HubSpot CMS" examples={HUBSPOT_EXAMPLES} />
-      </div>
-
-      <div className="rounded-xl bg-background-warm px-4 py-3">
-        <p className="text-body-sm text-text-default">
-          <span className="font-semibold text-text-heading">Worth knowing: </span>
-          {EXAMPLES_CAVEAT.text}
-        </p>
-        <div className="mt-3">
-          <SourceList sources={EXAMPLES_CAVEAT.sources} />
-        </div>
       </div>
     </section>
   );

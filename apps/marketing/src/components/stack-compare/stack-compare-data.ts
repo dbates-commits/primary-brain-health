@@ -1,4 +1,4 @@
-import type { Caveat, Dimension, Example, Source } from "./stack-compare-model";
+import type { Dimension, Example, Source } from "./stack-compare-model";
 
 /**
  * What we built versus building the same site in HubSpot Content Hub.
@@ -750,22 +750,3 @@ export const HUBSPOT_EXAMPLES: Example[] = [
     evidence: "checked-live",
   },
 ];
-
-/**
- * The caveat that keeps the examples section honest, and the one most likely to
- * come up in the room: most “big brand uses HubSpot” claims are about the CRM or
- * the marketing email, not the website product.
- */
-export const EXAMPLES_CAVEAT: Caveat = {
-  text: "Content Hub is 0.2% of all websites; Next.js is used by 3.4%. Different denominators — one is CMS share, the other framework usage — but the gap is roughly seventeenfold either way. No household-name consumer brand runs its main site on Content Hub; mid-market, healthcare and education is the market it serves well. Almost every \u201cbig brand uses HubSpot\u201d claim means the CRM or the marketing email, not the website.",
-  sources: [
-    {
-      label: "W3Techs \u2014 HubSpot CMS usage",
-      href: "https://w3techs.com/technologies/details/cm-hubspotcms",
-    },
-    {
-      label: "W3Techs \u2014 Next.js usage",
-      href: "https://w3techs.com/technologies/details/js-nextjs",
-    },
-  ],
-};
