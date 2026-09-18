@@ -317,6 +317,128 @@ export const DIMENSIONS: Dimension[] = [
     ],
   },
   {
+    id: "gated-content",
+    name: "Gated content and lead capture",
+    whyItMatters:
+      "The resource library is meant to trade a guide or a checklist for an email address, then segment the list that comes back.",
+    ours: {
+      summary: "Nothing built. The form half already works.",
+      claim: {
+        plain:
+          "There is no resource library and nothing gated today. The email-capture half is not the hard part — our forms already post into HubSpot — but the pages, the files and the segmentation do not exist.",
+        technical:
+          "Scoped as F5 in Phase 3 and unstarted. `src/lib/hubspot.ts` already submits to HubSpot Forms from two routes, so a gate is a form, a file and a page; what is missing is everything around it.",
+      },
+      pros: [
+        "A gate can sit on any page we build, in the design the rest of the site uses.",
+        "The captured contact still lands in HubSpot — the CRM is the destination either way.",
+      ],
+      cons: [
+        "None of it exists, and it is Phase 3 work.",
+        "Segmentation, nurture sequences and progressive profiling would all be built by hand or configured in HubSpot anyway.",
+      ],
+    },
+    hubspot: {
+      summary: "What the product is actually for.",
+      claim: {
+        plain:
+          "This is the job HubSpot was built to do. Gate a page, capture the email, drop the contact into a list and start a nurture sequence — all configured, none of it built.",
+        technical:
+          "Forms, lists and workflows are the core product. Smart content, smart CTAs and progressive profiling — asking a returning visitor a new question instead of the same one — are Marketing Hub Professional.",
+      },
+      pros: [
+        "Gate, capture, segment and nurture are one system with no integration between them.",
+        "Progressive profiling and smart content have no equivalent we would get for free.",
+        "A marketer can launch a gated asset without an engineer.",
+      ],
+      cons: [
+        "The good parts are Marketing Hub Professional, which is a separate subscription from Content Hub.",
+        "The gated page itself would be a HubSpot page, in a HubSpot theme.",
+      ],
+    },
+    verdict: "hubspot",
+    takeaway:
+      "The third row HubSpot wins, and the least surprising one — this is the product's home ground. Worth separating from the rest: it argues for using HubSpot well, not for moving the site into it.",
+    toConfirm:
+      "Which HubSpot subscription PBH is actually on. Smart content and progressive profiling are Marketing Hub Professional, and the repository has never known which tier the portal is.",
+    sources: [
+      {
+        label: "Resource library, gated downloads and list segmentation as scoped",
+        href: "docs/sow2/proposal/SOW2-Proposal-v5-no-pricing.md",
+      },
+      {
+        label: "The HubSpot form submission we already do",
+        href: "apps/marketing/src/lib/hubspot.ts",
+      },
+      {
+        label: "HubSpot — smart content rules",
+        href: "https://knowledge.hubspot.com/website-and-landing-pages/create-and-manage-smart-content-rules",
+        vendor: true,
+      },
+      {
+        label: "HubSpot — progressive fields in forms",
+        href: "https://knowledge.hubspot.com/forms-user-guide-v2/how-to-use-smart-fields-and-progressive-profiling",
+        vendor: true,
+      },
+    ],
+  },
+  {
+    id: "data",
+    name: "Where the data lives",
+    whyItMatters: "Whether HubSpot could be the database too, or whether we would be running both.",
+    ours: {
+      summary: "Postgres we control. Card numbers stay at Stripe.",
+      claim: {
+        plain:
+          "Accounts, consent records, payments and the audit trail live in our own database. The card number itself never touches it — that stays at Stripe.",
+        technical:
+          "Neon Postgres via Drizzle: users, consents, payments, linus_enrollments, audit_log, auth sessions and rate limits. The payments table holds brand, last four and expiry only — never a PAN or CVV, which is what keeps the PCI scope at SAQ-A.",
+      },
+      pros: [
+        "Real tables, real constraints, and a consent record we can prove the shape of.",
+        "On the Scale tier specifically because it is the lowest one offering a BAA.",
+        "No row ceiling worth thinking about.",
+      ],
+      cons: ["A database is ours to back up, migrate and pay for."],
+    },
+    hubspot: {
+      summary: "Not a database. HubDB caps at 10,000 rows a table.",
+      claim: {
+        plain:
+          "No. HubSpot stores contacts and deals well, but it is not a place to keep accounts, consent records and an audit trail — so we would be running a database anyway.",
+        technical:
+          "The only general store is HubDB: 10,000 rows per table, 1,000 tables and 1 million rows per account, with no documented guidance on personal or sensitive data. Sensitive Data designations are CRM-property-shaped and do not extend to it.",
+      },
+      pros: [
+        "Contacts, deals and their properties are genuinely well handled.",
+        "Card numbers would stay with the processor there too — that part is the same either way.",
+      ],
+      cons: [
+        "HubDB's 10,000-row table ceiling is not a place for sessions, audit rows or consent records.",
+        "No documented position on sensitive data in HubDB at all.",
+        "Keeping it would mean two systems and a sync, not one system.",
+      ],
+    },
+    verdict: "ours",
+    takeaway:
+      "We would still need Neon. HubSpot replacing the database is the one part of this that is not a trade-off — it is simply not what the product is.",
+    sources: [
+      {
+        label: "What we store, and why the card number is not in it",
+        href: "packages/db/src/schema/payments.ts",
+      },
+      {
+        label: "Why Neon Scale, and the BAA",
+        href: "docs/database.md",
+      },
+      {
+        label: "HubSpot — HubDB limits",
+        href: "https://developers.hubspot.com/docs/cms/data/hubdb",
+        vendor: true,
+      },
+    ],
+  },
+  {
     id: "accounts",
     name: "Signed-in pages and accounts",
     whyItMatters:
@@ -709,51 +831,3 @@ export const EXAMPLES_CAVEAT: Caveat = {
     },
   ],
 };
-
-/**
- * The open questions, gathered.
- *
- * Alec's ask was a chart, but a chart that ends without saying what it needs
- * leaves the reader to go hunting through nine collapsed rows for the three
- * sentences that need a person. These are those, plus the two the services page
- * has been carrying unanswered since it shipped.
- *
- * Each one names who can settle it. "Somebody has to decide" is not an action;
- * a name is.
- */
-export type OpenQuestion = {
-  /** The question, as it would be asked out loud. */
-  ask: string;
-  /** Why it is not already answered, and what turns on it. */
-  why: string;
-  /** Who can settle it. */
-  who: string;
-};
-
-export const OPEN_QUESTIONS: OpenQuestion[] = [
-  {
-    ask: "Run Lighthouse against the site, so the speed row has a number.",
-    why: "The contract targets 90+ on mobile and nobody has measured once. Until somebody does, “ours is faster” is an argument from architecture — and it is the first thing a sceptical engineer will ask for.",
-    who: "Us. It is an afternoon, and it should happen before this goes to Ian.",
-  },
-  {
-    ask: "Decide whether we are closing the analytics gap, and with what.",
-    why: "It is the clearest row HubSpot wins, and the answer changes the recommendation. GA4 is specified with a ten-event plan and unbuilt; no funnel tool has been chosen at all. The consent banner in PR #88 is the precondition.",
-    who: "Alec and Mark, on the tool. Then us to build it.",
-  },
-  {
-    ask: "Confirm who owns the HubSpot portal and who would own the GA4 property.",
-    why: "The repository does not know, and it has been an open question since the services page shipped. There is also no HubSpot test portal, so a form filled in on a preview lands with the real ones.",
-    who: "PBH — Mark or Melissa.",
-  },
-  {
-    ask: "Ask HubSpot whether Content Hub pages are covered by Sensitive Data.",
-    why: "Website pages are absent from the supported-tools list. That is missing documentation, not a documented “no”, and nobody should rely on either reading. It is the question that decides whether any of the booking flow could ever move.",
-    who: "Whoever holds the HubSpot relationship, via their rep.",
-  },
-  {
-    ask: "Fix staging so editing copy there stops editing production copy.",
-    why: "TinaCloud never indexed the staging branch, so the admin on staging is the production CMS wearing a different hostname. It undercuts the row this page wins most clearly.",
-    who: "Us, with a TinaCloud support ticket.",
-  },
-];

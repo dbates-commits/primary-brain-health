@@ -40,7 +40,7 @@ export default function StackComparisonPage() {
         <p className="mt-1 max-w-3xl text-body-sm text-text-default">
           <span className="font-semibold text-text-heading">Not whether to use HubSpot</span> — the
           CRM stays either way. Whether the <em>website</em> should be built in Content Hub instead.
-          Two rows go to HubSpot; both are gaps we could close ourselves.
+          Three rows go to HubSpot.
         </p>
         <div className="mt-3">
           <InternalTabs active="/internal/stack" />

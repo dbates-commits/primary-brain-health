@@ -3,13 +3,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  DIMENSIONS,
-  EXAMPLES_CAVEAT,
-  HUBSPOT_EXAMPLES,
-  OPEN_QUESTIONS,
-  OUR_EXAMPLES,
-} from "./stack-compare-data";
+import { DIMENSIONS, EXAMPLES_CAVEAT, HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
 import { VERDICT_LABELS } from "./stack-compare-model";
 
 /**
@@ -130,16 +124,6 @@ describe("stack comparison data", () => {
     expect(paths.length).toBeGreaterThan(0);
     for (const href of paths) {
       expect(fs.existsSync(path.join(repoRoot, href)), href).toBe(true);
-    }
-  });
-
-  it("says what it needs from a person, and who", () => {
-    expect(OPEN_QUESTIONS.length).toBeGreaterThan(0);
-    for (const question of OPEN_QUESTIONS) {
-      expect(question.ask, question.ask).not.toBe("");
-      expect(question.why, question.ask).not.toBe("");
-      // "Somebody has to decide" is not an action; a name is.
-      expect(question.who, question.ask).not.toBe("");
     }
   });
 
