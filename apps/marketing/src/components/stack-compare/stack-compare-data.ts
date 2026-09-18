@@ -20,7 +20,7 @@ import type { Dimension, Example, Source } from "./stack-compare-model";
 
 /** The comparison is with Content Hub, HubSpot's website product. */
 const CONTENT_HUB_PRICING: Source = {
-  label: "HubSpot — Content Hub pricing (Jan 2026)",
+  label: "HubSpot — Content Hub pricing (page updated 28 Jan 2026; checked 18 Sep 2026)",
   href: "https://blog.hubspot.com/website/hubspot-content-hub-pricing",
   vendor: true,
 };
@@ -100,7 +100,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
-      summary: "Built in, on the $450 tier.",
+      summary: "Built in, on the $450/mo tier.",
       claim: {
         plain:
           "Duplicate a page, change the headline; HubSpot splits traffic and declares a winner.",
@@ -109,7 +109,7 @@ export const DIMENSIONS: Dimension[] = [
       },
       pros: ["Self-serve — no deploy, no engineer.", "Measurement comes with it."],
       cons: [
-        "Professional only — it alone forces $15/mo to $450/mo.",
+        "Professional only — it alone forces $15/mo to $450/mo, billed annually.",
         "Could never test our booking or payment steps.",
       ],
     },
@@ -225,19 +225,24 @@ export const DIMENSIONS: Dimension[] = [
       summary: "Traffic free; features force $450–1,500/mo.",
       claim: {
         plain:
-          "HubSpot does not charge for traffic either. The features cost: A/B testing needs $450/mo, anything near our booking flow needs $1,500/mo.",
+          "HubSpot does not charge for traffic either. The features cost: A/B testing needs the $450/mo plan, anything near our booking flow needs the $1,500/mo one. Those are the annual-commitment prices — month to month, the middle tier is $600.",
         technical:
-          "Content Hub is seat-priced, with hosting and CDN included and no documented pageview overage. Starter $15/mo; Professional $450/mo buys A/B testing; Enterprise from $1,500/mo is the floor for serverless functions and for the Sensitive Data (BAA) feature.",
+          "Content Hub is seat-priced, with hosting and CDN included and no documented pageview overage. Billed annually: Starter $15/mo (1 seat), Professional $450/mo (3 core seats, +$45 each) buys A/B testing, Enterprise from $1,500/mo (5 core seats, +$75 each) is the floor for serverless functions and for the Sensitive Data (BAA) feature. Month to month those are $20 and $600.",
       },
-      pros: ["One bill, one vendor.", "Traffic genuinely is not a cost line."],
+      pros: [
+        "One bill, one vendor.",
+        "Traffic genuinely is not a cost line.",
+        "No onboarding fee at any Content Hub tier — worth saying, because its sibling hubs charge one.",
+      ],
       cons: [
         "Features force the tier up, not traffic. Ours land on Enterprise.",
-        "Marketing Hub contacts bill separately and do scale, if those visitors convert.",
+        "Marketing contacts bill separately again on top of that, and do scale if visitors convert.",
+        "The marketing automation people picture is Marketing Hub, a separate subscription: $800/mo month to month or $890 annually at Professional, plus a one-time $3,000 onboarding fee, and $3,600/mo plus $7,000 at Enterprise.",
       ],
     },
     verdict: "ours",
     takeaway:
-      "The spike is cheap either way — retire that premise. It is ~$180/mo against a tier our requirements push to $1,500/mo.",
+      "The spike is cheap either way — retire that premise. It is ~$180/mo against a Content Hub tier our requirements push to $1,500/mo, before any Marketing Hub subscription.",
     sources: [
       CONTENT_HUB_PRICING,
       OUR_VENDOR_COSTS,
@@ -249,6 +254,11 @@ export const DIMENSIONS: Dimension[] = [
       {
         label: "HubSpot — marketing contacts apply to Marketing Hub, not Content Hub",
         href: "https://knowledge.hubspot.com/records/marketing-contacts",
+        vendor: true,
+      },
+      {
+        label: "HubSpot — Marketing Hub pricing, including its onboarding fees",
+        href: "https://www.hubspot.com/pricing/marketing",
         vendor: true,
       },
     ],
