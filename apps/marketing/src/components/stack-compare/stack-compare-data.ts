@@ -222,12 +222,12 @@ export const DIMENSIONS: Dimension[] = [
       cons: ["Several vendors to own, and the repo still says “to confirm” about some of them."],
     },
     hubspot: {
-      summary: "Traffic free; features force $450–1,500/mo.",
+      summary: "Traffic free; features force $450–1,500 a month.",
       claim: {
         plain:
-          "HubSpot does not charge for traffic either. The features cost: A/B testing needs the $450/mo plan, anything near our booking flow needs the $1,500/mo one. Those are the annual-commitment prices — month to month, the middle tier is $600.",
+          "HubSpot does not charge for traffic either. The features cost: A/B testing needs the $450/mo plan, anything near our booking flow needs the $1,500/mo one — that is per month, so about $18,000 a year, not $1,500 a year.",
         technical:
-          "Content Hub is seat-priced, with hosting and CDN included and no documented pageview overage. Billed annually: Starter $15/mo (1 seat), Professional $450/mo (3 core seats, +$45 each) buys A/B testing, Enterprise from $1,500/mo (5 core seats, +$75 each) is the floor for serverless functions and for the Sensitive Data (BAA) feature. Month to month those are $20 and $600.",
+          "Content Hub is seat-priced, with hosting and CDN included and no documented pageview overage. Billed annually: Starter $15/mo (1 seat), Professional $450/mo (3 core seats, +$45 each) buys A/B testing, Enterprise from $1,500/mo — ~$18,000/yr — (5 core seats, +$75 each) is the floor for serverless functions and for the Sensitive Data (BAA) feature. Month to month, Starter and Professional are $20 and $600; HubSpot publishes no month-to-month price for Enterprise.",
       },
       pros: [
         "One bill, one vendor.",
@@ -241,8 +241,10 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     verdict: "ours",
+    toConfirm:
+      "HubSpot lists a month-to-month price for Starter and Professional but not for Enterprise, so whether $1,500/mo requires an annual commitment is not published. It would be a sales conversation, and it changes what a trial of it would cost.",
     takeaway:
-      "The spike is cheap either way — retire that premise. It is ~$180/mo against a Content Hub tier our requirements push to $1,500/mo, before any Marketing Hub subscription.",
+      "The spike is cheap either way — retire that premise. It is ~$180/mo against a Content Hub tier our requirements push to $1,500/mo — roughly $2,000/yr against $18,000/yr, before any Marketing Hub subscription.",
     sources: [
       CONTENT_HUB_PRICING,
       OUR_VENDOR_COSTS,
