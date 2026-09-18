@@ -87,10 +87,11 @@ export function ComparisonTable({ mode }: { mode: Mode }) {
             </tr>
           </thead>
           <tbody>
-            {DIMENSIONS.map((dimension) => (
+            {DIMENSIONS.map((dimension, index) => (
               <ComparisonTableRow
                 key={dimension.id}
                 dimension={dimension}
+                number={index + 1}
                 mode={mode}
                 open={open.has(dimension.id)}
                 onToggle={() => toggle(dimension.id)}
@@ -101,10 +102,11 @@ export function ComparisonTable({ mode }: { mode: Mode }) {
       </div>
 
       <div className="flex flex-col gap-3 md:hidden">
-        {DIMENSIONS.map((dimension) => (
+        {DIMENSIONS.map((dimension, index) => (
           <ComparisonCard
             key={dimension.id}
             dimension={dimension}
+            number={index + 1}
             mode={mode}
             open={open.has(dimension.id)}
             onToggle={() => toggle(dimension.id)}

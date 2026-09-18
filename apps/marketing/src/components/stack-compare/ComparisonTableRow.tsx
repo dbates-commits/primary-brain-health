@@ -20,11 +20,14 @@ import { VerdictBadge } from "./VerdictBadge";
  */
 export function ComparisonTableRow({
   dimension,
+  number,
   mode,
   open,
   onToggle,
 }: {
   dimension: Dimension;
+  /** 1-based, so a row can be referred to out loud: "row four". */
+  number: number;
   mode: Mode;
   open: boolean;
   onToggle: () => void;
@@ -67,6 +70,7 @@ export function ComparisonTableRow({
             >
               ▶
             </span>
+            <span className="text-body-sm text-text-tertiary tabular-nums">{number}.</span>
             <span className="text-body font-semibold text-text-heading">{dimension.name}</span>
           </button>
         </th>

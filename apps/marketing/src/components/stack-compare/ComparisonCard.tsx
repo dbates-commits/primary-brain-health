@@ -16,11 +16,14 @@ import { VerdictBadge } from "./VerdictBadge";
  */
 export function ComparisonCard({
   dimension,
+  number,
   mode,
   open,
   onToggle,
 }: {
   dimension: Dimension;
+  /** 1-based, matching the table, so a screenshot of either refers to the same row. */
+  number: number;
   mode: Mode;
   open: boolean;
   onToggle: () => void;
@@ -46,6 +49,7 @@ export function ComparisonCard({
           >
             ▶
           </span>
+          <span className="text-body-sm text-text-tertiary tabular-nums">{number}.</span>
           <span className="text-body font-semibold text-text-heading">{dimension.name}</span>
           <span className="ml-auto">
             <VerdictBadge verdict={dimension.verdict} />
