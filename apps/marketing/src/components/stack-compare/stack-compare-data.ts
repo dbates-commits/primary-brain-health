@@ -37,6 +37,7 @@ export const DIMENSIONS: Dimension[] = [
     whyItMatters:
       "Whether you can answer “how many people landed on the page, and how many of them started booking”.",
     ours: {
+      summary: "Nothing. No tag, no numbers.",
       claim: {
         plain:
           "We cannot answer that question at all today. Nothing on the site counts visitors, so no traffic has ever been recorded.",
@@ -53,6 +54,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "Built in, from day one.",
       claim: {
         plain:
           "It counts visitors from the day you turn it on, and ties a form fill back to the page and the campaign it came from, with nothing to build.",
@@ -87,6 +89,7 @@ export const DIMENSIONS: Dimension[] = [
     whyItMatters:
       "Showing half your visitors one headline and half another, then keeping the one that converts better.",
     ours: {
+      summary: "Buildable, not built.",
       claim: {
         plain:
           "There is nothing in the site today that can show two versions of a page. It can be built, but it has not been.",
@@ -103,6 +106,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "Built in, on the $450 tier.",
       claim: {
         plain:
           "You duplicate a page in the editor, change the headline, and HubSpot splits the traffic and declares a winner. A marketer can do it without asking anyone.",
@@ -144,6 +148,7 @@ export const DIMENSIONS: Dimension[] = [
     whyItMatters:
       "How fast the page appears, which Google uses for ranking and which decides how many people leave before it loads.",
     ours: {
+      summary: "Prebuilt files, untested.",
       claim: {
         plain:
           "Pages are built once, in advance, and handed to visitors as finished files from servers near them. There is no work left to do when someone arrives.",
@@ -161,6 +166,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "Fast defaults, scripts you cannot remove.",
       claim: {
         plain:
           "Pages are also served from a fast global network, and images are optimised automatically — but every page carries HubSpot's own scripts, which you cannot remove.",
@@ -212,6 +218,7 @@ export const DIMENSIONS: Dimension[] = [
     whyItMatters:
       "The Eisai landing page is expected to send a burst of traffic. The question is what that burst costs on each side.",
     ours: {
+      summary: "~$140–220/mo. Spikes are near-free.",
       claim: {
         plain:
           "Around $140–220 a month at launch, and a traffic spike barely moves it — finished files handed out by a cache cost almost nothing extra.",
@@ -227,6 +234,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "Traffic free; features force $450–1,500/mo.",
       claim: {
         plain:
           "HubSpot does not charge for traffic either, so the spike is free on both sides. What costs money is the features: A/B testing needs the $450/mo plan, and anything close to our booking flow needs the $1,500/mo one.",
@@ -265,6 +273,7 @@ export const DIMENSIONS: Dimension[] = [
     name: "Testing a change safely",
     whyItMatters: "Whether you can see a change, and let other people see it, before customers do.",
     ours: {
+      summary: "A shareable copy per change.",
       claim: {
         plain:
           "Every proposed change gets its own complete copy of the site at its own web address, which anyone can open. It disappears when the change ships.",
@@ -281,6 +290,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "One shared staging area, login required.",
       claim: {
         plain:
           "There is a staging area, but it shares its templates with the live site — so editing a template while testing changes the real site immediately. Preview links also require the viewer to log into HubSpot.",
@@ -329,6 +339,7 @@ export const DIMENSIONS: Dimension[] = [
     whyItMatters:
       "The site does not only describe the product — it sells it, takes consent, takes payment and hands the customer to Linus.",
     ours: {
+      summary: "All of it, with no limits.",
       claim: {
         plain:
           "All of it is ours: signing up, agreeing to the consent form, paying, and being handed over to the assessment. It is the larger half of what the site does.",
@@ -342,6 +353,7 @@ export const DIMENSIONS: Dimension[] = [
       cons: ["It is ours to maintain, and ours to be woken up by."],
     },
     hubspot: {
+      summary: "Enterprise only, 10 seconds, one file.",
       claim: {
         plain:
           "HubSpot can host custom logic, but only on its most expensive plan, and each piece must finish in ten seconds and live in a single file.",
@@ -376,6 +388,7 @@ export const DIMENSIONS: Dimension[] = [
     whyItMatters:
       "We are contractually bound to keep health information out of HubSpot. That constrains what could move there.",
     ours: {
+      summary: "Ours, with a signed agreement.",
       claim: {
         plain:
           "Sensitive information stays in our own database, with a signed agreement covering it, and only a name, an email and a paid flag ever reach HubSpot.",
@@ -391,6 +404,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "Enterprise only, and CRM-shaped.",
       claim: {
         plain:
           "HubSpot will sign a health-data agreement, but only on its top plan, and it covers CRM records rather than website pages.",
@@ -435,6 +449,7 @@ export const DIMENSIONS: Dimension[] = [
     name: "Editing the words on a page",
     whyItMatters: "Who can change the copy, and what happens to the old version.",
     ours: {
+      summary: "Anyone can edit; one history.",
       claim: {
         plain:
           "Anyone on the team can edit page copy in a visual editor without an engineer, and every edit is saved into the same history as the code.",
@@ -451,6 +466,7 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
+      summary: "Best-in-class editor; they hold the copy.",
       claim: {
         plain:
           "The best-in-class editor for a marketer working alone — drag, drop, publish. The trade is that HubSpot then holds the only copy.",
@@ -486,6 +502,7 @@ export const DIMENSIONS: Dimension[] = [
     name: "Matching the design",
     whyItMatters: "Whether the site can look exactly like what the designer drew.",
     ours: {
+      summary: "Exactly what Figma says.",
       claim: {
         plain:
           "The site's colours and type come straight from the design file, so what is drawn is what ships.",
@@ -499,6 +516,7 @@ export const DIMENSIONS: Dimension[] = [
       cons: ["The Figma sync is manual, so the tokens drift until somebody re-syncs them."],
     },
     hubspot: {
+      summary: "Whatever the theme allows.",
       claim: {
         plain:
           "You work inside a theme. Most designs are achievable; the unusual ones get negotiated down.",

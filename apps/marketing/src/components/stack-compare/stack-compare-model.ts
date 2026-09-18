@@ -23,6 +23,16 @@ export type Claim = {
 };
 
 export type Side = {
+  /**
+   * The scannable cell: a few words, and the only thing the table shows before
+   * a row is opened.
+   *
+   * Deliberately not a {@link Claim} — it stays plain whichever mode the page
+   * is in. Somebody running an eye down the table is looking for shape, not
+   * detail, and a summary that changed under the toggle would just make the
+   * column jump without telling them anything new.
+   */
+  summary: string;
   claim: Claim;
   pros: string[];
   cons: string[];

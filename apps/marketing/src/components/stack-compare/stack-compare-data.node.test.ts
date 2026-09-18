@@ -47,6 +47,21 @@ describe("stack comparison data", () => {
     }
   });
 
+  it("keeps every table cell short enough to scan", () => {
+    // The summary is the only thing the table shows before a row is opened. The
+    // whole point of the table was that the page had become too much text, so a
+    // summary that grows into a sentence quietly undoes it.
+    for (const dimension of DIMENSIONS) {
+      for (const [name, side] of [
+        ["ours", dimension.ours],
+        ["hubspot", dimension.hubspot],
+      ] as const) {
+        expect(side.summary, `${dimension.id}.${name}`).not.toBe("");
+        expect(side.summary.length, `${dimension.id}.${name}`).toBeLessThanOrEqual(56);
+      }
+    }
+  });
+
   it("says every claim twice, and differently", () => {
     // The toggle exists to swap one whole sentence for another. A row where the
     // two are identical is a row somebody forgot to translate.

@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { SegmentedControl } from "@pbh/ui";
 
-import { ComparisonRow } from "./ComparisonRow";
+import { ComparisonTable } from "./ComparisonTable";
 import { MODE_OPTIONS, type Mode } from "./mode";
 import { RealWorldExamples } from "./RealWorldExamples";
-import { DIMENSIONS } from "./stack-compare-data";
 
 /**
  * The whole comparison, and the only client component on the page.
@@ -42,11 +41,7 @@ export function StackComparison() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {DIMENSIONS.map((dimension) => (
-          <ComparisonRow key={dimension.id} dimension={dimension} mode={mode} />
-        ))}
-      </div>
+      <ComparisonTable mode={mode} />
 
       <RealWorldExamples />
     </div>
