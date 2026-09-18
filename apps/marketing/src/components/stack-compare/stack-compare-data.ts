@@ -317,72 +317,6 @@ export const DIMENSIONS: Dimension[] = [
     ],
   },
   {
-    id: "gated-content",
-    name: "Gated content and lead capture",
-    whyItMatters:
-      "The resource library is meant to trade a guide or a checklist for an email address, then segment the list that comes back.",
-    ours: {
-      summary: "Nothing built. The form half already works.",
-      claim: {
-        plain:
-          "There is no resource library and nothing gated today. The email-capture half is not the hard part — our forms already post into HubSpot — but the pages, the files and the segmentation do not exist.",
-        technical:
-          "Scoped as F5 in Phase 3 and unstarted. `src/lib/hubspot.ts` already submits to HubSpot Forms from two routes, so a gate is a form, a file and a page; what is missing is everything around it.",
-      },
-      pros: [
-        "A gate can sit on any page we build, in the design the rest of the site uses.",
-        "The captured contact still lands in HubSpot — the CRM is the destination either way.",
-      ],
-      cons: [
-        "None of it exists, and it is Phase 3 work.",
-        "Segmentation, nurture sequences and progressive profiling would all be built by hand or configured in HubSpot anyway.",
-      ],
-    },
-    hubspot: {
-      summary: "What the product is actually for.",
-      claim: {
-        plain:
-          "This is the job HubSpot was built to do. Gate a page, capture the email, drop the contact into a list and start a nurture sequence — all configured, none of it built.",
-        technical:
-          "Forms, lists and workflows are the core product. Smart content, smart CTAs and progressive profiling — asking a returning visitor a new question instead of the same one — are Marketing Hub Professional.",
-      },
-      pros: [
-        "Gate, capture, segment and nurture are one system with no integration between them.",
-        "Progressive profiling and smart content have no equivalent we would get for free.",
-        "A marketer can launch a gated asset without an engineer.",
-      ],
-      cons: [
-        "The good parts are Marketing Hub Professional, which is a separate subscription from Content Hub.",
-        "The gated page itself would be a HubSpot page, in a HubSpot theme.",
-      ],
-    },
-    verdict: "hubspot",
-    takeaway:
-      "The third row HubSpot wins, and the least surprising one — this is the product's home ground. Worth separating from the rest: it argues for using HubSpot well, not for moving the site into it.",
-    toConfirm:
-      "Which HubSpot subscription PBH is actually on. Smart content and progressive profiling are Marketing Hub Professional, and the repository has never known which tier the portal is.",
-    sources: [
-      {
-        label: "Resource library, gated downloads and list segmentation as scoped",
-        href: "docs/sow2/proposal/SOW2-Proposal-v5-no-pricing.md",
-      },
-      {
-        label: "The HubSpot form submission we already do",
-        href: "apps/marketing/src/lib/hubspot.ts",
-      },
-      {
-        label: "HubSpot — smart content rules",
-        href: "https://knowledge.hubspot.com/website-and-landing-pages/create-and-manage-smart-content-rules",
-        vendor: true,
-      },
-      {
-        label: "HubSpot — progressive fields in forms",
-        href: "https://knowledge.hubspot.com/forms-user-guide-v2/how-to-use-smart-fields-and-progressive-profiling",
-        vendor: true,
-      },
-    ],
-  },
-  {
     id: "data",
     name: "Where the data lives",
     whyItMatters: "Whether HubSpot could be the database too, or whether we would be running both.",
@@ -440,20 +374,20 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: "accounts",
-    name: "Signed-in pages and accounts",
+    name: "Gated pages (welcome, profile, login)",
     whyItMatters:
-      "Three pages are behind a login today — the sign-in screen, the post-payment welcome screen and the account settings page.",
+      "Three pages are behind a gate today: the sign-in screen, the post-payment welcome screen, and account settings.",
     ours: {
-      summary: "Ours, with Auth0 as the identity provider.",
+      summary: "Ours. Gated on payment, not just on login.",
       claim: {
         plain:
-          "We run the login ourselves, so a signed-in page can show anything and the account details stay in our own database.",
+          "We run the gate ourselves, so it can be as strict as the page needs — /welcome opens only for someone who has actually paid, not merely someone signed in — and the pages behind it can show anything we hold.",
         technical:
-          "Auth.js with database-backed sessions in Neon and Auth0 as the sole identity provider (PR #85). `/profile` gates on a session; `/welcome` additionally requires an entitlement.",
+          "Auth.js with database-backed sessions in Neon, Auth0 as the sole identity provider (PR #85). `/profile` gates on a session; `/welcome` additionally requires an entitlement, because accounts exist from signup and a session alone would let an unpaid signup reach the confirmation screen.",
       },
       pros: [
-        "A signed-in page can read anything we hold, including payment and plan data.",
-        "Auth0 is an OIDC provider and the session is a row in our own database.",
+        "The gate is a rule we write, so “signed in” and “has paid” can be different answers.",
+        "/profile shows plan, payment method and account actions — all read from our own database.",
         "Sessions carry a 15-minute idle timeout and an 8-hour cap, set from a security review.",
       ],
       cons: [
@@ -462,33 +396,37 @@ export const DIMENSIONS: Dimension[] = [
       ],
     },
     hubspot: {
-      summary: "Memberships, but every member is a CRM contact.",
+      summary: "Memberships, but every member becomes a CRM contact.",
       claim: {
         plain:
-          "HubSpot can put pages behind a login. The catch is that every person who logs in becomes a contact record in the CRM — which is the thing we have been keeping the booking flow out of.",
+          "HubSpot can put pages behind a login. The catch is that everybody who signs in becomes a contact record in the CRM — which is exactly what the booking flow has been kept out of.",
         technical:
-          "Memberships are Content Hub Professional and up, built on the CRM: the account system leverages HubSpot CRM and CRM Lists, so a member is a contact. SSO is SAML-only, Professional and up, documented for Okta and OneLogin.",
+          "Memberships are Content Hub Professional and up, built on the CRM: HubSpot's own wording is that the account system leverages HubSpot CRM and CRM Lists, with access controlled by list membership. SSO is SAML-only, Professional and up, documented for Okta and OneLogin.",
       },
       pros: [
         "Login, registration and password reset come built in, with no code.",
         "SSO exists, and Auth0 can act as a SAML provider, so it is probably reachable.",
       ],
       cons: [
-        "A member is a CRM contact by construction — the booking flow's “leaves no trace in HubSpot” property could not survive it.",
+        "A member is a CRM contact by construction — “a customer who pays leaves no trace in HubSpot” could not survive it.",
+        "Access is by contact list, so “has paid” would have to become a CRM list rather than a fact checked at the door.",
+        "/profile could not show plan or payment data without an Enterprise serverless function calling our database.",
         "SAML only. Our Auth0 setup is OIDC, and Auth0 is not among the documented providers.",
-        "A signed-in page could not show plan or payment data without an Enterprise serverless function calling our database.",
-        "SSO is enabled per subdomain, not globally.",
       ],
     },
     verdict: "ours",
     takeaway:
-      "HubSpot can gate a page, but it gates it by making the visitor a CRM contact. That is the opposite of the data rule we are working to.",
+      "HubSpot can gate a page, but it gates it by turning the visitor into a CRM contact and the entitlement into a list. That is the opposite of the data rule we are working to.",
     toConfirm:
       "Auth0 is not named in HubSpot's SSO documentation, which lists Okta and OneLogin. Auth0 does speak SAML, so it would likely work — but nobody has tried it, and it is Professional-and-up either way.",
     sources: [
       {
         label: "Our sign-in and session model",
         href: "docs/auth.md",
+      },
+      {
+        label: "Why /welcome checks payment and not just a session",
+        href: "apps/marketing/src/app/welcome/page.tsx",
       },
       {
         label: "The Auth0 provider, still in review",
