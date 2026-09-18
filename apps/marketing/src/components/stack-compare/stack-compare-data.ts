@@ -225,26 +225,23 @@ export const DIMENSIONS: Dimension[] = [
       summary: "Traffic free; features force $450–1,500 a month.",
       claim: {
         plain:
-          "HubSpot does not charge for traffic either. The features cost: A/B testing needs the $450/mo plan, anything near our booking flow needs the $1,500/mo one — that is per month, so about $18,000 a year, not $1,500 a year.",
+          "HubSpot does not charge for traffic either. The features cost: A/B testing needs the $450/mo plan, anything near our booking flow needs the $1,500/mo one — about $18,000 a year.",
         technical:
-          "Content Hub is seat-priced, with hosting and CDN included and no documented pageview overage. Billed annually: Starter $15/mo (1 seat), Professional $450/mo (3 core seats, +$45 each) buys A/B testing, Enterprise from $1,500/mo — ~$18,000/yr — (5 core seats, +$75 each) is the floor for serverless functions and for the Sensitive Data (BAA) feature. Month to month, Starter and Professional are $20 and $600; HubSpot publishes no month-to-month price for Enterprise.",
+          "Content Hub is seat-priced, hosting included, no pageview overage. Billed annually: Starter $15/mo, Professional $450/mo buys A/B testing, Enterprise from $1,500/mo (~$18,000/yr) is the floor for serverless functions and the BAA.",
       },
       pros: [
         "One bill, one vendor.",
         "Traffic genuinely is not a cost line.",
-        "No onboarding fee at any Content Hub tier — worth saying, because its sibling hubs charge one.",
+        "No onboarding fee at any Content Hub tier.",
       ],
       cons: [
         "Features force the tier up, not traffic. Ours land on Enterprise.",
-        "Marketing contacts bill separately again on top of that, and do scale if visitors convert.",
-        "The marketing automation people picture is Marketing Hub, a separate subscription: $800/mo month to month or $890 annually at Professional, plus a one-time $3,000 onboarding fee, and $3,600/mo plus $7,000 at Enterprise.",
+        "Marketing Hub is a separate subscription on top: $890/mo at Professional, plus a $3,000 onboarding fee.",
       ],
     },
     verdict: "ours",
-    toConfirm:
-      "HubSpot lists a month-to-month price for Starter and Professional but not for Enterprise, so whether $1,500/mo requires an annual commitment is not published. It would be a sales conversation, and it changes what a trial of it would cost.",
     takeaway:
-      "The spike is cheap either way — retire that premise. It is ~$180/mo against a Content Hub tier our requirements push to $1,500/mo — roughly $2,000/yr against $18,000/yr, before any Marketing Hub subscription.",
+      "The spike is cheap either way — retire that premise. Roughly $2,000/yr against $18,000/yr.",
     sources: [
       CONTENT_HUB_PRICING,
       OUR_VENDOR_COSTS,
