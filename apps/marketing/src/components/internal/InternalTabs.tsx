@@ -5,6 +5,7 @@ const TABS = [
   { href: "/internal/flow", label: "Customer journey" },
   { href: "/internal/services", label: "Services" },
   { href: "/internal/emails", label: "Emails" },
+  { href: "/internal/stack", label: "Our stack vs HubSpot" },
 ];
 
 /**
