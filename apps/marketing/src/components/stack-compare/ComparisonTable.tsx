@@ -46,10 +46,7 @@ export function ComparisonTable({ mode }: { mode: Mode }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] text-text-tertiary">
-          Select any row for the pros, the cons, and where the claim came from.
-        </p>
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={() => setOpen(allOpen ? new Set() : new Set(DIMENSIONS.map((d) => d.id)))}

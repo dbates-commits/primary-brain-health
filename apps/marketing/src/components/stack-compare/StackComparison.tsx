@@ -34,11 +34,6 @@ export function StackComparison() {
           onChange={(event) => setMode(event.target.value as Mode)}
           className="max-w-xs"
         />
-        <p className="text-body-sm text-text-secondary">
-          {mode === "plain"
-            ? "Written for someone who does not work in the code."
-            : "The same claims, with the names and numbers behind them."}
-        </p>
       </div>
 
       <ComparisonTable mode={mode} />

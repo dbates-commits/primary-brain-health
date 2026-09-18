@@ -38,18 +38,9 @@ export default function StackComparisonPage() {
         </p>
         <h1 className="mt-1 font-headline text-3xl text-text-heading">Our stack vs HubSpot</h1>
         <p className="mt-1 max-w-3xl text-body-sm text-text-default">
-          What we have today, against building the same website in HubSpot Content Hub. Every claim
-          about HubSpot links to where it came from; every claim about us names a file in the
-          repository. Anything neither could settle is written as a question for a person.
-        </p>
-        <p className="mt-2 max-w-3xl text-body-sm text-text-default">
-          <span className="font-semibold text-text-heading">
-            This is not a question of whether to use HubSpot.
-          </span>{" "}
-          The CRM stays either way — the enquiry forms already post into it, and work is in review
-          to record a customer there when they pay. The question on this page is narrower: should
-          the <em>website</em> be built in HubSpot instead of the way it is built now. Two rows
-          below say HubSpot would be better, and both are gaps we could close ourselves.
+          <span className="font-semibold text-text-heading">Not whether to use HubSpot</span> — the
+          CRM stays either way. Whether the <em>website</em> should be built in Content Hub instead.
+          Two rows go to HubSpot; both are gaps we could close ourselves.
         </p>
         <div className="mt-3">
           <InternalTabs active="/internal/stack" />

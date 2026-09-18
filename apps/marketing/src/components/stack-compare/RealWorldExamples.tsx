@@ -16,9 +16,8 @@ export function RealWorldExamples() {
       <div>
         <h2 className="font-headline text-2xl text-text-heading">Who else runs these</h2>
         <p className="mt-1 max-w-3xl text-body-sm text-text-default">
-          Neither list is an argument on its own — plenty of good sites run on both. They are here
-          because “who else uses it” is a fair question, and because the answer is checkable in one
-          command rather than taken on trust.
+          Neither list is an argument on its own. They are here because “who else uses it” is a fair
+          question, and the answer is checkable rather than taken on trust.
         </p>
       </div>
 
