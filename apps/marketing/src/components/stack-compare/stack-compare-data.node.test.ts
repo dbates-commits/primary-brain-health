@@ -1,6 +1,15 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
-import { DIMENSIONS, EXAMPLES_CAVEAT, HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
+import {
+  DIMENSIONS,
+  EXAMPLES_CAVEAT,
+  HUBSPOT_EXAMPLES,
+  OPEN_QUESTIONS,
+  OUR_EXAMPLES,
+} from "./stack-compare-data";
 import { VERDICT_LABELS } from "./stack-compare-model";
 
 /**
@@ -108,9 +117,36 @@ describe("stack comparison data", () => {
     }
   });
 
+  it("points every repo citation at a file that exists", () => {
+    // The page claims every statement about us names a file here. A path that
+    // has been renamed or deleted turns that claim into a bluff, and nothing
+    // else would catch it — these strings are rendered, never imported.
+    // `vitest --project=content` runs from apps/marketing, so repo root is two up.
+    const repoRoot = path.resolve(process.cwd(), "../..");
+    const paths = [...DIMENSIONS.flatMap((d) => d.sources), ...EXAMPLES_CAVEAT.sources]
+      .map((source) => source.href)
+      .filter((href) => !href.startsWith("http"));
+
+    expect(paths.length).toBeGreaterThan(0);
+    for (const href of paths) {
+      expect(fs.existsSync(path.join(repoRoot, href)), href).toBe(true);
+    }
+  });
+
+  it("says what it needs from a person, and who", () => {
+    expect(OPEN_QUESTIONS.length).toBeGreaterThan(0);
+    for (const question of OPEN_QUESTIONS) {
+      expect(question.ask, question.ask).not.toBe("");
+      expect(question.why, question.ask).not.toBe("");
+      // "Somebody has to decide" is not an action; a name is.
+      expect(question.who, question.ask).not.toBe("");
+    }
+  });
+
   it("keeps the caveat on the examples", () => {
     // The examples section is the one most likely to be screenshotted without
     // its context, so the context is data rather than markup.
-    expect(EXAMPLES_CAVEAT).not.toBe("");
+    expect(EXAMPLES_CAVEAT.text).not.toBe("");
+    expect(EXAMPLES_CAVEAT.sources.length).toBeGreaterThan(0);
   });
 });

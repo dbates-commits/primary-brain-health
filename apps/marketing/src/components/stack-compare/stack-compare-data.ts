@@ -1,4 +1,4 @@
-import type { Dimension, Example, Source } from "./stack-compare-model";
+import type { Caveat, Dimension, Example, Source } from "./stack-compare-model";
 
 /**
  * What we built versus building the same site in HubSpot Content Hub.
@@ -46,7 +46,7 @@ export const DIMENSIONS: Dimension[] = [
       },
       pros: [
         "The tool is ours to pick; the website does not decide it.",
-        "The consent banner is already in review.",
+        "The consent banner and Consent Mode are in review (PR #88), which is the precondition for GA4.",
       ],
       cons: [
         "Nobody can say how many people visited yesterday.",
@@ -95,7 +95,7 @@ export const DIMENSIONS: Dimension[] = [
       },
       pros: ["Once built, it could test the booking and payment steps too.", "No tier to buy."],
       cons: [
-        "It does not exist, and it is outside the current contract.",
+        "It does not exist, and no phase has scoped building it.",
         "Needs analytics first to read a result.",
       ],
     },
@@ -128,8 +128,8 @@ export const DIMENSIONS: Dimension[] = [
         vendor: true,
       },
       {
-        label: "SOW2: A/B testing strategy is named as out of scope",
-        href: "docs/sow2/proposal/SOW2-Proposal-v5-no-pricing.md",
+        label: "Nothing in the repo does this — no flag or experiment package is installed",
+        href: "apps/marketing/package.json",
       },
     ],
   },
@@ -327,7 +327,7 @@ export const DIMENSIONS: Dimension[] = [
         plain:
           "Signing up, consent, payment and the handover to the assessment are all ours — the larger half of what the site does.",
         technical:
-          "Twenty-three server modules in `packages/booking/src/server/` — Stripe checkout and webhook, consent stamping, the resume state machine, Auth.js sessions in Neon, and the Linus enrolment call.",
+          "Twenty-one server modules in `packages/booking/src/server/` — Stripe checkout and webhook, consent stamping, the resume state machine, Auth.js sessions in Neon, and the Linus enrolment call.",
       },
       pros: [
         "No limit on what a step can do or how long it takes.",
@@ -374,15 +374,18 @@ export const DIMENSIONS: Dimension[] = [
       summary: "Ours, with a signed agreement.",
       claim: {
         plain:
-          "Sensitive data stays in our own database under a signed agreement. Only a name, an email and a paid flag reach HubSpot.",
+          "Consent, payment and assessment data stay in our own database under a signed agreement. What does reach HubSpot today is the enquiry forms — name, email, phone, year of birth, gender, education level and a free-text message.",
         technical:
-          "Neon is on the Scale tier specifically because it is the lowest tier offering a BAA. The HubSpot contact integration is deliberately not exported from `@pbh/booking/server`, so an app cannot reach past the data rule by accident.",
+          "Neon is on the Scale tier specifically because it is the lowest tier offering a BAA. The booking flow calls HubSpot nowhere: a customer who signs up and pays leaves no trace there. The only path today is `src/lib/hubspot.ts`, reached from the two enquiry form routes.",
       },
       pros: [
-        "Enforced by the shape of the code, not by remembering it.",
-        "Consent records and the audit trail are ours.",
+        "Consent records, payment and the audit trail never leave our database.",
+        "One module is the only path to HubSpot, so the rule has one place to be checked.",
       ],
-      cons: ["A rule we maintain — a future change could still breach it."],
+      cons: [
+        "Nothing enforces it. `src/lib/hubspot.ts` is an ordinary app module any route can import.",
+        "The enquiry forms already send more than the phrase “no PHI” suggests — year of birth, gender and a free-text message.",
+      ],
     },
     hubspot: {
       summary: "Enterprise ($1,500/mo), and CRM-shaped.",
@@ -401,13 +404,17 @@ export const DIMENSIONS: Dimension[] = [
     },
     verdict: "ours",
     takeaway:
-      "HubSpot can hold health data on Enterprise, in the CRM — not documented as a place to run a consent flow.",
+      "HubSpot can hold health data on Enterprise, in the CRM — not documented as a place to run a consent flow. Worth noting the rule is a convention here, not a guardrail.",
     toConfirm:
       "Content Hub pages are simply absent from the supported list — missing documentation, not a documented “no”. Worth asking before relying on either reading.",
     sources: [
       {
         label: "The no-PHI rule, in the RFP",
         href: "docs/sow2/technical/PBH_Website_v2.1_RFP.md",
+      },
+      {
+        label: "What the enquiry form actually sends to HubSpot",
+        href: "apps/marketing/src/app/api/intake/route.ts",
       },
       {
         label: "Why Neon Scale, and the BAA",
@@ -616,5 +623,64 @@ export const HUBSPOT_EXAMPLES: Example[] = [
  * come up in the room: most “big brand uses HubSpot” claims are about the CRM or
  * the marketing email, not the website product.
  */
-export const EXAMPLES_CAVEAT =
-  "Content Hub is 0.2% of the web against Next.js's 3.4%, and no household-name consumer brand runs its main site on it — mid-market, healthcare and education is the market it serves well. Almost every “big brand uses HubSpot” claim means the CRM or the marketing email, not the website.";
+export const EXAMPLES_CAVEAT: Caveat = {
+  text: "Content Hub is 0.2% of all websites; Next.js is used by 3.4%. Different denominators — one is CMS share, the other framework usage — but the gap is roughly seventeenfold either way. No household-name consumer brand runs its main site on Content Hub; mid-market, healthcare and education is the market it serves well. Almost every \u201cbig brand uses HubSpot\u201d claim means the CRM or the marketing email, not the website.",
+  sources: [
+    {
+      label: "W3Techs \u2014 HubSpot CMS usage",
+      href: "https://w3techs.com/technologies/details/cm-hubspotcms",
+    },
+    {
+      label: "W3Techs \u2014 Next.js usage",
+      href: "https://w3techs.com/technologies/details/js-nextjs",
+    },
+  ],
+};
+
+/**
+ * The open questions, gathered.
+ *
+ * Alec's ask was a chart, but a chart that ends without saying what it needs
+ * leaves the reader to go hunting through nine collapsed rows for the three
+ * sentences that need a person. These are those, plus the two the services page
+ * has been carrying unanswered since it shipped.
+ *
+ * Each one names who can settle it. "Somebody has to decide" is not an action;
+ * a name is.
+ */
+export type OpenQuestion = {
+  /** The question, as it would be asked out loud. */
+  ask: string;
+  /** Why it is not already answered, and what turns on it. */
+  why: string;
+  /** Who can settle it. */
+  who: string;
+};
+
+export const OPEN_QUESTIONS: OpenQuestion[] = [
+  {
+    ask: "Run Lighthouse against the site, so the speed row has a number.",
+    why: "The contract targets 90+ on mobile and nobody has measured once. Until somebody does, “ours is faster” is an argument from architecture — and it is the first thing a sceptical engineer will ask for.",
+    who: "Us. It is an afternoon, and it should happen before this goes to Ian.",
+  },
+  {
+    ask: "Decide whether we are closing the analytics gap, and with what.",
+    why: "It is the clearest row HubSpot wins, and the answer changes the recommendation. GA4 is specified with a ten-event plan and unbuilt; no funnel tool has been chosen at all. The consent banner in PR #88 is the precondition.",
+    who: "Alec and Mark, on the tool. Then us to build it.",
+  },
+  {
+    ask: "Confirm who owns the HubSpot portal and who would own the GA4 property.",
+    why: "The repository does not know, and it has been an open question since the services page shipped. There is also no HubSpot test portal, so a form filled in on a preview lands with the real ones.",
+    who: "PBH — Mark or Melissa.",
+  },
+  {
+    ask: "Ask HubSpot whether Content Hub pages are covered by Sensitive Data.",
+    why: "Website pages are absent from the supported-tools list. That is missing documentation, not a documented “no”, and nobody should rely on either reading. It is the question that decides whether any of the booking flow could ever move.",
+    who: "Whoever holds the HubSpot relationship, via their rep.",
+  },
+  {
+    ask: "Fix staging so editing copy there stops editing production copy.",
+    why: "TinaCloud never indexed the staging branch, so the admin on staging is the production CMS wearing a different hostname. It undercuts the row this page wins most clearly.",
+    who: "Us, with a TinaCloud support ticket.",
+  },
+];

@@ -36,22 +36,28 @@ export function ComparisonTableRow({
       <tr
         id={dimension.id}
         onClick={onToggle}
-        aria-expanded={open}
-        aria-controls={detailId}
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onToggle();
-          }
-        }}
         className={cn(
           "cursor-pointer border-t border-border-subtle align-top transition-colors",
           open ? "bg-background-warm" : "hover:bg-background-warm",
         )}
       >
         <th scope="row" className="px-4 py-3 text-left">
-          <span className="flex items-baseline gap-2">
+          {/* The real control is this button, not the row. `aria-expanded` on a
+              <tr> is invalid — an implicit role="row" does not take it — so a
+              screen reader would never announce the state. The row stays
+              clickable for a mouse; the button is what assistive tech and the
+              keyboard actually get. */}
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={detailId}
+            onClick={(event) => {
+              // The row's own handler would otherwise fire second and toggle it back.
+              event.stopPropagation();
+              onToggle();
+            }}
+            className="flex items-baseline gap-2 text-left"
+          >
             <span
               aria-hidden
               className={cn(
@@ -62,7 +68,7 @@ export function ComparisonTableRow({
               ▶
             </span>
             <span className="text-body font-semibold text-text-heading">{dimension.name}</span>
-          </span>
+          </button>
         </th>
         <td className="px-4 py-3 text-body-sm text-text-default">{dimension.ours.summary}</td>
         <td className="px-4 py-3 text-body-sm text-text-default">{dimension.hubspot.summary}</td>

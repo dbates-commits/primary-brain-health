@@ -1,4 +1,5 @@
 import { ExampleList } from "./ExampleList";
+import { SourceList } from "./SourceList";
 import { EXAMPLES_CAVEAT, HUBSPOT_EXAMPLES, OUR_EXAMPLES } from "./stack-compare-data";
 
 /**
@@ -26,10 +27,15 @@ export function RealWorldExamples() {
         <ExampleList heading="HubSpot CMS" examples={HUBSPOT_EXAMPLES} />
       </div>
 
-      <p className="rounded-xl bg-background-warm px-4 py-3 text-body-sm text-text-default">
-        <span className="font-semibold text-text-heading">Worth knowing: </span>
-        {EXAMPLES_CAVEAT}
-      </p>
+      <div className="rounded-xl bg-background-warm px-4 py-3">
+        <p className="text-body-sm text-text-default">
+          <span className="font-semibold text-text-heading">Worth knowing: </span>
+          {EXAMPLES_CAVEAT.text}
+        </p>
+        <div className="mt-3">
+          <SourceList sources={EXAMPLES_CAVEAT.sources} />
+        </div>
+      </div>
     </section>
   );
 }

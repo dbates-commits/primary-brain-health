@@ -5,6 +5,7 @@ import { SegmentedControl } from "@pbh/ui";
 
 import { ComparisonTable } from "./ComparisonTable";
 import { MODE_OPTIONS, type Mode } from "./mode";
+import { OpenQuestions } from "./OpenQuestions";
 import { RealWorldExamples } from "./RealWorldExamples";
 
 /**
@@ -37,6 +38,8 @@ export function StackComparison() {
       </div>
 
       <ComparisonTable mode={mode} />
+
+      <OpenQuestions />
 
       <RealWorldExamples />
     </div>

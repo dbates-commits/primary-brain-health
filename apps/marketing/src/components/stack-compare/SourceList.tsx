@@ -31,7 +31,10 @@ export function SourceList({ sources }: { sources: Source[] }) {
                 {source.label}
               </a>
             ) : (
-              <code className="rounded bg-background-warm px-1 py-0.5">{source.label}</code>
+              <>
+                {source.label}{" "}
+                <code className="rounded bg-background-warm px-1 py-0.5">{source.href}</code>
+              </>
             )}
             {source.vendor ? <span> · HubSpot’s own documentation</span> : null}
           </li>

@@ -59,8 +59,7 @@ export function ComparisonTable({ mode }: { mode: Mode }) {
       <div className="hidden overflow-hidden rounded-2xl border border-border-default bg-background-default md:block">
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">
-            Our current stack compared with HubSpot Content Hub, across nine dimensions. Select a
-            row for the detail behind it.
+            {`Our current stack compared with HubSpot Content Hub, across ${DIMENSIONS.length} dimensions. Select a row for the detail behind it.`}
           </caption>
           <thead>
             <tr className="bg-background-warm">
