@@ -280,7 +280,7 @@ export const DIMENSIONS: Dimension[] = [
         plain:
           "A staging area exists, but it shares templates with the live site — editing one changes the real site immediately.",
         technical:
-          "Content staging is Professional and up. Its own documentation warns that changes to any template, global content or HubDB table are reflected on live pages. True sandboxes are Enterprise-only, with a 300-asset deploy-back cap and integrations reconnected by hand.",
+          "Content staging is Professional and up. Its own documentation warns that changes to any template, global content or HubDB table are reflected on live pages. True sandboxes are Enterprise-only (from $1,500/mo), with a 300-asset deploy-back cap and integrations reconnected by hand.",
       },
       pros: ["Enough for a page-copy change, and a real feature."],
       cons: [
@@ -336,10 +336,10 @@ export const DIMENSIONS: Dimension[] = [
       cons: ["Ours to maintain, and to be woken up by."],
     },
     hubspot: {
-      summary: "Enterprise only, 10 seconds, one file.",
+      summary: "Enterprise ($1,500/mo), 10 seconds, one file.",
       claim: {
         plain:
-          "Custom logic runs only on the top plan, must finish in ten seconds, and lives in a single file.",
+          "Custom logic runs only on the $1,500/mo Enterprise plan, must finish in ten seconds, and lives in a single file.",
         technical:
           "Serverless functions require Content Hub Enterprise: 10s max execution, 128MB, 100 endpoints, JSON only, and a single JavaScript file per function — you bundle it yourself.",
       },
@@ -385,16 +385,16 @@ export const DIMENSIONS: Dimension[] = [
       cons: ["A rule we maintain — a future change could still breach it."],
     },
     hubspot: {
-      summary: "Enterprise only, and CRM-shaped.",
+      summary: "Enterprise ($1,500/mo), and CRM-shaped.",
       claim: {
         plain:
-          "HubSpot will sign a health-data agreement, but only on the top plan, and it covers CRM records rather than pages.",
+          "HubSpot will sign a health-data agreement, but only on the $1,500/mo Enterprise plan, and it covers CRM records rather than pages.",
         technical:
-          "The Sensitive Data feature is Enterprise-only across hubs and is property-shaped: designations apply to CRM properties, with forms, attachments, limited workflows and the v3 API supported. Personalisation tokens, chatbots and sandboxes are explicitly unsupported.",
+          "The Sensitive Data feature is Enterprise-only across hubs (from $1,500/mo) and is property-shaped: designations apply to CRM properties, with forms, attachments, limited workflows and the v3 API supported. Personalisation tokens, chatbots and sandboxes are explicitly unsupported.",
       },
       pros: ["A real BAA is available — more than is commonly assumed."],
       cons: [
-        "Enterprise-only, and the price is not published.",
+        "Enterprise-only, so $1,500/mo before the feature’s own price, which is not published.",
         "Irreversible once enabled, and it locks the account out of data-centre migration.",
         "Website pages are not listed among the supported surfaces.",
       ],
